@@ -1,1 +1,1 @@
-"""platform utilities."""
+"""OS detection & path handling (future)."""

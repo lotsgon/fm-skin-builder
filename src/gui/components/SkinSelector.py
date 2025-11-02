@@ -1,1 +1,1 @@
-"""SkinSelector component."""
+"""SkinSelector (future)."""

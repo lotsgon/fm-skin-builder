@@ -1,0 +1,6 @@
+click>=8.1.7
+rich>=13.7.1
+pydantic>=2.8.0
+jsonschema>=4.23.0
+platformdirs>=4.3.0
+pytest>=8.3.2

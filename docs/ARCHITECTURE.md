@@ -1,0 +1,3 @@
+- BundleManager abstracts bundle R/W
+- SkinConfig validates schema_version
+- cache.py stores parsed configs under .cache

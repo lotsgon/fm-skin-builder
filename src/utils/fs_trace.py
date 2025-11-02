@@ -1,1 +1,1 @@
-"""fs_trace utilities."""
+"""Filesystem tracing stubs (fs_usage/inotify/ProcMon)."""

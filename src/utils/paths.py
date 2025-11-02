@@ -1,1 +1,1 @@
-"""paths utilities."""
+"""Platform-aware paths (future)."""

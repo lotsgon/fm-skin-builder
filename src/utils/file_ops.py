@@ -1,1 +1,1 @@
-"""file_ops utilities."""
+"""File operations helpers (future)."""

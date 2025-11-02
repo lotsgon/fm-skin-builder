@@ -1,1 +1,1 @@
-"""hashing utilities."""
+"""Hash utilities (future)."""

@@ -1,1 +1,1 @@
-"""BuildLogView component."""
+"""BuildLogView (future)."""

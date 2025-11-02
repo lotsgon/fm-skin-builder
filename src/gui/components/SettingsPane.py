@@ -1,1 +1,1 @@
-"""SettingsPane component."""
+"""SettingsPane (future)."""

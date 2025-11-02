@@ -1,0 +1,1 @@
+See SKIN_FORMAT.md and ARCHITECTURE.md

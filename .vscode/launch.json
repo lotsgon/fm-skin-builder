@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run CLI (build gold_theme)",
+      "type": "python",
+      "request": "launch",
+      "module": "src.cli.main",
+      "args": ["build", "skins/gold_theme", "--out", "build"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Run GUI",
+      "type": "python",
+      "request": "launch",
+      "module": "src.gui.app",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Pytest All",
+      "type": "python",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-q"],
+      "console": "integratedTerminal"
+    }
+  ]
+}

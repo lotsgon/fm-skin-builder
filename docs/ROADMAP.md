@@ -1,0 +1,4 @@
+- Build-all command
+- Swapper + verify
+- GUI manager
+- Web previewer

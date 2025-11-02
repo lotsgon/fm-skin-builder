@@ -1,4 +1,1 @@
-\"\"\"Implements CLI command: swap.\"\"\"
-
-def run(args):
-    print("Running swap command (stub)")
+def run(args): print('swap (stub)')

@@ -1,0 +1,6 @@
+name: Bug Report
+description: Report a bug
+body:
+  - type: textarea
+    attributes:
+      label: What happened?

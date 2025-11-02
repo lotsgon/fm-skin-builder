@@ -1,0 +1,3 @@
+- Use Black & PEP8
+- Conventional Commits
+- Run pytest
