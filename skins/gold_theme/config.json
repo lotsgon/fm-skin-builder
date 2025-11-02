@@ -1,0 +1,9 @@
+{
+  "name": "Gold Theme",
+  "target_bundle": "fm_base.bundle",
+  "output_bundle": "fm_base.bundle",
+  "overrides": {
+    "ui/skins/base/colours/FMColours.uss": "colours/FMColours.uss"
+  },
+  "description": "Example gold-accented skin."
+}

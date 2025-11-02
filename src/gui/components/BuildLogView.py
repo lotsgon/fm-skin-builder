@@ -1,0 +1,1 @@
+"""BuildLogView component."""
