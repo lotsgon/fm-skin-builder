@@ -156,3 +156,40 @@ def test_cli_patch_requires_bundle_when_not_inferable(tmp_path, monkeypatch):
 
     # Assert
     assert not out_dir.exists()
+
+
+def test_cli_patch_dry_run_produces_no_outputs(tmp_path, monkeypatch):
+    # Arrange skin folder
+    skin = tmp_path / "skins" / "demo"
+    (skin / "colours").mkdir(parents=True)
+    bundle_file = tmp_path / "fm_base.bundle"
+    bundle_file.write_bytes(b"orig")
+    (skin / "config.json").write_text(
+        json.dumps({
+            "schema_version": 1,
+            "name": "Demo",
+            "target_bundle": str(bundle_file),
+            "output_bundle": "fm_base.bundle",
+            "overrides": {},
+        }),
+        encoding="utf-8",
+    )
+    (skin / "colours" / "base.uss").write_text(":root{--primary:#112233;}\n", encoding="utf-8")
+
+    # Mock UnityPy
+    from src.core import css_patcher as cp
+    cp.UnityPy = SimpleNamespace(
+        load=lambda path: make_fake_env_with_simple_stylesheet())
+
+    # Act: call CLI main with argv including --dry-run and --debug-export (which should be ignored)
+    out_dir = tmp_path / "out_dry"
+    from src.cli import main as cli_main
+    argv = ["prog", "patch", str(skin), "--out", str(out_dir), "--debug-export", "--dry-run"]
+    monkeypatch.setattr(sys, "argv", argv, raising=False)
+    cli_main.main()
+
+    # Assert: no outputs should be created in dry-run
+    if out_dir.exists():
+        # directory should be empty (no modified bundles, no debug)
+        entries = list(out_dir.iterdir())
+        assert not entries, f"Dry-run should not produce files, found: {[e.name for e in entries]}"

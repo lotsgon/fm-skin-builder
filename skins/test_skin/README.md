@@ -10,8 +10,11 @@ This is a minimal skin used by tests and as a quick-start example.
 Use via CLI (example):
 
 - Infer bundle from config.json:
-  - python -m src.cli.main patch skins/test_skin --out build --debug-export
+  - python -m src.cli.main patch skins/test_skin --out build --dry-run
 - Explicit bundle directory:
   - python -m src.cli.main patch skins/test_skin --out build --bundle /path/to/bundles --patch-direct
 
-Note: The repository does not include any real FM bundles. Tests mock UnityPy and create temporary fake bundles.
+Notes:
+- Use `--dry-run` to preview changes without writing files.
+- Add `--debug-export` to export original/patched `.uss` + JSON when actually writing bundles.
+

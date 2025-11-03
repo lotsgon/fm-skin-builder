@@ -14,4 +14,7 @@ def run(args) -> None:
         patch_direct=args.patch_direct,
         debug_export=args.debug_export,
         backup=args.backup,
+        dry_run=args.dry_run,
+        use_scan_cache=not args.no_scan_cache,
+        refresh_scan_cache=args.refresh_scan_cache,
     )

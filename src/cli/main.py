@@ -33,6 +33,12 @@ def main() -> None:
                    help="Export .uss and JSON (original/patched) for debugging")
     p.add_argument("--backup", action="store_true",
                    help="Backup original bundle(s) before patching")
+    p.add_argument("--dry-run", action="store_true",
+                   help="Compute and report changes without writing any files")
+    p.add_argument("--no-scan-cache", action="store_true",
+                   help="Do not use cached scan indices even if available")
+    p.add_argument("--refresh-scan-cache", action="store_true",
+                   help="Force refresh of scan cache before patching (if a skin config is present)")
 
     s = sub.add_parser("scan", help="Scan bundles and index stylesheet usage")
     s.add_argument("--bundle", type=str, required=True,
