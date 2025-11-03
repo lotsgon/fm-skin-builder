@@ -984,7 +984,8 @@ def run_patch(css_dir: Path, out_dir: Path, bundle: Optional[Path] = None, patch
                 swap_textures(
                     bundle_path=b,
                     skin_dir=css_dir,
-                    includes=list(includes) if isinstance(includes, list) else [],
+                    includes=list(includes) if isinstance(
+                        includes, list) else [],
                     out_dir=out_dir,
                     dry_run=dry_run,
                 )

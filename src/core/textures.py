@@ -115,8 +115,10 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
                 # UnityPy often exposes m_Container as a list of entries
                 for entry in list(container):
                     # Try common shapes: entry.first (name) + entry.second (PPtr), or entry.name + entry.asset
-                    alias = getattr(entry, "first", None) or getattr(entry, "name", None)
-                    asset = getattr(entry, "second", None) or getattr(entry, "asset", None)
+                    alias = getattr(entry, "first", None) or getattr(
+                        entry, "name", None)
+                    asset = getattr(entry, "second", None) or getattr(
+                        entry, "asset", None)
                     if alias and asset is not None:
                         pid = getattr(asset, "m_PathID", None)
                         if isinstance(pid, int):
@@ -128,18 +130,22 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
                 data = obj.read()
             except Exception:
                 continue
-            alias = getattr(data, "m_Name", None) or getattr(data, "name", None)
+            alias = getattr(data, "m_Name", None) or getattr(
+                data, "name", None)
             if not alias:
                 continue
             pid = None
             try:
                 # Common location of texture PPtr in UnityPy Sprite
                 rd = getattr(data, "m_RD", None)
-                tex_ptr = getattr(rd, "texture", None) if rd is not None else None
-                pid = getattr(tex_ptr, "m_PathID", None) if tex_ptr is not None else None
+                tex_ptr = getattr(
+                    rd, "texture", None) if rd is not None else None
+                pid = getattr(tex_ptr, "m_PathID",
+                              None) if tex_ptr is not None else None
                 if pid is None:
                     tex_ptr = getattr(data, "m_Texture", None)
-                    pid = getattr(tex_ptr, "m_PathID", None) if tex_ptr is not None else None
+                    pid = getattr(tex_ptr, "m_PathID",
+                                  None) if tex_ptr is not None else None
             except Exception:
                 pid = None
             if isinstance(pid, int):
@@ -160,7 +166,8 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
 
     # Group replacements by base name and scale
     repl_by_base: DefaultDict[str, Dict[int, bytes]] = defaultdict(dict)
-    repl_ext_by_base: DefaultDict[str, Dict[int, Optional[str]]] = defaultdict(dict)
+    repl_ext_by_base: DefaultDict[str,
+                                  Dict[int, Optional[str]]] = defaultdict(dict)
     for repl_name, buf in replacements.items():
         base, scale = _parse_base_and_scale(repl_name)
         repl_by_base[base][scale] = buf
@@ -192,7 +199,8 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
             data = env_scale_map.get(scale)
             if data is None:
                 # Replacement exists for variant that bundle doesn't have
-                log.debug(f"[TEXTURE] No matching asset variant for '{base}' at {scale}x; ignoring replacement.")
+                log.debug(
+                    f"[TEXTURE] No matching asset variant for '{base}' at {scale}x; ignoring replacement.")
                 continue
             try:
                 # Prefer PIL path for set_image when available
@@ -225,16 +233,19 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
                     except Exception:
                         pass
                 name_display = f"{base}{'' if scale == 1 else f'_x{scale}'}"
-                log.info(f"  [TEXTURE] Replaced '{name_display}' ({len(buf)} bytes)")
+                log.info(
+                    f"  [TEXTURE] Replaced '{name_display}' ({len(buf)} bytes)")
                 replaced += 1
             except Exception as e:
-                log.warning(f"  [TEXTURE] Failed to replace texture '{base}' at {scale}x: {e}")
+                log.warning(
+                    f"  [TEXTURE] Failed to replace texture '{base}' at {scale}x: {e}")
 
     if replaced == 0:
         # Help users discover names when no matches occurred
         sample = sorted(env_by_base.keys())[:10]
         if sample:
-            log.info(f"[TEXTURE] No matches. Candidate names include: {sample} ...")
+            log.info(
+                f"[TEXTURE] No matches. Candidate names include: {sample} ...")
     return replaced
 
 
@@ -274,7 +285,8 @@ def swap_textures(
     if count == 0:
         return None
     if dry_run:
-        log.info(f"[DRY-RUN] Would replace {count} textures in {bundle_path.name}")
+        log.info(
+            f"[DRY-RUN] Would replace {count} textures in {bundle_path.name}")
         return None
 
     out_dir.mkdir(parents=True, exist_ok=True)

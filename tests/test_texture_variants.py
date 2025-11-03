@@ -41,7 +41,7 @@ class FakeEnv:
         self.file = FakeFile()
 
 
-@pytest.mark.parametrize("provided", ["base-only", "all-variants"]) 
+@pytest.mark.parametrize("provided", ["base-only", "all-variants"])
 def test_texture_variant_awareness(tmp_path, monkeypatch, caplog, provided):
     # Skin with includes assets/icons
     skin = tmp_path / "skins" / "demo"
@@ -82,7 +82,8 @@ def test_texture_variant_awareness(tmp_path, monkeypatch, caplog, provided):
         assert data1.saved is True
         assert data2.saved is False
         assert data4.saved is False
-        assert any("Only 1/3 variants provided" in rec.message for rec in caplog.records)
+        assert any(
+            "Only 1/3 variants provided" in rec.message for rec in caplog.records)
     else:
         run_patch(skin, out_dir, bundle=None, dry_run=False)
         assert data1.saved is True

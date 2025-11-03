@@ -51,7 +51,8 @@ def test_texture_swap_via_assetbundle_container_alias(tmp_path, monkeypatch, cap
     }), encoding="utf-8")
 
     # Replacement file uses the container alias name, different format
-    (skin / "assets" / "backgrounds" / "premier_league_skin_fm26.jpg").write_bytes(b"JPGDATA")
+    (skin / "assets" / "backgrounds" /
+     "premier_league_skin_fm26.jpg").write_bytes(b"JPGDATA")
 
     # Bundle at repo root for inference
     bundle_file = tmp_path / "ui.bundle"
@@ -62,7 +63,8 @@ def test_texture_swap_via_assetbundle_container_alias(tmp_path, monkeypatch, cap
     tex_obj = FakeObj("Texture2D", tex_data, path_id=1001)
 
     # AssetBundle container maps alias name to texture path id
-    container_entry = SimpleNamespace(first="premier_league_skin_fm26.png", second=SimpleNamespace(m_PathID=1001))
+    container_entry = SimpleNamespace(
+        first="premier_league_skin_fm26.png", second=SimpleNamespace(m_PathID=1001))
     ab_data = SimpleNamespace(m_Container=[container_entry])
     ab_obj = FakeObj("AssetBundle", ab_data)
 
