@@ -67,7 +67,7 @@ def _parse_base_and_scale(name: str) -> Tuple[str, int]:
     return name_no_ext, 1
 
 
-def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Optional[Dict[str, str]] = None) -> int:
+def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Optional[Dict[str, str]] = None, name_map: Optional[Dict[str, str]] = None) -> int:
     """Apply replacements to Texture2D assets in UnityPy env with variant awareness.
 
     Returns number of textures replaced.
@@ -170,6 +170,13 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
                                   Dict[int, Optional[str]]] = defaultdict(dict)
     for repl_name, buf in replacements.items():
         base, scale = _parse_base_and_scale(repl_name)
+        # Apply optional name mapping per base, allow mapping to include variant suffix which overrides scale
+        if name_map and base in name_map:
+            mapped = name_map[base]
+            mbase, mscale = _parse_base_and_scale(mapped)
+            base = mbase
+            if mscale != 1:
+                scale = mscale
         repl_by_base[base][scale] = buf
         if repl_exts is not None:
             repl_ext_by_base[base][scale] = repl_exts.get(repl_name)
@@ -214,6 +221,20 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
                 if used_pil and hasattr(data, "set_image"):
                     from PIL import Image  # type: ignore
                     img = Image.open(BytesIO(buf))
+                    # Size validation (warn on mismatch)
+                    tgt_w = getattr(data, "m_Width", None) or getattr(
+                        data, "width", None)
+                    tgt_h = getattr(data, "m_Height", None) or getattr(
+                        data, "height", None)
+                    if isinstance(tgt_w, int) and isinstance(tgt_h, int):
+                        try:
+                            rw, rh = img.size
+                            if (rw, rh) != (tgt_w, tgt_h):
+                                log.warning(
+                                    f"[TEXTURE] Size mismatch for '{base}' at {scale}x: bundle is {tgt_w}x{tgt_h}, replacement is {rw}x{rh}. Proceeding to replace."
+                                )
+                        except Exception:
+                            pass
                     data.set_image(img)
                 elif hasattr(data, "image_data"):
                     data.image_data = buf
@@ -277,11 +298,39 @@ def swap_textures(
         replacements.update(r)
         repl_exts.update(e)
 
+    # Optional name mapping files. Precedence: global assets/mapping.json, then type-specific mapping (icons/backgrounds) overrides.
+    name_map: Dict[str, str] = {}
+
+    def _load_map_file(p: Path) -> None:
+        nonlocal name_map
+        if not p.exists():
+            return
+        try:
+            import json
+            loaded = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                for k, v in loaded.items():
+                    if isinstance(k, str) and isinstance(v, str):
+                        k_noext, _ = _strip_image_extension(k)
+                        name_map[k_noext] = v
+            else:
+                log.warning(f"[TEXTURE] mapping file is not an object: {p}")
+        except Exception as e:
+            log.warning(f"[TEXTURE] Failed to read mapping file {p}: {e}")
+
+    for fname in ("mapping.json", "map.json"):
+        _load_map_file(skin_dir / "assets" / fname)
+    # Type-specific mapping overrides global
+    for sub in ("icons", "backgrounds"):
+        for fname in ("mapping.json", "map.json"):
+            _load_map_file(skin_dir / "assets" / sub / fname)
+
     if not replacements:
         return None
 
     env = UnityPy.load(str(bundle_path))
-    count = _swap_textures_in_env(env, replacements, repl_exts)
+    count = _swap_textures_in_env(
+        env, replacements, repl_exts, name_map or None)
     if count == 0:
         return None
     if dry_run:

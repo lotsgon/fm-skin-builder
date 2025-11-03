@@ -38,6 +38,32 @@ python -m src.cli.main patch skins/<skin> --out build
 
 - Use `--dry-run` to preview without writing files.
 
+## Optional: name mapping (mapping.json)
+
+If your file names don't match the bundle's Texture2D or container/sprite names, add a mapping file:
+
+- Global (applies to both icons and backgrounds): `skins/<skin>/assets/mapping.json` (or `map.json`)
+- Type-specific (overrides global): `skins/<skin>/assets/icons/mapping.json` (or `map.json`)
+
+Example `mapping.json`:
+
+```json
+{
+  "my_icon": "Search",
+  "logo": "AppLogo_x2"
+}
+```
+
+- Keys are your replacement filename stems (extension ignored), e.g., `my_icon.png` maps from `"my_icon"`.
+- Values are the target asset/alias names in the bundle. They can include spaces.
+- You can also include variant suffixes in the mapping’s value (e.g., `"AppLogo_x2"`) to target a specific DPI variant. If omitted, 1x is assumed.
+- Only the contents are replaced; Unity asset names are not renamed.
+
+## Format and size warnings
+
+- If the replacement format differs from the bundle (e.g., PNG vs JPG), a warning is logged and the replacement still proceeds.
+- If the replacement image dimensions differ from the target Texture2D’s width/height, a warning is logged and the replacement still proceeds (no automatic scaling is performed).
+
 ## Variant awareness and warnings
 
 - If the bundle contains variants for a texture (e.g., `Search`, `Search_x2`, `Search_x4`) and you only provide one of them, you'll get a warning like:
