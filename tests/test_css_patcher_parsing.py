@@ -23,9 +23,11 @@ def test_collect_css_from_dir_scans_skin_and_colours(tmp_path: Path):
     skin = tmp_path / "skins" / "my"
     (skin / "colours").mkdir(parents=True)
     # skin root file
-    (skin / "root.uss").write_text(":root{--root:#010203;}\n", encoding="utf-8")
+    (skin /
+     "root.uss").write_text(":root{--root:#010203;}\n", encoding="utf-8")
     # colours file
-    (skin / "colours" / "base.css").write_text(".green{color:#00FF00;}\n", encoding="utf-8")
+    (skin / "colours" /
+     "base.css").write_text(".green{color:#00FF00;}\n", encoding="utf-8")
     # config.json to mark as skin folder
     (skin / "config.json").write_text(
         "{""schema_version"":1,""name"":""MySkin"",""target_bundle"":""fm_base.bundle"",""output_bundle"":""fm_base.bundle"",""overrides"":{}}",

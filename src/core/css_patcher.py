@@ -35,7 +35,8 @@ def load_css_selector_overrides(path: Path) -> Dict[Tuple[str, str], str]:
         props = re.findall(r"([\w-]+)\s*:\s*(#[0-9a-fA-F]{6,8});", block)
         for prop, hexval in props:
             selector_overrides[(selector.strip(), prop.strip())] = hexval
-            selector_overrides[(selector.strip().lstrip("."), prop.strip())] = hexval
+            selector_overrides[(selector.strip().lstrip(
+                "."), prop.strip())] = hexval
     return selector_overrides
 
 
@@ -85,9 +86,11 @@ def serialize_stylesheet_to_uss(data) -> str:
     colors = getattr(data, "colors", [])
     floats = getattr(data, "floats", []) if hasattr(data, "floats") else []
     rules = getattr(data, "m_Rules", [])
-    selectors = getattr(data, "m_ComplexSelectors", []) if hasattr(data, "m_ComplexSelectors") else []
+    selectors = getattr(data, "m_ComplexSelectors", []) if hasattr(
+        data, "m_ComplexSelectors") else []
 
-    color_properties = {"color", "background-color", "border-color", "-unity-background-image-tint-color"}
+    color_properties = {"color", "background-color",
+                        "border-color", "-unity-background-image-tint-color"}
     lines: List[str] = []
 
     for sel in selectors:
@@ -96,7 +99,8 @@ def serialize_stylesheet_to_uss(data) -> str:
             continue
         selector_text = ""
         if hasattr(sel, "m_Selectors") and sel.m_Selectors:
-            parts = sel.m_Selectors[0].m_Parts if sel.m_Selectors[0].m_Parts else []
+            parts = sel.m_Selectors[0].m_Parts if sel.m_Selectors[0].m_Parts else [
+            ]
             for part in parts:
                 val = getattr(part, "m_Value", "")
                 ptype = getattr(part, "m_Type", 0)
@@ -114,7 +118,8 @@ def serialize_stylesheet_to_uss(data) -> str:
         for prop in getattr(rule, "m_Properties", []):
             prop_name = getattr(prop, "m_Name", "")
             values = list(getattr(prop, "m_Values", []))
-            type4_vals = [v for v in values if getattr(v, "m_ValueType", None) == 4]
+            type4_vals = [v for v in values if getattr(
+                v, "m_ValueType", None) == 4]
             if type4_vals:
                 for val in type4_vals:
                     value_type = getattr(val, "m_ValueType", None)
@@ -122,7 +127,8 @@ def serialize_stylesheet_to_uss(data) -> str:
                     comment = f"rule={rule_idx}, type={value_type}, index={value_index}"
                     if value_type == 4 and 0 <= value_index < len(colors):
                         col = colors[value_index]
-                        lines.append(f"  {prop_name}: {color_to_hex(col)}; /* {comment}, src=colors */")
+                        lines.append(
+                            f"  {prop_name}: {color_to_hex(col)}; /* {comment}, src=colors */")
                 continue
             for val in values:
                 value_type = getattr(val, "m_ValueType", None)
@@ -130,23 +136,29 @@ def serialize_stylesheet_to_uss(data) -> str:
                 comment = f"rule={rule_idx}, type={value_type}, index={value_index}"
                 if value_type == 3 and 0 <= value_index < len(strings):
                     varname = strings[value_index]
-                    lines.append(f"  {prop_name}: var({varname}); /* {comment}, src=strings */")
+                    lines.append(
+                        f"  {prop_name}: var({varname}); /* {comment}, src=strings */")
                 elif value_type == 8 and 0 <= value_index < len(strings):
                     varname = strings[value_index]
                     varname = _re.sub(r"^-+", "--", varname)
-                    lines.append(f"  {prop_name}: {varname}; /* {comment}, src=strings */")
+                    lines.append(
+                        f"  {prop_name}: {varname}; /* {comment}, src=strings */")
                 elif value_type == 2 and 0 <= value_index < len(floats):
                     val_float = floats[value_index]
                     if prop_name in color_properties:
-                        lines.append(f"  /* {prop_name}: {val_float}; [SKIPPED: not valid CSS color] {comment}, src=floats */")
+                        lines.append(
+                            f"  /* {prop_name}: {val_float}; [SKIPPED: not valid CSS color] {comment}, src=floats */")
                     else:
-                        lines.append(f"  {prop_name}: {val_float}; /* {comment}, src=floats */")
+                        lines.append(
+                            f"  {prop_name}: {val_float}; /* {comment}, src=floats */")
                 elif value_type == 10 and 0 <= value_index < len(strings):
                     varname = strings[value_index]
                     varname = _re.sub(r"^-+", "--", varname)
-                    lines.append(f"  {prop_name}: {varname}; /* {comment}, src=strings */")
+                    lines.append(
+                        f"  {prop_name}: {varname}; /* {comment}, src=strings */")
                 else:
-                    lines.append(f"  {prop_name}: {value_index}; /* {comment}, src=unknown */")
+                    lines.append(
+                        f"  {prop_name}: {value_index}; /* {comment}, src=unknown */")
         lines.append("}")
     return "\n".join(lines)
 
@@ -168,7 +180,8 @@ def clean_for_json(obj, seen=None, max_depth: int = 10):
             "valueIndex": int(getattr(obj, "valueIndex")) if getattr(obj, "valueIndex") is not None else None,
         }
 
-    selector_keys = ["m_Specificity", "m_Type", "m_PreviousRelationship", "ruleIndex"]
+    selector_keys = ["m_Specificity", "m_Type",
+                     "m_PreviousRelationship", "ruleIndex"]
     if any(hasattr(obj, k) for k in selector_keys):
         result = {}
         for k in getattr(obj, "__dict__", {}).keys():
@@ -262,7 +275,8 @@ class CssPatcher:
                 data.save()
 
         if not any_changes:
-            log.info("No changes detected; skipping bundle write and debug outputs.")
+            log.info(
+                "No changes detected; skipping bundle write and debug outputs.")
             return
 
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -271,7 +285,8 @@ class CssPatcher:
         orig_out_file = out_dir / f"{name}{ext}"
 
         try:
-            log.info(f"[INFO] Writing modified bundle to: {out_file} (env.file.save())")
+            log.info(
+                f"[INFO] Writing modified bundle to: {out_file} (env.file.save())")
             with open(out_file, "wb") as f:
                 f.write(env.file.save())
             saved = True
@@ -282,20 +297,25 @@ class CssPatcher:
         if orig_out_file.exists():
             try:
                 orig_out_file.unlink()
-                log.info(f"[CLEANUP] Removed stray original bundle: {orig_out_file}")
+                log.info(
+                    f"[CLEANUP] Removed stray original bundle: {orig_out_file}")
             except Exception as cleanup_err:
-                log.warning(f"[WARN] Could not remove stray original bundle: {orig_out_file}: {cleanup_err}")
+                log.warning(
+                    f"[WARN] Could not remove stray original bundle: {orig_out_file}: {cleanup_err}")
 
         cwd_orig_file = Path.cwd() / f"{name}{ext}"
         if cwd_orig_file != orig_out_file and cwd_orig_file.exists():
             try:
                 cwd_orig_file.unlink()
-                log.info(f"[CLEANUP] Removed stray original bundle from CWD: {cwd_orig_file}")
+                log.info(
+                    f"[CLEANUP] Removed stray original bundle from CWD: {cwd_orig_file}")
             except Exception as cleanup_err:
-                log.warning(f"[WARN] Could not remove stray original bundle from CWD: {cwd_orig_file}: {cleanup_err}")
+                log.warning(
+                    f"[WARN] Could not remove stray original bundle from CWD: {cwd_orig_file}: {cleanup_err}")
 
         if not saved:
-            log.error("[ERROR] Could not save patched bundle. The bundle may be corrupt or use unsupported compression.")
+            log.error(
+                "[ERROR] Could not save patched bundle. The bundle may be corrupt or use unsupported compression.")
             return
 
         log.info("\n🧾 Summary:")
@@ -371,7 +391,8 @@ class CssPatcher:
                             value_index = getattr(val, "valueIndex", None)
                             if value_index is not None and 0 <= value_index < len(getattr(data, "colors", [])):
                                 prop_name = getattr(prop, "m_Name", "")
-                                css_match = next((self.css_vars[k] for k in self.css_vars if k.endswith(prop_name)), None)
+                                css_match = next(
+                                    (self.css_vars[k] for k in self.css_vars if k.endswith(prop_name)), None)
                                 if css_match:
                                     r, g, b, a = hex_to_rgba(css_match)
                                     col = data.colors[value_index]
@@ -379,7 +400,8 @@ class CssPatcher:
                                         return True
 
         # Selector/property overrides
-        selectors = getattr(data, "m_ComplexSelectors", []) if hasattr(data, "m_ComplexSelectors") else []
+        selectors = getattr(data, "m_ComplexSelectors", []) if hasattr(
+            data, "m_ComplexSelectors") else []
         rules = getattr(data, "m_Rules", [])
         for rule_idx, rule in enumerate(rules):
             selector_texts: List[str] = []
@@ -411,7 +433,8 @@ class CssPatcher:
         colors = getattr(data, "colors", [])
         strings = getattr(data, "strings", [])
         rules = getattr(data, "m_Rules", [])
-        selectors = getattr(data, "m_ComplexSelectors", []) if hasattr(data, "m_ComplexSelectors") else []
+        selectors = getattr(data, "m_ComplexSelectors", []) if hasattr(
+            data, "m_ComplexSelectors") else []
 
         # Direct property patches (by var name == prop m_Name)
         direct_property_patched_indices = set()
@@ -429,7 +452,8 @@ class CssPatcher:
                                 if (col.r, col.g, col.b, col.a) != (r, g, b, a):
                                     col.r, col.g, col.b, col.a = r, g, b, a
                                     patched_vars += 1
-                                    direct_property_patched_indices.add(value_index)
+                                    direct_property_patched_indices.add(
+                                        value_index)
                                     log.info(
                                         f"  [PATCHED - direct property] {name}: {prop_name} (color index {value_index}) → {hex_val}"
                                     )
@@ -464,7 +488,8 @@ class CssPatcher:
                     break
             if found:
                 color_indices_to_patch[color_idx] = var_name
-                log.info(f"  [WILL PATCH] {name}: {var_name} (color index {color_idx}) → {self.css_vars[var_name]}")
+                log.info(
+                    f"  [WILL PATCH] {name}: {var_name} (color index {color_idx}) → {self.css_vars[var_name]}")
 
         for color_idx, var_name in color_indices_to_patch.items():
             hex_val = self.css_vars.get(var_name)
@@ -475,7 +500,8 @@ class CssPatcher:
             if (col.r, col.g, col.b, col.a) != (r, g, b, a):
                 col.r, col.g, col.b, col.a = r, g, b, a
                 patched_vars += 1
-                log.info(f"  [PATCHED] {name}: {var_name} (color index {color_idx}) → {hex_val}")
+                log.info(
+                    f"  [PATCHED] {name}: {var_name} (color index {color_idx}) → {hex_val}")
                 changed = True
 
         # Optional: patch inlined literals
@@ -487,7 +513,8 @@ class CssPatcher:
                         value_index = getattr(val, "valueIndex", None)
                         if value_type == 4 and 0 <= value_index < len(colors):
                             prop_name = getattr(prop, "m_Name", "")
-                            css_match = next((self.css_vars[k] for k in self.css_vars if k.endswith(prop_name)), None)
+                            css_match = next(
+                                (self.css_vars[k] for k in self.css_vars if k.endswith(prop_name)), None)
                             if css_match:
                                 r, g, b, a = hex_to_rgba(css_match)
                                 col = colors[value_index]
@@ -526,7 +553,8 @@ class CssPatcher:
                             for val in getattr(prop, "m_Values", []):
                                 if getattr(val, "m_ValueType", None) == 4:
                                     found_type4 = True
-                                    value_index = getattr(val, "valueIndex", None)
+                                    value_index = getattr(
+                                        val, "valueIndex", None)
                                     if value_index is not None and 0 <= value_index < len(colors):
                                         r, g, b, a = hex_to_rgba(hex_val)
                                         col = colors[value_index]
@@ -556,7 +584,8 @@ class CssPatcher:
     def _export_debug_original(self, name: str, data) -> None:
         assert self.debug_export_dir is not None
         uss_text = serialize_stylesheet_to_uss(data)
-        (self.debug_export_dir / f"original_{name}.uss").write_text(uss_text, encoding="utf-8")
+        (self.debug_export_dir /
+         f"original_{name}.uss").write_text(uss_text, encoding="utf-8")
 
         try:
             raw_json = clean_for_json(data)
@@ -583,7 +612,8 @@ class CssPatcher:
                         out_json[k] = ""
                     elif k in {"m_EditorHideFlags", "m_HideFlags"}:
                         out_json[k] = 0
-            structure = {k: raw_json[k] for k in raw_json if k not in root_fields}
+            structure = {k: raw_json[k]
+                         for k in raw_json if k not in root_fields}
             if "m_ImportedWithWarnings" in structure and structure["m_ImportedWithWarnings"] is None:
                 structure["m_ImportedWithWarnings"] = 0
             out_json["m_Structure"] = structure
@@ -591,7 +621,8 @@ class CssPatcher:
                 json.dumps(out_json, ensure_ascii=False, indent=2), encoding="utf-8"
             )
         except Exception as e:
-            log.warning(f"[WARN] Could not export original JSON for {name}: {e}")
+            log.warning(
+                f"[WARN] Could not export original JSON for {name}: {e}")
 
         minimal = {
             "m_Name": getattr(data, "m_Name", None),
@@ -607,7 +638,8 @@ class CssPatcher:
     def _export_debug_patched(self, name: str, data) -> None:
         assert self.debug_export_dir is not None
         uss_text = serialize_stylesheet_to_uss(data)
-        (self.debug_export_dir / f"patched_{name}.uss").write_text(uss_text, encoding="utf-8")
+        (self.debug_export_dir /
+         f"patched_{name}.uss").write_text(uss_text, encoding="utf-8")
         try:
             raw_json = clean_for_json(data)
             root_fields = [
@@ -633,7 +665,8 @@ class CssPatcher:
                         out_json[k] = ""
                     elif k in {"m_EditorHideFlags", "m_HideFlags"}:
                         out_json[k] = 0
-            structure = {k: raw_json[k] for k in raw_json if k not in root_fields}
+            structure = {k: raw_json[k]
+                         for k in raw_json if k not in root_fields}
             if "m_ImportedWithWarnings" in structure and structure["m_ImportedWithWarnings"] is None:
                 structure["m_ImportedWithWarnings"] = 0
             out_json["m_Structure"] = structure
@@ -641,7 +674,8 @@ class CssPatcher:
                 json.dumps(out_json, ensure_ascii=False, indent=2), encoding="utf-8"
             )
         except Exception as e:
-            log.warning(f"[WARN] Could not export patched JSON for {name}: {e}")
+            log.warning(
+                f"[WARN] Could not export patched JSON for {name}: {e}")
         minimal = {
             "m_Name": getattr(data, "m_Name", None),
             "strings": list(getattr(data, "strings", [])),
@@ -687,7 +721,8 @@ def collect_css_from_dir(css_dir: Path) -> Tuple[Dict[str, str], Dict[Tuple[str,
         except Exception as e:
             log.warning(f"Failed to parse {f}: {e}")
 
-    log.info(f"Total CSS vars: {len(css_vars)}, selector overrides: {len(selector_overrides)} from {len(files)} files")
+    log.info(
+        f"Total CSS vars: {len(css_vars)}, selector overrides: {len(selector_overrides)} from {len(files)} files")
     return css_vars, selector_overrides
 
 
@@ -719,18 +754,21 @@ def run_patch(css_dir: Path, out_dir: Path, bundle: Optional[Path] = None, patch
     """
     css_vars, selector_overrides = collect_css_from_dir(css_dir)
     debug_dir = (out_dir / "debug_uss") if debug_export else None
-    patcher = CssPatcher(css_vars, selector_overrides, patch_direct=patch_direct, debug_export_dir=debug_dir)
+    patcher = CssPatcher(css_vars, selector_overrides,
+                         patch_direct=patch_direct, debug_export_dir=debug_dir)
 
     bundle_files: List[Path] = []
     if bundle is not None:
         if bundle.is_dir():
-            bundle_files = [p for p in bundle.iterdir() if p.suffix == ".bundle"]
+            bundle_files = [
+                p for p in bundle.iterdir() if p.suffix == ".bundle"]
         else:
             bundle_files = [bundle]
     else:
         bundle_files = infer_bundle_files(css_dir)
         if not bundle_files:
-            log.error("No bundle specified and none could be inferred from config. Provide --bundle.")
+            log.error(
+                "No bundle specified and none could be inferred from config. Provide --bundle.")
             return
 
     for b in bundle_files:

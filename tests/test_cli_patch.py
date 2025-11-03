@@ -57,7 +57,8 @@ def make_fake_env_with_simple_stylesheet():
     # Construct a stylesheet with var reference and color ref to same index 0
     colors = [FakeColor(0.0, 0.0, 0.0, 1.0)]
     strings = ["--primary"]
-    rules = [FakeRule([FakeProperty("color", [FakeValue(3, 0), FakeValue(4, 0)])])]
+    rules = [
+        FakeRule([FakeProperty("color", [FakeValue(3, 0), FakeValue(4, 0)])])]
     data = FakeData("Style", strings, colors, rules)
     env = FakeEnv([FakeObj(data)])
     return env
@@ -79,16 +80,19 @@ def test_cli_patch_infers_bundle_and_patches(tmp_path, monkeypatch):
         }),
         encoding="utf-8",
     )
-    (skin / "colours" / "base.uss").write_text(":root{--primary:#112233;}\n", encoding="utf-8")
+    (skin / "colours" /
+     "base.uss").write_text(":root{--primary:#112233;}\n", encoding="utf-8")
 
     # Mock UnityPy
     from src.core import css_patcher as cp
-    cp.UnityPy = SimpleNamespace(load=lambda path: make_fake_env_with_simple_stylesheet())
+    cp.UnityPy = SimpleNamespace(
+        load=lambda path: make_fake_env_with_simple_stylesheet())
 
     # Act: call CLI main with argv
     out_dir = tmp_path / "out"
     from src.cli import main as cli_main
-    argv = ["prog", "patch", str(skin), "--out", str(out_dir), "--debug-export"]
+    argv = ["prog", "patch", str(skin), "--out",
+            str(out_dir), "--debug-export"]
     monkeypatch.setattr(sys, "argv", argv, raising=False)
     cli_main.main()
 
@@ -106,7 +110,8 @@ def test_cli_patch_with_bundle_dir(tmp_path, monkeypatch):
     # Arrange css dir (not a skin)
     css_dir = tmp_path / "css"
     css_dir.mkdir()
-    (css_dir / "t.uss").write_text(":root{--primary:#445566;}\n", encoding="utf-8")
+    (css_dir /
+     "t.uss").write_text(":root{--primary:#445566;}\n", encoding="utf-8")
 
     # Arrange bundle dir
     bundles = tmp_path / "bundles"
@@ -115,12 +120,14 @@ def test_cli_patch_with_bundle_dir(tmp_path, monkeypatch):
 
     # Mock UnityPy
     from src.core import css_patcher as cp
-    cp.UnityPy = SimpleNamespace(load=lambda path: make_fake_env_with_simple_stylesheet())
+    cp.UnityPy = SimpleNamespace(
+        load=lambda path: make_fake_env_with_simple_stylesheet())
 
     # Act: call CLI main with argv specifying --bundle dir
     out_dir = tmp_path / "out2"
     from src.cli import main as cli_main
-    argv = ["prog", "patch", str(css_dir), "--out", str(out_dir), "--bundle", str(bundles)]
+    argv = ["prog", "patch", str(css_dir), "--out",
+            str(out_dir), "--bundle", str(bundles)]
     monkeypatch.setattr(sys, "argv", argv, raising=False)
     cli_main.main()
 
@@ -133,7 +140,8 @@ def test_cli_patch_requires_bundle_when_not_inferable(tmp_path, monkeypatch):
     # Arrange a CSS dir without config.json
     css_dir = tmp_path / "css"
     css_dir.mkdir()
-    (css_dir / "t.css").write_text(":root{--primary:#778899;}\n", encoding="utf-8")
+    (css_dir /
+     "t.css").write_text(":root{--primary:#778899;}\n", encoding="utf-8")
 
     # Mock UnityPy (shouldn't be used)
     from src.core import css_patcher as cp

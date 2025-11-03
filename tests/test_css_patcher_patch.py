@@ -98,7 +98,8 @@ def test_var_based_patch_and_save(tmp_path: Path):
     set_unitypy_in_module(cp, env)
 
     out_dir = tmp_path / "out"
-    patcher = cp.CssPatcher(css_vars={"--primary": "#FF0000"}, selector_overrides={}, patch_direct=False, debug_export_dir=None)
+    patcher = cp.CssPatcher(css_vars={
+                            "--primary": "#FF0000"}, selector_overrides={}, patch_direct=False, debug_export_dir=None)
     patcher.patch_bundle_file(tmp_path / "fm_base.bundle", out_dir)
 
     # Verify color was patched to red
@@ -123,7 +124,8 @@ def test_selector_override_patch(tmp_path: Path):
     set_unitypy_in_module(cp, env)
 
     out_dir = tmp_path / "out2"
-    patcher = cp.CssPatcher(css_vars={}, selector_overrides={(".green", "color"): "#00FF00"}, patch_direct=False, debug_export_dir=None)
+    patcher = cp.CssPatcher(css_vars={}, selector_overrides={(
+        ".green", "color"): "#00FF00"}, patch_direct=False, debug_export_dir=None)
     patcher.patch_bundle_file(tmp_path / "ui.bundle", out_dir)
 
     # Verify color patched to green
@@ -144,7 +146,8 @@ def test_patch_direct_literal(tmp_path: Path):
     from src.core import css_patcher as cp
     set_unitypy_in_module(cp, env)
     out_dir = tmp_path / "out3"
-    patcher = cp.CssPatcher(css_vars={"--foo-color": "#112233"}, selector_overrides={}, patch_direct=True, debug_export_dir=None)
+    patcher = cp.CssPatcher(css_vars={"--foo-color": "#112233"},
+                            selector_overrides={}, patch_direct=True, debug_export_dir=None)
     patcher.patch_bundle_file(tmp_path / "ui.bundle", out_dir)
 
     # Verify color patched to #112233
@@ -166,7 +169,8 @@ def test_debug_export_writes_files(tmp_path: Path):
     set_unitypy_in_module(cp, env)
     out_dir = tmp_path / "out4"
     debug_dir = out_dir / "debug_uss"
-    patcher = cp.CssPatcher(css_vars={"--primary": "#0000FF"}, selector_overrides={}, patch_direct=False, debug_export_dir=debug_dir)
+    patcher = cp.CssPatcher(css_vars={"--primary": "#0000FF"}, selector_overrides={
+    }, patch_direct=False, debug_export_dir=debug_dir)
     patcher.patch_bundle_file(tmp_path / "ui.bundle", out_dir)
 
     files = {p.name for p in debug_dir.iterdir()}

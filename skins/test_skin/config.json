@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
-  "name": "Test Skin (Sample)",
-  "target_bundle": "fm_base.bundle",
-  "output_bundle": "fm_base.bundle",
-  "overrides": {}
+    "schema_version": 1,
+    "name": "Test Skin (Sample)",
+    "target_bundle": "fm_base.bundle",
+    "output_bundle": "fm_base.bundle",
+    "overrides": {}
 }

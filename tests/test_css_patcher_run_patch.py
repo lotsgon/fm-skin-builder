@@ -80,12 +80,14 @@ def test_run_patch_infers_bundle_and_creates_backup(tmp_path: Path, monkeypatch)
     )
     # Provide a CSS var
     (skin / "colours").mkdir()
-    (skin / "colours" / "base.uss").write_text(":root{--primary:#FF00FF;}\n", encoding="utf-8")
+    (skin / "colours" /
+     "base.uss").write_text(":root{--primary:#FF00FF;}\n", encoding="utf-8")
 
     # Fake UnityPy env returning a trivial stylesheet
     colors = [FakeColor(0.0, 0.0, 0.0, 1.0)]
     strings = ["--primary"]
-    rules = [FakeRule([FakeProperty("color", [SimpleNamespace(m_ValueType=3, valueIndex=0), SimpleNamespace(m_ValueType=4, valueIndex=0)])])]
+    rules = [FakeRule([FakeProperty("color", [SimpleNamespace(
+        m_ValueType=3, valueIndex=0), SimpleNamespace(m_ValueType=4, valueIndex=0)])])]
     data = FakeData("Style", strings, colors, rules)
     env = FakeEnv([FakeObj(data)])
 
@@ -93,7 +95,8 @@ def test_run_patch_infers_bundle_and_creates_backup(tmp_path: Path, monkeypatch)
     cp.UnityPy = SimpleNamespace(load=lambda path: env)
 
     out_dir = tmp_path / "out"
-    run_patch(css_dir=skin, out_dir=out_dir, bundle=None, patch_direct=False, debug_export=True, backup=True)
+    run_patch(css_dir=skin, out_dir=out_dir, bundle=None,
+              patch_direct=False, debug_export=True, backup=True)
 
     # A modified bundle should be written
     assert out_dir.exists()

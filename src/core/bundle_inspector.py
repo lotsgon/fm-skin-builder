@@ -13,7 +13,8 @@ log = get_logger(__name__)
 
 def _safe_rule_selectors(data) -> Dict[int, List[str]]:
     rules = getattr(data, "m_Rules", [])
-    selectors = getattr(data, "m_ComplexSelectors", []) if hasattr(data, "m_ComplexSelectors") else []
+    selectors = getattr(data, "m_ComplexSelectors", []) if hasattr(
+        data, "m_ComplexSelectors") else []
     out: Dict[int, List[str]] = {i: [] for i in range(len(rules))}
     for sel in selectors:
         rule_idx = getattr(sel, "ruleIndex", -1)
@@ -85,16 +86,19 @@ def scan_bundle(bundle_path: Path, out_dir: Path, export_uss: bool = True) -> Di
                         rec["string"] = strings[vi]
                         if isinstance(strings[vi], str) and strings[vi].startswith("--"):
                             vm = index["var_map"].setdefault(strings[vi], [])
-                            vm.append({"asset": name, "rule": i, "prop": prop_name, "color_index": vi})
+                            vm.append({"asset": name, "rule": i,
+                                      "prop": prop_name, "color_index": vi})
                     if vt == 4 and isinstance(vi, int) and 0 <= vi < len(colors):
                         c = colors[vi]
                         rec["color"] = {"r": c.r, "g": c.g, "b": c.b, "a": c.a}
                     values_info.append(rec)
                 props_info.append({"name": prop_name, "values": values_info})
                 for sel in selectors:
-                    sm = index["selector_map"].setdefault(sel, {}).setdefault(prop_name, [])
+                    sm = index["selector_map"].setdefault(
+                        sel, {}).setdefault(prop_name, [])
                     sm.append({"asset": name, "rule": i})
-            asset_info["rules"].append({"idx": i, "selectors": selectors, "properties": props_info})
+            asset_info["rules"].append(
+                {"idx": i, "selectors": selectors, "properties": props_info})
 
         index["assets"].append(asset_info)
 
@@ -111,7 +115,8 @@ def scan_bundle(bundle_path: Path, out_dir: Path, export_uss: bool = True) -> Di
             index["conflicts"]["selectors"][sel] = sorted(list(assets))
 
     # write index json
-    (out_dir / "bundle_index.json").write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out_dir / "bundle_index.json").write_text(json.dumps(index,
+                                                          ensure_ascii=False, indent=2), encoding="utf-8")
     return index
 
 

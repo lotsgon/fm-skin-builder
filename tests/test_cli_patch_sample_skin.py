@@ -57,7 +57,8 @@ def fake_unity_env():
 
     colors = [FakeColor(0.0, 0.0, 0.0, 1.0)]
     strings = ["--primary"]
-    rules = [FakeRule([FakeProperty("color", [FakeValue(3, 0), FakeValue(4, 0)])])]
+    rules = [
+        FakeRule([FakeProperty("color", [FakeValue(3, 0), FakeValue(4, 0)])])]
     data = FakeData("Style", strings, colors, rules)
     return FakeEnv([FakeObj(data)])
 
@@ -85,7 +86,8 @@ def test_cli_patch_uses_sample_skin(tmp_path, monkeypatch):
     # Run CLI
     out_dir = tmp_path / "out"
     from src.cli import main as cli_main
-    argv = ["prog", "patch", str(skin_copy), "--out", str(out_dir), "--debug-export"]
+    argv = ["prog", "patch", str(skin_copy), "--out",
+            str(out_dir), "--debug-export"]
     monkeypatch.setattr(sys, "argv", argv, raising=False)
     cli_main.main()
 
