@@ -14,6 +14,11 @@ Optional flags:
 - `--patch-direct` patch inlined literals
 - `--debug-export` export original/patched `.uss` + JSON
 
+Troubleshooting:
+- When running over large bundle sets, a rare CPython shutdown crash (none_dealloc) can occur due to third-party C extensions during interpreter finalization. The CLI mitigates this by performing a fast, hard process exit after finishing. You can control this via the environment variable `FM_HARD_EXIT` (defaults to enabled):
+	- `FM_HARD_EXIT=1` (default) — force immediate process exit after finishing to avoid finalization crashes.
+	- `FM_HARD_EXIT=0` — disable hard exit if you prefer normal interpreter shutdown.
+
 ## Docs
 
 - docs/README.md (overview & quick start)

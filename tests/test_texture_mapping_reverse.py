@@ -8,8 +8,8 @@ class FakeTexture2DData:
     def __init__(self, name: str):
         self.m_Name = name
         self.saved = False
-        self.m_Width = 100
-        self.m_Height = 50
+        self.m_Width = 16
+        self.m_Height = 16
 
     def save(self):
         self.saved = True
@@ -42,34 +42,35 @@ class FakeEnv:
         self.file = FakeFile()
 
 
-def test_texture_mapping_json_alias_with_spaces(tmp_path, caplog):
-    # Skin config and mapping
+def test_texture_mapping_target_to_source_variant(tmp_path):
+    # Skin config and mapping (target -> source form)
     skin = tmp_path / "skins" / "demo"
-    (skin / "assets" / "backgrounds").mkdir(parents=True)
+    (skin / "assets" / "icons").mkdir(parents=True)
     (skin / "assets").mkdir(parents=True, exist_ok=True)
     (skin / "config.json").write_text(json.dumps({
         "schema_version": 2,
         "name": "Demo",
-        "includes": ["assets/backgrounds"]
-    }), encoding="utf-8")
-    # mapping: target (Sky Bet League One) -> source (my_background)
-    (skin / "assets" / "mapping.json").write_text(json.dumps({
-        "Sky Bet League One": "my_background"
+        "includes": ["assets/icons"]
     }), encoding="utf-8")
 
-    # Replacement file using custom name
-    (skin / "assets" / "backgrounds" / "my_background.jpg").write_bytes(b"JPEGDATA")
+    # mapping: settings-small_4x (target) -> crown (source)
+    (skin / "assets" / "icons" / "mapping.json").write_text(json.dumps({
+        "settings-small_4x": "crown"
+    }), encoding="utf-8")
 
-    # Bundle and env: Texture2D aliased via AssetBundle container name with spaces
+    # Replacement file providing the 4x variant of crown
+    (skin / "assets" / "icons" / "crown_x4.png").write_bytes(b"PNGDATA")
+
+    # Bundle and env: Texture2D aliased via AssetBundle container name with _4x suffix
     bundle_file = tmp_path / "ui.bundle"
     bundle_file.write_bytes(b"orig")
 
     tex_data = FakeTexture2DData("internal_tex")
-    tex_obj = FakeObj("Texture2D", tex_data, path_id=3003)
+    tex_obj = FakeObj("Texture2D", tex_data, path_id=7777)
 
-    # AssetBundle container contains human-friendly name with spaces
+    # AssetBundle container contains the friendly alias with variant suffix
     container_entry = SimpleNamespace(
-        first="Sky Bet League One.png", second=SimpleNamespace(m_PathID=3003))
+        first="settings-small_4x.png", second=SimpleNamespace(m_PathID=7777))
     ab_data = SimpleNamespace(m_Container=[container_entry])
     ab_obj = FakeObj("AssetBundle", ab_data)
 
@@ -81,7 +82,6 @@ def test_texture_mapping_json_alias_with_spaces(tmp_path, caplog):
     tx.UnityPy = SimpleNamespace(load=lambda path: env)
 
     out_dir = tmp_path / "out"
-    caplog.set_level("INFO")
     run_patch(skin, out_dir, bundle=None, dry_run=False)
 
     assert tex_data.saved is True

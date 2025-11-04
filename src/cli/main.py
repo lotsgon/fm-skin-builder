@@ -1,6 +1,9 @@
 from __future__ import annotations
 import argparse
 from .commands import build as cmd_build, extract as cmd_extract, verify as cmd_verify, swap as cmd_swap, patch as cmd_patch, scan as cmd_scan
+import os
+import sys
+import gc
 
 
 def entrypoint():
@@ -62,6 +65,23 @@ def main() -> None:
         cmd_patch.run(args)
     elif args.command == "scan":
         cmd_scan.run(args)
+
+    # Mitigate rare CPython finalization crash observed with C extensions (e.g., compression libs)
+    # by forcing an immediate process exit after flushing. Can be disabled by setting FM_HARD_EXIT=0.
+    try:
+        sys.stdout.flush()
+    except Exception:
+        pass
+    try:
+        sys.stderr.flush()
+    except Exception:
+        pass
+    try:
+        gc.collect()
+    except Exception:
+        pass
+    if os.environ.get("FM_HARD_EXIT", "1") not in {"0", "false", "False"}:
+        os._exit(0)
 
 
 if __name__ == "__main__":

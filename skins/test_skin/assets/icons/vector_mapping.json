@@ -1,0 +1,15 @@
+{
+    "_comment": "This is just an example - vector sprites can go in the main mapping.json",
+    "kit-squad-outfield": {
+        "type": "vector",
+        "shape": "circle",
+        "radius": 60,
+        "segments": 24,
+        "color": [
+            255,
+            255,
+            255,
+            255
+        ]
+    }
+}

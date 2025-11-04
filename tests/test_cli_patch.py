@@ -64,7 +64,7 @@ def make_fake_env_with_simple_stylesheet():
     return env
 
 
-def test_cli_patch_infers_bundle_and_patches(tmp_path, monkeypatch):
+def test_cli_patch_patches_with_explicit_bundle_dir(tmp_path, monkeypatch):
     # Arrange skin folder
     skin = tmp_path / "skins" / "demo"
     (skin / "colours").mkdir(parents=True)
@@ -85,11 +85,11 @@ def test_cli_patch_infers_bundle_and_patches(tmp_path, monkeypatch):
     cp.UnityPy = SimpleNamespace(
         load=lambda path: make_fake_env_with_simple_stylesheet())
 
-    # Act: call CLI main with argv
+    # Act: call CLI main with argv (explicit --bundle dir)
     out_dir = tmp_path / "out"
     from src.cli import main as cli_main
     argv = ["prog", "patch", str(skin), "--out",
-            str(out_dir), "--debug-export"]
+            str(out_dir), "--debug-export", "--bundle", str(tmp_path)]
     monkeypatch.setattr(sys, "argv", argv, raising=False)
     cli_main.main()
 

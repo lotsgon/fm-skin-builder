@@ -8,8 +8,9 @@ import shutil
 import UnityPy
 
 from .logger import get_logger
+import gc
 from .cache import load_or_cache_config, cache_dir
-from .textures import swap_textures
+from .textures import swap_textures, TextureSwapResult
 
 log = get_logger(__name__)
 
@@ -247,7 +248,7 @@ class CssPatcher:
         self.selectors_filter = selectors_filter
         self.selector_props_filter = selector_props_filter
 
-    def patch_bundle_file(self, bundle_path: Path, out_dir: Path, candidate_assets: Optional[Set[str]] = None) -> None:
+    def patch_bundle_file(self, bundle_path: Path, out_dir: Path, candidate_assets: Optional[Set[str]] = None) -> Optional[List[str]]:
         env = UnityPy.load(str(bundle_path))
         bundle_name = bundle_path.name
 
@@ -296,7 +297,20 @@ class CssPatcher:
         if not any_changes:
             log.info(
                 "No changes detected; skipping bundle write and debug outputs.")
-            return
+            # Proactively release UnityPy objects to avoid finalizer issues
+            try:
+                original_uss.clear()
+            except Exception:
+                pass
+            try:
+                del env
+            except Exception:
+                pass
+            try:
+                gc.collect()
+            except Exception:
+                pass
+            return None
 
         # Prepare conflict/touch summary for selector overrides across assets
         multi_asset_touches: List[Tuple[Tuple[str, str], int]] = []
@@ -306,18 +320,33 @@ class CssPatcher:
                     multi_asset_touches.append((k, len(assets)))
 
         if self.dry_run:
-            log.info("\n🧾 Summary:")
-            log.info(f"  Stylesheets found: {found_styles}")
-            log.info(f"  Assets modified: {len(changed_asset_names)}")
-            log.info(f"  Variables patched: {patched_vars}")
-            log.info(f"  Direct colors patched: {patched_direct}")
+            # Defer summary logging to caller so textures can run first.
+            lines: List[str] = []
+            lines.append("\n🧾 Summary:")
+            lines.append(f"  Stylesheets found: {found_styles}")
+            lines.append(f"  Assets modified: {len(changed_asset_names)}")
+            lines.append(f"  Variables patched: {patched_vars}")
+            lines.append(f"  Direct colors patched: {patched_direct}")
             if multi_asset_touches:
-                log.info("  Selector overrides affecting multiple assets:")
+                lines.append("  Selector overrides affecting multiple assets:")
                 for (sel, prop), n in multi_asset_touches:
-                    log.info(f"    {sel} / {prop}: {n} assets")
-            log.info(
+                    lines.append(f"    {sel} / {prop}: {n} assets")
+            lines.append(
                 "[DRY-RUN] No files were written. Use without --dry-run to apply changes.")
-            return
+            # Cleanup UnityPy structures before returning
+            try:
+                original_uss.clear()
+            except Exception:
+                pass
+            try:
+                del env
+            except Exception:
+                pass
+            try:
+                gc.collect()
+            except Exception:
+                pass
+            return lines
 
         out_dir.mkdir(parents=True, exist_ok=True)
         name, ext = os.path.splitext(bundle_name)
@@ -356,7 +385,20 @@ class CssPatcher:
         if not saved:
             log.error(
                 "[ERROR] Could not save patched bundle. The bundle may be corrupt or use unsupported compression.")
-            return
+            # Cleanup UnityPy structures before returning
+            try:
+                original_uss.clear()
+            except Exception:
+                pass
+            try:
+                del env
+            except Exception:
+                pass
+            try:
+                gc.collect()
+            except Exception:
+                pass
+            return None
 
         log.info("\n🧾 Summary:")
         log.info(f"  Stylesheets found: {found_styles}")
@@ -370,6 +412,20 @@ class CssPatcher:
         log.info(f"💾 Saved patched bundle(s) → {out_dir}")
         if self.debug_export_dir:
             log.info(f"📝 Exported .uss files to {self.debug_export_dir}")
+        # Cleanup UnityPy structures before returning
+        try:
+            original_uss.clear()
+        except Exception:
+            pass
+        try:
+            del env
+        except Exception:
+            pass
+        try:
+            gc.collect()
+        except Exception:
+            pass
+        return None
 
     # -----------------------------
     # internals
@@ -863,27 +919,49 @@ def load_targeting_hints(css_dir: Path) -> Tuple[Optional[Set[str]], Optional[Se
 
 
 def infer_bundle_files(css_dir: Path) -> List[Path]:
-    """Infer bundle file(s) from conventional locations relative to the repo.
+    """Infer bundle file(s) from Football Manager 26 default install locations.
 
     Priority:
-    1) If a 'bundles' directory exists at repo root (two levels up), use all *.bundle inside it.
-    2) Else, if exactly one *.bundle exists at repo root, use it.
-    3) Otherwise, return empty and require --bundle.
+    - Auto-detect StreamingAssets bundles in known Steam/Epic install paths for the current OS.
+    - Otherwise return empty and require --bundle.
     """
     bundles: List[Path] = []
-    repo_root = css_dir.parent.parent
-    bundles_dir = repo_root / "bundles"
-    if bundles_dir.exists() and bundles_dir.is_dir():
-        found = sorted([p for p in bundles_dir.iterdir()
-                       if p.suffix == ".bundle"])
-        if found:
-            log.info(f"Inferred bundles directory: {bundles_dir}")
-            return found
-    # Fallback: single bundle at repo root
-    root_bundles = [p for p in repo_root.iterdir() if p.suffix == ".bundle"]
-    if len(root_bundles) == 1:
-        log.info(f"Inferred bundle from repo root: {root_bundles[0]}")
-        return [root_bundles[0]]
+    # FM install auto-detect (Steam/Epic default paths)
+    try:
+        import platform as _plat
+        sysname = _plat.system()
+        candidates: List[Path] = []
+        if sysname == "Windows":
+            candidates.extend([
+                Path(r"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Football Manager 26\\fm_Data\\StreamingAssets\\aa\\StandaloneWindows64"),
+                Path(r"C:\\Program Files\\Epic Games\\Football Manager 26\\fm_Data\\StreamingAssets\\aa\\StandaloneWindows64"),
+            ])
+        elif sysname == "Darwin":
+            candidates.extend([
+                Path(os.path.expanduser(
+                    "~/Library/Application Support/Steam/steamapps/common/Football Manager 26/fm.app/Contents/Resources/Data/StreamingAssets/aa/StandaloneOSX")),
+                Path(os.path.expanduser(
+                    "~/Library/Application Support/Steam/steamapps/common/Football Manager 26/fm_Data/StreamingAssets/aa/StandaloneOSXUniversal")),
+                Path(os.path.expanduser(
+                    "~/Library/Application Support/Epic/Football Manager 26/fm_Data/StreamingAssets/aa/StandaloneOSXUniversal")),
+            ])
+        elif sysname == "Linux":
+            candidates.extend([
+                Path(os.path.expanduser(
+                    "~/.local/share/Steam/steamapps/common/Football Manager 26/fm_Data/StreamingAssets/aa/StandaloneLinux64")),
+                Path(os.path.expanduser(
+                    "~/.steam/steam/steamapps/common/Football Manager 26/fm_Data/StreamingAssets/aa/StandaloneLinux64")),
+            ])
+        for c in candidates:
+            if c.exists() and c.is_dir():
+                found = sorted(
+                    [p for p in c.iterdir() if p.suffix == ".bundle"])
+                if found:
+                    log.info(
+                        f"Inferred bundles directory from FM install: {c}")
+                    return found
+    except Exception:
+        pass
     return []
 
 
@@ -949,6 +1027,55 @@ def run_patch(css_dir: Path, out_dir: Path, bundle: Optional[Path] = None, patch
         except Exception as e:
             log.debug(f"Scan cache unavailable: {e}")
 
+    # Texture prefilter: collect candidate target names from mapping and file stems
+    def _collect_replacement_stems(root: Path) -> List[str]:
+        stems: List[str] = []
+        if root.exists():
+            for p in root.glob("*.*"):
+                if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".svg"}:
+                    stems.append(p.stem)
+        return stems
+
+    def _load_texture_name_map(skin_root: Path) -> Dict[str, str]:
+        name_map: Dict[str, str] = {}
+        import json as _json
+
+        def _load(p: Path):
+            if p.exists():
+                try:
+                    d = _json.loads(p.read_text(encoding="utf-8"))
+                    if isinstance(d, dict):
+                        for k, v in d.items():
+                            if isinstance(k, str) and isinstance(v, str):
+                                name_map[k] = v
+                except Exception:
+                    pass
+        for fname in ("mapping.json", "map.json"):
+            _load(skin_root / "assets" / fname)
+        for sub in ("icons", "backgrounds"):
+            for fname in ("mapping.json", "map.json"):
+                _load(skin_root / "assets" / sub / fname)
+        return name_map
+
+    includes = getattr(cfg_model, "includes", None)
+    includes_list: List[str] = list(
+        includes) if isinstance(includes, list) else []
+    want_icons = any(x.strip().lower() ==
+                     "assets/icons" for x in includes_list)
+    want_bgs = any(x.strip().lower() ==
+                   "assets/backgrounds" for x in includes_list)
+    icon_dir = css_dir / "assets" / "icons"
+    bg_dir = css_dir / "assets" / "backgrounds"
+    replace_stems = set(_collect_replacement_stems(
+        icon_dir) + _collect_replacement_stems(bg_dir))
+    name_map = _load_texture_name_map(css_dir)
+    target_names_from_map = set(name_map.keys())
+
+    all_summaries: List[List[str]] = []
+    css_bundles_modified = 0
+    css_assets_modified_total = 0
+    texture_replacements_total = 0
+    texture_bundles_written = 0
     for b in bundle_files:
         if backup:
             ts = os.environ.get("FM_SKIN_BACKUP_TS") or "backup"
@@ -970,9 +1097,31 @@ def run_patch(css_dir: Path, out_dir: Path, bundle: Optional[Path] = None, patch
             log.info(
                 f"Hint filter excluded all assets for {b.name}; skipping bundle.")
             continue
-        patcher.patch_bundle_file(b, out_dir, candidate_assets=cand)
+        # Heuristic: skip CSS patch scan for obvious non-style bundles on first run
+        do_css = True
+        bname = b.name.lower()
+        if not refresh_scan_cache and not use_scan_cache:
+            do_css = True
+        else:
+            if not ("styles" in bname):
+                # If index exists and indicates no styles, skip; if no index and name not styles, skip
+                idx = None
+                try:
+                    cdir = cache_dir(root=css_dir.parent.parent) / css_dir.name
+                    idx = _load_index(cdir, b)
+                except Exception:
+                    idx = None
+                if (idx is None) or (not idx.get("assets")):
+                    do_css = False
+
+        summary_lines: Optional[List[str]] = None
+        if do_css:
+            res = patcher.patch_bundle_file(b, out_dir, candidate_assets=cand)
+            summary_lines = res
+            # Count modified CSS bundles in both dry-run and real mode (res is only returned when changes exist)
+            if res:
+                css_bundles_modified += 1
         # Process texture swaps if requested by includes
-        includes = getattr(cfg_model, "includes", None)
         should_swap = False
         if includes is None:
             should_swap = False
@@ -981,16 +1130,99 @@ def run_patch(css_dir: Path, out_dir: Path, bundle: Optional[Path] = None, patch
                               "assets/icons", "assets/backgrounds"} for x in includes)
         if should_swap:
             try:
-                swap_textures(
-                    bundle_path=b,
-                    skin_dir=css_dir,
-                    includes=list(includes) if isinstance(
-                        includes, list) else [],
-                    out_dir=out_dir,
-                    dry_run=dry_run,
-                )
+                # Prefilter: use index if available to check intersection with candidate names
+                do_textures = True
+                idx = None
+                try:
+                    cdir = cache_dir(root=css_dir.parent.parent) / css_dir.name
+                    idx = _load_index(cdir, b)
+                except Exception:
+                    idx = None
+                texture_names = set()
+                if idx is not None:
+                    for key in ("textures", "aliases", "sprites"):
+                        vals = idx.get(key)
+                        if isinstance(vals, list):
+                            # strip extensions in aliases when present
+                            for n in vals:
+                                try:
+                                    nstr = str(n)
+                                except Exception:
+                                    continue
+                                texture_names.add(nstr)
+                # Basic name intersection using target mapping keys and raw stems
+                # Also support wildcard patterns and scale-agnostic matching (prefix matching)
+                has_interest = False
+                if texture_names:
+                    # compare case-sensitively first, then lower
+                    if target_names_from_map & texture_names:
+                        has_interest = True
+                    else:
+                        lowset = {n.lower() for n in texture_names}
+                        # Check if any mapping key matches (exact or prefix for scale-agnostic)
+                        for k in target_names_from_map:
+                            k_lower = k.lower()
+                            # Exact match
+                            if k_lower in lowset:
+                                has_interest = True
+                                break
+                            # Wildcard pattern
+                            if '*' in k or '?' in k:
+                                import fnmatch
+                                if any(fnmatch.fnmatch(n.lower(), k_lower) for n in texture_names):
+                                    has_interest = True
+                                    break
+                            # Scale-agnostic: check if any texture starts with mapping key
+                            # e.g., "settings-large" matches "settings-large_1x", "settings-large_2x", etc.
+                            if any(n.lower().startswith(k_lower + '_') or n.lower() == k_lower for n in texture_names):
+                                has_interest = True
+                                break
+
+                        # Also check raw file stems
+                        if not has_interest and any(s.lower() in lowset for s in replace_stems):
+                            has_interest = True
+                else:
+                    # No index? Use heuristic on bundle filename
+                    if (want_icons and ("icon" in bname)) or (want_bgs and ("background" in bname)):
+                        has_interest = True
+                if has_interest:
+                    tsr: TextureSwapResult = swap_textures(
+                        bundle_path=b,
+                        skin_dir=css_dir,
+                        includes=list(includes) if isinstance(
+                            includes, list) else [],
+                        out_dir=out_dir,
+                        dry_run=dry_run,
+                    )
+                    texture_replacements_total += tsr.replaced_count
+                    if tsr.out_file is not None:
+                        texture_bundles_written += 1
+                else:
+                    log.debug(
+                        "[TEXTURE] Prefilter: skipping bundle with no matching names.")
             except Exception as e:
                 log.warning(f"[WARN] Texture swap skipped due to error: {e}")
+        # Defer dry-run summary to the end so it logs after any texture messages
+        if summary_lines:
+            all_summaries.append(summary_lines)
+
+    # After all bundles, print any deferred dry-run summaries so they appear last
+    if all_summaries:
+        for lines in all_summaries:
+            for line in lines:
+                log.info(line)
+
+    # Overall summary at end
+    log.info("\n=== Overall Summary ===")
+    log.info(f"Bundles processed: {len(bundle_files)}")
+    log.info(f"CSS bundles modified: {css_bundles_modified}")
+    if texture_replacements_total or texture_bundles_written:
+        if dry_run:
+            log.info(
+                f"[DRY-RUN] Would replace {texture_replacements_total} textures across bundles")
+        else:
+            log.info(
+                f"Textures replaced: {texture_replacements_total} across {texture_bundles_written} bundles")
 
 
 # -----------------------------

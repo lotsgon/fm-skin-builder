@@ -1,0 +1,29 @@
+{
+    "cog_*": "crown",
+    "globe_*": "paw",
+    "fmpedia_*": "mug-hot-alt",
+    "star_*": "crown",
+    "kit-squad-outfield": {
+        "type": "vector",
+        "shape": "circle",
+        "radius": 0.64,
+        "segments": 3,
+        "color": [
+            0,
+            255,
+            0,
+            255
+        ]
+    },
+    "kit-squad-goalkeeper": {
+        "type": "vector",
+        "shape": "circle",
+        "radius": 0.64,
+        "color": [
+            255,
+            200,
+            0,
+            255
+        ]
+    }
+}

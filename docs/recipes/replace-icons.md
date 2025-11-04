@@ -45,19 +45,21 @@ If your file names don't match the bundle's Texture2D or container/sprite names,
 - Global (applies to both icons and backgrounds): `skins/<skin>/assets/mapping.json` (or `map.json`)
 - Type-specific (overrides global): `skins/<skin>/assets/icons/mapping.json` (or `map.json`)
 
-Example `mapping.json`:
+Mapping (unique keys): target → source
 
 ```json
 {
-  "my_icon": "Search",
-  "logo": "AppLogo_x2"
+  "Search": "my_icon",
+  "AppLogo_x2": "logo"
 }
 ```
 
-- Keys are your replacement filename stems (extension ignored), e.g., `my_icon.png` maps from `"my_icon"`.
-- Values are the target asset/alias names in the bundle. They can include spaces.
-- You can also include variant suffixes in the mapping’s value (e.g., `"AppLogo_x2"`) to target a specific DPI variant. If omitted, 1x is assumed.
-- Only the contents are replaced; Unity asset names are not renamed.
+- Keys are the target asset/alias names in the bundle (unique), optionally with variant suffix (e.g., `AppLogo_x2`).
+- Values are your replacement filename stems (extension ignored), e.g., `my_icon.png`.
+- If the key includes a variant (like `_x2` or `@2x`), we look for that same variant on the source; otherwise we map all available variants from the source.
+- Only contents are replaced; Unity asset names are not renamed.
+
+Legacy source → target mapping is no longer supported to prevent ambiguity when multiple targets share one source or when file stems clash with existing asset names. Please migrate skins to the target → source form.
 
 ## Format and size warnings
 
@@ -76,3 +78,8 @@ Example `mapping.json`:
 - Start with 1x first to validate name matching.
 - Add 2x and 4x variants as needed for crisp rendering on high-DPI displays.
 - Use `--debug-export` to export and inspect bundle contents if you're unsure about the texture names.
+
+## Troubleshooting
+
+- No matches for an icon bundle (e.g., ui-icons_assets_4x.bundle): Many icon bundles contain Sprites that reference Texture2D data stored in another bundle (often a *_assets_common.bundle). If you see the hint about sprites referencing textures in another bundle, run the patcher against the common bundle as well (or the entire bundles/ directory). Use the scan cache output in `.cache/skins/<skin>/<bundle>.index.json` to inspect `textures`, `sprites`, and `aliases` lists.
+- Atlas textures: If a Texture2D is shared by multiple Sprites (atlas-like), replacements are blocked for safety and logged as an error.

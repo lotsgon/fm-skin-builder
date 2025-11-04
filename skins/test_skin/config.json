@@ -2,6 +2,7 @@
     "schema_version": 2,
     "name": "Test Skin (Sample)",
     "includes": [
-        "assets/backgrounds"
+        "assets/backgrounds",
+        "assets/icons"
     ]
 }

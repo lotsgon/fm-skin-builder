@@ -4,6 +4,7 @@ from typing import Dict, List, Tuple, Any, Optional
 import json
 import os
 import UnityPy
+import gc
 
 from .logger import get_logger
 from .css_patcher import build_selector_from_parts, serialize_stylesheet_to_uss
@@ -41,11 +42,67 @@ def scan_bundle(bundle_path: Path, out_dir: Path, export_uss: bool = True) -> Di
         "assets": [],
         "var_map": {},
         "selector_map": {},
-        "conflicts": {"selectors": {}}
+        "conflicts": {"selectors": {}},
+        # Additive catalogs for non-style bundles
+        "textures": [],
+        "sprites": [],
+        "aliases": []
     }
 
     selector_to_assets: Dict[str, set] = {}
 
+    # First pass: collect non-style catalogs (Texture2D, Sprite, AssetBundle aliases)
+    for obj in env.objects:
+        tname = obj.type.name
+        if tname == "Texture2D":
+            try:
+                data = obj.read()
+            except Exception:
+                continue
+            name = getattr(data, "m_Name", None) or getattr(data, "name", None)
+            if name:
+                index["textures"].append(str(name))
+        elif tname == "Sprite":
+            try:
+                data = obj.read()
+            except Exception:
+                continue
+            name = getattr(data, "m_Name", None) or getattr(data, "name", None)
+            if name:
+                index["sprites"].append(str(name))
+        elif tname == "SpriteAtlas":
+            # Index sprites from SpriteAtlas (for sprite overlay operations)
+            try:
+                data = obj.read()
+            except Exception:
+                continue
+            packed_names = getattr(data, "m_PackedSpriteNamesToIndex", None)
+            if packed_names:
+                try:
+                    # m_PackedSpriteNamesToIndex is a list of sprite names
+                    for sprite_name in list(packed_names):
+                        if sprite_name:
+                            index["sprites"].append(str(sprite_name))
+                except Exception:
+                    pass
+        elif tname == "AssetBundle":
+            try:
+                data = obj.read()
+            except Exception:
+                continue
+            container = getattr(data, "m_Container", None)
+            if container is None:
+                continue
+            try:
+                for entry in list(container):
+                    alias = getattr(entry, "first", None) or getattr(
+                        entry, "name", None)
+                    if alias:
+                        index["aliases"].append(str(alias))
+            except Exception:
+                pass
+
+    # Second pass: style scanning
     for obj in env.objects:
         if obj.type.name != "MonoBehaviour":
             continue
@@ -117,6 +174,15 @@ def scan_bundle(bundle_path: Path, out_dir: Path, export_uss: bool = True) -> Di
     # write index json
     (out_dir / "bundle_index.json").write_text(json.dumps(index,
                                                           ensure_ascii=False, indent=2), encoding="utf-8")
+    # Proactively release UnityPy env
+    try:
+        del env
+    except Exception:
+        pass
+    try:
+        gc.collect()
+    except Exception:
+        pass
     return index
 
 

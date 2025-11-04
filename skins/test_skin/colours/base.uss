@@ -1,5 +1,5 @@
 :root {
-  --primary: #112233;
+  --colours-linear-scale-20: #f200ff;
   --accent: #33AAFFCC; /* with alpha */
 }
 
