@@ -2,6 +2,7 @@
 
 - Start here: SKIN_FORMAT.md (skin layout, config)
 - Architecture: ARCHITECTURE.md (how patching works)
+- **NEW: ASSET_EXPLORER.md** (searchable CSS/UXML catalog & cross-references)
 - Roadmap: ROADMAP.md
 - Developer TODO: TODO.md
 
@@ -56,6 +57,28 @@ Use scan when you want to explore which variables/selectors occur and where:
 - python -m src.cli.main scan --bundle /path/to/bundle_or_dir --out build/scan --export-uss
 
 This produces a `bundle_index.json` plus optional `.uss` exports for browsing/diffing.
+
+## Asset Explorer (NEW!)
+
+Search and explore FM's CSS variables, classes, and their relationships:
+
+1. **Build catalog** from bundles:
+   ```bash
+   python scripts/build_css_uxml_catalog.py \
+     --bundle-dir bundles \
+     --output extracted_sprites/css_uxml_catalog.json
+   ```
+
+2. **Generate HTML explorer**:
+   ```bash
+   python scripts/generate_css_uxml_explorer.py \
+     --input extracted_sprites/css_uxml_catalog.json \
+     --output extracted_sprites/css_uxml_explorer.html
+   ```
+
+3. **Browse** in your web browser - search for variables, classes, see where they're defined and used!
+
+See **ASSET_EXPLORER.md** for full details and examples.
 
 ## Caching
 
