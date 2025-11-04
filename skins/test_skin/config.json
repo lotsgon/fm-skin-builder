@@ -1,7 +1,7 @@
 {
-    "schema_version": 1,
+    "schema_version": 2,
     "name": "Test Skin (Sample)",
-    "target_bundle": "fm_base.bundle",
-    "output_bundle": "fm_base.bundle",
-    "overrides": {}
+    "includes": [
+        "assets/backgrounds"
+    ]
 }

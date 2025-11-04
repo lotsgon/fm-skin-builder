@@ -69,15 +69,12 @@ def test_cli_patch_uses_sample_skin(tmp_path, monkeypatch):
     sample_skin = repo_root / "skins" / "test_skin"
     assert sample_skin.exists()
 
-    # Copy sample skin to tmp workspace and fix bundle path
+    # Copy sample skin to tmp workspace
     skin_copy = tmp_path / "skins" / "test_skin"
     shutil.copytree(sample_skin, skin_copy)
     bundle_file = tmp_path / "fm_base.bundle"
     bundle_file.write_bytes(b"orig")
-    cfg_path = skin_copy / "config.json"
-    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
-    cfg["target_bundle"] = str(bundle_file)
-    cfg_path.write_text(json.dumps(cfg), encoding="utf-8")
+    # Config v2 has no bundle fields; inference will find the single bundle at repo root
 
     # Mock UnityPy
     from src.core import css_patcher as cp

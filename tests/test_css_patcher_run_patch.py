@@ -70,11 +70,8 @@ def test_run_patch_infers_bundle_and_creates_backup(tmp_path: Path, monkeypatch)
     bundle_file.write_bytes(b"orig")
     (skin / "config.json").write_text(
         json.dumps({
-            "schema_version": 1,
-            "name": "MySkin",
-            "target_bundle": str(bundle_file),
-            "output_bundle": "fm_base.bundle",
-            "overrides": {}
+            "schema_version": 2,
+            "name": "MySkin"
         }),
         encoding="utf-8",
     )

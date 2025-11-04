@@ -9,6 +9,7 @@ import UnityPy
 
 from .logger import get_logger
 from .cache import load_or_cache_config, cache_dir
+from .textures import swap_textures
 
 log = get_logger(__name__)
 
@@ -862,19 +863,28 @@ def load_targeting_hints(css_dir: Path) -> Tuple[Optional[Set[str]], Optional[Se
 
 
 def infer_bundle_files(css_dir: Path) -> List[Path]:
-    """Infer bundle file(s) from skin config if available."""
+    """Infer bundle file(s) from conventional locations relative to the repo.
+
+    Priority:
+    1) If a 'bundles' directory exists at repo root (two levels up), use all *.bundle inside it.
+    2) Else, if exactly one *.bundle exists at repo root, use it.
+    3) Otherwise, return empty and require --bundle.
+    """
     bundles: List[Path] = []
-    cfg = css_dir / "config.json"
-    if cfg.exists():
-        try:
-            model = load_or_cache_config(css_dir)
-            target = Path(model.target_bundle)
-            if target.exists():
-                bundles.append(target)
-                log.info(f"Inferred bundle from config: {target}")
-        except Exception as e:
-            log.warning(f"Could not infer bundle from config: {e}")
-    return bundles
+    repo_root = css_dir.parent.parent
+    bundles_dir = repo_root / "bundles"
+    if bundles_dir.exists() and bundles_dir.is_dir():
+        found = sorted([p for p in bundles_dir.iterdir()
+                       if p.suffix == ".bundle"])
+        if found:
+            log.info(f"Inferred bundles directory: {bundles_dir}")
+            return found
+    # Fallback: single bundle at repo root
+    root_bundles = [p for p in repo_root.iterdir() if p.suffix == ".bundle"]
+    if len(root_bundles) == 1:
+        log.info(f"Inferred bundle from repo root: {root_bundles[0]}")
+        return [root_bundles[0]]
+    return []
 
 
 def run_patch(css_dir: Path, out_dir: Path, bundle: Optional[Path] = None, patch_direct: bool = False, debug_export: bool = False, backup: bool = False, dry_run: bool = False, use_scan_cache: bool = True, refresh_scan_cache: bool = False) -> None:
@@ -888,6 +898,14 @@ def run_patch(css_dir: Path, out_dir: Path, bundle: Optional[Path] = None, patch
     - backup: backup original bundle(s) next to their paths
     """
     css_vars, selector_overrides = collect_css_from_dir(css_dir)
+    # Load config v2 (for includes), if present
+    cfg_model = None
+    cfg_path = css_dir / "config.json"
+    if cfg_path.exists():
+        try:
+            cfg_model = load_or_cache_config(css_dir)
+        except Exception as e:
+            log.warning(f"Could not parse config.json: {e}")
     # Optional targeting hints
     hints_assets, hints_selectors, hints_selector_props = load_targeting_hints(
         css_dir)
@@ -953,6 +971,26 @@ def run_patch(css_dir: Path, out_dir: Path, bundle: Optional[Path] = None, patch
                 f"Hint filter excluded all assets for {b.name}; skipping bundle.")
             continue
         patcher.patch_bundle_file(b, out_dir, candidate_assets=cand)
+        # Process texture swaps if requested by includes
+        includes = getattr(cfg_model, "includes", None)
+        should_swap = False
+        if includes is None:
+            should_swap = False
+        else:
+            should_swap = any(x.strip().lower() in {
+                              "assets/icons", "assets/backgrounds"} for x in includes)
+        if should_swap:
+            try:
+                swap_textures(
+                    bundle_path=b,
+                    skin_dir=css_dir,
+                    includes=list(includes) if isinstance(
+                        includes, list) else [],
+                    out_dir=out_dir,
+                    dry_run=dry_run,
+                )
+            except Exception as e:
+                log.warning(f"[WARN] Texture swap skipped due to error: {e}")
 
 
 # -----------------------------

@@ -72,11 +72,8 @@ def test_cli_patch_infers_bundle_and_patches(tmp_path, monkeypatch):
     bundle_file.write_bytes(b"orig")
     (skin / "config.json").write_text(
         json.dumps({
-            "schema_version": 1,
-            "name": "Demo",
-            "target_bundle": str(bundle_file),
-            "output_bundle": "fm_base.bundle",
-            "overrides": {},
+            "schema_version": 2,
+            "name": "Demo"
         }),
         encoding="utf-8",
     )
@@ -166,11 +163,8 @@ def test_cli_patch_dry_run_produces_no_outputs(tmp_path, monkeypatch):
     bundle_file.write_bytes(b"orig")
     (skin / "config.json").write_text(
         json.dumps({
-            "schema_version": 1,
-            "name": "Demo",
-            "target_bundle": str(bundle_file),
-            "output_bundle": "fm_base.bundle",
-            "overrides": {},
+            "schema_version": 2,
+            "name": "Demo"
         }),
         encoding="utf-8",
     )

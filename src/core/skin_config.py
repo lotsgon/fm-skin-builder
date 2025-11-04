@@ -1,16 +1,17 @@
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from pathlib import Path
 import json
 
 
 class SkinConfigModel(BaseModel):
-    schema_version: int = Field(1, ge=1)
+    # New schema v2: metadata + includes only
+    schema_version: int = Field(2, ge=2)
     name: str
-    target_bundle: str
-    output_bundle: str
-    overrides: Dict[str, str] = Field(default_factory=dict)
+    author: Optional[str] = None
+    version: Optional[str] = None
+    includes: Optional[List[str]] = None
     description: Optional[str] = None
 
 

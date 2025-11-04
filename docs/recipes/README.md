@@ -9,3 +9,7 @@ Practical, copy-paste guides for common tasks. Each recipe assumes you've instal
 - Use opt-in targeting hints to narrow scope: targeting-hints.md
 - Understand conflict surfacing: conflict-surfacing.md
 - Debug exports and inspecting structure: debug-exports.md
+
+- Config v2 quick start: config-v2.md
+- Replace app icons (Texture2D): replace-icons.md
+- Replace background images (Texture2D): replace-backgrounds.md
