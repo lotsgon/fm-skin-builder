@@ -8,3 +8,4 @@ backups/
 .pytest_cache/
 dist/
 bundles/
+extracted_sprites/
