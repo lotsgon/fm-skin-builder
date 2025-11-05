@@ -1,0 +1,50 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <UXML data-unity-id="973763194">
+        <BindingExpect class="base-template-grow" data-unity-id="-729693469">
+            <BindableSwitchElement class="base-template-grow width-100-percent" data-unity-id="340682869">
+                <VisualElement data-unity-id="-110075088">
+                    <SIVisible data-unity-id="-2081967340" data-binding-rid="1003" data-binding-binding="human.team.IsClub">
+                        <ButtonGroup class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none base-template-grow" data-unity-id="-1280026591" data-binding-rid="1004" data-binding-currentselectedidbinding="gameworldsubtabsandbookmarks.PrimaryTab" data-binding-selectionbinding="gameworldsubtabsandbookmarks.PrimaryTab">
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                        </ButtonGroup>
+                    </SIVisible>
+                    <SIVisible data-unity-id="-1366139812" data-binding-rid="1005" data-binding-binding="human.team.IsClub">
+                        <ButtonGroup class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none base-template-grow" data-unity-id="151628465" data-binding-rid="1006" data-binding-currentselectedidbinding="gameworldsubtabsandbookmarks.PrimaryTab" data-binding-selectionbinding="gameworldsubtabsandbookmarks.PrimaryTab">
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                            <!-- Include: navigation-tab-portal-default -->
+                            <Template src="navigation-tab-portal-default" />
+                        </ButtonGroup>
+                    </SIVisible>
+                </VisualElement>
+                <VisualElement data-unity-id="-199554327">
+                    <ButtonGroup class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none base-template-grow" data-unity-id="2034041478" data-binding-rid="1008" data-binding-currentselectedidbinding="gameworldsubtabsandbookmarks.PrimaryTab" data-binding-selectionbinding="gameworldsubtabsandbookmarks.PrimaryTab">
+                        <!-- Include: navigation-tab-portal-default -->
+                        <Template src="navigation-tab-portal-default" />
+                        <!-- Include: navigation-tab-portal-default -->
+                        <Template src="navigation-tab-portal-default" />
+                    </ButtonGroup>
+                </VisualElement>
+            </BindableSwitchElement>
+        </BindingExpect>
+    </UXML>
+</ui:UXML>

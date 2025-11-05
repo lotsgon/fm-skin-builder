@@ -6,6 +6,7 @@ import os
 import re
 import json
 from .logger import get_logger
+from ..utils.uxml_binary_patcher import UXMLBinaryPatcher
 
 logger = get_logger(__name__)
 
@@ -74,7 +75,8 @@ class BundleManager:
         colors = getattr(data, "colors", [])
         strings = getattr(data, "strings", [])
         rules = getattr(data, "m_Rules", [])
-        var_to_string_idx = {s: i for i, s in enumerate(strings) if s.startswith("--")}
+        var_to_string_idx = {s: i for i, s in enumerate(
+            strings) if s.startswith("--")}
 
         # Patch direct property matches
         for rule in rules:
@@ -90,7 +92,8 @@ class BundleManager:
                                 col = colors[value_index]
                                 if (col.r, col.g, col.b, col.a) != (r, g, b, a):
                                     col.r, col.g, col.b, col.a = r, g, b, a
-                                    logger.info(f"Patched {name}: {prop_name} -> {hex_val}")
+                                    logger.info(
+                                        f"Patched {name}: {prop_name} -> {hex_val}")
 
         # Patch CSS variables
         for color_idx, color in enumerate(colors):
@@ -119,6 +122,108 @@ class BundleManager:
     def _was_modified(self, data) -> bool:
         """Check if data was modified (simplified)."""
         return True  # For now, assume yes
+
+    def update_uxml_asset(self, asset_name: str, uxml_data: Dict, uxml_file: Path = None) -> bool:
+        """
+        Update a UXML asset in the bundle.
+
+        Args:
+            asset_name: Name of the asset (with or without .uxml)
+            uxml_data: Dictionary containing UXML asset data
+            uxml_file: Path to XML file (for reordering)
+
+        Returns:
+            True if update successful
+        """
+        if self.env is None:
+            self.load_bundle()
+
+        updated = False
+        checked = 0
+        for obj in self.env.objects:
+            try:
+                # Skip non-MonoBehaviour objects
+                if obj.type.name != "MonoBehaviour":
+                    continue
+
+                data = obj.read()
+
+                # Check if it has m_Name attribute
+                if not hasattr(data, "m_Name"):
+                    continue
+
+                name = data.m_Name
+                checked += 1
+
+                # Match asset name (handle both with and without .uxml)
+                if name and (name == asset_name or name == f"{asset_name}.uxml"):
+                    # Check if it's a VisualTreeAsset
+                    if not hasattr(data, "m_VisualElementAssets"):
+                        logger.warning(
+                            f"Found {name} but it has no m_VisualElementAssets")
+                        continue
+
+                    logger.info(f"✓ Found matching asset: {name}")
+                    logger.info(
+                        f"Reordering {len(data.m_VisualElementAssets)} elements based on XML hierarchy")
+
+                    # Use reorderer to safely update element order without corruption
+                    from ..utils.uxml_reorderer import UXMLReorderer
+                    reorderer = UXMLReorderer(verbose=True)
+
+                    try:
+                        # Get raw binary data
+                        raw_data = obj.get_raw_data()
+                        raw_mod = bytearray(raw_data)
+
+                        # Reorder elements based on XML hierarchy
+                        success = reorderer.reorder_from_xml(
+                            raw_mod,
+                            uxml_file,
+                            data.m_VisualElementAssets
+                        )
+
+                        if not success:
+                            logger.error("Failed to reorder elements")
+                            return False
+
+                        # Set modified data back
+                        obj.set_raw_data(bytes(raw_mod))
+
+                        self.modified = True
+                        updated = True
+
+                        logger.info(f"✓ Successfully updated UXML asset")
+                        logger.info(
+                            f"  Elements: {len(uxml_data['m_VisualElementAssets'])}")
+
+                        if 'managedReferencesRegistry' in uxml_data:
+                            refs = uxml_data['managedReferencesRegistry'].get(
+                                'references', [])
+                            logger.info(f"  Bindings: {len(refs)}")
+
+                        break
+
+                    except Exception as update_err:
+                        logger.error(
+                            f"Failed to update UXML asset: {update_err}")
+                        import traceback
+                        traceback.print_exc()
+                        raise
+
+            except Exception as e:
+                # Log the error if it's for our target asset
+                if 'name' in locals() and name == asset_name:
+                    logger.error(f"Error updating {asset_name}: {e}")
+                    raise
+                # Silently skip other objects
+                continue
+
+        if not updated:
+            logger.warning(
+                f"UXML asset not found: {asset_name} (checked {checked} MonoBehaviour objects)")
+
+        return updated
 
     def save(self, output_path: Path) -> None:
         """Save the modified bundle."""

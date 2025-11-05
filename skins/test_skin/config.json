@@ -4,5 +4,11 @@
     "includes": [
         "assets/backgrounds",
         "assets/icons"
-    ]
+    ],
+    "uxml_overrides": {
+        "PlayerAttributesStandardBlock": "uxml/PlayerAttributesStandardBlock.uxml",
+        "PlayerAttributesCompactBlock": "uxml/PlayerAttributesCompactBlock.uxml",
+        "PlayerAttributesLargeBlock": "uxml/PlayerAttributesLargeBlock.uxml",
+        "PlayerAttributesSmallBlock": "uxml/PlayerAttributesSmallBlock.uxml"
+    }
 }

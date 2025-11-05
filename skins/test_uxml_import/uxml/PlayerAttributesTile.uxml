@@ -1,0 +1,65 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <UXML data-unity-id="382705796">
+        <BindingRemapper data-unity-id="-1320750867" data-binding-rid="1000" data-binding-mappings="person -&gt; binding;player -&gt; binding">
+            <VisualElement data-unity-id="-250374529">
+                <BindingExpect class="flex-grow-class" data-unity-id="-701132486" data-binding-rid="1002" data-binding-parameters="isonmainscreen">
+                    <VisualElement class="layout-tile-base-container" data-unity-id="1621942558">
+                        <BindingVariables class="flex-grow-class align-self-stretch-class" data-unity-id="-1871083989" data-binding-rid="1004" data-binding-valuevariables="TileInteraction">
+                            <SIButton class="interactable-tile layout-tile-interaction-button" data-unity-id="1704689761" data-binding-rid="1005" data-binding-hoverbinding="TileInteraction">
+                                <!-- Include: states-templates-tile-content -->
+                                <Template src="states-templates-tile-content" class="states-templates-tile-content" />
+                                <VisualElement class="width-100-percent height-100-percent layout-tile-interaction_border" data-unity-id="-535638080" />
+                                <VisualElement class="row-direction-normal tile-title-frame" data-unity-id="-2056772375">
+                                    <VisualElement data-unity-id="1250565786" />
+                                    <AutoScroller data-unity-id="-270568509" data-binding-rid="1009" data-binding-binding="TileInteraction">
+                                        <SIText class="heading-no-wrap  heading-left-align tile-title-color fm-universe-small-14px" data-unity-id="-5498938" />
+                                    </AutoScroller>
+                                </VisualElement>
+                            </SIButton>
+                        </BindingVariables>
+                    </VisualElement>
+                </BindingExpect>
+            </VisualElement>
+        </BindingRemapper>
+    </UXML>
+    <BindingVariables data-unity-id="1966393314" data-binding-rid="1011" data-binding-valuevariables="TileInteraction;viewid;rolemask">
+        <BindingExpect class="base-template-grow" data-unity-id="1963027296" data-binding-rid="1012" data-binding-parameters="person;rolemask">
+            <BindableSwitchElement class="base-template-grow" data-unity-id="438526983" data-binding-rid="1013" data-binding-binding="Person.IsGoalkeeper">
+                <VisualElement class="frames-player-attributes-high-res-position-outfeild-highlighted-yes-masked-no base-template-grow" data-unity-id="1687859671">
+                    <VisualElement class="frames-player-attributes-high-res-position-outfeild-highlighted-no-masked-no base-template-grow" data-unity-id="1416058064">
+                        <VisualElement class="padding-right-global-padding-regular" data-unity-id="-376877838">
+                            <VisualElement data-unity-id="604019261">
+                                <SIText class="body-regular-14px-bold secondary-text-colour" data-unity-id="63782065" />
+                                <StreamedObjectList class="virtualised-list--stretched" data-unity-id="-1457352230" />
+                            </VisualElement>
+                        </VisualElement>
+                        <VisualElement class="padding-left-global-padding-regular" data-unity-id="2128519574">
+                            <VisualElement data-unity-id="1319846789">
+                                <SIText class="body-regular-14px-bold secondary-text-colour" data-unity-id="-1009960291" />
+                                <StreamedObjectList class="virtualised-list--stretched" data-unity-id="1763872710" />
+                            </VisualElement>
+                        </VisualElement>
+                    </VisualElement>
+                </VisualElement>
+                <VisualElement class="frames-player-attributes-high-res-position-outfeild-highlighted-yes-masked-no base-template-grow" data-unity-id="-638581391">
+                    <VisualElement class="frames-player-attributes-high-res-position-outfeild-highlighted-no-masked-no" data-unity-id="1058143236">
+                        <VisualElement class="padding-right-global-padding-regular" data-unity-id="1233733568">
+                            <VisualElement data-unity-id="-111810395">
+                                <SIText class="body-regular-14px-bold secondary-text-colour" data-unity-id="1316478643" />
+                                <StreamedObjectList class="virtualised-list--stretched" data-unity-id="-204655652" />
+                            </VisualElement>
+                        </VisualElement>
+                        <VisualElement class="padding-left-global-padding-regular" data-unity-id="-555836316">
+                            <VisualElement data-unity-id="604017133">
+                                <VisualElement data-unity-id="242736287">
+                                    <SIText class="body-regular-14px-bold secondary-text-colour" data-unity-id="-1639678854" />
+                                    <StreamedObjectList class="virtualised-list--stretched" data-unity-id="1134154147" />
+                                </VisualElement>
+                            </VisualElement>
+                        </VisualElement>
+                    </VisualElement>
+                </VisualElement>
+            </BindableSwitchElement>
+        </BindingExpect>
+    </BindingVariables>
+</ui:UXML>

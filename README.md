@@ -19,10 +19,47 @@ Troubleshooting:
 	- `FM_HARD_EXIT=1` (default) — force immediate process exit after finishing to avoid finalization crashes.
 	- `FM_HARD_EXIT=0` — disable hard exit if you prefer normal interpreter shutdown.
 
+## Asset Catalog & Explorer
+
+Browse and search all FM game assets with our interactive HTML explorer:
+
+```bash
+# Generate asset catalog from bundles
+PYTHONPATH=/workspaces/fm-skin-builder python scripts/build_css_uxml_catalog.py \
+  --bundle-dir bundles \
+  --output extracted_sprites/css_uxml_catalog.json \
+  --export-files \
+  --export-mode minimal
+
+# Generate interactive HTML explorer
+PYTHONPATH=/workspaces/fm-skin-builder python scripts/generate_asset_explorer.py \
+  --input extracted_sprites/css_uxml_catalog.json \
+  --output extracted_sprites/asset_explorer.html
+```
+
+**Features:**
+- 🔍 Search 15,000+ assets (backgrounds, sprites, CSS, UXML)
+- 📊 Asset metadata (dimensions, bundles, PathIDs)
+- 📋 Click-to-copy asset names
+- 🎨 Modern searchable interface
+- ⚡ Instant client-side filtering
+- 📝 Export UXML/CSS files with 3 modes (minimal, standard, verbose)
+
+**Export Modes:**
+- `--export-mode minimal` - Clean XML for editing (default)
+- `--export-mode standard` - Balanced with some comments
+- `--export-mode verbose` - Full detail for debugging
+
+See [docs/EXPORT_MODES.md](docs/EXPORT_MODES.md) for details.
+
+Open `extracted_sprites/asset_explorer.html` in your browser to explore!
+
 ## Docs
 
 - docs/README.md (overview & quick start)
 - docs/recipes/README.md (task-focused guides)
 - docs/SKIN_FORMAT.md (skin layout, config, CSS overrides)
 - docs/ARCHITECTURE.md (components & data flow)
-- docs/ROADMAP.md, docs/TODO.md
+- docs/ASSET_CATALOG_IMPLEMENTATION.md (asset cataloging system)
+- docs/BINDING_EXTRACTION.md, docs/BINDING_XML_FORMAT.md (UXML bindings)
+- docs/ROADMAP.md, docs/ROADMAP_IMPORT_EXPORT.md, docs/TODO.md

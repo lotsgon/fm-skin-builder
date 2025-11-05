@@ -1,0 +1,13 @@
+{
+    "schema_version": 2,
+    "name": "Test UXML Import",
+    "author": "Test",
+    "version": "1.0.0",
+    "description": "Test skin with UXML override",
+    "includes": [
+        "bundles/ui-tiles_assets_all.bundle"
+    ],
+    "uxml_overrides": {
+        "PlayerAttributesTile": "uxml/PlayerAttributesTile.uxml"
+    }
+}

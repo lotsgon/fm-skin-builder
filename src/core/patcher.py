@@ -3,6 +3,7 @@ from pathlib import Path
 from .bundle_manager import BundleManager
 from .cache import load_or_cache_config
 from .logger import get_logger
+from ..utils.uxml_importer import UXMLImporter
 import re
 
 log = get_logger(__name__)
@@ -39,6 +40,37 @@ def apply_overrides(skin_dir: Path, out_dir: Path) -> None:
             log.warning(f"Missing local file: {src}")
             continue
         bundle.replace_asset(internal, src)
+
+    # Apply UXML overrides
+    if model.uxml_overrides:
+        importer = UXMLImporter()
+        for asset_name, local_path in model.uxml_overrides.items():
+            uxml_file = skin_dir / local_path
+            if not uxml_file.exists():
+                log.warning(f"Missing UXML file: {uxml_file}")
+                continue
+
+            try:
+                log.info(f"Importing UXML: {asset_name} from {local_path}")
+                uxml_data = importer.parse_uxml_file(str(uxml_file))
+
+                # Check for validation errors
+                validation = importer.get_validation_report()
+                if "Error" in validation:
+                    log.error(f"UXML validation failed for {asset_name}:")
+                    log.error(validation)
+                    continue
+
+                # Update the bundle
+                if bundle.update_uxml_asset(asset_name, uxml_data):
+                    log.info(f"✓ Applied UXML override: {asset_name}")
+                else:
+                    log.warning(
+                        f"✗ Failed to apply UXML override: {asset_name}")
+
+            except Exception as e:
+                log.error(f"Failed to import UXML {asset_name}: {e}")
+                continue
 
     out = out_dir / model.output_bundle
     bundle.save(out)

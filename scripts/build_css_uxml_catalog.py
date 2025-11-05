@@ -16,9 +16,10 @@ Usage:
     python scripts/build_css_uxml_catalog.py --bundle bundles/ui-styles_assets_common.bundle --output catalog.json
 """
 
-from src.utils.uxml_parser import extract_strings_with_offsets, detect_class_or_style, parse_visual_tree_asset, visual_tree_asset_to_xml
+from src.utils.uxml_parser import extract_strings_with_offsets, detect_class_or_style, parse_visual_tree_asset, visual_tree_asset_to_xml, ExportMode
 from src.core.css_patcher import build_selector_from_parts, serialize_stylesheet_to_uss
 from src.core.logger import get_logger
+from src.core.asset_catalog import AssetCatalog
 import argparse
 import json
 import sys
@@ -334,7 +335,7 @@ class CSSUXMLCatalog:
         }
 
 
-def scan_bundle_for_catalog(bundle_path: Path, catalog: CSSUXMLCatalog, export_dir: Optional[Path] = None, verbose: bool = False):
+def scan_bundle_for_catalog(bundle_path: Path, catalog: CSSUXMLCatalog, export_dir: Optional[Path] = None, verbose: bool = False, export_mode: ExportMode = ExportMode.MINIMAL):
     """Scan a single bundle and add to catalog.
 
     Args:
@@ -342,6 +343,7 @@ def scan_bundle_for_catalog(bundle_path: Path, catalog: CSSUXMLCatalog, export_d
         catalog: CSSUXMLCatalog to populate
         export_dir: Optional directory to export USS/UXML files
         verbose: Enable verbose logging
+        export_mode: UXML export mode (MINIMAL, STANDARD, or VERBOSE)
     """
     bundle_name = bundle_path.name
 
@@ -409,7 +411,8 @@ def scan_bundle_for_catalog(bundle_path: Path, catalog: CSSUXMLCatalog, export_d
                 # Export UXML file
                 if uxml_export_dir:
                     try:
-                        uxml_content = visual_tree_asset_to_xml(data, name)
+                        uxml_content = visual_tree_asset_to_xml(
+                            data, name, export_mode)
                         uxml_file = uxml_export_dir / f"{name}.uxml"
                         uxml_file.write_text(uxml_content, encoding='utf-8')
                         # Add export path to catalog (relative to HTML file location)
@@ -469,7 +472,7 @@ def scan_bundle_for_catalog(bundle_path: Path, catalog: CSSUXMLCatalog, export_d
             f"  Found {stylesheets_found} stylesheets, {uxml_found} UXML files")
 
 
-def build_catalog(bundle_paths: List[Path], output_path: Path, export_files: bool = False, verbose: bool = False):
+def build_catalog(bundle_paths: List[Path], output_path: Path, export_files: bool = False, verbose: bool = False, export_mode: str = "minimal"):
     """Build the full catalog from multiple bundles.
 
     Args:
@@ -477,8 +480,18 @@ def build_catalog(bundle_paths: List[Path], output_path: Path, export_files: boo
         output_path: Path to output JSON catalog
         export_files: If True, export USS/UXML to human-readable formats
         verbose: Enable verbose logging
+        export_mode: UXML export mode - "minimal", "standard", or "verbose"
     """
     catalog = CSSUXMLCatalog()
+    asset_catalog = AssetCatalog()
+
+    # Convert string export_mode to ExportMode enum
+    mode_map = {
+        "minimal": ExportMode.MINIMAL,
+        "standard": ExportMode.STANDARD,
+        "verbose": ExportMode.VERBOSE
+    }
+    export_mode_enum = mode_map.get(export_mode.lower(), ExportMode.MINIMAL)
 
     # Determine export directory
     export_dir = None
@@ -487,17 +500,33 @@ def build_catalog(bundle_paths: List[Path], output_path: Path, export_files: boo
         export_dir.mkdir(parents=True, exist_ok=True)
 
     for bundle_path in bundle_paths:
-        scan_bundle_for_catalog(bundle_path, catalog, export_dir, verbose)
+        scan_bundle_for_catalog(bundle_path, catalog,
+                                export_dir, verbose, export_mode_enum)
+        # Scan for assets (textures, sprites, fonts, videos)
+        asset_catalog.scan_bundle(bundle_path, bundle_path.stem)
+
+    # Build catalog dict
+    catalog_dict = catalog.to_dict()
+
+    # Build cross-references (note: we'd need UXML content for accurate refs)
+    # For now just merge the asset data
+    asset_catalog.merge_into_catalog(catalog_dict)
 
     # Export to JSON
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(catalog.to_dict(), f, indent=2, ensure_ascii=False)
+        json.dump(catalog_dict, f, indent=2, ensure_ascii=False)
 
     # Print summary
     print(f"\n✓ Catalog built successfully!")
     print(f"  Output: {output_path}")
     print(f"\n📊 Summary:")
+    print(f"  Assets:")
+    print(f"    Backgrounds: {len(catalog_dict.get('backgrounds', {}))}")
+    print(f"    Textures: {len(catalog_dict.get('textures', {}))}")
+    print(f"    Sprites: {len(catalog_dict.get('sprites', {}))}")
+    print(f"    Fonts: {len(catalog_dict.get('fonts', {}))}")
+    print(f"    Videos: {len(catalog_dict.get('videos', {}))}")
     print(f"  CSS Variables: {len(catalog.css_variables)}")
     print(f"  CSS Classes: {len(catalog.css_classes)}")
     print(f"  UXML Files: {len(catalog.uxml_files)}")
@@ -553,6 +582,13 @@ def main():
         action="store_true",
         help="Export USS and UXML to human-readable formats (creates exports/uss and exports/uxml directories)"
     )
+    parser.add_argument(
+        "--export-mode",
+        "-m",
+        choices=["minimal", "standard", "verbose"],
+        default="minimal",
+        help="UXML export mode: minimal (clean, for editing), standard (some comments), verbose (full details)"
+    )
 
     args = parser.parse_args()
 
@@ -582,7 +618,9 @@ def main():
     if args.export_files:
         print(
             f"📄 Exporting USS and UXML files to {args.output.parent / 'exports'}")
-    build_catalog(bundle_paths, args.output, args.export_files, args.verbose)
+        print(f"📝 UXML export mode: {args.export_mode}")
+    build_catalog(bundle_paths, args.output, args.export_files,
+                  args.verbose, args.export_mode)
 
     return 0
 

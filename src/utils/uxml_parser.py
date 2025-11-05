@@ -5,8 +5,17 @@ from pathlib import Path
 import re
 from collections import namedtuple
 from typing import List, Dict, Set, Any, Optional
+from enum import Enum
 
 StringHit = namedtuple("StringHit", ["offset", "text"])
+
+
+class ExportMode(Enum):
+    """UXML export modes for different use cases."""
+    MINIMAL = "minimal"      # Clean XML for editing (no comments, data in attributes)
+    STANDARD = "standard"    # Balanced (some comments, data in attributes)
+    VERBOSE = "verbose"      # Full details (all comments, extra documentation)
+
 
 UI_KEYWORDS = [
     "VisualElement",
@@ -395,12 +404,16 @@ def parse_visual_tree_asset(data: Any, name: str, bundle: str) -> Optional[UXMLD
     return doc
 
 
-def visual_tree_asset_to_xml(data: Any, name: str) -> str:
+def visual_tree_asset_to_xml(data: Any, name: str, export_mode: ExportMode = ExportMode.MINIMAL) -> str:
     """Convert VisualTreeAsset to human-readable XML/UXML format.
 
     Args:
         data: The MonoBehaviour data with m_VisualElementAssets
         name: Name of the asset
+        export_mode: Export mode (MINIMAL, STANDARD, or VERBOSE)
+                    - MINIMAL: Clean XML, data in attributes, no comments
+                    - STANDARD: Some comments, data in attributes
+                    - VERBOSE: Full comments and documentation
 
     Returns:
         Formatted XML string representing the UXML structure
@@ -425,8 +438,8 @@ def visual_tree_asset_to_xml(data: Any, name: str) -> str:
     if stylesheets:
         xml_lines.append('')  # Blank line after stylesheets
 
-    # NEW: Add template references as comments
-    if hasattr(data, 'm_TemplateAssets'):
+    # Add template references (only in STANDARD and VERBOSE modes)
+    if export_mode != ExportMode.MINIMAL and hasattr(data, 'm_TemplateAssets'):
         template_assets = getattr(data, 'm_TemplateAssets', [])
         if template_assets:
             xml_lines.append('    <!-- UXML Templates Used In This File -->')
@@ -472,22 +485,29 @@ def visual_tree_asset_to_xml(data: Any, name: str) -> str:
                         'bindings': bindings
                     })
 
-            # Add binding info to XML as structured comments
-            if binding_list:
+            # Add binding info to XML (mode-dependent)
+            if binding_list and export_mode != ExportMode.MINIMAL:
+                # Header (all non-minimal modes)
                 xml_lines.append(
                     '    <!-- ============================================ -->')
                 xml_lines.append(
                     '    <!-- DATA BINDINGS (connects UI to game data)   -->')
-                xml_lines.append(
-                    '    <!-- Format: BindingType[rid=ID, name="..."]     -->')
-                xml_lines.append(
-                    '    <!--   key: value                               -->')
+
+                if export_mode == ExportMode.VERBOSE:
+                    xml_lines.append(
+                        '    <!-- Format: BindingType[rid=ID, name="..."]     -->')
+                    xml_lines.append(
+                        '    <!--   key: value                               -->')
+
                 xml_lines.append(
                     '    <!-- ============================================ -->')
                 xml_lines.append('')
 
-                # Limit to first 50 to avoid huge files
-                for binding_info in binding_list[:50]:
+                # Binding details (limit varies by mode)
+                max_bindings = 50 if export_mode == ExportMode.STANDARD else len(
+                    binding_list)
+
+                for binding_info in binding_list[:max_bindings]:
                     rid = binding_info['rid']
                     b_type = binding_info['type'].split(
                         '/')[-1]  # Get just the class name
@@ -497,26 +517,28 @@ def visual_tree_asset_to_xml(data: Any, name: str) -> str:
                     xml_lines.append(
                         f'    <!-- {b_type}[rid={rid}{name_attr}] -->')
 
-                    for key, value in binding_info['bindings'].items():
-                        if isinstance(value, list):
-                            xml_lines.append(f'    <!--   {key}: -->')
-                            for item in value[:10]:  # Limit list items
+                    # Show details in VERBOSE mode
+                    if export_mode == ExportMode.VERBOSE:
+                        for key, value in binding_info['bindings'].items():
+                            if isinstance(value, list):
+                                xml_lines.append(f'    <!--   {key}: -->')
+                                for item in value[:10]:  # Limit list items
+                                    # Escape XML characters in value
+                                    item_escaped = str(item).replace('&', '&amp;').replace(
+                                        '<', '&lt;').replace('>', '&gt;')
+                                    xml_lines.append(
+                                        f'    <!--     - {item_escaped} -->')
+                            else:
                                 # Escape XML characters in value
-                                item_escaped = str(item).replace('&', '&amp;').replace(
+                                value_escaped = str(value).replace('&', '&amp;').replace(
                                     '<', '&lt;').replace('>', '&gt;')
                                 xml_lines.append(
-                                    f'    <!--     - {item_escaped} -->')
-                        else:
-                            # Escape XML characters in value
-                            value_escaped = str(value).replace('&', '&amp;').replace(
-                                '<', '&lt;').replace('>', '&gt;')
-                            xml_lines.append(
-                                f'    <!--   {key}: {value_escaped} -->')
-                    xml_lines.append('    <!--  -->')
+                                    f'    <!--   {key}: {value_escaped} -->')
+                        xml_lines.append('    <!--  -->')
 
-                if len(binding_list) > 50:
+                if len(binding_list) > max_bindings:
                     xml_lines.append(
-                        f'    <!-- ... and {len(binding_list) - 50} more bindings -->')
+                        f'    <!-- ... and {len(binding_list) - max_bindings} more bindings -->')
 
                 xml_lines.append('')
 
@@ -595,12 +617,12 @@ def visual_tree_asset_to_xml(data: Any, name: str) -> str:
 
         lines = []
 
-        # Add comment for custom components showing full qualified name
-        if is_custom_component:
+        # Add comment for custom components (only in STANDARD and VERBOSE modes)
+        if is_custom_component and export_mode != ExportMode.MINIMAL:
             lines.append(f"{indent_str}<!-- {elem_type_full} -->")
 
-        # Add inline binding comment if this element has bindings
-        if elem_id in binding_map:
+        # Add inline binding comment (only in STANDARD and VERBOSE modes)
+        if elem_id in binding_map and export_mode != ExportMode.MINIMAL:
             binding_info = binding_map[elem_id]
             bindings = binding_info['bindings']
 
@@ -619,7 +641,7 @@ def visual_tree_asset_to_xml(data: Any, name: str) -> str:
             if key_bindings:
                 lines.append(
                     f"{indent_str}<!-- BINDING[rid={binding_info['rid']}]: {'; '.join(key_bindings[:3])} -->")
-                if len(key_bindings) > 3:
+                if len(key_bindings) > 3 and export_mode == ExportMode.VERBOSE:
                     lines.append(
                         f"{indent_str}<!--   ... and {len(key_bindings) - 3} more bindings -->")
 
@@ -637,6 +659,36 @@ def visual_tree_asset_to_xml(data: Any, name: str) -> str:
         # Add element m_Id for binding preservation on re-import
         if elem_id is not None:
             tag += f' data-unity-id="{elem_id}"'
+
+        # Add binding data as attributes (MINIMAL mode)
+        if elem_id in binding_map and export_mode == ExportMode.MINIMAL:
+            binding_info = binding_map[elem_id]
+            bindings = binding_info['bindings']
+            rid = binding_info['rid']
+
+            # Add binding RID
+            tag += f' data-binding-rid="{rid}"'
+
+            # Add specific binding attributes
+            for key, value in bindings.items():
+                # Create attribute name: data-binding-{key-in-kebab-case}
+                attr_name = f'data-binding-{key.lower().replace("_", "-")}'
+
+                if isinstance(value, list):
+                    # Join list items with semicolon
+                    attr_value = ';'.join(str(item) for item in value)
+                else:
+                    attr_value = str(value)
+
+                # Escape attribute value
+                attr_value = attr_value.replace('"', '&quot;').replace(
+                    '&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+
+                # Limit attribute length to keep XML readable
+                if len(attr_value) > 200:
+                    attr_value = attr_value[:197] + '...'
+
+                tag += f' {attr_name}="{attr_value}"'
 
         # Check for properties (inline styles)
         properties = getattr(elem, 'm_Properties', [])

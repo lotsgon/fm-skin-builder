@@ -14,6 +14,9 @@ class SkinConfigModel(BaseModel):
     includes: Optional[List[str]] = None
     description: Optional[str] = None
 
+    # Optional UXML overrides: {asset_name: file_path}
+    uxml_overrides: Optional[Dict[str, str]] = None
+
 
 class SkinConfig:
     def __init__(self, path: Path):

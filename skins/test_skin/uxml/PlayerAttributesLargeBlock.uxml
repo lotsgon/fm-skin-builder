@@ -1,0 +1,97 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <UXML data-unity-id="-1521530353">
+        <BindingExpect data-unity-id="1069980280" data-binding-rid="1000" data-binding-parameters="person">
+            <BindingVariables data-unity-id="2140356618" data-binding-rid="1001" data-binding-valuevariables="polygonselected">
+                <BindingRemapper data-unity-id="1689598661" data-binding-rid="1002" data-binding-mappings="human -&gt; Human;player -&gt; Person">
+                    <VisualElement class="frames-player-attributes-full-block-size-max-rows" data-unity-id="-282293591">
+                        <!-- Include: role_selector-large -->
+                        <Template src="role_selector-large" />
+                        <!-- Include: layout-divider-solid-vertical -->
+                        <Template src="layout-divider-solid-vertical" class="margin-right-global-gap-large margin-left-global-gap-large" />
+                        <!-- Include: layout-divider-solid-vertical -->
+                        <Template src="layout-divider-solid-vertical" class="margin-right-global-gap-large margin-left-global-gap-large" />
+                        <BindableSwitchElement class="row-direction-normal" data-unity-id="1772345864" data-binding-rid="1004" data-binding-binding="polygonselected">
+                            <!-- Include: AttributesTableTemplate -->
+                            <Template src="AttributesTableTemplate" />
+                            <VisualElement class="column-direction-normal margin-right-global-gap-large" data-unity-id="784716729">
+                                <BindableSwitchElement data-unity-id="-1724046701" data-binding-rid="1006" data-binding-binding="person.IsGoalkeeper">
+                                    <VisualElement class="data_display-graph-spider-graph-labelled--tile-x-large" data-unity-id="-1458977130">
+                                        <FMPolarChart class="margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" data-unity-id="1579925442" />
+                                    </VisualElement>
+                                    <VisualElement class="data_display-graph-spider-graph-labelled--tile-x-large" data-unity-id="-206278424">
+                                        <FMPolarChart class="margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" data-unity-id="-209644442" />
+                                    </VisualElement>
+                                </BindableSwitchElement>
+                            </VisualElement>
+                        </BindableSwitchElement>
+                        <VisualElement class="column-direction-normal" data-unity-id="967039097">
+                            <VisualElement class="column-direction-normal" data-unity-id="695237490">
+                                <!-- Include: layout-divider-solid-horizontal -->
+                                <Template src="layout-divider-solid-horizontal" class="margin-bottom-global-gap-large margin-top-global-gap-large" />
+                                <!-- Include: layout-divider-solid-horizontal -->
+                                <Template src="layout-divider-solid-horizontal" class="margin-bottom-global-gap-large margin-top-global-gap-large" />
+                                <!-- Include: layout-divider-solid-horizontal -->
+                                <Template src="layout-divider-solid-horizontal" class="margin-bottom-global-gap-large margin-top-global-gap-large" />
+                                <VisualElement class="row-direction-normal width-100-percent justify-content-space-between align-items-start" data-unity-id="-1097698412">
+                                    <SIText class="body-small-12px-bold global-text-secondary" data-unity-id="-116801313" />
+                                    <SICheckBox class="buttons-button-single-toggle-default--toggle-false" data-unity-id="-1637935608" data-binding-rid="1015" data-binding-selectionbinding="polygonselected">
+                                        <VisualElement class="game-concepts-attributes-medium" data-unity-id="595660197" />
+                                    </SICheckBox>
+                                </VisualElement>
+                                <VisualElement class="column-direction-normal" data-unity-id="-113435295">
+                                    <VisualElement class="column-direction-normal margin-bottom-global-gap-large" data-unity-id="1851724921">
+                                        <VisualElement class="column-direction-normal align-items-start" data-unity-id="-1999216454">
+                                            <SIText class="global-text-secondary body-small-12px-regular margin-bottom-global-gap-small" data-unity-id="1218642468" />
+                                            <SIText class="body-regular-14px-regular global-text-primary" data-unity-id="-302491827" />
+                                        </VisualElement>
+                                    </VisualElement>
+                                    <VisualElement class="column-direction-normal margin-bottom-global-gap-large align-items-start" data-unity-id="62155037">
+                                        <SIText class="global-text-secondary body-small-12px-regular margin-bottom-global-gap-small" data-unity-id="-1283388926" />
+                                        <SIText class="global-text-primary body-regular-14px-regular" data-unity-id="1490444075" />
+                                    </VisualElement>
+                                    <VisualElement class="column-direction-normal align-items-start" data-unity-id="-206280552">
+                                        <SIVisible data-unity-id="-1820260104" data-binding-rid="1026" data-binding-binding="person.IsVirtual">
+                                            <VisualElement class="column-direction-normal align-items-start" data-unity-id="-660406655">
+                                                <SIText class="global-text-secondary body-small-12px-regular margin-bottom-global-gap-small" data-unity-id="-1021687501" />
+                                                <SIText class="body-regular-14px-regular global-text-primary" data-unity-id="1752145500" data-binding-rid="1029" data-binding-textbinding="Person.Personality" />
+                                            </VisualElement>
+                                        </SIVisible>
+                                    </VisualElement>
+                                </VisualElement>
+                                <VisualElement class="row-direction-normal" data-unity-id="65521055">
+                                    <VisualElement data-unity-id="420067737">
+                                        <SIText class="global-text-secondary body-small-12px-regular margin-bottom-global-gap-small" data-unity-id="-746519876" />
+                                        <BindingRemapper data-unity-id="2027313125" data-binding-rid="1036" data-binding-mappings="footednessValue -&gt; Person.Footedness.RightFootedness;footednessString -&gt; Person.Footedness.RightFootednessString;player -&gt; Person">
+                                            <!-- Include: FootednessStepperWithBorderCell -->
+                                            <Template src="FootednessStepperWithBorderCell" />
+                                        </BindingRemapper>
+                                    </VisualElement>
+                                    <VisualElement class="margin-right-global-gap-large" data-unity-id="-2085329675">
+                                        <SIText class="global-text-secondary body-small-12px-regular margin-bottom-global-gap-small" data-unity-id="-1462347404" />
+                                        <BindingRemapper data-unity-id="1311485597" data-binding-rid="1033" data-binding-mappings="footednessValue -&gt; Person.Footedness.LeftFootedness;footednessString -&gt; Person.Footedness.LeftFootednessString;player -&gt; Person">
+                                            <!-- Include: FootednessStepperWithBorderCell -->
+                                            <Template src="FootednessStepperWithBorderCell" />
+                                        </BindingRemapper>
+                                    </VisualElement>
+                                </VisualElement>
+                                <VisualElement class="column-direction-normal" data-unity-id="2034047289">
+                                    <VisualElement class="row-direction-normal" data-unity-id="1851722793">
+                                        <SIButton class="margin-right-global-gap-none margin-left-global-gap-none data_display-cell-standard-small--type-standard" data-unity-id="148264002">
+                                            <!-- Include: data_display-cell-standard-small -->
+                                            <Template src="data_display-cell-standard-small" class="body-regular-14px-regular" />
+                                        </SIButton>
+                                    </VisualElement>
+                                    <VisualElement class="row-direction-normal" data-unity-id="1583287204">
+                                        <VisualElement class="column-direction-normal" data-unity-id="-388607176">
+                                            <StreamedObjectList data-unity-id="413331445" data-binding-rid="1042" data-binding-binding="Person.PlayerTraits" />
+                                        </VisualElement>
+                                    </VisualElement>
+                                </VisualElement>
+                            </VisualElement>
+                        </VisualElement>
+                    </VisualElement>
+                </BindingRemapper>
+            </BindingVariables>
+        </BindingExpect>
+    </UXML>
+</ui:UXML>
