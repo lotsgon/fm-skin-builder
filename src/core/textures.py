@@ -855,6 +855,9 @@ def swap_textures(
     includes: List[str],
     out_dir: Path,
     dry_run: bool = False,
+    *,
+    env: Optional[UnityPy.Environment] = None,
+    defer_save: bool = False,
 ) -> TextureSwapResult:
     """Swap textures in bundle based on skin assets folders.
 
@@ -862,6 +865,8 @@ def swap_textures(
     - backgrounds from skins/<skin>/assets/backgrounds
 
     Returns output bundle path if a write occurred; None otherwise.
+    When an Environment is provided (with ``defer_save=True``), bytes are
+    updated in-place and the caller is responsible for saving via BundleContext.
     """
     icon_dir = skin_dir / "assets" / "icons"
     bg_dir = skin_dir / "assets" / "backgrounds"
@@ -916,32 +921,40 @@ def swap_textures(
     if not replacements and not has_vector_sprites:
         return TextureSwapResult(0, None)
 
-    env = UnityPy.load(str(bundle_path))
+    own_env = env is None
+    if own_env:
+        env = UnityPy.load(str(bundle_path))
+
     count = _swap_textures_in_env(
         env, replacements, repl_exts, name_map or None)
     if count == 0:
-        # Cleanup UnityPy env before returning
-        try:
-            del env
-        except Exception:
-            pass
-        try:
-            gc.collect()
-        except Exception:
-            pass
+        if own_env:
+            try:
+                del env
+            except Exception:
+                pass
+            try:
+                gc.collect()
+            except Exception:
+                pass
         return TextureSwapResult(0, None)
     if dry_run:
         log.info(
             f"[DRY-RUN] Would modify {count} textures/sprites in {bundle_path.name}")
-        # Cleanup UnityPy env before returning
-        try:
-            del env
-        except Exception:
-            pass
-        try:
-            gc.collect()
-        except Exception:
-            pass
+        if own_env:
+            try:
+                del env
+            except Exception:
+                pass
+            try:
+                gc.collect()
+            except Exception:
+                pass
+        return TextureSwapResult(count, None)
+    if defer_save:
+        return TextureSwapResult(count, None)
+
+    if not own_env:
         return TextureSwapResult(count, None)
 
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -950,13 +963,13 @@ def swap_textures(
     with open(out_file, "wb") as f:
         f.write(env.file.save())
     log.info(f"💾 Saved texture-swapped bundle → {out_file}")
-    # Cleanup UnityPy env after saving
-    try:
-        del env
-    except Exception:
-        pass
-    try:
-        gc.collect()
-    except Exception:
-        pass
+    if own_env:
+        try:
+            del env
+        except Exception:
+            pass
+        try:
+            gc.collect()
+        except Exception:
+            pass
     return TextureSwapResult(count, out_file)

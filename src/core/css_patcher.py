@@ -10,8 +10,8 @@ import UnityPy
 from .logger import get_logger
 import gc
 from .cache import load_or_cache_config, cache_dir
-from .textures import swap_textures, TextureSwapResult
 from .context import BundleContext, PatchReport
+from .services import TextureSwapOptions, TextureSwapService
 
 log = get_logger(__name__)
 
@@ -1025,9 +1025,18 @@ def run_patch(css_dir: Path, out_dir: Path, bundle: Optional[Path] = None, patch
     name_map = _load_texture_name_map(css_dir)
     target_names_from_map = set(name_map.keys())
 
+    swap_targets_present = any(
+        x.strip().lower() in {"assets/icons", "assets/backgrounds"}
+        for x in includes_list
+    )
+    texture_service: Optional[TextureSwapService] = None
+    if swap_targets_present:
+        texture_service = TextureSwapService(
+            TextureSwapOptions(includes=includes_list, dry_run=dry_run)
+        )
+
     all_summaries: List[List[str]] = []
     css_bundles_modified = 0
-    css_assets_modified_total = 0
     texture_replacements_total = 0
     texture_bundles_written = 0
     for b in bundle_files:
@@ -1068,97 +1077,84 @@ def run_patch(css_dir: Path, out_dir: Path, bundle: Optional[Path] = None, patch
                 if (idx is None) or (not idx.get("assets")):
                     do_css = False
 
-        summary_lines: Optional[List[str]] = None
-        if do_css:
-            res = patcher.patch_bundle_file(b, out_dir, candidate_assets=cand)
-            summary_lines = res
-            # Count modified CSS bundles in both dry-run and real mode (res is only returned when changes exist)
-            if res:
+        report: PatchReport
+        with BundleContext(b) as bundle_ctx:
+            if do_css:
+                report = patcher.patch_bundle(
+                    bundle_ctx, candidate_assets=cand)
+            else:
+                bundle_ctx.load()
+                report = PatchReport(bundle_ctx.bundle_path, dry_run=dry_run)
+
+            if report.assets_modified:
                 css_bundles_modified += 1
-        # Process texture swaps if requested by includes
-        should_swap = False
-        if includes is None:
-            should_swap = False
-        else:
-            should_swap = any(x.strip().lower() in {
-                              "assets/icons", "assets/backgrounds"} for x in includes)
-        if should_swap:
-            try:
-                # Prefilter: use index if available to check intersection with candidate names
-                do_textures = True
-                idx = None
+
+            if texture_service:
                 try:
-                    cdir = cache_dir(root=css_dir.parent.parent) / css_dir.name
-                    idx = _load_index(cdir, b)
-                except Exception:
+                    # Prefilter: use index if available to check intersection with candidate names
                     idx = None
-                texture_names = set()
-                if idx is not None:
-                    for key in ("textures", "aliases", "sprites"):
-                        vals = idx.get(key)
-                        if isinstance(vals, list):
-                            # strip extensions in aliases when present
-                            for n in vals:
-                                try:
-                                    nstr = str(n)
-                                except Exception:
-                                    continue
-                                texture_names.add(nstr)
-                # Basic name intersection using target mapping keys and raw stems
-                # Also support wildcard patterns and scale-agnostic matching (prefix matching)
-                has_interest = False
-                if texture_names:
-                    # compare case-sensitively first, then lower
-                    if target_names_from_map & texture_names:
-                        has_interest = True
-                    else:
-                        lowset = {n.lower() for n in texture_names}
-                        # Check if any mapping key matches (exact or prefix for scale-agnostic)
-                        for k in target_names_from_map:
-                            k_lower = k.lower()
-                            # Exact match
-                            if k_lower in lowset:
-                                has_interest = True
-                                break
-                            # Wildcard pattern
-                            if '*' in k or '?' in k:
-                                import fnmatch
-                                if any(fnmatch.fnmatch(n.lower(), k_lower) for n in texture_names):
+                    try:
+                        cdir = cache_dir(
+                            root=css_dir.parent.parent) / css_dir.name
+                        idx = _load_index(cdir, b)
+                    except Exception:
+                        idx = None
+                    texture_names = set()
+                    if idx is not None:
+                        for key in ("textures", "aliases", "sprites"):
+                            vals = idx.get(key)
+                            if isinstance(vals, list):
+                                for n in vals:
+                                    try:
+                                        nstr = str(n)
+                                    except Exception:
+                                        continue
+                                    texture_names.add(nstr)
+                    has_interest = False
+                    if texture_names:
+                        if target_names_from_map & texture_names:
+                            has_interest = True
+                        else:
+                            lowset = {n.lower() for n in texture_names}
+                            for k in target_names_from_map:
+                                k_lower = k.lower()
+                                if k_lower in lowset:
                                     has_interest = True
                                     break
-                            # Scale-agnostic: check if any texture starts with mapping key
-                            # e.g., "settings-large" matches "settings-large_1x", "settings-large_2x", etc.
-                            if any(n.lower().startswith(k_lower + '_') or n.lower() == k_lower for n in texture_names):
-                                has_interest = True
-                                break
+                                if '*' in k or '?' in k:
+                                    import fnmatch
 
-                        # Also check raw file stems
-                        if not has_interest and any(s.lower() in lowset for s in replace_stems):
+                                    if any(fnmatch.fnmatch(n.lower(), k_lower) for n in texture_names):
+                                        has_interest = True
+                                        break
+                                if any(n.lower().startswith(k_lower + '_') or n.lower() == k_lower for n in texture_names):
+                                    has_interest = True
+                                    break
+                            if not has_interest and any(s.lower() in lowset for s in replace_stems):
+                                has_interest = True
+                    else:
+                        if (want_icons and ("icon" in bname)) or (want_bgs and ("background" in bname)):
                             has_interest = True
-                else:
-                    # No index? Use heuristic on bundle filename
-                    if (want_icons and ("icon" in bname)) or (want_bgs and ("background" in bname)):
-                        has_interest = True
-                if has_interest:
-                    tsr: TextureSwapResult = swap_textures(
-                        bundle_path=b,
-                        skin_dir=css_dir,
-                        includes=list(includes) if isinstance(
-                            includes, list) else [],
-                        out_dir=out_dir,
-                        dry_run=dry_run,
-                    )
-                    texture_replacements_total += tsr.replaced_count
-                    if tsr.out_file is not None:
-                        texture_bundles_written += 1
-                else:
-                    log.debug(
-                        "[TEXTURE] Prefilter: skipping bundle with no matching names.")
-            except Exception as e:
-                log.warning(f"[WARN] Texture swap skipped due to error: {e}")
-        # Defer dry-run summary to the end so it logs after any texture messages
-        if summary_lines:
-            all_summaries.append(summary_lines)
+                    if has_interest:
+                        texture_service.apply(
+                            bundle_ctx, css_dir, out_dir, report)
+                    else:
+                        log.debug(
+                            "[TEXTURE] Prefilter: skipping bundle with no matching names.")
+                except Exception as e:
+                    log.warning(
+                        f"[WARN] Texture swap skipped due to error: {e}")
+
+            saved_path = bundle_ctx.save_modified(out_dir, dry_run=dry_run)
+            if saved_path:
+                report.mark_saved(saved_path)
+
+        if report.summary_lines:
+            all_summaries.append(report.summary_lines)
+
+        texture_replacements_total += report.texture_replacements
+        if not dry_run and report.texture_replacements > 0:
+            texture_bundles_written += 1
 
     # After all bundles, print any deferred dry-run summaries so they appear last
     if all_summaries:
