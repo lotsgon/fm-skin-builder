@@ -1,5 +1,5 @@
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple, Any, Set
 import re
@@ -935,6 +935,27 @@ class PipelineOptions:
     refresh_scan_cache: bool = False
 
 
+@dataclass
+class PipelineResult:
+    bundle_reports: List[PatchReport]
+    css_bundles_modified: int
+    texture_replacements_total: int
+    texture_bundles_written: int
+    bundles_requested: int
+    summary_lines: List[str] = field(default_factory=list)
+
+    @classmethod
+    def empty(cls) -> "PipelineResult":
+        return cls(
+            bundle_reports=[],
+            css_bundles_modified=0,
+            texture_replacements_total=0,
+            texture_bundles_written=0,
+            bundles_requested=0,
+            summary_lines=[],
+        )
+
+
 class SkinPatchPipeline:
     """Coordinates CSS + texture patching for a skin directory."""
 
@@ -943,7 +964,7 @@ class SkinPatchPipeline:
         self.out_dir = out_dir
         self.options = options
 
-    def run(self, bundle: Optional[Path] = None) -> None:
+    def run(self, bundle: Optional[Path] = None) -> PipelineResult:
         css_vars, selector_overrides = collect_css_from_dir(self.css_dir)
         cfg_model = None
         cfg_path = self.css_dir / "config.json"
@@ -983,7 +1004,9 @@ class SkinPatchPipeline:
                 log.error(
                     "No bundle specified and none could be inferred from config. Provide --bundle."
                 )
-                return
+                return PipelineResult.empty()
+
+        bundles_requested = len(bundle_files)
 
         skin_is_known = (self.css_dir / "config.json").exists()
         cache_candidates: Dict[Path, Optional[Set[str]]] = {}
@@ -1045,8 +1068,10 @@ class SkinPatchPipeline:
                        "assets/backgrounds" for x in includes_list)
         icon_dir = self.css_dir / "assets" / "icons"
         bg_dir = self.css_dir / "assets" / "backgrounds"
-        replace_stems = set(_collect_replacement_stems(
-            icon_dir) + _collect_replacement_stems(bg_dir))
+        replace_stems = set(
+            _collect_replacement_stems(icon_dir) +
+            _collect_replacement_stems(bg_dir)
+        )
         name_map = _load_texture_name_map(self.css_dir)
         target_names_from_map = set(name_map.keys())
 
@@ -1061,7 +1086,8 @@ class SkinPatchPipeline:
                                    dry_run=self.options.dry_run)
             )
 
-        all_summaries: List[List[str]] = []
+        summary_lines: List[str] = []
+        bundle_reports: List[PatchReport] = []
         css_bundles_modified = 0
         texture_replacements_total = 0
         texture_bundles_written = 0
@@ -1181,29 +1207,22 @@ class SkinPatchPipeline:
                     report.mark_saved(saved_path)
 
             if report.summary_lines:
-                all_summaries.append(report.summary_lines)
+                summary_lines.extend(report.summary_lines)
 
             texture_replacements_total += report.texture_replacements
             if not self.options.dry_run and report.texture_replacements > 0:
                 texture_bundles_written += 1
 
-        if all_summaries:
-            for lines in all_summaries:
-                for line in lines:
-                    log.info(line)
+            bundle_reports.append(report)
 
-        log.info("\n=== Overall Summary ===")
-        log.info(f"Bundles processed: {len(bundle_files)}")
-        log.info(f"CSS bundles modified: {css_bundles_modified}")
-        if texture_replacements_total or texture_bundles_written:
-            if self.options.dry_run:
-                log.info(
-                    f"[DRY-RUN] Would replace {texture_replacements_total} textures across bundles"
-                )
-            else:
-                log.info(
-                    f"Textures replaced: {texture_replacements_total} across {texture_bundles_written} bundles"
-                )
+        return PipelineResult(
+            bundle_reports=bundle_reports,
+            css_bundles_modified=css_bundles_modified,
+            texture_replacements_total=texture_replacements_total,
+            texture_bundles_written=texture_bundles_written,
+            bundles_requested=bundles_requested,
+            summary_lines=summary_lines,
+        )
 
 
 def run_patch(
@@ -1216,7 +1235,7 @@ def run_patch(
     dry_run: bool = False,
     use_scan_cache: bool = True,
     refresh_scan_cache: bool = False,
-) -> None:
+) -> PipelineResult:
     """High-level entry to patch bundles based on CSS in css_dir."""
 
     options = PipelineOptions(
@@ -1228,7 +1247,7 @@ def run_patch(
         refresh_scan_cache=refresh_scan_cache,
     )
     pipeline = SkinPatchPipeline(css_dir, out_dir, options)
-    pipeline.run(bundle=bundle)
+    return pipeline.run(bundle=bundle)
 
 
 # -----------------------------
