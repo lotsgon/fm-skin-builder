@@ -1,5 +1,10 @@
 # Core Refactor Plan (Class-First Architecture)
 
+## Progress Snapshot (Nov 2025)
+- ✅ Phase 1 foundations: `BundleContext` and `PatchReport` shipped, legacy call sites wrapped.
+- ✅ Phase 2 (partial): `CssPatchService` and `TextureSwapService` in place; `SkinPatchPipeline` introduced for orchestration.
+- ⏳ Upcoming: Bundle scan service extraction, expanded test suites, and documentation refresh (CONTEXT, CLI guidance).
+
 ## Goals
 - Make `src/core` reusable from CLI, GUI, or future automation by exposing cohesive class-based APIs.
 - Preserve current behaviours (bundle patching, scanning, texture swapping) with zero regression for existing command-line flows.
@@ -70,9 +75,9 @@
 
 | Phase | Key Outputs |
 | --- | --- |
-| 1 | `BundleContext`, `PatchReport`, updated `run_patch` wiring (no behaviour change). |
-| 2 | `CssPatchService`, `TextureSwapService`, `BundleScanService` classes + updated modules. |
-| 3 | `SkinPatchPipeline`, CLI refactor, legacy shims with deprecation notices. |
+| 1 | `BundleContext`, `PatchReport`, updated `run_patch` wiring (no behaviour change). ✅ |
+| 2 | `CssPatchService`, `TextureSwapService`, `BundleScanService` classes + updated modules. *(Services shipped; scan service pending)* |
+| 3 | `SkinPatchPipeline`, CLI refactor, legacy shims with deprecation notices. *(Pipeline shipped; CLI update next)* |
 | 4 | Test suite expansion (`tests/core/test_css_service.py`, etc.). |
 | 5 | Updated docs (`docs/ARCHITECTURE.md`, new `CONTEXT.md`). |
 

@@ -1,34 +1,44 @@
 ## Components
 
+- context
+	- `BundleContext` owns UnityPy lifecycle (load/save/dispose, optional backup) and exposes dirty tracking via `save_modified()`.
+	- `PatchReport` captures change metrics (assets touched, variables patched, texture swaps, dry-run summaries) for CLI/GUI surfaces.
+
+- services
+	- `CssPatchService` wraps the legacy `CssPatcher` class and provides an `apply(bundle_ctx, candidate_assets)` method for orchestration layers.
+	- `TextureSwapService` coordinates replacements against a loaded bundle, folding counts into a shared `PatchReport` while deferring file writes to the context.
+
 - css_patcher
-	- Parses CSS variables and selector overrides from a skin directory
-	- Patches Unity StyleSheet assets inside bundles
-	- Change-aware: only writes bundles/debug when changes occur
-	- Supports `--patch-direct` (inlined literals) and `--dry-run` (no writes)
-	- Optional debug export of original/patched `.uss` and JSON
+	- Still hosts parser/debug helpers plus the core `CssPatcher` implementation.
+	- Adds `PipelineOptions` and `SkinPatchPipeline` to compose CSS + texture services, scan cache hints, and bundle saving in a single flow.
 
 - bundle_inspector
-	- Scans bundle(s), builds an index of variables/selectors/usages
-	- Optionally exports each StyleSheet as `.uss` for reference/diffing
-	- Reports potential conflicts (same selector across multiple assets)
+	- Scans bundle(s), builds an index of variables/selectors/usages, and optionally exports `.uss` files for reference/diffing.
 
-- SkinConfig / cache.py
-	- Validates `config.json` (`schema_version`, `target_bundle`, etc.)
-	- Caches parsed config under `.cache/skins/<skin>/<hash>.json`
+- cache / skin_config
+	- Validate `config.json` and cache parsed models under `.cache/skins/<skin>/<hash>.json`.
 
 - CLI
-	- `patch`: CSS-first workflow; infers bundle from config or accepts `--bundle`
-	- `scan`: Power-user tool to explore mappings; entirely optional
+	- `patch` calls `SkinPatchPipeline` for a class-first workflow (dry-run, debug export, patch-direct all mapped through `PipelineOptions`).
+	- `scan` remains a power tool for exploring mappings; optional for day-to-day patching.
 
 ## Data flow (patch)
 
-skin dir (CSS/USS) → collect variables + selector overrides →
-load bundle(s) → detect/apply changes → write modified bundle(s) → optional debug exports
+```
+skin directory
+  ├─ collect CSS vars / selector overrides
+  ├─ build CssPatchService + TextureSwapService
+  └─ for each bundle → BundleContext.load()
+        ├─ CssPatchService.apply(...)
+        ├─ TextureSwapService.apply(...)
+        └─ BundleContext.save_modified(...)
+             ↳ PatchReport aggregations drive CLI output (or GUI in future)
+```
 
-`--dry-run` follows the same discovery and change detection path but never writes files.
+Dry-run goes through the same discovery and patch calculations; `BundleContext` never writes because `PatchReport.dry_run` stays true.
 
 ## Design principles
 
-- Usability first: “write CSS, we do the rest”; no mapping files required
-- Scan is optional; its artifacts are for exploration, not maintenance
-- Prefer automatic, transparent caching when available
+- Keep orchestration thin: services own UnityPy mutations, the pipeline coordinates only sequencing and reporting.
+- Preserve backwards compatibility via `run_patch` shim while encouraging new consumers to use `SkinPatchPipeline` directly.
+- Maintain optional scanning/caching to enable faster iterations without mandating precomputed indexes.
