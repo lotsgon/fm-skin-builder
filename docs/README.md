@@ -1,6 +1,7 @@
 ## Documentation overview
 
 - Start here: SKIN_FORMAT.md (skin layout, config)
+- CLI usage: CLI_GUIDE.md (step-by-step command walkthrough)
 - Architecture: ARCHITECTURE.md (how patching works)
 - Roadmap: ROADMAP.md
 - Developer TODO: TODO.md

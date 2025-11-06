@@ -5,21 +5,32 @@
 	- `PatchReport` captures change metrics (assets touched, variables patched, texture swaps, dry-run summaries) for CLI/GUI surfaces.
 
 - services
-	- `CssPatchService` wraps the legacy `CssPatcher` class and provides an `apply(bundle_ctx, candidate_assets)` method for orchestration layers.
+	- `CssPatchService` wraps the `CssPatcher` class and provides an `apply(bundle_ctx, candidate_assets)` method for orchestration layers.
 	- `TextureSwapService` coordinates replacements against a loaded bundle, folding counts into a shared `PatchReport` while deferring file writes to the context.
 
+- css_sources
+	- Collects CSS variables, selector overrides, and targeting hints from a skin directory.
+
+- scan_cache
+	- Manages cached bundle indices (`*.index.json`) and candidate asset discovery.
+
+- bundle_paths
+	- Infers Football Manager bundle locations across supported platforms when users do not pass `--bundle`.
+
+- texture_utils
+	- Provides replacement stem collection, name mapping, texture prefilter logic, and helpers that feed `TextureSwapService`.
+
 - css_patcher
-	- Still hosts parser/debug helpers plus the core `CssPatcher` implementation.
-	- Adds `PipelineOptions` and `SkinPatchPipeline` to compose CSS + texture services, scan cache hints, and bundle saving in a single flow.
+	- Hosts the core `CssPatcher` implementation plus `PipelineOptions` and `SkinPatchPipeline`, which compose CSS + texture services, scan cache helpers, and bundle saving in a single flow.
 
 - bundle_inspector
 	- Scans bundle(s), builds an index of variables/selectors/usages, and optionally exports `.uss` files for reference/diffing.
 
 - cache / skin_config
-	- Validate `config.json` and cache parsed models under `.cache/skins/<skin>/<hash>.json`.
+	- Validates `config.json` and caches parsed models under `.cache/skins/<skin>/<hash>.json`.
 
 - CLI
-	- `patch` calls `SkinPatchPipeline` for a class-first workflow (dry-run, debug export, patch-direct all mapped through `PipelineOptions`).
+	- `patch` drives `SkinPatchPipeline`, exposing dry-run, debug export, backup, and caching flags directly to end-users.
 	- `scan` remains a power tool for exploring mappings; optional for day-to-day patching.
 
 ## Data flow (patch)
