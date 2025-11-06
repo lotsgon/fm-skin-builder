@@ -133,6 +133,41 @@ def test_selector_override_patch(tmp_path: Path):
     assert (r, g, b) == (0.0, 1.0, 0.0)
 
 
+def test_selector_override_converts_string_handles(tmp_path: Path):
+    # If a selector override targets a property with only string handles, convert one to a literal color
+    colors = [FakeColor(0.0, 0.0, 0.0, 1.0)]
+    strings = ["--colours-linear-scale-20",
+               "--colours-data-ratings-star-ability-orange"]
+    prop = FakeProperty("color", [FakeValue(10, 0), FakeValue(8, 1)])
+    rule = FakeRule([prop])
+    selector = FakeComplexSelector(0, [FakeSelector(
+        [FakeSelPart("attribute-colour-great", 3)])])
+    data = FakeData("StyleStrings", strings, colors, [rule], [selector])
+    env = FakeEnv([FakeObj(data)])
+
+    from src.core import css_patcher as cp
+    set_unitypy_in_module(cp, env)
+
+    out_dir = tmp_path / "out_selector_strings"
+    target_hex = "#81848D"
+    patcher = cp.CssPatcher(
+        css_vars={},
+        selector_overrides={(".attribute-colour-great", "color"): target_hex},
+        patch_direct=False,
+        debug_export_dir=None,
+    )
+    patcher.patch_bundle_file(tmp_path / "ui.bundle", out_dir)
+
+    # A new color entry should have been appended and the first handle converted to color
+    assert len(colors) == 2
+    converted = prop.m_Values[0]
+    assert converted.m_ValueType == 4
+    assert converted.valueIndex == 1
+    new_color = colors[1]
+    R, G, B, A = hex_to_rgba(target_hex)
+    assert (new_color.r, new_color.g, new_color.b, new_color.a) == (R, G, B, A)
+
+
 def test_patch_direct_literal(tmp_path: Path):
     # color property with type 4, no var link; patch_direct should match '--foo-color' endswith 'color'
     colors = [FakeColor(0.0, 0.0, 0.0, 1.0)]

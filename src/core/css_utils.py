@@ -33,7 +33,10 @@ def load_css_selector_overrides(path: Path) -> Dict[Tuple[str, str], str]:
     selector_blocks = re.findall(r"(\.[\w-]+)\s*\{([^}]*)\}", text)
     selector_overrides: Dict[Tuple[str, str], str] = {}
     for selector, block in selector_blocks:
-        props = re.findall(r"([\w-]+)\s*:\s*(#[0-9a-fA-F]{6,8});", block)
+        props = re.findall(
+            r"([\w-]+)\s*:\s*(#[0-9a-fA-F]{6,8})(?:\s*;|\s*(?=\n|$))",
+            block,
+        )
         for prop, hexval in props:
             selector_overrides[(selector.strip(), prop.strip())] = hexval
             selector_overrides[(selector.strip().lstrip(

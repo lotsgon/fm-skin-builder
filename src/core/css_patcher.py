@@ -574,14 +574,15 @@ class CssPatcher:
                             log.info(
                                 f"  [DEBUG] Selector/property match: {key} in {name}, patching to {hex_val}"
                             )
+                            values = list(getattr(prop, "m_Values", []))
+                            r, g, b, a = hex_to_rgba(hex_val)
                             found_type4 = False
-                            for val in getattr(prop, "m_Values", []):
+                            for val in values:
                                 if getattr(val, "m_ValueType", None) == 4:
                                     found_type4 = True
                                     value_index = getattr(
                                         val, "valueIndex", None)
                                     if value_index is not None and 0 <= value_index < len(colors):
-                                        r, g, b, a = hex_to_rgba(hex_val)
                                         col = colors[value_index]
                                         if (col.r, col.g, col.b, col.a) != (r, g, b, a):
                                             col.r, col.g, col.b, col.a = r, g, b, a
@@ -594,7 +595,6 @@ class CssPatcher:
                                             log.info(
                                                 f"  [PATCHED - selector/property] {name}: {key} (color index {value_index}) already set to {hex_val}"
                                             )
-                                        # Record touch for conflict surfacing (normalize key to tuple)
                                         try:
                                             touches = getattr(
                                                 self, "_selector_touches", None)
@@ -605,9 +605,41 @@ class CssPatcher:
                                         except Exception:
                                             pass
                             if not found_type4:
-                                log.warning(
-                                    f"  [WARN] No m_ValueType==4 found for {key} in {name}."
+                                replacement_handle = next(
+                                    (
+                                        val
+                                        for val in values
+                                        if getattr(val, "m_ValueType", None) in {3, 8, 10}
+                                    ),
+                                    None,
                                 )
+                                if replacement_handle is None:
+                                    log.warning(
+                                        f"  [WARN] No suitable value found to convert for {key} in {name}."
+                                    )
+                                    continue
+                                new_color = _build_unity_color(
+                                    colors, r, g, b, a)
+                                colors.append(new_color)
+                                new_index = len(colors) - 1
+                                setattr(replacement_handle, "m_ValueType", 4)
+                                setattr(replacement_handle,
+                                        "valueIndex", new_index)
+                                patched_vars += 1
+                                direct_property_patched_indices.add(new_index)
+                                changed = True
+                                log.info(
+                                    f"  [PATCHED - selector/property literal] {name}: {key} (new color index {new_index}) → {hex_val}"
+                                )
+                                try:
+                                    touches = getattr(
+                                        self, "_selector_touches", None)
+                                    if touches is not None:
+                                        norm_sel = key[0]
+                                        touches.setdefault((norm_sel if norm_sel.startswith(
+                                            '.') else norm_sel, prop_name), set()).add(name)
+                                except Exception:
+                                    pass
 
         if self.debug_export_dir and changed and not self.dry_run:
             # Ensure dir exists before exporting
