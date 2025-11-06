@@ -11,6 +11,7 @@ from .logger import get_logger
 import gc
 from .cache import load_or_cache_config, cache_dir
 from .textures import swap_textures, TextureSwapResult
+from .context import BundleContext, PatchReport
 
 log = get_logger(__name__)
 
@@ -249,22 +250,49 @@ class CssPatcher:
         self.selector_props_filter = selector_props_filter
 
     def patch_bundle_file(self, bundle_path: Path, out_dir: Path, candidate_assets: Optional[Set[str]] = None) -> Optional[List[str]]:
-        env = UnityPy.load(str(bundle_path))
-        bundle_name = bundle_path.name
+        bundle_context = BundleContext(bundle_path, loader=UnityPy.load)
+        try:
+            report = self.patch_bundle(
+                bundle_context, candidate_assets=candidate_assets)
+            if not report.has_changes:
+                return report.summary_lines if self.dry_run else None
+            if self.dry_run:
+                return report.summary_lines
+
+            saved_path = bundle_context.save_modified(
+                out_dir, dry_run=self.dry_run)
+            if saved_path is None:
+                log.error(
+                    "[ERROR] Could not save patched bundle. The bundle may be corrupt or use unsupported compression."
+                )
+                return None
+
+            report.mark_saved(saved_path)
+            log.info(f"💾 Saved patched bundle(s) → {out_dir}")
+            return None
+        finally:
+            bundle_context.dispose()
+
+    def patch_bundle(
+        self,
+        bundle: BundleContext,
+        candidate_assets: Optional[Set[str]] = None,
+    ) -> PatchReport:
+        bundle.load()
+        bundle_name = bundle.bundle_path.name
+        env = bundle.env
 
         patched_vars = 0
         patched_direct = 0
         found_styles = 0
         any_changes = False
         changed_asset_names: Set[str] = set()
-        # Track selector override touches per (selector, prop) across assets for conflict surfacing
-        self._selector_touches: Dict[Tuple[str, str], Set[str]] = {}
-
-        # Defer creating debug dir until we actually have something to export
+        report = PatchReport(bundle.bundle_path, dry_run=self.dry_run)
+        self._selector_touches = {}
 
         log.info(f"🔍 Scanning bundle: {bundle_name}")
 
-        original_uss = []
+        original_uss: List[Tuple[Any, Any, str]] = []
         for obj in env.objects:
             if obj.type.name != "MonoBehaviour":
                 continue
@@ -272,12 +300,10 @@ class CssPatcher:
             if not hasattr(data, "colors") or not hasattr(data, "strings"):
                 continue
             name = getattr(data, "m_Name", "UnnamedStyleSheet")
-            # If we have a candidate filter, skip non-candidates
             if candidate_assets is not None and name not in candidate_assets:
                 continue
             will_patch = self._will_patch(data)
             if self.debug_export_dir and will_patch and not self.dry_run:
-                # ensure dir exists right before first export
                 self.debug_export_dir.mkdir(parents=True, exist_ok=True)
                 self._export_debug_original(name, data)
             original_uss.append((obj, data, name))
@@ -288,7 +314,6 @@ class CssPatcher:
             patched_vars += pv
             patched_direct += pd
             if changed:
-                # Only persist modified typetrees
                 any_changes = True
                 changed_asset_names.add(name)
                 if not self.dry_run:
@@ -297,30 +322,30 @@ class CssPatcher:
         if not any_changes:
             log.info(
                 "No changes detected; skipping bundle write and debug outputs.")
-            # Proactively release UnityPy objects to avoid finalizer issues
             try:
                 original_uss.clear()
             except Exception:
                 pass
-            try:
-                del env
-            except Exception:
-                pass
-            try:
-                gc.collect()
-            except Exception:
-                pass
-            return None
+            report.variables_patched = patched_vars
+            report.direct_patched = patched_direct
+            return report
 
-        # Prepare conflict/touch summary for selector overrides across assets
+        if not self.dry_run:
+            bundle.mark_dirty()
+
         multi_asset_touches: List[Tuple[Tuple[str, str], int]] = []
-        if hasattr(self, "_selector_touches"):
-            for k, assets in self._selector_touches.items():
-                if isinstance(assets, set) and len(assets) > 1:
-                    multi_asset_touches.append((k, len(assets)))
+        for k, assets in getattr(self, "_selector_touches", {}).items():
+            if isinstance(assets, set) and len(assets) > 1:
+                multi_asset_touches.append((k, len(assets)))
+
+        report.assets_modified = changed_asset_names
+        report.variables_patched = patched_vars
+        report.direct_patched = patched_direct
+        report.selector_conflicts = [
+            (sel, prop, count) for (sel, prop), count in multi_asset_touches
+        ]
 
         if self.dry_run:
-            # Defer summary logging to caller so textures can run first.
             lines: List[str] = []
             lines.append("\n🧾 Summary:")
             lines.append(f"  Stylesheets found: {found_styles}")
@@ -332,100 +357,29 @@ class CssPatcher:
                 for (sel, prop), n in multi_asset_touches:
                     lines.append(f"    {sel} / {prop}: {n} assets")
             lines.append(
-                "[DRY-RUN] No files were written. Use without --dry-run to apply changes.")
-            # Cleanup UnityPy structures before returning
-            try:
-                original_uss.clear()
-            except Exception:
-                pass
-            try:
-                del env
-            except Exception:
-                pass
-            try:
-                gc.collect()
-            except Exception:
-                pass
-            return lines
+                "[DRY-RUN] No files were written. Use without --dry-run to apply changes."
+            )
+            report.summary_lines = lines
+        else:
+            log.info("\n🧾 Summary:")
+            log.info(f"  Stylesheets found: {found_styles}")
+            log.info(f"  Assets modified: {len(changed_asset_names)}")
+            log.info(f"  Variables patched: {patched_vars}")
+            log.info(f"  Direct colors patched: {patched_direct}")
+            if multi_asset_touches:
+                log.info("  Selector overrides affecting multiple assets:")
+                for (sel, prop), n in multi_asset_touches:
+                    log.info(f"    {sel} / {prop}: {n} assets")
 
-        out_dir.mkdir(parents=True, exist_ok=True)
-        name, ext = os.path.splitext(bundle_name)
-        out_file = out_dir / f"{name}_modified{ext}"
-        orig_out_file = out_dir / f"{name}{ext}"
-
-        try:
-            log.info(
-                f"[INFO] Writing modified bundle to: {out_file} (env.file.save())")
-            with open(out_file, "wb") as f:
-                f.write(env.file.save())
-            saved = True
-        except Exception as e:
-            log.error(f"[ERROR] Failed to save modified bundle: {e}")
-            saved = False
-
-        if orig_out_file.exists():
-            try:
-                orig_out_file.unlink()
-                log.info(
-                    f"[CLEANUP] Removed stray original bundle: {orig_out_file}")
-            except Exception as cleanup_err:
-                log.warning(
-                    f"[WARN] Could not remove stray original bundle: {orig_out_file}: {cleanup_err}")
-
-        cwd_orig_file = Path.cwd() / f"{name}{ext}"
-        if cwd_orig_file != orig_out_file and cwd_orig_file.exists():
-            try:
-                cwd_orig_file.unlink()
-                log.info(
-                    f"[CLEANUP] Removed stray original bundle from CWD: {cwd_orig_file}")
-            except Exception as cleanup_err:
-                log.warning(
-                    f"[WARN] Could not remove stray original bundle from CWD: {cwd_orig_file}: {cleanup_err}")
-
-        if not saved:
-            log.error(
-                "[ERROR] Could not save patched bundle. The bundle may be corrupt or use unsupported compression.")
-            # Cleanup UnityPy structures before returning
-            try:
-                original_uss.clear()
-            except Exception:
-                pass
-            try:
-                del env
-            except Exception:
-                pass
-            try:
-                gc.collect()
-            except Exception:
-                pass
-            return None
-
-        log.info("\n🧾 Summary:")
-        log.info(f"  Stylesheets found: {found_styles}")
-        log.info(f"  Assets modified: {len(changed_asset_names)}")
-        log.info(f"  Variables patched: {patched_vars}")
-        log.info(f"  Direct colors patched: {patched_direct}")
-        if multi_asset_touches:
-            log.info("  Selector overrides affecting multiple assets:")
-            for (sel, prop), n in multi_asset_touches:
-                log.info(f"    {sel} / {prop}: {n} assets")
-        log.info(f"💾 Saved patched bundle(s) → {out_dir}")
-        if self.debug_export_dir:
+        if self.debug_export_dir and not self.dry_run:
             log.info(f"📝 Exported .uss files to {self.debug_export_dir}")
-        # Cleanup UnityPy structures before returning
+
         try:
             original_uss.clear()
         except Exception:
             pass
-        try:
-            del env
-        except Exception:
-            pass
-        try:
-            gc.collect()
-        except Exception:
-            pass
-        return None
+
+        return report
 
     # -----------------------------
     # internals
