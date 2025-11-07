@@ -106,7 +106,11 @@ class BundleContext:
         if self._env is not None:
             try:
                 del self._env
-            finally:
+            except Exception:
+                self._env = None
+                gc.collect()
+                raise
+            else:
                 self._env = None
                 gc.collect()
 
@@ -126,10 +130,12 @@ class BundleContext:
             try:
                 orig_out_file.unlink()
             except Exception:
+                # Best-effort cleanup; ignore errors if file cannot be deleted.
                 pass
         cwd_orig_file = Path.cwd() / f"{name}{ext}"
         if cwd_orig_file.exists() and cwd_orig_file not in {new_path, orig_out_file}:
             try:
                 cwd_orig_file.unlink()
             except Exception:
+                # Best-effort cleanup; ignore errors if file cannot be deleted.
                 pass

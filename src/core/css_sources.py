@@ -143,12 +143,12 @@ def _mapping_targets_for_file(
         rel = css_file.relative_to(css_dir)
         variants.add(str(rel).replace("\\", "/").lower())
     except ValueError:
+        # It's expected that css_file may not be relative to css_dir; ignore and continue.
         pass
     matches: List[str] = []
     for variant in variants:
         if variant in mapping:
             matches.extend(mapping[variant])
-        variant_with_ext = variant
         if not variant.endswith(".css") and not variant.endswith(".uss"):
             if variant in mapping:
                 matches.extend(mapping[variant])

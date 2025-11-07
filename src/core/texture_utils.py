@@ -91,14 +91,17 @@ def should_swap_textures(
         lowered = {name.lower() for name in texture_names}
         for target in target_names:
             target_lower = target.lower()
+            # Check for exact match
             if target_lower in lowered:
                 return True
-            if any(fnmatch.fnmatch(name.lower(), target_lower) for name in texture_names):
-                return True
+            # Only use fnmatch if the target contains wildcards
+            if any(wildcard in target_lower for wildcard in ("*", "?", "[")):
+                if any(fnmatch.fnmatch(name, target_lower) for name in lowered):
+                    return True
+            # Check for prefix match or exact match with underscore
             if any(
-                name.lower().startswith(
-                    f"{target_lower}_") or name.lower() == target_lower
-                for name in texture_names
+                name.startswith(f"{target_lower}_") or name == target_lower
+                for name in lowered
             ):
                 return True
 

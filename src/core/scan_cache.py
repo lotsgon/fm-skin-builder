@@ -57,10 +57,18 @@ def load_scan_index(cache_skin_dir: Path, bundle: Path) -> Optional[Dict[str, An
 def _save_scan_index(cache_skin_dir: Path, bundle: Path, index: Dict[str, Any]) -> Path:
     path = _cache_index_path(cache_skin_dir, bundle)
     idx = dict(index)
-    idx["_meta"] = {"version": SCAN_INDEX_VERSION,
-                    "fingerprint": _bundle_fingerprint(bundle)}
-    path.write_text(json.dumps(idx, ensure_ascii=False,
-                    indent=2), encoding="utf-8")
+    idx["_meta"] = {
+        "version": SCAN_INDEX_VERSION,
+        "fingerprint": _bundle_fingerprint(bundle),
+    }
+    path.write_text(
+        json.dumps(
+            idx,
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     return path
 
 
@@ -81,8 +89,8 @@ def refresh_scan_index(cache_skin_dir: Path, bundle: Path) -> Dict[str, Any]:
             for child in tmp_out.iterdir():
                 try:
                     child.unlink()
-                except Exception:
-                    pass
+                except Exception as e:
+                    log.debug(f"Failed to delete temporary file {child}: {e}")
             tmp_out.rmdir()
         except Exception:
             pass

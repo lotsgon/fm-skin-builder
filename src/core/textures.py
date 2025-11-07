@@ -932,10 +932,12 @@ def swap_textures(
             try:
                 del env
             except Exception:
+                # Ignore exceptions during cleanup; env deletion failure is non-critical.
                 pass
             try:
                 gc.collect()
             except Exception:
+                # Ignore exceptions during garbage collection; cleanup failure is non-critical.
                 pass
         return TextureSwapResult(0, None)
     if dry_run:
@@ -945,10 +947,12 @@ def swap_textures(
             try:
                 del env
             except Exception:
+                # Ignore exceptions during cleanup; env deletion failure is non-critical.
                 pass
             try:
                 gc.collect()
             except Exception:
+                # Ignore exceptions during garbage collection; cleanup failure is non-critical.
                 pass
         return TextureSwapResult(count, None)
     if defer_save:
@@ -967,9 +971,11 @@ def swap_textures(
         try:
             del env
         except Exception:
+            # Ignore exceptions during cleanup; env deletion failure is non-critical.
             pass
         try:
             gc.collect()
         except Exception:
+            # Ignore exceptions during garbage collection; cleanup failure is non-critical.
             pass
     return TextureSwapResult(count, out_file)

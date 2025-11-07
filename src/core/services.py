@@ -68,6 +68,7 @@ class TextureSwapService:
 
     def __init__(self, options: TextureSwapOptions):
         self.options = options
+        self._includes_lower = {x.lower() for x in options.includes}
 
     def apply(
         self,
@@ -96,7 +97,6 @@ class TextureSwapService:
         return result
 
     def _should_swap(self) -> bool:
-        includes = {x.lower() for x in self.options.includes}
         return any(
-            token in includes for token in {"assets/icons", "assets/backgrounds"}
+            token in self._includes_lower for token in {"assets/icons", "assets/backgrounds"}
         )

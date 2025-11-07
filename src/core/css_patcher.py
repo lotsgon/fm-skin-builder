@@ -28,8 +28,6 @@ from .css_utils import (
     build_selector_from_parts,
     clean_for_json,
     hex_to_rgba,
-    load_css_selector_overrides,
-    load_css_vars,
     serialize_stylesheet_to_uss,
 )
 from .texture_utils import (
@@ -703,7 +701,7 @@ class CssPatcher:
                                         touches.setdefault((norm_sel if norm_sel.startswith(
                                             '.') else norm_sel, prop_name), set()).add(name)
                                 except Exception:
-                                    pass
+                                    log.exception("Exception occurred while updating selector touches for %s", key)
 
         if self.debug_export_dir and changed and not self.dry_run:
             # Ensure dir exists before exporting
@@ -831,6 +829,16 @@ class PipelineOptions:
 
 @dataclass
 class PipelineResult:
+    """Result object returned by the skin patching pipeline.
+    
+    Attributes:
+        bundle_reports: List of individual bundle patch reports with details per bundle.
+        css_bundles_modified: Number of CSS bundles that were actually modified.
+        texture_replacements_total: Total count of texture replacements across all bundles.
+        texture_bundles_written: Number of bundles written with texture changes.
+        bundles_requested: Total number of bundles requested for processing.
+        summary_lines: Human-readable summary lines for CLI output.
+    """
     bundle_reports: List[PatchReport]
     css_bundles_modified: int
     texture_replacements_total: int
