@@ -702,7 +702,6 @@ class CssPatcher:
                                             '.') else norm_sel, prop_name), set()).add(name)
                                 except Exception:
                                     log.exception("Exception occurred while updating selector touches for %s", key)
-                                    pass
 
         if self.debug_export_dir and changed and not self.dry_run:
             # Ensure dir exists before exporting
