@@ -79,5 +79,5 @@ def test_texture_swap_via_sprite_alias(tmp_path, monkeypatch):
 
     # Texture should be saved through the alias mapping
     assert tex_data.saved is True
-    # And modified bundle exists
-    assert any(p.name.endswith("_modified.bundle") for p in out_dir.iterdir())
+    # And modified bundle exists with original name
+    assert (out_dir / "ui.bundle").exists()

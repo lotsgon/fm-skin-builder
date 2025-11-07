@@ -85,4 +85,4 @@ def test_texture_mapping_target_to_source_variant(tmp_path):
     run_patch(skin, out_dir, bundle=None, dry_run=False)
 
     assert tex_data.saved is True
-    assert any(p.name.endswith("_modified.bundle") for p in out_dir.iterdir())
+    assert (out_dir / "ui.bundle").exists()

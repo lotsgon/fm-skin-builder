@@ -1,28 +1,90 @@
 # Football Manager 2026 Skin Builder
 
-CSS-first skin patching for Football Manager bundles. Write CSS/USS overrides; we do the rest.
+CSS-first tooling for Football Manager bundles. Drop in CSS/USS overrides and the builder takes care of scanning, patching, and texture swaps.
 
-## Try it
+## Prerequisites
 
-- Patch using a skin folder (bundle inferred from config):
-	- python -m src.cli.main patch skins/test_skin --out build --dry-run
-- Or specify a bundle directory:
-	- python -m src.cli.main patch skins/test_skin --out build --bundle bundles --debug-export
+- Python 3.10+ (3.11 recommended)
+- `pip install -r requirements.txt`
+- Unity bundles extracted locally (or let the tool infer them from a Football Manager install)
 
-Optional flags:
-- `--dry-run` preview only
-- `--patch-direct` patch inlined literals
-- `--debug-export` export original/patched `.uss` + JSON
+## CLI Overview
 
-Troubleshooting:
-- When running over large bundle sets, a rare CPython shutdown crash (none_dealloc) can occur due to third-party C extensions during interpreter finalization. The CLI mitigates this by performing a fast, hard process exit after finishing. You can control this via the environment variable `FM_HARD_EXIT` (defaults to enabled):
-	- `FM_HARD_EXIT=1` (default) — force immediate process exit after finishing to avoid finalization crashes.
-	- `FM_HARD_EXIT=0` — disable hard exit if you prefer normal interpreter shutdown.
+Run all commands through `python -m src.cli.main ...` from the repository root.
 
-## Docs
+Available commands:
 
-- docs/README.md (overview & quick start)
-- docs/recipes/README.md (task-focused guides)
-- docs/SKIN_FORMAT.md (skin layout, config, CSS overrides)
-- docs/ARCHITECTURE.md (components & data flow)
-- docs/ROADMAP.md, docs/TODO.md
+- `patch` — apply CSS/USS overrides (and optional texture swaps) to one or more bundles
+- `scan` — build an index of selectors, variables, and assets for discovery or diffing
+- `build`, `extract`, `verify`, `swap` — reserved for future workflows (stubs today)
+
+Use `python -m src.cli.main <command> --help` for CLI reference.
+
+## Patch Workflow
+
+1. Prepare a skin folder (see `skins/test_skin` for structure).
+   - `config.json` with at least `schema_version` and `target_bundle`
+   - CSS/USS overrides in `colours/*.uss` or alongside `config.json`
+   - Optional `assets/icons` and `assets/backgrounds` for texture swaps
+2. Run the patch command:
+
+```bash
+python -m src.cli.main patch skins/your_skin
+```
+
+- Without `--bundle`, the CLI infers bundles from `config.json` or installed FM paths.
+- Point `--bundle` at a specific `.bundle` file or a directory of bundles to override auto-discovery.
+- Omit `--out` to write patched bundles back into `<skin>/packages`; pass `--out <dir>` to use a custom destination.
+
+Common flags:
+
+- `--dry-run` — report changes without writing bundles (summaries land in stdout)
+- `--debug-export` — write original and patched `.uss`/JSON to `<out>/debug_uss`
+- `--patch-direct` — replace literal color values in addition to CSS variables
+- `--backup` — create `.bak` files alongside each input bundle
+- `--no-scan-cache` — skip cached scan indices
+- `--refresh-scan-cache` — force new scan indices before patching
+
+Patching output:
+
+- Modified bundles keep their original filenames and are written to the chosen output directory (default: `<skin>/packages`).
+- Texture swaps (icons/backgrounds) reuse the same out directory and report counts in the CLI summary.
+- Dry runs leave the filesystem untouched but emit `Summary:` lines per bundle.
+
+Per-stylesheet overrides:
+
+- Place a `mapping.json` next to your CSS (either in the skin root or `colours/`) to target specific Unity stylesheets.
+- Each key corresponds to a CSS file name (with or without extension, relative paths also work). The value lists stylesheet asset names to receive that file's variables/selectors.
+- Files without an explicit mapping still apply globally, but the patcher now also falls back to matching assets by CSS filename stem, letting `fm_colours.uss` preferentially apply to `FMColours`.
+
+## Scan Workflow
+
+Use scan when exploring bundle contents or precomputing indices for faster patches:
+
+```bash
+python -m src.cli.main scan --bundle bundles --out build/scan --export-uss
+```
+
+- Accepts a single `.bundle` or a directory tree.
+- Produces `<out>/<bundle>.index.json` and, when `--export-uss` is set, `.uss` files for each stylesheet asset.
+- Scan caches live under `.cache/skins/<skin>/<bundle>.index.json` and are reused automatically by the patch command unless disabled.
+
+## Environment Notes
+
+- Set `FM_HARD_EXIT=0` to disable the hard exit safeguard if you prefer normal interpreter shutdown.
+- The tool respects targeting hints (`hints.txt`) to limit patch scope—see `docs/recipes/targeting-hints.md`.
+- Texture name mappings (`assets/*/mapping.json`) steer the new texture prefilter and swap pipeline.
+
+## Documentation
+
+- `docs/CLI_GUIDE.md` — step-by-step CLI usage and troubleshooting
+- `docs/README.md` — documentation index and quick start
+- `docs/SKIN_FORMAT.md` — skin layout and configuration schema
+- `docs/ARCHITECTURE.md` — module breakdown and data flow
+- `docs/recipes/` — focused guides for common tasks
+
+### Need Help?
+
+- Check the recipes for targeted workflows (`dry-run`, `scan-and-cache`, etc.).
+- Run with `--debug-export` to inspect generated `.uss` files when CSS changes are not appearing.
+- Re-run with `--refresh-scan-cache` if bundles changed upstream or cached indices look stale.

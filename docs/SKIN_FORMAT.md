@@ -27,20 +27,36 @@ Example (`schema_version` required):
 .green { color: #00D3E7; }
 ```
 
-The patcher applies variable changes and selector overrides across the bundle’s StyleSheets.
-If a selector appears in multiple assets, all are updated by default; conflicts are surfaced in logs.
+### Targeting specific StyleSheets
+
+- Create a `mapping.json` next to your CSS files (skin root or `colours/`).
+- Each key can be a file name, stem, or relative path. Values can be a single stylesheet name or a list under `"stylesheets"`.
+
+```json
+{
+  "FMColours.uss": ["FMColours"],
+  "colours/AttributeOverrides.css": {
+    "stylesheets": ["AttributeColours", "AttributeColoursDark"]
+  }
+}
+```
+
+- Mapped files only apply to the listed stylesheet assets. Files without a mapping still apply globally, but the pipeline tries to match assets whose names share the CSS filename stem first.
+
+The patcher merges global variables/selectors and per-asset overrides before patching, preserving the previous behaviour while enabling precise scoping when needed.
 
 ## Patching
 
 - Infer bundle from a skin’s `config.json`:
-  - python -m src.cli.main patch skins/your_skin --out build
+  - python -m src.cli.main patch skins/your_skin
 - Or specify a bundle or directory explicitly:
-  - python -m src.cli.main patch skins/your_skin --out build --bundle /path/to/bundles
+  - python -m src.cli.main patch skins/your_skin --bundle /path/to/bundles
 
-Options:
-- `--dry-run` to preview changes without writing files
-- `--patch-direct` to also patch inlined literals
-- `--debug-export` to export original/patched `.uss` and JSON for inspection
+- Options:
+  - `--out <dir>` to override the default `<skin>/packages` output directory
+  - `--dry-run` to preview changes without writing files
+  - `--patch-direct` to also patch inlined literals
+  - `--debug-export` to export original/patched `.uss` and JSON for inspection
 
 ## Scan (optional)
 

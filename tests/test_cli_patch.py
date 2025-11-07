@@ -95,7 +95,7 @@ def test_cli_patch_patches_with_explicit_bundle_dir(tmp_path, monkeypatch):
 
     # Assert outputs
     assert out_dir.exists()
-    assert any(p.name.endswith("_modified.bundle") for p in out_dir.iterdir())
+    assert (out_dir / "fm_base.bundle").exists()
     debug_dir = out_dir / "debug_uss"
     assert debug_dir.exists()
     files = {p.name for p in debug_dir.iterdir()}
@@ -130,7 +130,7 @@ def test_cli_patch_with_bundle_dir(tmp_path, monkeypatch):
 
     # Assert
     assert out_dir.exists()
-    assert any(p.name.endswith("_modified.bundle") for p in out_dir.iterdir())
+    assert (out_dir / "ui.bundle").exists()
 
 
 def test_cli_patch_requires_bundle_when_not_inferable(tmp_path, monkeypatch):

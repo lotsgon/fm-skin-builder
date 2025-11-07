@@ -83,7 +83,6 @@ def test_sprite_atlas_replacement_blocked(tmp_path, caplog):
 
     # Should be blocked: texture unchanged, no output file, log error
     assert tex.saved is False
-    assert not any(p.name.endswith("_modified.bundle")
-                   for p in out_dir.iterdir())
+    assert not any(p.suffix == ".bundle" for p in out_dir.iterdir())
     assert any(
         "Atlas replacement is not supported" in rec.message for rec in caplog.records)

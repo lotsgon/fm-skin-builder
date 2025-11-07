@@ -7,7 +7,7 @@ import UnityPy
 import gc
 
 from .logger import get_logger
-from .css_patcher import build_selector_from_parts, serialize_stylesheet_to_uss
+from .css_utils import build_selector_from_parts, serialize_stylesheet_to_uss
 
 log = get_logger(__name__)
 

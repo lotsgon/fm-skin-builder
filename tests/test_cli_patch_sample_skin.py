@@ -81,17 +81,16 @@ def test_cli_patch_uses_sample_skin(tmp_path, monkeypatch):
     cp.UnityPy = SimpleNamespace(load=lambda path: fake_unity_env())
 
     # Run CLI
-    out_dir = tmp_path / "out"
     from src.cli import main as cli_main
-    argv = ["prog", "patch", str(skin_copy), "--out",
-            str(out_dir), "--debug-export"]
+    argv = ["prog", "patch", str(skin_copy), "--debug-export"]
     monkeypatch.setattr(sys, "argv", argv, raising=False)
     cli_main.main()
 
     # Verify outputs
-    assert out_dir.exists()
-    assert any(p.name.endswith("_modified.bundle") for p in out_dir.iterdir())
-    debug_dir = out_dir / "debug_uss"
+    packages_dir = skin_copy / "packages"
+    assert packages_dir.exists()
+    assert (packages_dir / "fm_base.bundle").exists()
+    debug_dir = packages_dir / "debug_uss"
     assert debug_dir.exists()
     files = {p.name for p in debug_dir.iterdir()}
     assert any(n.startswith("original_") for n in files)

@@ -26,8 +26,8 @@ def main() -> None:
     p = sub.add_parser("patch", help="Patch bundles using CSS/USS overrides")
     p.add_argument(
         "css", type=str, help="Skin folder or directory containing .css/.uss overrides")
-    p.add_argument("--out", type=str, required=True,
-                   help="Output directory for modified bundles")
+    p.add_argument("--out", type=str, default=None,
+                   help="Output directory for modified bundles (defaults to <skin>/packages)")
     p.add_argument("--bundle", type=str, default=None,
                    help="Optional bundle file or directory (if omitted, inferred from skin config)")
     p.add_argument("--patch-direct", action="store_true",

@@ -1,8 +1,10 @@
 ## Documentation overview
 
 - Start here: SKIN_FORMAT.md (skin layout, config)
+- CLI usage: CLI_GUIDE.md (step-by-step command walkthrough)
 - Architecture: ARCHITECTURE.md (how patching works)
 - Roadmap: ROADMAP.md
+- CSS property override roadmap: roadmap/property-overrides.md
 - Developer TODO: TODO.md
 
 ### Recipes
@@ -16,6 +18,7 @@ Practical guides for common tasks live under recipes/:
 - recipes/targeting-hints.md
 - recipes/conflict-surfacing.md
 - recipes/debug-exports.md
+- recipes/per-stylesheet-overrides.md
 
 ## Quick start
 
@@ -25,9 +28,9 @@ Practical guides for common tasks live under recipes/:
 
 2) Patch bundles using your CSS overrides:
 - Infer bundle from the skin config
-	- python -m src.cli.main patch skins/your_skin --out build
+	- python -m src.cli.main patch skins/your_skin
 - Or specify a bundle or bundle directory
-	- python -m src.cli.main patch skins/your_skin --out build --bundle /path/to/bundles
+	- python -m src.cli.main patch skins/your_skin --bundle /path/to/bundles
 
 Auto-detect bundles (optional): If no bundles/ directory exists and no --bundle is provided, the tool will try to find Football Manager 26's StreamingAssets bundles in default install locations (Steam/Epic) on your OS. Example paths:
 
@@ -39,10 +42,11 @@ Auto-detect bundles (optional): If no bundles/ directory exists and no --bundle 
 - Linux (Steam): ~/.local/share/Steam/steamapps/common/Football Manager 26/fm_Data/StreamingAssets/aa/StandaloneLinux64
 	- Alt: ~/.steam/steam/steamapps/common/Football Manager 26/fm_Data/StreamingAssets/aa/StandaloneLinux64
 
-3) Optional flags:
-- `--dry-run` preview changes without writing files
-- `--debug-export` export original/patched .uss and JSON for inspection
-- `--patch-direct` also patch inlined color literals
+- Optional flags:
+	- `--out <dir>` override the default `<skin>/packages` output directory
+	- `--dry-run` preview changes without writing files
+	- `--debug-export` export original/patched .uss and JSON for inspection
+	- `--patch-direct` also patch inlined color literals
 
 Notes:
 - Usability first: you only write CSS; no mapping files are required

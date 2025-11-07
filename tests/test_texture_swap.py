@@ -69,4 +69,4 @@ def test_texture_swap_icons_with_includes(tmp_path, monkeypatch):
 
     # Ensure texture was replaced/saved and output bundle exists
     assert data_logo.saved is True
-    assert any(p.name.endswith("_modified.bundle") for p in out_dir.iterdir())
+    assert (out_dir / "ui.bundle").exists()

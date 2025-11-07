@@ -1,5 +1,6 @@
 from pathlib import Path
-from src.core.css_patcher import load_css_vars, load_css_selector_overrides, collect_css_from_dir
+from src.core.css_utils import load_css_vars, load_css_selector_overrides
+from src.core.css_sources import collect_css_from_dir
 
 
 def test_load_css_vars_and_selectors_from_file(tmp_path: Path):
@@ -34,7 +35,40 @@ def test_collect_css_from_dir_scans_skin_and_colours(tmp_path: Path):
         encoding="utf-8",
     )
 
-    vars_, sel = collect_css_from_dir(skin)
-    assert vars_["--root"] == "#010203"
-    assert (".green", "color") in sel
-    assert sel[("green", "color")] == "#00FF00"
+    collected = collect_css_from_dir(skin)
+    assert collected.global_vars["--root"] == "#010203"
+    assert collected.global_selectors[(".green", "color")] == "#00FF00"
+    assert collected.global_selectors[("green", "color")] == "#00FF00"
+
+
+def test_selector_override_without_trailing_semicolon(tmp_path: Path):
+    css = tmp_path / "theme2.css"
+    css.write_text(
+        ".foo { color: #123456 }\n.bar { color: #abcdef; }\n",
+        encoding="utf-8",
+    )
+
+    sel = load_css_selector_overrides(css)
+
+    assert sel[(".foo", "color")] == "#123456"
+    assert sel[("foo", "color")] == "#123456"
+    assert sel[(".bar", "color")] == "#ABCDEF"
+
+
+def test_rgb_and_rgba_colours_are_normalised(tmp_path: Path):
+    css = tmp_path / "theme_rgb.css"
+    css.write_text(
+        ":root { --bright: rgb(17,34,51); --transparent: rgba(255, 0, 128, 0.5); --percent: rgba(100%,0%,0%,25%); }\n"
+        ".blue { color: rgba(0, 255, 0, 0.25); }\n"
+        ".pink { color: rgb(255, 100, 200); }\n",
+        encoding="utf-8",
+    )
+
+    vars_ = load_css_vars(css)
+    selectors = load_css_selector_overrides(css)
+
+    assert vars_["--bright"] == "#112233"
+    assert vars_["--transparent"] == "#FF008080"
+    assert vars_["--percent"] == "#FF000040"
+    assert selectors[(".blue", "color")] == "#00FF0040"
+    assert selectors[(".pink", "color")] == "#FF64C8"

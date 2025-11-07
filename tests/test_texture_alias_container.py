@@ -82,7 +82,7 @@ def test_texture_swap_via_assetbundle_container_alias(tmp_path, monkeypatch, cap
 
     # Texture should be saved
     assert tex_data.saved is True
-    # And a modified bundle written
-    assert any(p.name.endswith("_modified.bundle") for p in out_dir.iterdir())
+    # And a modified bundle written with original name
+    assert (out_dir / "ui.bundle").exists()
     # Cross-format warning should be present
     assert any("Format mismatch" in rec.message for rec in caplog.records)

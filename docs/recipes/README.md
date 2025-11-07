@@ -4,6 +4,7 @@ Practical, copy-paste guides for common tasks. Each recipe assumes you've instal
 
 - Change a CSS variable color: change-variable.md
 - Override a selector/property color: override-selector.md
+- Scope overrides to specific stylesheets: per-stylesheet-overrides.md
 - Preview changes without writing: dry-run.md
 - Explore bundles and export .uss: scan-and-cache.md
 - Use opt-in targeting hints to narrow scope: targeting-hints.md
