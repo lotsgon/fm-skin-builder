@@ -1,9 +1,8 @@
 import json
-from pathlib import Path
 from types import SimpleNamespace
 import pytest
 
-from src.core.css_patcher import run_patch
+from fm_skin_builder.core.css_patcher import run_patch
 
 
 class FakeTexture2DData:
@@ -69,8 +68,8 @@ def test_texture_variant_awareness(tmp_path, monkeypatch, caplog, provided):
     env = FakeEnv([FakeObj(data1), FakeObj(data2), FakeObj(data4)])
 
     # Wire both modules to same env
-    from src.core import css_patcher as cp
-    from src.core import textures as tx
+    from fm_skin_builder.core import css_patcher as cp
+    from fm_skin_builder.core import textures as tx
     cp.UnityPy = SimpleNamespace(load=lambda path: env)
     tx.UnityPy = SimpleNamespace(load=lambda path: env)
 

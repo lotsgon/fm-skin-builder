@@ -1,5 +1,5 @@
 from pathlib import Path
-from src.core.cache import load_or_cache_config
+from fm_skin_builder.core.cache import load_or_cache_config
 
 
 def test_config_cache(tmp_path: Path):

@@ -41,9 +41,9 @@ Branch: `feat/texture-replacement`
 ## Quick commands
 
 - Dry-run against repo bundles folder:
-  - `python -m src.cli.main patch skins/test_skin --out build --bundle bundles --dry-run`
+  - `python -m fm_skin_builder.cli.main patch skins/test_skin --out build --bundle bundles --dry-run`
 - Real run (writes modified bundles to build/):
-  - `python -m src.cli.main patch skins/test_skin --out build --bundle bundles`
+  - `python -m fm_skin_builder.cli.main patch skins/test_skin --out build --bundle bundles`
 
 ## Risk notes
 

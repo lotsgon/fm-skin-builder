@@ -4,8 +4,8 @@ from typing import Optional, Set
 
 import pytest
 
-from src.core.css_patcher import PipelineOptions, SkinPatchPipeline
-from src.core.context import PatchReport
+from fm_skin_builder.core.css_patcher import PipelineOptions, SkinPatchPipeline
+from fm_skin_builder.core.context import PatchReport
 
 
 class FakeBundleContext:
@@ -83,23 +83,23 @@ def reset_texture_service_calls():
 
 def _setup_common_stubs(monkeypatch, *, dry_run: bool) -> None:
     monkeypatch.setattr(
-        "src.core.css_patcher.BundleContext", FakeBundleContext)
+        "fm_skin_builder.core.css_patcher.BundleContext", FakeBundleContext)
     css_service = FakeCssService()
     css_service._dry_run = dry_run
-    monkeypatch.setattr("src.core.css_patcher.CssPatchService",
+    monkeypatch.setattr("fm_skin_builder.core.css_patcher.CssPatchService",
                         lambda *a, **k: css_service)
     monkeypatch.setattr(
-        "src.core.css_patcher.collect_css_from_dir",
+        "fm_skin_builder.core.css_patcher.collect_css_from_dir",
         lambda path: ({"--primary": "#FFF"}, {(".selector", "color"): "#000"}),
     )
     monkeypatch.setattr(
-        "src.core.css_patcher.load_targeting_hints",
+        "fm_skin_builder.core.css_patcher.load_targeting_hints",
         lambda path: (None, None, None),
     )
     monkeypatch.setattr(
-        "src.core.css_patcher.collect_replacement_stems", lambda *a, **k: [])
+        "fm_skin_builder.core.css_patcher.collect_replacement_stems", lambda *a, **k: [])
     monkeypatch.setattr(
-        "src.core.css_patcher.load_texture_name_map", lambda *_: {})
+        "fm_skin_builder.core.css_patcher.load_texture_name_map", lambda *_: {})
 
 
 def test_pipeline_produces_summary_in_dry_run(tmp_path: Path, monkeypatch):
@@ -112,7 +112,7 @@ def test_pipeline_produces_summary_in_dry_run(tmp_path: Path, monkeypatch):
 
     _setup_common_stubs(monkeypatch, dry_run=True)
     monkeypatch.setattr(
-        "src.core.css_patcher.load_or_cache_config",
+        "fm_skin_builder.core.css_patcher.load_or_cache_config",
         lambda _: SimpleNamespace(includes=[]),
     )
 
@@ -141,28 +141,28 @@ def test_pipeline_texture_prefilter_invokes_swap(tmp_path: Path, monkeypatch):
 
     _setup_common_stubs(monkeypatch, dry_run=False)
     monkeypatch.setattr(
-        "src.core.css_patcher.load_or_cache_config",
+        "fm_skin_builder.core.css_patcher.load_or_cache_config",
         lambda *_: SimpleNamespace(includes=["assets/icons"]),
     )
     monkeypatch.setattr(
-        "src.core.css_patcher.TextureSwapService", RecordingTextureSwapService)
+        "fm_skin_builder.core.css_patcher.TextureSwapService", RecordingTextureSwapService)
     monkeypatch.setattr(
-        "src.core.css_patcher._load_or_refresh_scan_cache",
+        "fm_skin_builder.core.css_patcher._load_or_refresh_scan_cache",
         lambda *a, **k: {"FakeAsset"},
     )
     monkeypatch.setattr(
-        "src.core.css_patcher.load_cached_bundle_index",
+        "fm_skin_builder.core.css_patcher.load_cached_bundle_index",
         lambda css_dir, bundle_path, skin_cache_dir=None: {
             "textures": ["IconHero"],
             "assets": ["FakeAsset"],
         },
     )
     monkeypatch.setattr(
-        "src.core.css_patcher.load_texture_name_map",
+        "fm_skin_builder.core.css_patcher.load_texture_name_map",
         lambda *_: {"IconHero": "ui/icon"},
     )
     monkeypatch.setattr(
-        "src.core.css_patcher.collect_replacement_stems",
+        "fm_skin_builder.core.css_patcher.collect_replacement_stems",
         lambda *a, **k: ["iconhero"],
     )
 
@@ -191,26 +191,26 @@ def test_pipeline_texture_prefilter_skips_when_no_interest(tmp_path: Path, monke
 
     _setup_common_stubs(monkeypatch, dry_run=False)
     monkeypatch.setattr(
-        "src.core.css_patcher.load_or_cache_config",
+        "fm_skin_builder.core.css_patcher.load_or_cache_config",
         lambda *_: SimpleNamespace(includes=["assets/icons"]),
     )
     monkeypatch.setattr(
-        "src.core.css_patcher.TextureSwapService", RecordingTextureSwapService)
+        "fm_skin_builder.core.css_patcher.TextureSwapService", RecordingTextureSwapService)
     monkeypatch.setattr(
-        "src.core.css_patcher._load_or_refresh_scan_cache",
+        "fm_skin_builder.core.css_patcher._load_or_refresh_scan_cache",
         lambda *a, **k: {"FakeAsset"},
     )
     monkeypatch.setattr(
-        "src.core.css_patcher.load_cached_bundle_index",
+        "fm_skin_builder.core.css_patcher.load_cached_bundle_index",
         lambda css_dir, bundle_path, skin_cache_dir=None: {
             "textures": ["Another"]},
     )
     monkeypatch.setattr(
-        "src.core.css_patcher.load_texture_name_map",
+        "fm_skin_builder.core.css_patcher.load_texture_name_map",
         lambda *_: {"IconHero": "ui/icon"},
     )
     monkeypatch.setattr(
-        "src.core.css_patcher.collect_replacement_stems",
+        "fm_skin_builder.core.css_patcher.collect_replacement_stems",
         lambda *a, **k: ["iconhero"],
     )
 

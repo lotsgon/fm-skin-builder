@@ -28,9 +28,9 @@ Practical guides for common tasks live under recipes/:
 
 2) Patch bundles using your CSS overrides:
 - Infer bundle from the skin config
-	- python -m src.cli.main patch skins/your_skin
+	- python -m fm_skin_builder.cli.main patch skins/your_skin
 - Or specify a bundle or bundle directory
-	- python -m src.cli.main patch skins/your_skin --bundle /path/to/bundles
+	- python -m fm_skin_builder.cli.main patch skins/your_skin --bundle /path/to/bundles
 
 Auto-detect bundles (optional): If no bundles/ directory exists and no --bundle is provided, the tool will try to find Football Manager 26's StreamingAssets bundles in default install locations (Steam/Epic) on your OS. Example paths:
 
@@ -57,7 +57,7 @@ Notes:
 
 Use scan when you want to explore which variables/selectors occur and where:
 
-- python -m src.cli.main scan --bundle /path/to/bundle_or_dir --out build/scan --export-uss
+- python -m fm_skin_builder.cli.main scan --bundle /path/to/bundle_or_dir --out build/scan --export-uss
 
 This produces a `bundle_index.json` plus optional `.uss` exports for browsing/diffing.
 

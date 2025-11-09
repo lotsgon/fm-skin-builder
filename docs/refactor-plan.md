@@ -6,7 +6,7 @@
 - ⏳ Upcoming: Bundle scan service extraction, expanded test suites, and documentation refresh (CONTEXT, CLI guidance).
 
 ## Goals
-- Make `src/core` reusable from CLI, GUI, or future automation by exposing cohesive class-based APIs.
+- Make `fm_skin_builder/core` reusable from CLI, GUI, or future automation by exposing cohesive class-based APIs.
 - Preserve current behaviours (bundle patching, scanning, texture swapping) with zero regression for existing command-line flows.
 - Improve testability by isolating UnityPy side-effects behind well-defined classes, enabling mocks/fakes in unit tests.
 - Prepare documentation (`docs/ARCHITECTURE.md`, future `CONTEXT.md`) to present the new class hierarchy as the entry point for contributors.
@@ -43,7 +43,7 @@
 ## Migration Strategy
 
 1. **Foundation Prep**
-   - Introduce `BundleContext`, `PatchReport`, and helper dataclasses in new module (`src/core/context.py` or similar).
+   - Introduce `BundleContext`, `PatchReport`, and helper dataclasses in new module (`fm_skin_builder/core/context.py` or similar).
    - Provide transitional adapters so existing code (e.g., `run_patch`) can wrap these classes without immediate behaviour change.
 
 2. **Service Extraction**
@@ -97,8 +97,8 @@
    - Assert the new `PipelineResult` fields (counts, summary lines, dry-run metrics) so future changes cannot silently break the CLI surface.
    - Smoke-test the CLI against representative skins to confirm real-world logging and backups still behave as expected.
 2. **Trim the mega-modules**
-   - Extract pure helpers from `src/core/css_patcher.py` into dedicated modules for parsing/selector utilities, scan-cache helpers, and pipeline orchestration.
-   - Apply the same treatment to `src/core/textures.py`, separating discovery/filter logic from mutation routines.
+   - Extract pure helpers from `fm_skin_builder/core/css_patcher.py` into dedicated modules for parsing/selector utilities, scan-cache helpers, and pipeline orchestration.
+   - Apply the same treatment to `fm_skin_builder/core/textures.py`, separating discovery/filter logic from mutation routines.
    - As we carve pieces out, wrap them with unit tests to raise coverage incrementally.
 3. **Prepare richer front ends**
    - On top of the refactored modules, design a progress callback/event interface that the pipeline can invoke per bundle/service step (sync first, async-ready later).

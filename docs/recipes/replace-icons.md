@@ -33,7 +33,7 @@ Also supported: `Name@2x.png`, `Name@4x.png`. Cross-format replacements (e.g., b
 ## 3) Run the patcher
 
 ```
-python -m src.cli.main patch skins/<skin> --out build
+python -m fm_skin_builder.cli.main patch skins/<skin> --out build
 ```
 
 - Use `--dry-run` to preview without writing files.

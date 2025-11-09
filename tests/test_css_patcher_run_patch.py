@@ -1,7 +1,7 @@
 from pathlib import Path
 import json
 from types import SimpleNamespace
-from src.core.css_patcher import run_patch
+from fm_skin_builder.core.css_patcher import run_patch
 
 
 class FakeColor:
@@ -63,7 +63,7 @@ class FakeEnv:
 
 
 def _install_fake_unity(monkeypatch, env):
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
 
     monkeypatch.setattr(cp, "UnityPy", SimpleNamespace(load=lambda path: env))
 

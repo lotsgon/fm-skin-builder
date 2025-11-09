@@ -1,4 +1,3 @@
-from pathlib import Path
 from types import SimpleNamespace
 import json
 import sys
@@ -81,13 +80,13 @@ def test_cli_patch_patches_with_explicit_bundle_dir(tmp_path, monkeypatch):
      "base.uss").write_text(":root{--primary:#112233;}\n", encoding="utf-8")
 
     # Mock UnityPy
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     cp.UnityPy = SimpleNamespace(
         load=lambda path: make_fake_env_with_simple_stylesheet())
 
     # Act: call CLI main with argv (explicit --bundle dir)
     out_dir = tmp_path / "out"
-    from src.cli import main as cli_main
+    from fm_skin_builder.cli import main as cli_main
     argv = ["prog", "patch", str(skin), "--out",
             str(out_dir), "--debug-export", "--bundle", str(tmp_path)]
     monkeypatch.setattr(sys, "argv", argv, raising=False)
@@ -116,13 +115,13 @@ def test_cli_patch_with_bundle_dir(tmp_path, monkeypatch):
     (bundles / "ui.bundle").write_bytes(b"orig")
 
     # Mock UnityPy
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     cp.UnityPy = SimpleNamespace(
         load=lambda path: make_fake_env_with_simple_stylesheet())
 
     # Act: call CLI main with argv specifying --bundle dir
     out_dir = tmp_path / "out2"
-    from src.cli import main as cli_main
+    from fm_skin_builder.cli import main as cli_main
     argv = ["prog", "patch", str(css_dir), "--out",
             str(out_dir), "--bundle", str(bundles)]
     monkeypatch.setattr(sys, "argv", argv, raising=False)
@@ -141,12 +140,12 @@ def test_cli_patch_requires_bundle_when_not_inferable(tmp_path, monkeypatch):
      "t.css").write_text(":root{--primary:#778899;}\n", encoding="utf-8")
 
     # Mock UnityPy (shouldn't be used)
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     cp.UnityPy = SimpleNamespace(load=lambda path: None)
 
     # Act: call CLI without --bundle; expect early return, no out dir created
     out_dir = tmp_path / "out3"
-    from src.cli import main as cli_main
+    from fm_skin_builder.cli import main as cli_main
     argv = ["prog", "patch", str(css_dir), "--out", str(out_dir)]
     monkeypatch.setattr(sys, "argv", argv, raising=False)
     cli_main.main()
@@ -172,13 +171,13 @@ def test_cli_patch_dry_run_produces_no_outputs(tmp_path, monkeypatch):
      "base.uss").write_text(":root{--primary:#112233;}\n", encoding="utf-8")
 
     # Mock UnityPy
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     cp.UnityPy = SimpleNamespace(
         load=lambda path: make_fake_env_with_simple_stylesheet())
 
     # Act: call CLI main with argv including --dry-run and --debug-export (which should be ignored)
     out_dir = tmp_path / "out_dry"
-    from src.cli import main as cli_main
+    from fm_skin_builder.cli import main as cli_main
     argv = ["prog", "patch", str(skin), "--out",
             str(out_dir), "--debug-export", "--dry-run"]
     monkeypatch.setattr(sys, "argv", argv, raising=False)

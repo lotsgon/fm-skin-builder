@@ -1,0 +1,8 @@
+# husky
+branch="$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD)"
+if [ "$branch" = "main" ] || [ "$branch" = "beta" ]; then
+  echo "[husky] Direct commits to '$branch' are blocked. Please create a feature branch."
+  exit 1
+fi
+
+npm run lint

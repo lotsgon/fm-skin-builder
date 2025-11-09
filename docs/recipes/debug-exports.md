@@ -2,7 +2,7 @@
 
 Add --debug-export to write .uss and JSON snapshots for original and patched StyleSheets next to your output folder.
 
-- python -m src.cli.main patch skins/your_skin --out build --debug-export
+- python -m fm_skin_builder.cli.main patch skins/your_skin --out build --debug-export
 
 What you’ll see
 

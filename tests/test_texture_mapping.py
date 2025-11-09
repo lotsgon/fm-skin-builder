@@ -1,7 +1,7 @@
 import json
 from types import SimpleNamespace
 
-from src.core.css_patcher import run_patch
+from fm_skin_builder.core.css_patcher import run_patch
 
 
 class FakeTexture2DData:
@@ -75,8 +75,8 @@ def test_texture_mapping_json_alias_with_spaces(tmp_path, caplog):
 
     env = FakeEnv([tex_obj, ab_obj])
 
-    from src.core import css_patcher as cp
-    from src.core import textures as tx
+    from fm_skin_builder.core import css_patcher as cp
+    from fm_skin_builder.core import textures as tx
     cp.UnityPy = SimpleNamespace(load=lambda path: env)
     tx.UnityPy = SimpleNamespace(load=lambda path: env)
 

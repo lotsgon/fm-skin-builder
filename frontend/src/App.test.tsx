@@ -1,0 +1,88 @@
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+const invokeMock = vi.fn();
+
+vi.mock('@tauri-apps/api/core', () => ({
+  invoke: (...args: unknown[]) => invokeMock(...args)
+}));
+
+async function renderApp() {
+  const module = await import('./App');
+  const App = module.default;
+  return render(<App />);
+}
+
+describe('App shell', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    invokeMock.mockReset();
+    Reflect.deleteProperty(window as Record<string, unknown>, '__TAURI_IPC__');
+    Reflect.deleteProperty(window as Record<string, unknown>, '__TAURI__');
+  });
+
+  afterEach(() => {
+    cleanup();
+  });
+
+  it('informs the user when the backend runtime is missing', async () => {
+    invokeMock.mockRejectedValue(new Error('Runtime missing'));
+    const user = userEvent.setup();
+    await renderApp();
+
+    expect(screen.getByText(/(Frontend Preview|Detecting Runtime)/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Preview Build/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Command failed: Error: Runtime missing/i)
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('sends the correct payload when running in Tauri', async () => {
+    Object.defineProperty(window, '__TAURI__', {
+      value: { invoke: vi.fn() },
+      configurable: true
+    });
+
+    invokeMock.mockResolvedValue({
+      stdout: 'Patched bundles successfully',
+      stderr: '',
+      status: 0
+    });
+
+    const user = userEvent.setup();
+    await renderApp();
+
+    const skinInput = screen.getByLabelText(/Skin Folder/i);
+    await user.clear(skinInput);
+    await user.type(skinInput, 'skins/pro');
+
+    const bundlesInput = screen.getByLabelText(/Bundles Directory/i);
+    await user.clear(bundlesInput);
+    await user.type(bundlesInput, '/tmp/bundles');
+
+    const debugToggle = screen.getByLabelText(/debug mode/i);
+    await user.click(debugToggle);
+
+    await user.click(screen.getByRole('button', { name: /Build Bundles/i }));
+
+    await waitFor(() => {
+      expect(invokeMock).toHaveBeenCalledWith('run_python_task', {
+        config: {
+          skinPath: 'skins/pro',
+          bundlesPath: '/tmp/bundles',
+          debugExport: true,
+          dryRun: false
+        }
+      });
+    });
+
+    expect(
+      screen.getByText(/Patched bundles successfully/i)
+    ).toBeInTheDocument();
+  });
+});

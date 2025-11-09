@@ -2,7 +2,7 @@
 
 Use dry-run to see what would change without writing modified bundles or debug files.
 
-- python -m src.cli.main patch skins/your_skin --out build --dry-run
+- python -m fm_skin_builder.cli.main patch skins/your_skin --out build --dry-run
 
 The summary includes:
 - Stylesheets found

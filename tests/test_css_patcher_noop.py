@@ -69,7 +69,7 @@ def test_no_changes_no_outputs(tmp_path: Path):
     data = FakeData("Style", strings, colors, [rule])
     env = FakeEnv([FakeObj(data)])
 
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     cp.UnityPy = SimpleNamespace(load=lambda path: env)
 
     out_dir = tmp_path / "out"

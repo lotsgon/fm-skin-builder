@@ -1,9 +1,8 @@
 from pathlib import Path
 from types import SimpleNamespace
 import json
-import pytest
 
-from src.core.css_patcher import run_patch
+from fm_skin_builder.core.css_patcher import run_patch
 
 
 class FakeColor:
@@ -97,7 +96,7 @@ def test_scan_cache_prefilters_assets(tmp_path: Path, monkeypatch):
      "base.uss").write_text(":root{--primary:#112233;}\n", encoding="utf-8")
 
     # Fake UnityPy env with two assets that would both qualify normally
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     env, dataA, dataB = make_env_two_assets()
     cp.UnityPy = SimpleNamespace(load=lambda path: env)
 
@@ -148,7 +147,7 @@ def test_hints_asset_filter_limits_targets(tmp_path: Path, monkeypatch):
     (skin / "hints.txt").write_text("asset: StyleB\n", encoding="utf-8")
 
     # Fake UnityPy env with two assets as before
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     env, dataA, dataB = make_env_two_assets()
     cp.UnityPy = SimpleNamespace(load=lambda path: env)
 

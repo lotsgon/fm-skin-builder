@@ -1,4 +1,4 @@
-from src.core.textures import _coerce_vector_color, _normalise_vector_config
+from fm_skin_builder.core.textures import _coerce_vector_color, _normalise_vector_config
 
 
 def test_coerce_vector_color_hex_string():
