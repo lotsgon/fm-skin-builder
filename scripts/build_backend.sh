@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/frontend/src-tauri/resources/backend"
-ENTRY_POINT="$ROOT_DIR/src/cli/main.py"
+ENTRY_POINT="$ROOT_DIR/fm_skin_builder/cli/main.py"
 BINARY_NAME="fm_skin_builder"
 
 if [[ "$(uname -s)" == "Darwin" || "$(uname -s)" == "Linux" ]]; then

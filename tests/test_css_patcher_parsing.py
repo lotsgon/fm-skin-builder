@@ -1,6 +1,6 @@
 from pathlib import Path
-from src.core.css_utils import load_css_vars, load_css_selector_overrides
-from src.core.css_sources import collect_css_from_dir
+from fm_skin_builder.core.css_utils import load_css_vars, load_css_selector_overrides
+from fm_skin_builder.core.css_sources import collect_css_from_dir
 
 
 def test_load_css_vars_and_selectors_from_file(tmp_path: Path):

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fm-skin-builder"
 version = "0.1.0"
-description = "Football Manager 2026 Skin Builder (CLI + core + GUI stubs)"
+description = "Football Manager 2026 Skin Builder (CLI + core + desktop shell)"
 authors = [{name="Tom Stone"}]
 requires-python = "==3.9.19"
 dependencies = [
@@ -16,8 +16,11 @@ dependencies = [
     "platformdirs>=4.3.0"
 ]
 
+[tool.setuptools.packages.find]
+include = ["fm_skin_builder*"]
+
 [project.scripts]
-fm-skin = "src.cli.main:entrypoint"
+fm-skin = "fm_skin_builder.cli.main:entrypoint"
 
 [tool.black]
 line-length = 100

@@ -13,4 +13,4 @@ if [[ ! -x "$VENV_PY" ]]; then
   exit 1
 fi
 
-"$VENV_PY" -m ruff check "$ROOT_DIR/src" "$ROOT_DIR/tests"
+"$VENV_PY" -m ruff check "$ROOT_DIR/fm_skin_builder" "$ROOT_DIR/tests"

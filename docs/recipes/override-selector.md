@@ -9,7 +9,7 @@ Minimal steps
     .green { color: #00D3E7; }
 
 - Patch:
-  - python -m src.cli.main patch skins/your_skin --out build
+  - python -m fm_skin_builder.cli.main patch skins/your_skin --out build
 
 What it does
 

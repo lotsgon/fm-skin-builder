@@ -4,7 +4,7 @@ Scan (optional) explores which variables and selectors appear and where. A trans
 
 Explore with scan
 
-- python -m src.cli.main scan --bundle /path/to/bundle_or_dir --out build/scan --export-uss
+- python -m fm_skin_builder.cli.main scan --bundle /path/to/bundle_or_dir --out build/scan --export-uss
 
 This writes:
 - build/scan/<bundle-stem>/bundle_index.json

@@ -39,7 +39,7 @@ CSS-first tooling for Football Manager bundles. Drop in CSS/USS overrides and th
 
 ## CLI Overview
 
-Run all commands through `python -m src.cli.main ...` from the repository root.
+Run all commands through `python -m fm_skin_builder.cli.main ...` from the repository root.
 
 Available commands:
 
@@ -47,7 +47,7 @@ Available commands:
 - `scan` — build an index of selectors, variables, and assets for discovery or diffing
 - `build`, `extract`, `verify`, `swap` — reserved for future workflows (stubs today)
 
-Use `python -m src.cli.main <command> --help` for CLI reference.
+Use `python -m fm_skin_builder.cli.main <command> --help` for CLI reference.
 
 ## Patch Workflow
 
@@ -58,7 +58,7 @@ Use `python -m src.cli.main <command> --help` for CLI reference.
 2. Run the patch command:
 
 ```bash
-python -m src.cli.main patch skins/your_skin
+python -m fm_skin_builder.cli.main patch skins/your_skin
 ```
 
 - Without `--bundle`, the CLI infers bundles from `config.json` or installed FM paths.
@@ -91,7 +91,7 @@ Per-stylesheet overrides:
 Use scan when exploring bundle contents or precomputing indices for faster patches:
 
 ```bash
-python -m src.cli.main scan --bundle bundles --out build/scan --export-uss
+python -m fm_skin_builder.cli.main scan --bundle bundles --out build/scan --export-uss
 ```
 
 - Accepts a single `.bundle` or a directory tree.

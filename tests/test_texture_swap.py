@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 import json
 
-from src.core.css_patcher import run_patch
+from fm_skin_builder.core.css_patcher import run_patch
 
 
 class FakeTexture2DData:
@@ -58,8 +58,8 @@ def test_texture_swap_icons_with_includes(tmp_path, monkeypatch):
     # Fake UnityPy env with a Texture2D named Logo
     data_logo = FakeTexture2DData("Logo")
     env = FakeEnv([FakeObj(data_logo)])
-    from src.core import css_patcher as cp
-    from src.core import textures as tx
+    from fm_skin_builder.core import css_patcher as cp
+    from fm_skin_builder.core import textures as tx
     cp.UnityPy = SimpleNamespace(load=lambda path: env)
     tx.UnityPy = SimpleNamespace(load=lambda path: env)
 

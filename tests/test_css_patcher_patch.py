@@ -1,7 +1,7 @@
 from pathlib import Path
 from types import SimpleNamespace
-from src.core.css_patcher import hex_to_rgba
-from src.core.css_sources import CollectedCss
+from fm_skin_builder.core.css_patcher import hex_to_rgba
+from fm_skin_builder.core.css_sources import CollectedCss
 
 
 class FakeColor:
@@ -94,7 +94,7 @@ def test_var_based_patch_and_save(tmp_path: Path):
     data = FakeData("Style", strings, colors, [rule])
     env = FakeEnv([FakeObj(data)])
 
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     set_unitypy_in_module(cp, env)
 
     out_dir = tmp_path / "out"
@@ -127,7 +127,7 @@ def test_selector_override_patch(tmp_path: Path):
     data = FakeData("Style2", strings, colors, [rule], [sel])
     env = FakeEnv([FakeObj(data)])
 
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     set_unitypy_in_module(cp, env)
 
     out_dir = tmp_path / "out2"
@@ -160,7 +160,7 @@ def test_selector_override_converts_string_handles(tmp_path: Path):
     data = FakeData("StyleStrings", strings, colors, [rule], [selector])
     env = FakeEnv([FakeObj(data)])
 
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     set_unitypy_in_module(cp, env)
 
     out_dir = tmp_path / "out_selector_strings"
@@ -199,7 +199,7 @@ def test_patch_direct_literal(tmp_path: Path):
     data = FakeData("Style3", strings, colors, [rule])
     env = FakeEnv([FakeObj(data)])
 
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     set_unitypy_in_module(cp, env)
     out_dir = tmp_path / "out3"
     css_data = CollectedCss.from_overrides(
@@ -228,7 +228,7 @@ def test_debug_export_writes_files(tmp_path: Path):
     data = FakeData("DebugStyle", strings, colors, [rule])
     env = FakeEnv([FakeObj(data)])
 
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     set_unitypy_in_module(cp, env)
     out_dir = tmp_path / "out4"
     debug_dir = out_dir / "debug_uss"
@@ -256,7 +256,7 @@ def test_root_level_variable_applies_when_strings_names_var(tmp_path: Path):
     data = FakeData("RootStyle", strings, colors, [])
     env = FakeEnv([FakeObj(data)])
 
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     set_unitypy_in_module(cp, env)
 
     out_dir = tmp_path / "out_root"
@@ -284,7 +284,7 @@ def test_root_level_literal_variable_updates(tmp_path: Path):
     data = FakeData("LiteralRoot", strings, colors, [FakeRule([prop])])
     env = FakeEnv([FakeObj(data)])
 
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     set_unitypy_in_module(cp, env)
 
     out_dir = tmp_path / "out_literal"
@@ -315,7 +315,7 @@ def test_variable_reference_converted_to_literal_color(tmp_path: Path):
     data = FakeData("RefStyle", strings, colors, [rule])
     env = FakeEnv([FakeObj(data)])
 
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     set_unitypy_in_module(cp, env)
 
     out_dir = tmp_path / "out_var_literal"

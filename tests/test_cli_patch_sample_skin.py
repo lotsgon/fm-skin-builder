@@ -76,11 +76,11 @@ def test_cli_patch_uses_sample_skin(tmp_path, monkeypatch):
     # Config v2 has no bundle fields; inference will find the single bundle at repo root
 
     # Mock UnityPy
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     cp.UnityPy = SimpleNamespace(load=lambda path: fake_unity_env())
 
     # Run CLI
-    from src.cli import main as cli_main
+    from fm_skin_builder.cli import main as cli_main
     argv = ["prog", "patch", str(skin_copy), "--debug-export"]
     monkeypatch.setattr(sys, "argv", argv, raising=False)
     cli_main.main()

@@ -84,7 +84,7 @@ fn run_python_task(app_handle: AppHandle, config: TaskConfig) -> Result<CommandR
         let mut cmd = Command::new(python_command());
         cmd.arg("-m").arg("fm_skin_builder");
         cmd.current_dir(workspace_root());
-        cmd.env("PYTHONPATH", "src");
+        cmd.env("PYTHONPATH", "fm_skin_builder");
         cmd
     } else {
         let backend_binary = app_handle
