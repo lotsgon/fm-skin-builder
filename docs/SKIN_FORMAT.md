@@ -48,9 +48,9 @@ The patcher merges global variables/selectors and per-asset overrides before pat
 ## Patching
 
 - Infer bundle from a skin’s `config.json`:
-  - python -m src.cli.main patch skins/your_skin
+  - python -m fm_skin_builder.cli.main patch skins/your_skin
 - Or specify a bundle or directory explicitly:
-  - python -m src.cli.main patch skins/your_skin --bundle /path/to/bundles
+  - python -m fm_skin_builder.cli.main patch skins/your_skin --bundle /path/to/bundles
 
 - Options:
   - `--out <dir>` to override the default `<skin>/packages` output directory
@@ -61,6 +61,6 @@ The patcher merges global variables/selectors and per-asset overrides before pat
 ## Scan (optional)
 
 - Explore variables and selectors with:
-  - python -m src.cli.main scan --bundle /path/to/bundle_or_dir --out build/scan --export-uss
+  - python -m fm_skin_builder.cli.main scan --bundle /path/to/bundle_or_dir --out build/scan --export-uss
 
 This is not required to patch; it’s a reference tool for power users and debugging.

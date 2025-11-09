@@ -1,0 +1,21 @@
+{
+  "name": "fm-skin-builder",
+  "private": true,
+  "scripts": {
+    "tauri": "./scripts/run_tauri.sh",
+    "tauri:dev": "./scripts/run_tauri.sh dev",
+    "tauri:dev-local": "FORCE_BACKEND_BUILD=1 ./scripts/run_tauri.sh dev",
+    "tauri:build": "./scripts/run_tauri.sh build",
+    "lint:python": "./scripts/lint_python.sh",
+    "lint:rust": "./scripts/lint_rust.sh",
+    "lint:frontend": "npm --prefix frontend run lint",
+    "lint": "npm run lint:python && npm run lint:rust && npm run lint:frontend",
+    "test:frontend": "npm --prefix frontend run test",
+    "prepare": "node scripts/bootstrap.mjs"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "husky": "^9.1.6"
+  }
+}

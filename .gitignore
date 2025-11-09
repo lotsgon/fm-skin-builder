@@ -10,3 +10,13 @@ dist/
 bundles/
 extracted_sprites/
 skins/new_skin
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.turbo/
+frontend/src-tauri/target/
+frontend/src-tauri/gen/
+fm_skin_builder.spec
+frontend/src-tauri/resources/backend/fm_skin_builder
+.venv/

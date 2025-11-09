@@ -46,10 +46,10 @@ Patch against bundles inferred from the repo layout (a `bundles/` folder or a si
 
 ```
 # Dry-run preview
-python -m src.cli.main patch skins/my_skin --dry-run
+python -m fm_skin_builder.cli.main patch skins/my_skin --dry-run
 
 # Write outputs next to other build artifacts
-python -m src.cli.main patch skins/my_skin --out build
+python -m fm_skin_builder.cli.main patch skins/my_skin --out build
 ```
 
 Notes

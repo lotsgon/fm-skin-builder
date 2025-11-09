@@ -2,7 +2,7 @@ from pathlib import Path
 from types import SimpleNamespace
 import json
 
-from src.core.css_patcher import run_patch
+from fm_skin_builder.core.css_patcher import run_patch
 
 
 class FakeColor:
@@ -110,7 +110,7 @@ def test_conflict_surfacing_logs_multi_asset_touch(tmp_path: Path, monkeypatch, 
     dataA = FakeData("StyleA", strings, colors1, [ruleA], [])
     dataB = FakeData("StyleB", strings, colors2, [ruleB], [])
 
-    from src.core import css_patcher as cp
+    from fm_skin_builder.core import css_patcher as cp
     cp.UnityPy = SimpleNamespace(
         load=lambda path: FakeEnv([FakeObj(dataA), FakeObj(dataB)]))
 

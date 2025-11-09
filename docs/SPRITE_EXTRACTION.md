@@ -92,7 +92,7 @@ Once you've extracted sprites, you can:
 
 5. **Patch bundles**:
    ```bash
-   python -m src.cli.main patch skins/your_skin --out build
+   python -m fm_skin_builder.cli.main patch skins/your_skin --out build
    ```
 
 ## Notes

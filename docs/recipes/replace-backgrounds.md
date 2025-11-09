@@ -33,7 +33,7 @@ You can also use `Name@2x.png`, `Name@4x.png` suffixes. Cross-format replacement
 ## 3) Run the patcher
 
 ```
-python -m src.cli.main patch skins/<skin> --out build
+python -m fm_skin_builder.cli.main patch skins/<skin> --out build
 ```
 
 - Add `--dry-run` to preview.

@@ -63,7 +63,7 @@ When no explicit mapping exists, the patcher still prefers assets whose names ma
 ## 5. Run the patch
 
 ```bash
-python -m src.cli.main patch skins/<your_skin>
+python -m fm_skin_builder.cli.main patch skins/<your_skin>
 ```
 
 - Patched bundles are written back to `skins/<your_skin>/packages` by default.

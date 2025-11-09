@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
-import hashlib, json
+import hashlib
+import json
 from .logger import get_logger
 from .skin_config import SkinConfig, SkinConfigModel
 

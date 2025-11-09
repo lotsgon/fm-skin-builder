@@ -66,7 +66,7 @@ def extract_sprites_from_bundle(bundle_path: Path, output_dir: Path, scale: str 
     sprite_output_dir.mkdir(parents=True, exist_ok=True)
 
     # First, parse all sprite atlases to get sprite information
-    from src.core.textures import _parse_sprite_atlas
+    from fm_skin_builder.core.textures import _parse_sprite_atlas
     sprite_atlas_map = _parse_sprite_atlas(env)
 
     if not sprite_atlas_map:

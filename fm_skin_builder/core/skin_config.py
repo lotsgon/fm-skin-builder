@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, List
+from typing import Optional, List
 from pathlib import Path
 import json
 

@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple, Any, Set
 from types import SimpleNamespace
-import re
 import json
 import os
 import shutil
@@ -15,7 +14,6 @@ except Exception:  # pragma: no cover - UnityPy may not expose ColorRGBA in test
     UnityColorRGBA = None
 
 from .logger import get_logger
-import gc
 from .cache import load_or_cache_config, cache_dir
 from .context import BundleContext, PatchReport
 from .services import (

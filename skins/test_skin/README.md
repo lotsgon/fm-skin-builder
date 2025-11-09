@@ -10,9 +10,9 @@ This is a minimal skin used by tests and as a quick-start example.
 Use via CLI (example):
 
 - Infer bundle from config.json:
-  - python -m src.cli.main patch skins/test_skin --out build --dry-run
+  - python -m fm_skin_builder.cli.main patch skins/test_skin --out build --dry-run
 - Explicit bundle directory:
-  - python -m src.cli.main patch skins/test_skin --out build --bundle /path/to/bundles --patch-direct
+  - python -m fm_skin_builder.cli.main patch skins/test_skin --out build --bundle /path/to/bundles --patch-direct
 
 Notes:
 - Use `--dry-run` to preview changes without writing files.

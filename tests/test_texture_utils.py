@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.core.texture_utils import (
+from fm_skin_builder.core.texture_utils import (
     collect_replacement_stems,
     gather_texture_names_from_index,
     load_texture_name_map,

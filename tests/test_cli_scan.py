@@ -1,4 +1,3 @@
-from pathlib import Path
 from types import SimpleNamespace
 import json
 import sys
@@ -91,13 +90,13 @@ def test_cli_scan_exports_index_and_uss(tmp_path, monkeypatch):
     bundle.write_bytes(b"orig")
 
     # Mock UnityPy
-    from src.core import bundle_inspector as inspector
+    from fm_skin_builder.core import bundle_inspector as inspector
     inspector.UnityPy = SimpleNamespace(
         load=lambda path: make_fake_env_for_scan())
 
     # Run CLI
     out_dir = tmp_path / "scan_out"
-    from src.cli import main as cli_main
+    from fm_skin_builder.cli import main as cli_main
     argv = ["prog", "scan", "--bundle",
             str(bundle), "--out", str(out_dir), "--export-uss"]
     monkeypatch.setattr(sys, "argv", argv, raising=False)

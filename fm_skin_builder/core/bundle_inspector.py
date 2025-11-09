@@ -1,8 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, List, Tuple, Any, Optional
+from typing import Dict, List, Any
 import json
-import os
 import UnityPy
 import gc
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Test script for vector sprite integration in the main patching system."""
 
-from src.core.textures import swap_textures
+from fm_skin_builder.core.textures import swap_textures
 import sys
 import logging
 from pathlib import Path
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 # Import the texture swapping function
 
 # Force debug on textures module
-textures_log = logging.getLogger("src.core.textures")
+textures_log = logging.getLogger("fm_skin_builder.core.textures")
 textures_log.setLevel(logging.DEBUG)
 for handler in textures_log.handlers:
     handler.setLevel(logging.DEBUG)

@@ -1,6 +1,6 @@
 # CLI Guide
 
-This guide walks through the day-to-day commands exposed by `python -m src.cli.main` and how they interact with the refactored pipeline.
+This guide walks through the day-to-day commands exposed by `python -m fm_skin_builder.cli.main` and how they interact with the refactored pipeline.
 
 ## Installing
 
@@ -16,14 +16,14 @@ pip install -r requirements.txt
 
 ## Command Reference
 
-Run `python -m src.cli.main --help` for the global overview and `python -m src.cli.main <command> --help` for per-command options.
+Run `python -m fm_skin_builder.cli.main --help` for the global overview and `python -m fm_skin_builder.cli.main <command> --help` for per-command options.
 
 ### Patch
 
 Applies CSS/USS overrides (and optional texture swaps) to one or more Unity bundles.
 
 ```bash
-python -m src.cli.main patch <css_dir> [--out <output_dir>] [options]
+python -m fm_skin_builder.cli.main patch <css_dir> [--out <output_dir>] [options]
 ```
 
 Key arguments:
@@ -66,7 +66,7 @@ Outputs:
 Creates index files that map CSS variables/selectors to the assets that reference them. Also exports `.uss` files when desired.
 
 ```bash
-python -m src.cli.main scan --bundle <path> --out <output_dir> [--export-uss]
+python -m fm_skin_builder.cli.main scan --bundle <path> --out <output_dir> [--export-uss]
 ```
 
 - Accepts either a single `.bundle` or a directory containing many bundles.
@@ -87,7 +87,7 @@ python -m src.cli.main scan --bundle <path> --out <output_dir> [--export-uss]
 2. Dry run the patch to confirm what would change:
 
    ```bash
-   python -m src.cli.main patch skins/my_skin --dry-run
+   python -m fm_skin_builder.cli.main patch skins/my_skin --dry-run
    ```
 
    Add `--out build/test` if you want to inspect results outside of the default `<skin>/packages` folder.
@@ -97,7 +97,7 @@ python -m src.cli.main scan --bundle <path> --out <output_dir> [--export-uss]
 4. Remove `--dry-run` to write patched bundles once you are satisfied:
 
    ```bash
-   python -m src.cli.main patch skins/my_skin --backup
+   python -m fm_skin_builder.cli.main patch skins/my_skin --backup
    ```
 
 5. Copy the patched bundle files (from `<skin>/packages` unless you overrode `--out`) into Football Manager's `data` override folder per your modding setup.
@@ -120,4 +120,4 @@ python -m src.cli.main scan --bundle <path> --out <output_dir> [--export-uss]
 
 ## Extending the Pipeline
 
-For development details (module layout, services, and orchestration), read `docs/ARCHITECTURE.md` and the inline docstrings in `src/core`. The refactor breaks down responsibilities into small helper modules (`css_sources`, `scan_cache`, `bundle_paths`, `texture_utils`) so new front-ends (CLI/GUI) can consume the pipeline without touching Unity internals directly.
+For development details (module layout, services, and orchestration), read `docs/ARCHITECTURE.md` and the inline docstrings in `fm_skin_builder/core`. The refactor breaks down responsibilities into small helper modules (`css_sources`, `scan_cache`, `bundle_paths`, `texture_utils`) so new front-ends (CLI/GUI) can consume the pipeline without touching Unity internals directly.

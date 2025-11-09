@@ -1,10 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 import UnityPy
-import os
-import re
-import json
 from .logger import get_logger
 
 logger = get_logger(__name__)
@@ -74,7 +71,6 @@ class BundleManager:
         colors = getattr(data, "colors", [])
         strings = getattr(data, "strings", [])
         rules = getattr(data, "m_Rules", [])
-        var_to_string_idx = {s: i for i, s in enumerate(strings) if s.startswith("--")}
 
         # Patch direct property matches
         for rule in rules:

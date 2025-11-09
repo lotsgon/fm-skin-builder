@@ -17,8 +17,7 @@ require further investigation into FM's rendering pipeline.
 from __future__ import annotations
 import struct
 import math
-import base64
-from typing import Tuple, List, Optional
+from typing import Tuple, Optional
 import logging
 
 log = logging.getLogger(__name__)
@@ -122,7 +121,6 @@ def svg_path_to_mesh(svg_path: str, scale: float = 1.0) -> Optional[Tuple[bytes,
     """
     try:
         from svg.path import parse_path
-        from svg.path.path import Line, CubicBezier, QuadraticBezier
 
         path = parse_path(svg_path)
         vertices = []
