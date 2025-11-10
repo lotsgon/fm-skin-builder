@@ -1,7 +1,7 @@
 name: Build FM Asset Catalogue (Parallel)
 
 on:
-  # Manual trigger with version input
+  # Manual trigger only
   workflow_dispatch:
     inputs:
       fm_version:
@@ -18,14 +18,15 @@ on:
         required: true
         type: string
       num_groups:
-        description: 'Number of parallel groups (default: 10)'
+        description: 'Number of parallel groups (recommend: 10-15)'
         required: false
         type: number
         default: 10
-
-  # Schedule: Run weekly on Monday at 2am UTC
-  schedule:
-    - cron: '0 2 * * 1'
+      exclude_bundles:
+        description: 'Exclude patterns (space-separated, e.g., "newgen regen")'
+        required: false
+        type: string
+        default: 'newgen regen'
 
 env:
   # R2 Configuration
@@ -75,7 +76,8 @@ jobs:
           python scripts/split_bundles.py \
             --prefix "${{ github.event.inputs.bundles_prefix }}" \
             --groups ${{ github.event.inputs.num_groups }} \
-            --output bundle_groups
+            --output bundle_groups \
+            --exclude ${{ github.event.inputs.exclude_bundles }}
 
           # Generate matrix array [0, 1, 2, ..., N-1]
           SUMMARY=$(cat bundle_groups/split_summary.json)
@@ -101,7 +103,7 @@ jobs:
     name: Extract Group ${{ matrix.group }}
     needs: split
     runs-on: ubuntu-latest
-    timeout-minutes: 90  # 1.5 hour timeout per group
+    timeout-minutes: 60  # 1 hour timeout per group (adjust based on testing)
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.split.outputs.matrix) }}

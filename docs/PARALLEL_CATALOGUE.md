@@ -8,7 +8,16 @@ The parallel catalogue building system enables processing of large numbers of FM
 
 **Challenge**: Processing all FM bundles sequentially takes more than 2 hours, causing GitHub Actions workflows to timeout.
 
-**Solution**: Split bundles into groups, process each group in parallel, then merge the results into a unified catalogue.
+**Key Issues**:
+1. **Large bundle files**: 1.6GB newgen faces bundle alone takes significant time
+2. **Duplicate processing**: Scale variants (_1x, _2x, _3x, _4x) processed separately then deduplicated
+3. **Sequential bottleneck**: All bundles processed in a single job
+
+**Solution**:
+1. **Exclude problematic bundles** (newgen/regen faces)
+2. **Keep scale variants together** to deduplicate before image processing
+3. **Split into parallel groups** for faster processing
+4. **Merge results** with deduplication
 
 ## Architecture
 
@@ -44,8 +53,14 @@ The parallel catalogue building system enables processing of large numbers of FM
 python scripts/split_bundles.py \
   --prefix "fm2025/StandaloneOSX" \
   --groups 10 \
+  --exclude newgen regen \
   --output bundle_groups
 ```
+
+**Features**:
+- **Bundle exclusion**: Skip problematic bundles (default: newgen, regen)
+- **Scale variant grouping**: Keep _1x, _2x, _3x, _4x together
+- **Load balancing**: Distribute bundles evenly across groups
 
 **Output**:
 - `bundle_groups/group_0.json` - First group of bundles
@@ -64,6 +79,14 @@ python scripts/split_bundles.py \
     ...
   ]
 }
+```
+
+**Grouping Example**:
+```
+ui-iconspriteatlases_assets_1x.bundle  ┐
+ui-iconspriteatlases_assets_2x.bundle  ├─ Kept together in same group
+ui-iconspriteatlases_assets_3x.bundle  │  for efficient deduplication
+ui-iconspriteatlases_assets_4x.bundle  ┘
 ```
 
 ### 2. Group Download (`scripts/download_bundle_group.py`)
@@ -120,10 +143,14 @@ Location: `.github/workflows/build-catalogue.yml`
 
 ### Trigger
 
-Manual workflow dispatch with inputs:
-- `fm_version`: FM version (e.g., "fm2025")
-- `bundle_prefix`: R2 prefix (e.g., "fm2025/StandaloneOSX")
-- `num_groups`: Number of parallel groups (default: 10)
+**Manual trigger only** (no scheduled runs)
+
+Inputs:
+- `fm_version`: FM version (e.g., "2025.0.0")
+- `catalogue_version`: Catalogue version number (e.g., "1")
+- `bundles_prefix`: R2 prefix (e.g., "fm2025/StandaloneOSX")
+- `num_groups`: Number of parallel groups (default: 10, recommend: 10-15)
+- `exclude_bundles`: Space-separated patterns to exclude (default: "newgen regen")
 
 ### Jobs
 
@@ -136,16 +163,19 @@ Manual workflow dispatch with inputs:
 #### Job 2: Extract (Matrix)
 - Runs in parallel for each group (0 to N-1)
 - Downloads bundles for assigned group
-- Builds partial catalogue
+- Builds partial catalogue (with intra-group deduplication)
 - Uploads partial catalogue as artifact
+- **Timeout**: 60 minutes per group (adjust based on testing)
 
 **Matrix Strategy**:
 ```yaml
 strategy:
-  fail-fast: false
+  fail-fast: false  # Don't cancel other groups if one fails
   matrix:
     group: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 ```
+
+**Note**: Scale variants (\_1x, \_2x, etc.) are kept in the same group for efficient deduplication before image processing.
 
 #### Job 3: Merge
 - Downloads all partial catalogue artifacts
@@ -178,29 +208,61 @@ num_groups: 10
 
 ## Performance Optimization
 
+### Key Optimizations
+
+1. **Bundle Exclusion** 🚫
+   - Excludes newgen/regen face bundles by default (1.6GB+)
+   - Can be customized via `--exclude` parameter
+   - Reduces total processing time significantly
+
+2. **Scale Variant Grouping** 🎯
+   - Keeps `bundle_1x`, `bundle_2x`, `bundle_3x`, `bundle_4x` together
+   - Enables deduplication **before** image processing
+   - Prevents processing the same image 4 times
+   - **Major time saver** for image-heavy bundles
+
+3. **Load Balancing** ⚖️
+   - Uses bin-packing algorithm to distribute bundles
+   - Aims for equal bundle counts per group
+   - Minimizes stragglers (groups that finish late)
+
 ### Choosing Number of Groups
 
 **Factors to consider**:
 1. **Total bundle count**: More bundles → more groups
-2. **GitHub Actions limits**: Max concurrent jobs (usually 20)
-3. **Bundle size variance**: Uneven bundle sizes may create stragglers
-4. **Processing time**: Aim for ~10-15 minutes per group
+2. **GitHub Actions limits**: Max 20 concurrent jobs (free tier)
+3. **Image processing time**: Dominates the workload
+4. **Processing time target**: Aim for 30-60 minutes per group
 
 **Recommendations**:
-- **100 bundles**: 5-8 groups
-- **200 bundles**: 8-12 groups
-- **300 bundles**: 10-15 groups
-- **500+ bundles**: 15-20 groups
+- **~297 bundles (excluding newgen)**: Start with **10 groups**
+- **If groups timeout**: Increase to **12-15 groups**
+- **If groups finish quickly**: Can reduce to 8 groups
 
-### Expected Speedup
+**GitHub Actions Concurrency**:
+- Free tier: 20 concurrent jobs
+- Pro: 40 concurrent jobs
+- **Recommendation**: Stay under 15 groups to leave buffer
 
-| Sequential | Parallel (10 groups) | Speedup |
-|------------|----------------------|---------|
-| 120 min    | ~15 min              | 8x      |
-| 150 min    | ~18 min              | 8.3x    |
-| 180 min    | ~21 min              | 8.6x    |
+### Expected Performance
 
-*Note: Speedup accounts for split/merge overhead (~2-3 min)*
+**Without optimizations** (sequential):
+- 297 bundles with all scale variants
+- Processing same images 4 times
+- **Result**: 120-180+ minutes → **TIMEOUT** ❌
+
+**With optimizations** (parallel):
+- ~270 bundles (newgen excluded)
+- Scale variants grouped for deduplication
+- 10 parallel groups
+- **Result**: 30-60 minutes per group = **~1 hour total** ✅
+
+**Performance breakdown per group**:
+- Download bundles: ~5 min
+- Extract & process: ~25-50 min (depends on bundle complexity)
+- Upload results: ~2 min
+
+*Note: Times vary based on bundle contents. Image-heavy bundles take longer.*
 
 ## Limitations & Future Work
 
@@ -213,12 +275,33 @@ num_groups: 10
 
 ### Future Enhancements
 
-1. **Smart Splitting**: Split by estimated processing time, not just count
-2. **Incremental Updates**: Only process changed bundles
-3. **Dynamic Scaling**: Auto-adjust group count based on bundle count
-4. **Progress Tracking**: Real-time progress visualization
-5. **Cost Optimization**: Use spot instances for parallel jobs
-6. **Bundle Filtering**: Option to process specific bundle patterns
+1. **Early Deduplication in Catalogue Builder** 🎯
+   - Deduplicate images **during** extraction, not just at merge
+   - Skip processing of already-seen image hashes
+   - Would eliminate the 4x redundant processing entirely
+   - **Highest priority optimization**
+
+2. **Smart Splitting by Size**:
+   - Split by estimated processing time, not just bundle count
+   - Factor in bundle file sizes
+   - Better load balancing for mixed bundle sizes
+
+3. **Incremental Updates**:
+   - Only process changed bundles
+   - Compare with previous catalogue
+   - Skip unchanged scale variants
+
+4. **Dynamic Scaling**:
+   - Auto-adjust group count based on bundle count
+   - Detect available GitHub Actions concurrency
+
+5. **Progress Tracking**:
+   - Real-time progress visualization
+   - Estimated time remaining per group
+
+6. **Bundle Filtering**:
+   - Process only specific bundle patterns
+   - Include/exclude by bundle type (UI, textures, etc.)
 
 ## Testing Locally
 
