@@ -128,20 +128,46 @@ class SpriteExtractor(BaseAssetExtractor):
         # Extract image data
         image_data = None
         try:
+            # Check if image property exists before accessing
+            if not hasattr(sprite_obj, 'image'):
+                return {
+                    "name": name,
+                    "bundle": bundle_name,
+                    "has_vertex_data": has_vertex_data,
+                    "width": width,
+                    "height": height,
+                    "image_data": None,
+                    "atlas": None,
+                    **self._create_default_status(),
+                }
+
+            # Access image - this is where segfaults often occur
             image = sprite_obj.image
             if image:
-                # Skip very large images to prevent memory issues
-                if image.width > 4096 or image.height > 4096:
-                    # Too large, skip image data but keep metadata
-                    pass
-                else:
-                    # Convert PIL Image to bytes for later processing
-                    import io
-                    buf = io.BytesIO()
-                    image.save(buf, format='PNG')
-                    image_data = buf.getvalue()
-        except Exception:
+                # For large images, convert to thumbnail immediately to save memory
+                # Don't store full 4K+ images in memory
+                from PIL import Image
+                import io
+
+                # Create a copy to avoid modifying original
+                img_copy = image.copy()
+
+                # If image is very large, create thumbnail immediately
+                if img_copy.width > 2048 or img_copy.height > 2048:
+                    # Create thumbnail at 2048x2048 max (will be thumbnailed again to 256x256 later)
+                    img_copy.thumbnail((2048, 2048), Image.Resampling.LANCZOS)
+
+                # Convert to PNG bytes
+                buf = io.BytesIO()
+                img_copy.save(buf, format='PNG')
+                image_data = buf.getvalue()
+
+                # Clean up
+                del img_copy
+                del buf
+        except Exception as e:
             # Image extraction failed, continue without image data
+            # Don't fail the entire extraction for one bad image
             pass
 
         return {
