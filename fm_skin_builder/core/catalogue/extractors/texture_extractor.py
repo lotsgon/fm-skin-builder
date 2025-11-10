@@ -29,25 +29,39 @@ class TextureExtractor(BaseAssetExtractor):
             List of texture data dictionaries
         """
         import gc
+        import sys
 
         textures = []
 
         try:
+            log.info(f"    Loading bundle: {bundle_path.name}")
+            sys.stdout.flush()
             env = UnityPy.load(str(bundle_path))
+            log.info(f"    Bundle loaded successfully")
+            sys.stdout.flush()
         except Exception as e:
             # If we can't load the bundle, return empty list
+            log.warning(f"    Failed to load bundle: {e}")
             return textures
 
         bundle_name = bundle_path.name
 
         try:
+            log.info(f"    Iterating through objects...")
+            sys.stdout.flush()
+
             for obj in env.objects:
                 if obj.type.name != "Texture2D":
                     continue
 
                 try:
+                    log.info(f"    Reading Texture2D object...")
+                    sys.stdout.flush()
                     data = obj.read()
-                except Exception:
+                    log.info(f"    Object read successfully")
+                    sys.stdout.flush()
+                except Exception as e:
+                    log.warning(f"    Failed to read object: {e}")
                     continue
 
                 name = self._get_asset_name(data)
@@ -115,7 +129,9 @@ class TextureExtractor(BaseAssetExtractor):
             texture_format_name = str(texture_format) if texture_format is not None else "unknown"
 
             # Log texture details for debugging - this helps identify crashes
+            import sys
             log.info(f"    Processing texture: {name} (format={texture_format_name}, {width}x{height})")
+            sys.stdout.flush()
 
             # Skip problematic texture formats that cause segfaults
             # These are known to crash UnityPy on certain platforms
@@ -171,7 +187,11 @@ class TextureExtractor(BaseAssetExtractor):
 
             # Access image - this is where segfaults often occur
             # Wrap in multiprocessing to isolate segfaults (future)
+            log.info(f"    Accessing .image property for {name}...")
+            sys.stdout.flush()
             image = texture_obj.image
+            log.info(f"    Image accessed successfully")
+            sys.stdout.flush()
             if image:
                 # For large images, convert to thumbnail immediately to save memory
                 # Don't store full 4K+ images in memory
