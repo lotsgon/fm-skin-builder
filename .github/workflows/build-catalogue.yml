@@ -1,0 +1,87 @@
+name: Build FM Asset Catalogue
+
+on:
+  # Manual trigger with version input
+  workflow_dispatch:
+    inputs:
+      fm_version:
+        description: 'FM Version (e.g., 2025.0.0)'
+        required: true
+        type: string
+      catalogue_version:
+        description: 'Catalogue version number'
+        required: false
+        default: '1'
+        type: string
+      bundles_prefix:
+        description: 'R2 prefix for bundles (e.g., fm2025/StandaloneOSX)'
+        required: true
+        type: string
+
+  # Schedule: Run weekly on Monday at 2am UTC
+  schedule:
+    - cron: '0 2 * * 1'
+
+env:
+  # R2 Configuration (set in repo secrets)
+  R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  R2_BUNDLES_BUCKET: ${{ secrets.R2_BUNDLES_BUCKET || 'fm-bundles' }}
+  R2_CATALOGUE_BUCKET: ${{ secrets.R2_CATALOGUE_BUCKET || 'fm-asset-catalogue' }}
+
+jobs:
+  build-catalogue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120  # 2 hour timeout
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcairo2 libcairo2-dev
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+          pip install boto3  # For R2/S3 API
+
+      - name: Download bundles from R2
+        run: |
+          python scripts/download_bundles_from_r2.py \
+            --prefix "${{ github.event.inputs.bundles_prefix }}" \
+            --output bundles/
+
+      - name: Build catalogue
+        run: |
+          python -m fm_skin_builder.cli.main catalogue \
+            --bundle bundles/ \
+            --fm-version "${{ github.event.inputs.fm_version }}" \
+            --catalogue-version "${{ github.event.inputs.catalogue_version }}" \
+            --out build/catalogue
+
+      - name: Upload catalogue to R2
+        run: |
+          python scripts/upload_catalogue_to_r2.py \
+            --catalogue-dir "build/catalogue/${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}" \
+            --fm-version "${{ github.event.inputs.fm_version }}" \
+            --catalogue-version "${{ github.event.inputs.catalogue_version }}"
+
+      - name: Upload artifacts (for debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalogue-${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}
+          path: build/catalogue/
+          retention-days: 7
