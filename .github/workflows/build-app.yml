@@ -16,16 +16,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: ubuntu-22.04
+          - platform: ubuntu-20.04
             target: x86_64-unknown-linux-gnu
             name: linux
-          - platform: macos-latest
+          - platform: macos-13
             target: x86_64-apple-darwin
             name: macos-x86_64
-          - platform: macos-latest
+          - platform: macos-14
             target: aarch64-apple-darwin
             name: macos-aarch64
-          - platform: windows-latest
+          - platform: windows-2022
             target: x86_64-pc-windows-msvc
             name: windows
 
@@ -59,11 +59,11 @@ jobs:
           cache: 'pip'
 
       - name: Install Linux dependencies
-        if: matrix.platform == 'ubuntu-22.04'
+        if: matrix.platform == 'ubuntu-20.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
+            libwebkit2gtk-4.0-dev \
             libappindicator3-dev \
             librsvg2-dev \
             patchelf \
@@ -78,7 +78,7 @@ jobs:
           pip install pyinstaller
 
       - name: Setup Windows code signing
-        if: matrix.platform == 'windows-latest' && github.event_name != 'pull_request'
+        if: matrix.platform == 'windows-2022' && github.event_name != 'pull_request'
         shell: pwsh
         run: |
           if ("${{ secrets.WINDOWS_CERTIFICATE }}" -ne "") {
@@ -108,7 +108,7 @@ jobs:
       - name: Build Python backend
         shell: bash
         run: |
-          if [ "${{ matrix.platform }}" = "windows-latest" ]; then
+          if [ "${{ matrix.platform }}" = "windows-2022" ]; then
             BINARY_NAME="fm_skin_builder.exe"
           else
             BINARY_NAME="fm_skin_builder"
@@ -150,11 +150,11 @@ jobs:
         run: |
           mkdir -p artifacts
 
-          if [ "${{ matrix.platform }}" = "ubuntu-22.04" ]; then
+          if [ "${{ matrix.platform }}" = "ubuntu-20.04" ]; then
             # Linux: AppImage and .deb
             cp frontend/src-tauri/target/release/bundle/appimage/*.AppImage artifacts/ || true
             cp frontend/src-tauri/target/release/bundle/deb/*.deb artifacts/ || true
-          elif [ "${{ matrix.platform }}" = "macos-latest" ]; then
+          elif [[ "${{ matrix.platform }}" == macos-* ]]; then
             # macOS: DMG and .app
             if [ "${{ matrix.name }}" = "macos-aarch64" ]; then
               cp frontend/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg artifacts/ || true
@@ -163,7 +163,7 @@ jobs:
               cp frontend/src-tauri/target/release/bundle/dmg/*.dmg artifacts/ || true
               cp -r frontend/src-tauri/target/release/bundle/macos/*.app artifacts/ || true
             fi
-          elif [ "${{ matrix.platform }}" = "windows-latest" ]; then
+          elif [ "${{ matrix.platform }}" = "windows-2022" ]; then
             # Windows: NSIS installer and MSI
             cp frontend/src-tauri/target/release/bundle/nsis/*.exe artifacts/ || true
             cp frontend/src-tauri/target/release/bundle/msi/*.msi artifacts/ || true
@@ -185,9 +185,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: ubuntu-22.04
+          - platform: ubuntu-20.04
             name: linux
-          - platform: windows-latest
+          - platform: windows-2022
             name: windows
 
     runs-on: ${{ matrix.platform }}
@@ -200,7 +200,7 @@ jobs:
           path: artifacts
 
       - name: Test Linux AppImage
-        if: matrix.platform == 'ubuntu-22.04'
+        if: matrix.platform == 'ubuntu-20.04'
         run: |
           chmod +x artifacts/*.AppImage
           # Basic smoke test - check the binary can be extracted and exists
@@ -210,7 +210,7 @@ jobs:
           echo "Linux AppImage structure validated"
 
       - name: Test Windows installer exists
-        if: matrix.platform == 'windows-latest'
+        if: matrix.platform == 'windows-2022'
         shell: bash
         run: |
           ls -lah artifacts/
