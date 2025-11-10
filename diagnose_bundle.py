@@ -33,9 +33,21 @@ def diagnose_bundle(bundle_path: Path):
             height = getattr(data, "m_Height", 0)
             tex_format = getattr(data, "m_TextureFormat", "unknown")
 
+            # Get format details
+            format_name = "unknown"
+            format_value = "unknown"
+            if hasattr(tex_format, 'name'):
+                format_name = tex_format.name
+            if hasattr(tex_format, 'value'):
+                format_value = tex_format.value
+
             print(f"\n  [{i}] {name}")
             print(f"      Size: {width}x{height}")
             print(f"      Format: {tex_format}")
+            if format_name != "unknown":
+                print(f"      Format Name: {format_name}")
+            if format_value != "unknown":
+                print(f"      Format Value: {format_value}")
 
             # Try to access image - this is where crashes happen
             print(f"      Attempting to access .image property...", end=" ")

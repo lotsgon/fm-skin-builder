@@ -112,19 +112,49 @@ class TextureExtractor(BaseAssetExtractor):
 
             # Check texture format - some formats cause segfaults
             texture_format = getattr(texture_obj, "m_TextureFormat", None)
+            texture_format_name = str(texture_format) if texture_format is not None else "unknown"
 
-            # Log texture details for debugging
-            log.debug(f"    Processing texture: {name} (format={texture_format}, {width}x{height})")
+            # Log texture details for debugging - this helps identify crashes
+            log.info(f"    Processing texture: {name} (format={texture_format_name}, {width}x{height})")
 
             # Skip problematic texture formats that cause segfaults
             # These are known to crash UnityPy on certain platforms
-            # Common problematic formats:
-            # - ASTC formats on some platforms
-            # - ETC formats without decoders
-            # - BC7 on older systems
+            # Common problematic formats that cause C-level crashes:
+            # - ASTC_4x4, ASTC_5x5, ASTC_6x6, ASTC_8x8, ASTC_10x10, ASTC_12x12 (ASTC compressed formats)
+            # - ETC_RGB4, ETC2_RGB, ETC2_RGBA (without proper decoders on macOS)
+            # - BC7 (on some older systems without decoder support)
+            # - PVRTC formats (platform-specific issues)
+            #
+            # Unity TextureFormat enum values for reference:
+            # ASTC formats: typically 48-53
+            # ETC formats: typically 34, 45-47
+            # BC7: 26
+            # PVRTC formats: 30-33
             problematic_formats = [
-                # Will be populated as we discover them
+                # ASTC formats (enum values 48-53)
+                48, 49, 50, 51, 52, 53,
+                # ETC formats (enum values 34, 45-47)
+                34, 45, 46, 47,
+                # BC7 (enum value 26)
+                26,
+                # PVRTC formats (enum values 30-33)
+                30, 31, 32, 33,
             ]
+
+            # Also check by name if format is an enum
+            if hasattr(texture_format, 'name'):
+                format_name = texture_format.name
+                if any(problematic in format_name for problematic in ['ASTC', 'ETC', 'PVRTC', 'BC7']):
+                    log.warning(f"    Skipping texture {name} with potentially problematic format {format_name}")
+                    return {
+                        "name": name,
+                        "bundle": bundle_name,
+                        "type": texture_type,
+                        "width": width,
+                        "height": height,
+                        "image_data": None,
+                        **self._create_default_status(),
+                    }
 
             if texture_format in problematic_formats:
                 log.warning(f"    Skipping texture {name} with problematic format {texture_format}")

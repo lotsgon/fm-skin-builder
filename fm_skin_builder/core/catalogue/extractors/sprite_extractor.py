@@ -141,6 +141,49 @@ class SpriteExtractor(BaseAssetExtractor):
                     **self._create_default_status(),
                 }
 
+            # Check texture format if available (sprites reference textures)
+            texture_ref = getattr(sprite_obj, 'm_RD', None)
+            if texture_ref:
+                texture = getattr(texture_ref, 'texture', None)
+                if texture:
+                    # Get the actual texture object to check format
+                    try:
+                        tex_data = texture.read()
+                        tex_format = getattr(tex_data, 'm_TextureFormat', None)
+
+                        # Skip problematic formats (same as texture extractor)
+                        problematic_formats = [48, 49, 50, 51, 52, 53, 34, 45, 46, 47, 26, 30, 31, 32, 33]
+
+                        if tex_format in problematic_formats:
+                            return {
+                                "name": name,
+                                "bundle": bundle_name,
+                                "has_vertex_data": has_vertex_data,
+                                "width": width,
+                                "height": height,
+                                "image_data": None,
+                                "atlas": None,
+                                **self._create_default_status(),
+                            }
+
+                        # Also check by name if format is an enum
+                        if hasattr(tex_format, 'name'):
+                            format_name = tex_format.name
+                            if any(problematic in format_name for problematic in ['ASTC', 'ETC', 'PVRTC', 'BC7']):
+                                return {
+                                    "name": name,
+                                    "bundle": bundle_name,
+                                    "has_vertex_data": has_vertex_data,
+                                    "width": width,
+                                    "height": height,
+                                    "image_data": None,
+                                    "atlas": None,
+                                    **self._create_default_status(),
+                                }
+                    except Exception:
+                        # If we can't check the texture format, proceed cautiously
+                        pass
+
             # Access image - this is where segfaults often occur
             image = sprite_obj.image
             if image:
