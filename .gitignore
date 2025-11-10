@@ -20,3 +20,4 @@ frontend/src-tauri/gen/
 fm_skin_builder.spec
 frontend/src-tauri/resources/backend/fm_skin_builder
 .venv/
+.env.local
