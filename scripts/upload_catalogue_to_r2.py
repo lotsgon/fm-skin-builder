@@ -24,7 +24,7 @@ def upload_catalogue(catalogue_dir: Path, fm_version: str, catalogue_version: st
     """
     # Get R2 credentials from environment
     account_id = os.getenv("R2_ACCOUNT_ID")
-    bucket_name = os.getenv("R2_CATALOGUE_BUCKET", "fm-asset-catalogue")
+    bucket_name = os.getenv("R2_CATALOGUE_BUCKET", "fm-skin-builder-asset-catalogue")
 
     # Support new R2_API_KEY format (from Cloudflare)
     api_key = os.getenv("R2_API_KEY")

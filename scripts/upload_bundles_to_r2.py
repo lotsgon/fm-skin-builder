@@ -27,7 +27,7 @@ def upload_bundles(bundles_dir: Path, prefix: str):
     """
     # Get R2 credentials from environment
     account_id = os.getenv("R2_ACCOUNT_ID")
-    bucket_name = os.getenv("R2_BUNDLES_BUCKET", "fm-bundles")
+    bucket_name = os.getenv("R2_BUNDLES_BUCKET", "fm-skin-builder-bundles")
 
     # Support new R2_API_KEY format (from Cloudflare)
     api_key = os.getenv("R2_API_KEY")
@@ -108,7 +108,9 @@ def upload_bundles(bundles_dir: Path, prefix: str):
             print(f"❌ Error: {e}")
             continue
 
-    print(f"\n✅ Uploaded {uploaded_count}/{len(bundle_files)} bundles ({total_size / 1024 / 1024:.1f} MB)")
+    print(
+        f"\n✅ Uploaded {uploaded_count}/{len(bundle_files)} bundles ({total_size / 1024 / 1024:.1f} MB)"
+    )
     print(f"   R2 Location: {bucket_name}/{prefix}/")
 
 
