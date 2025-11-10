@@ -128,18 +128,8 @@ class SpriteExtractor(BaseAssetExtractor):
         # Extract image data
         image_data = None
         try:
-            # Check if image property exists before accessing
-            if not hasattr(sprite_obj, 'image'):
-                return {
-                    "name": name,
-                    "bundle": bundle_name,
-                    "has_vertex_data": has_vertex_data,
-                    "width": width,
-                    "height": height,
-                    "image_data": None,
-                    "atlas": None,
-                    **self._create_default_status(),
-                }
+            # NOTE: DO NOT use hasattr(sprite_obj, 'image') as it triggers property
+            # access which causes segfaults on macOS. Just try to access directly.
 
             # Check texture format if available (sprites reference textures)
             texture_ref = getattr(sprite_obj, 'm_RD', None)

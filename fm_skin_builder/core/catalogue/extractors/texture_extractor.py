@@ -128,17 +128,8 @@ class TextureExtractor(BaseAssetExtractor):
         # Extract image data
         image_data = None
         try:
-            # Check if image property exists before accessing
-            if not hasattr(texture_obj, 'image'):
-                return {
-                    "name": name,
-                    "bundle": bundle_name,
-                    "type": texture_type,
-                    "width": width,
-                    "height": height,
-                    "image_data": None,
-                    **self._create_default_status(),
-                }
+            # NOTE: DO NOT use hasattr(texture_obj, 'image') as it triggers property
+            # access which causes segfaults on macOS. Just try to access directly.
 
             # Check texture format - some formats cause segfaults
             log.info(f"    Getting texture format for {name}...")
