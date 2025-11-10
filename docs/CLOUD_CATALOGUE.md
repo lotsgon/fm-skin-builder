@@ -78,22 +78,28 @@ Permissions:
 ```
 
 Save the generated:
-- Account ID
-- Access Key ID
-- Secret Access Key
+- **Account ID** (e.g., `abc123def456`)
+- **Access Key ID** (e.g., `a1b2c3d4e5f6`)
+- **Secret Access Key** (e.g., `xyz789secretkey`)
 
-### 3. Add Secrets to GitHub
+### 3. Add Secrets and Variables to GitHub
 
 In your GitHub repo → Settings → Secrets and variables → Actions:
 
-Add these repository secrets:
+**Add Repository Secrets** (under "Secrets" tab):
 
 ```
-R2_ACCOUNT_ID         = your-account-id
-R2_ACCESS_KEY_ID      = your-access-key-id
-R2_SECRET_ACCESS_KEY  = your-secret-access-key
-R2_BUNDLES_BUCKET     = fm-bundles
-R2_CATALOGUE_BUCKET   = fm-asset-catalogue
+R2_ACCOUNT_ID  = your-account-id
+R2_API_KEY     = access_key_id:secret_access_key
+```
+
+> **Note**: Combine your Access Key ID and Secret Access Key with a colon (`:`) separator
+
+**Add Repository Variables** (under "Variables" tab):
+
+```
+R2_BUNDLES_BUCKET    = fm-bundles
+R2_CATALOGUE_BUCKET  = fm-asset-catalogue
 ```
 
 ### 4. Install boto3 Locally
@@ -112,8 +118,8 @@ Set environment variables:
 
 ```bash
 export R2_ACCOUNT_ID="your-account-id"
-export R2_ACCESS_KEY_ID="your-access-key"
-export R2_SECRET_ACCESS_KEY="your-secret-key"
+export R2_API_KEY="access_key_id:secret_access_key"
+export R2_BUNDLES_BUCKET="fm-bundles"  # optional, defaults to fm-bundles
 ```
 
 Upload bundles from your Mac:

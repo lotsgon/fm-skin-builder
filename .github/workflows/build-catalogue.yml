@@ -23,12 +23,17 @@ on:
     - cron: '0 2 * * 1'
 
 env:
-  # R2 Configuration (set in repo secrets)
+  # R2 Configuration
+  # Required secrets (set in repo secrets):
+  #   - R2_ACCOUNT_ID
+  #   - R2_API_KEY (Cloudflare R2 API token)
+  # Required variables (set in repo variables):
+  #   - R2_BUNDLES_BUCKET (e.g., "fm-bundles")
+  #   - R2_CATALOGUE_BUCKET (e.g., "fm-asset-catalogue")
   R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-  R2_BUNDLES_BUCKET: ${{ secrets.R2_BUNDLES_BUCKET || 'fm-bundles' }}
-  R2_CATALOGUE_BUCKET: ${{ secrets.R2_CATALOGUE_BUCKET || 'fm-asset-catalogue' }}
+  R2_API_KEY: ${{ secrets.R2_API_KEY }}
+  R2_BUNDLES_BUCKET: ${{ vars.R2_BUNDLES_BUCKET }}
+  R2_CATALOGUE_BUCKET: ${{ vars.R2_CATALOGUE_BUCKET }}
 
 jobs:
   build-catalogue:

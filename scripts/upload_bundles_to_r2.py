@@ -27,15 +27,28 @@ def upload_bundles(bundles_dir: Path, prefix: str):
     """
     # Get R2 credentials from environment
     account_id = os.getenv("R2_ACCOUNT_ID")
-    access_key = os.getenv("R2_ACCESS_KEY_ID")
-    secret_key = os.getenv("R2_SECRET_ACCESS_KEY")
     bucket_name = os.getenv("R2_BUNDLES_BUCKET", "fm-bundles")
+
+    # Support new R2_API_KEY format (from Cloudflare)
+    api_key = os.getenv("R2_API_KEY")
+    if api_key:
+        # Parse API key - format: "access_key_id:secret_access_key"
+        if ":" in api_key:
+            access_key, secret_key = api_key.split(":", 1)
+        else:
+            print("Error: R2_API_KEY must be in format 'access_key_id:secret_access_key'")
+            sys.exit(1)
+    else:
+        # Fallback to separate keys (legacy)
+        access_key = os.getenv("R2_ACCESS_KEY_ID")
+        secret_key = os.getenv("R2_SECRET_ACCESS_KEY")
 
     if not all([account_id, access_key, secret_key]):
         print("Error: R2 credentials not found in environment variables")
-        print("Required: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY")
-        print("\nSet them in your environment:")
+        print("\nRequired: R2_ACCOUNT_ID and R2_API_KEY")
         print('  export R2_ACCOUNT_ID="your-account-id"')
+        print('  export R2_API_KEY="access_key:secret_key"')
+        print("\nOR (legacy):")
         print('  export R2_ACCESS_KEY_ID="your-access-key"')
         print('  export R2_SECRET_ACCESS_KEY="your-secret-key"')
         sys.exit(1)
@@ -110,10 +123,9 @@ Example:
     --prefix "fm2025/StandaloneOSX"
 
 Environment variables required:
-  R2_ACCOUNT_ID        - Your Cloudflare R2 account ID
-  R2_ACCESS_KEY_ID     - R2 access key ID
-  R2_SECRET_ACCESS_KEY - R2 secret access key
-  R2_BUNDLES_BUCKET    - R2 bucket name (default: fm-bundles)
+  R2_ACCOUNT_ID     - Your Cloudflare R2 account ID
+  R2_API_KEY        - R2 API key in format "access_key_id:secret_access_key"
+  R2_BUNDLES_BUCKET - R2 bucket name (default: fm-bundles)
         """,
     )
     parser.add_argument(

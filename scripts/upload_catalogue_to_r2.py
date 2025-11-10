@@ -24,13 +24,26 @@ def upload_catalogue(catalogue_dir: Path, fm_version: str, catalogue_version: st
     """
     # Get R2 credentials from environment
     account_id = os.getenv("R2_ACCOUNT_ID")
-    access_key = os.getenv("R2_ACCESS_KEY_ID")
-    secret_key = os.getenv("R2_SECRET_ACCESS_KEY")
     bucket_name = os.getenv("R2_CATALOGUE_BUCKET", "fm-asset-catalogue")
+
+    # Support new R2_API_KEY format (from Cloudflare)
+    api_key = os.getenv("R2_API_KEY")
+    if api_key:
+        # Parse API key - format: "access_key_id:secret_access_key"
+        if ":" in api_key:
+            access_key, secret_key = api_key.split(":", 1)
+        else:
+            print("Error: R2_API_KEY must be in format 'access_key_id:secret_access_key'")
+            sys.exit(1)
+    else:
+        # Fallback to separate keys (legacy)
+        access_key = os.getenv("R2_ACCESS_KEY_ID")
+        secret_key = os.getenv("R2_SECRET_ACCESS_KEY")
 
     if not all([account_id, access_key, secret_key]):
         print("Error: R2 credentials not found in environment variables")
-        print("Required: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY")
+        print("Required: R2_ACCOUNT_ID and R2_API_KEY")
+        print("  OR: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY")
         sys.exit(1)
 
     if not catalogue_dir.exists():
