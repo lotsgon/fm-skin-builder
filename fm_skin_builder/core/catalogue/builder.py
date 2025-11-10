@@ -147,36 +147,54 @@ class CatalogueBuilder:
 
     def _extract_from_bundles(self, bundles: List[Path]) -> None:
         """Extract assets from all bundles."""
+        import gc
+
         for bundle_path in bundles:
             log.info(f"  Scanning: {bundle_path.name}")
-            self.bundles_scanned.append(bundle_path.name)
 
             try:
+                self.bundles_scanned.append(bundle_path.name)
+
                 # Extract CSS
-                css_data = self.css_extractor.extract_from_bundle(bundle_path)
-                self.css_variables.extend(css_data.get("variables", []))
-                self.css_classes.extend(css_data.get("classes", []))
+                try:
+                    css_data = self.css_extractor.extract_from_bundle(bundle_path)
+                    self.css_variables.extend(css_data.get("variables", []))
+                    self.css_classes.extend(css_data.get("classes", []))
+                except Exception as e:
+                    log.warning(f"  Error extracting CSS from {bundle_path.name}: {e}")
 
                 # Extract sprites (returns raw data, not models yet)
-                sprite_data_list = self.sprite_extractor.extract_from_bundle(bundle_path)
-
-                # Convert sprite data to models (after image processing)
-                # For now, store as intermediate data
-                if not hasattr(self, '_sprite_data'):
-                    self._sprite_data = []
-                self._sprite_data.extend(sprite_data_list)
+                try:
+                    sprite_data_list = self.sprite_extractor.extract_from_bundle(bundle_path)
+                    if not hasattr(self, '_sprite_data'):
+                        self._sprite_data = []
+                    self._sprite_data.extend(sprite_data_list)
+                except Exception as e:
+                    log.warning(f"  Error extracting sprites from {bundle_path.name}: {e}")
 
                 # Extract textures (returns raw data)
-                texture_data_list = self.texture_extractor.extract_from_bundle(bundle_path)
-                if not hasattr(self, '_texture_data'):
-                    self._texture_data = []
-                self._texture_data.extend(texture_data_list)
+                try:
+                    texture_data_list = self.texture_extractor.extract_from_bundle(bundle_path)
+                    if not hasattr(self, '_texture_data'):
+                        self._texture_data = []
+                    self._texture_data.extend(texture_data_list)
+                except Exception as e:
+                    log.warning(f"  Error extracting textures from {bundle_path.name}: {e}")
 
                 # Extract fonts
-                self.fonts.extend(self.font_extractor.extract_from_bundle(bundle_path))
+                try:
+                    self.fonts.extend(self.font_extractor.extract_from_bundle(bundle_path))
+                except Exception as e:
+                    log.warning(f"  Error extracting fonts from {bundle_path.name}: {e}")
 
             except Exception as e:
-                log.warning(f"  Error scanning {bundle_path.name}: {e}")
+                log.error(f"  Critical error scanning {bundle_path.name}: {e}")
+                import traceback
+                log.debug(traceback.format_exc())
+
+            # Force garbage collection after each bundle to prevent memory issues
+            finally:
+                gc.collect()
 
     def _process_images(self) -> None:
         """Process images to create thumbnails and extract colors."""

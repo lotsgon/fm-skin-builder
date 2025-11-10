@@ -25,27 +25,46 @@ class TextureExtractor(BaseAssetExtractor):
         Returns:
             List of texture data dictionaries
         """
-        env = UnityPy.load(str(bundle_path))
-        bundle_name = bundle_path.name
+        import gc
 
         textures = []
 
-        for obj in env.objects:
-            if obj.type.name != "Texture2D":
-                continue
+        try:
+            env = UnityPy.load(str(bundle_path))
+        except Exception as e:
+            # If we can't load the bundle, return empty list
+            return textures
 
+        bundle_name = bundle_path.name
+
+        try:
+            for obj in env.objects:
+                if obj.type.name != "Texture2D":
+                    continue
+
+                try:
+                    data = obj.read()
+                except Exception:
+                    continue
+
+                name = self._get_asset_name(data)
+                if not name:
+                    continue
+
+                try:
+                    texture_data = self._extract_texture_data(data, bundle_name)
+                    if texture_data:
+                        textures.append(texture_data)
+                except Exception:
+                    # Skip problematic textures
+                    continue
+        finally:
+            # Clean up UnityPy environment
             try:
-                data = obj.read()
-            except Exception:
-                continue
-
-            name = self._get_asset_name(data)
-            if not name:
-                continue
-
-            texture_data = self._extract_texture_data(data, bundle_name)
-            if texture_data:
-                textures.append(texture_data)
+                del env
+            except:
+                pass
+            gc.collect()
 
         return textures
 
@@ -78,11 +97,17 @@ class TextureExtractor(BaseAssetExtractor):
         try:
             image = texture_obj.image
             if image:
-                import io
-                buf = io.BytesIO()
-                image.save(buf, format='PNG')
-                image_data = buf.getvalue()
+                # Skip very large images to prevent memory issues
+                if image.width > 4096 or image.height > 4096:
+                    # Too large, skip image data but keep metadata
+                    pass
+                else:
+                    import io
+                    buf = io.BytesIO()
+                    image.save(buf, format='PNG')
+                    image_data = buf.getvalue()
         except Exception:
+            # Image extraction failed, continue without image data
             pass
 
         return {

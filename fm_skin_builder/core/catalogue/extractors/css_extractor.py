@@ -28,73 +28,88 @@ class CSSExtractor(BaseAssetExtractor):
         Returns:
             Dictionary with 'variables' and 'classes' lists
         """
-        env = UnityPy.load(str(bundle_path))
-        bundle_name = bundle_path.name
+        import gc
 
         variables: List[CSSVariable] = []
         classes: List[CSSClass] = []
 
-        for obj in env.objects:
-            if obj.type.name != "MonoBehaviour":
-                continue
+        try:
+            env = UnityPy.load(str(bundle_path))
+        except Exception as e:
+            # If we can't load the bundle, return empty results
+            return {"variables": variables, "classes": classes}
 
-            try:
-                data = obj.read()
-            except Exception:
-                continue
+        bundle_name = bundle_path.name
 
-            # Check if this is a StyleSheet asset
-            if not hasattr(data, "colors") or not hasattr(data, "strings"):
-                continue
+        try:
+            for obj in env.objects:
+                if obj.type.name != "MonoBehaviour":
+                    continue
 
-            stylesheet_name = self._get_asset_name(data) or "UnnamedStyleSheet"
-            strings = list(getattr(data, "strings", []))
-            colors = getattr(data, "colors", [])
-            rules = getattr(data, "m_Rules", [])
-            rule_selectors = self._get_rule_selectors(data)
+                try:
+                    data = obj.read()
+                except Exception:
+                    continue
 
-            # Extract CSS variables and classes from each rule
-            for rule_idx, rule in enumerate(rules):
-                selectors = rule_selectors.get(rule_idx, [])
-                properties = getattr(rule, "m_Properties", [])
+                # Check if this is a StyleSheet asset
+                if not hasattr(data, "colors") or not hasattr(data, "strings"):
+                    continue
 
-                for prop in properties:
-                    prop_name = getattr(prop, "m_Name", None)
-                    if not prop_name:
-                        continue
+                stylesheet_name = self._get_asset_name(data) or "UnnamedStyleSheet"
+                strings = list(getattr(data, "strings", []))
+                colors = getattr(data, "colors", [])
+                rules = getattr(data, "m_Rules", [])
+                rule_selectors = self._get_rule_selectors(data)
 
-                    # Parse values
-                    value_defs = self._extract_values(
-                        prop, strings, colors
-                    )
+                # Extract CSS variables and classes from each rule
+                for rule_idx, rule in enumerate(rules):
+                    selectors = rule_selectors.get(rule_idx, [])
+                    properties = getattr(rule, "m_Properties", [])
 
-                    # Check if this property defines a CSS variable
-                    if prop_name and prop_name.startswith("--"):
-                        # This is a CSS variable definition
-                        css_var = self._create_css_variable(
-                            name=prop_name,
-                            stylesheet=stylesheet_name,
-                            bundle=bundle_name,
-                            rule_index=rule_idx,
-                            values=value_defs,
+                    for prop in properties:
+                        prop_name = getattr(prop, "m_Name", None)
+                        if not prop_name:
+                            continue
+
+                        # Parse values
+                        value_defs = self._extract_values(
+                            prop, strings, colors
                         )
-                        if css_var:
-                            variables.append(css_var)
 
-                # Create CSS class entries for non-variable selectors
-                if selectors and properties:
-                    for selector in selectors:
-                        if not selector.startswith("--"):  # Skip variable selectors
-                            css_class = self._create_css_class(
-                                name=selector,
+                        # Check if this property defines a CSS variable
+                        if prop_name and prop_name.startswith("--"):
+                            # This is a CSS variable definition
+                            css_var = self._create_css_variable(
+                                name=prop_name,
                                 stylesheet=stylesheet_name,
                                 bundle=bundle_name,
-                                properties=properties,
-                                strings=strings,
-                                colors=colors,
+                                rule_index=rule_idx,
+                                values=value_defs,
                             )
-                            if css_class:
-                                classes.append(css_class)
+                            if css_var:
+                                variables.append(css_var)
+
+                    # Create CSS class entries for non-variable selectors
+                    if selectors and properties:
+                        for selector in selectors:
+                            if not selector.startswith("--"):  # Skip variable selectors
+                                css_class = self._create_css_class(
+                                    name=selector,
+                                    stylesheet=stylesheet_name,
+                                    bundle=bundle_name,
+                                    properties=properties,
+                                    strings=strings,
+                                    colors=colors,
+                                )
+                                if css_class:
+                                    classes.append(css_class)
+        finally:
+            # Clean up UnityPy environment
+            try:
+                del env
+            except:
+                pass
+            gc.collect()
 
         return {"variables": variables, "classes": classes}
 

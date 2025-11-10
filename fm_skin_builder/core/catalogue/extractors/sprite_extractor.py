@@ -27,54 +27,73 @@ class SpriteExtractor(BaseAssetExtractor):
             List of sprite data dictionaries (not full Sprite models yet,
             as they need image processing for hashes and thumbnails)
         """
-        env = UnityPy.load(str(bundle_path))
-        bundle_name = bundle_path.name
+        import gc
 
         sprites = []
 
-        for obj in env.objects:
-            if obj.type.name != "Sprite":
-                continue
+        try:
+            env = UnityPy.load(str(bundle_path))
+        except Exception as e:
+            # If we can't load the bundle, return empty list
+            return sprites
 
+        bundle_name = bundle_path.name
+
+        try:
+            for obj in env.objects:
+                if obj.type.name != "Sprite":
+                    continue
+
+                try:
+                    data = obj.read()
+                except Exception:
+                    continue
+
+                name = self._get_asset_name(data)
+                if not name:
+                    continue
+
+                # Extract sprite metadata
+                try:
+                    sprite_data = self._extract_sprite_data(data, bundle_name)
+                    if sprite_data:
+                        sprites.append(sprite_data)
+                except Exception:
+                    # Skip problematic sprites
+                    continue
+
+            # Also check SpriteAtlas
+            for obj in env.objects:
+                if obj.type.name != "SpriteAtlas":
+                    continue
+
+                try:
+                    data = obj.read()
+                except Exception:
+                    continue
+
+                atlas_name = self._get_asset_name(data) or "UnnamedAtlas"
+                packed_names = getattr(data, "m_PackedSpriteNamesToIndex", None)
+
+                if packed_names:
+                    for sprite_name in list(packed_names):
+                        if sprite_name:
+                            # Mark this as from an atlas
+                            sprites.append({
+                                "name": str(sprite_name),
+                                "atlas": atlas_name,
+                                "bundle": bundle_name,
+                                "has_vertex_data": False,  # Atlas sprites typically don't
+                                "image_data": None,  # Atlas sprites need special handling
+                                **self._create_default_status(),
+                            })
+        finally:
+            # Clean up UnityPy environment
             try:
-                data = obj.read()
-            except Exception:
-                continue
-
-            name = self._get_asset_name(data)
-            if not name:
-                continue
-
-            # Extract sprite metadata
-            sprite_data = self._extract_sprite_data(data, bundle_name)
-            if sprite_data:
-                sprites.append(sprite_data)
-
-        # Also check SpriteAtlas
-        for obj in env.objects:
-            if obj.type.name != "SpriteAtlas":
-                continue
-
-            try:
-                data = obj.read()
-            except Exception:
-                continue
-
-            atlas_name = self._get_asset_name(data) or "UnnamedAtlas"
-            packed_names = getattr(data, "m_PackedSpriteNamesToIndex", None)
-
-            if packed_names:
-                for sprite_name in list(packed_names):
-                    if sprite_name:
-                        # Mark this as from an atlas
-                        sprites.append({
-                            "name": str(sprite_name),
-                            "atlas": atlas_name,
-                            "bundle": bundle_name,
-                            "has_vertex_data": False,  # Atlas sprites typically don't
-                            "image_data": None,  # Atlas sprites need special handling
-                            **self._create_default_status(),
-                        })
+                del env
+            except:
+                pass
+            gc.collect()
 
         return sprites
 
@@ -111,12 +130,18 @@ class SpriteExtractor(BaseAssetExtractor):
         try:
             image = sprite_obj.image
             if image:
-                # Convert PIL Image to bytes for later processing
-                import io
-                buf = io.BytesIO()
-                image.save(buf, format='PNG')
-                image_data = buf.getvalue()
+                # Skip very large images to prevent memory issues
+                if image.width > 4096 or image.height > 4096:
+                    # Too large, skip image data but keep metadata
+                    pass
+                else:
+                    # Convert PIL Image to bytes for later processing
+                    import io
+                    buf = io.BytesIO()
+                    image.save(buf, format='PNG')
+                    image_data = buf.getvalue()
         except Exception:
+            # Image extraction failed, continue without image data
             pass
 
         return {
