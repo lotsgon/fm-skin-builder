@@ -206,7 +206,7 @@ jobs:
         with:
           projectPath: frontend
           tauriScript: npm run tauri
-          args: ${{ matrix.settings.target != 'universal-apple-darwin' && format('-- --target {0}', matrix.settings.target) || '' }}
+          args: ${{ matrix.settings.target != 'universal-apple-darwin' && format('--target {0}', matrix.settings.target) || '' }}
 
       - name: Prepare artifacts
         shell: bash
