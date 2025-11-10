@@ -86,13 +86,13 @@ def patch_sprite_texture(sprites_path, atlas_path, filter_keywords=("star",)):
 
 
 ## ⚠️ Implementation Notes
-Sprite rects (m_RD.rect) must not change — only texture reference updates.
+- Sprite rects (m_RD.rect) must not change — only texture reference updates.
 
-Keep the same suffixes (_1x/_2x/_4x) for correct runtime resolution.
+- Keep the same suffixes (_1x/_2x/_4x) for correct runtime resolution.
 
-If FM caches sprites in memory, ensure cache-clearing between runs (game restart or force asset reload).
+- If FM caches sprites in memory, ensure cache-clearing between runs (game restart or force asset reload).
 
-Similar logic could be reused for other runtime-driven SIImage assets beyond rating stars.
+- Similar logic could be reused for other runtime-driven SIImage assets beyond rating stars.
 
 ##  🧩 Future Extension (Optional)
 Add detection for SITextureImage textures (club kits) and replace base recolourable templates.

@@ -170,7 +170,12 @@ def _fit_positions_to_sprite(
 
     scale_x = width_units / mesh_width
     scale_y = height_units / mesh_height
-    uniform_scale = min(scale_x, scale_y) * max(scale_override, 1e-6)
+    if scale_override < 0:
+        log.warning("Negative scale_override (%f) is invalid; using 1e-6 instead.", scale_override)
+        scale_override_used = 1e-6
+    else:
+        scale_override_used = scale_override
+    uniform_scale = min(scale_x, scale_y) * scale_override_used
 
     center_x = (min_x + max_x) * 0.5
     center_y = (min_y + max_y) * 0.5
@@ -280,8 +285,8 @@ def replace_vector_sprite(
             if hasattr(submesh, "triangleCount"):
                 try:
                     submesh.triangleCount = index_count // 3
-                except Exception:
-                    pass
+                except Exception as e:
+                    log.warning(f"[VECTOR] Failed to set submesh.triangleCount: {e}")
             if getattr(submesh, "localAABB", None) is not None:
                 try:
                     from UnityPy.classes.math import Vector3f
@@ -294,8 +299,8 @@ def replace_vector_sprite(
                     extent = Vector3f(half_width, half_height, 0.0)
                     submesh.localAABB.m_Center = center
                     submesh.localAABB.m_Extent = extent
-                except Exception:
-                    pass
+                except Exception as e:
+                    log.warning(f"[VECTOR] Failed to set localAABB: {e}")
 
         # NOTE: We keep the SpriteAtlas reference intact. Even though the sprite references
         # an atlas, the vertex data and mesh should take precedence when rendered.
@@ -312,8 +317,8 @@ def replace_vector_sprite(
 
         try:
             sprite_obj.m_IsPolygon = True
-        except Exception:
-            pass
+        except Exception as e:
+            log.warning(f"[VECTOR] Failed to set m_IsPolygon: {e}")
 
         # Save the sprite
         if hasattr(sprite_obj, "save"):

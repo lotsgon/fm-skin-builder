@@ -48,8 +48,8 @@ def _svg_to_png_bytes(svg_path: Path, width: int = 512, height: int = 512) -> Op
                         scale_x = width / drawing.width
                         scale_y = height / drawing.height
                         drawing.scale(scale_x, scale_y)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    log.debug(f"[VECTOR] Failed to scale drawing for {svg_path}: {exc}")
                 try:
                     png_bytes = renderPM.drawToString(drawing, fmt="PNG")
                 except AttributeError:
@@ -58,6 +58,7 @@ def _svg_to_png_bytes(svg_path: Path, width: int = 512, height: int = 512) -> Op
                     png_bytes = buf.getvalue()
                 return png_bytes
         except ImportError:
+            # svglib/reportlab not installed; try next fallback for SVG conversion
             pass
         except Exception as exc:
             log.debug(
@@ -510,8 +511,7 @@ def _coerce_vector_color(value: Any) -> Optional[Tuple[int, int, int, int]]:
                     if len(comps) == len(parts):
                         if len(comps) == 3:
                             comps.append(255.0)
-                        # type: ignore[return-value]
-                        return tuple(_clamp_byte(c) for c in comps)
+                        return tuple(_clamp_byte(c) for c in comps)  # type: ignore[return-value]
 
     if isinstance(value, (list, tuple)):
         comps = list(value)
@@ -1452,8 +1452,6 @@ def swap_textures(
                 for k, v in loaded.items():
                     if isinstance(k, str):
                         key = k
-                        if key.endswith("_*"):
-                            key = key[:-2] + "_*"
                         k_noext, _ = _strip_image_extension(key)
                         target_key = k_noext
 
