@@ -229,29 +229,58 @@ The project includes a comprehensive GitHub Actions workflow that builds for all
 
 ### Workflow Overview
 
-The `.github/workflows/build-app.yml` workflow:
+The build system uses **two separate workflows** for optimal performance:
 
-1. **Builds on multiple platforms**:
-   - Ubuntu 22.04 (Linux x86_64)
-   - Windows Latest (x86_64)
-   - macOS Latest (x86_64 and ARM64)
+#### CI Tests (`.github/workflows/ci.yml`)
+Runs on every push and PR:
+- **Python tests**: Runs pytest suite
+- **Frontend tests**: Runs Vitest suite
+- **Linting**: Ruff (Python), ESLint (TypeScript), cargo fmt/clippy (Rust)
+- Fast feedback (~2-3 minutes)
 
-2. **For each platform**:
-   - Sets up dependencies (Rust, Node, Python)
-   - Runs Python tests
-   - Runs frontend tests
-   - Builds Python backend with PyInstaller
-   - Builds Tauri application
-   - Signs the build (if configured)
-   - Uploads artifacts
+#### Build Application (`.github/workflows/build-app.yml`)
+Optimized multi-stage build process:
 
-3. **Tests the builds**:
-   - Validates Linux AppImage structure
-   - Verifies Windows installer exists
+1. **Test Stage** (parallel):
+   - Runs Python and frontend tests
+   - Ensures code quality before building
 
-4. **Artifacts**:
-   - Retained for 30 days
-   - Named by platform (e.g., `fm-skin-builder-linux`)
+2. **Backend Build Stage** (parallel, ~2-3 minutes per platform):
+   - Builds Python backend with PyInstaller on each platform
+   - Caches backend binaries as artifacts
+   - Platforms:
+     - ubuntu-latest (Linux)
+     - macos-15-intel (macOS Intel)
+     - windows-latest (Windows)
+
+3. **Application Build Stage** (~5-7 minutes per platform):
+   - Downloads pre-built backend for platform
+   - Installs minimal dependencies (faster than before)
+   - Builds frontend assets
+   - Uses `tauri-apps/tauri-action` for optimized builds
+   - Signs builds (if configured)
+   - Creates native installers:
+     - **Linux**: AppImage + .deb (ubuntu-latest)
+     - **Windows**: NSIS installer + MSI (windows-latest, embedded WebView2)
+     - **macOS**: Separate builds:
+       - Intel x86_64 (macos-15-intel)
+       - ARM64 (macos-latest)
+       - Universal binary (macos-latest)
+
+4. **Release Stage** (on version tags):
+   - Automatically creates GitHub release
+   - Uploads all platform artifacts
+   - Generates release notes
+
+**Supported macOS Versions**: 10.13+ through latest (including 15.6.1)
+
+**Key Optimizations**:
+- Backend built once per platform, reused for all builds
+- Tests run in parallel, don't block builds
+- Minimal Linux dependencies (only WebKit essentials)
+- Embedded WebView2 on Windows (no runtime download)
+- Universal macOS binaries for maximum compatibility
+- Total build time: **~8-12 minutes** for all platforms
 
 ### Downloading Artifacts
 
