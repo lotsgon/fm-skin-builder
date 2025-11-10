@@ -197,9 +197,24 @@ class TextureExtractor(BaseAssetExtractor):
                 }
 
             # Access image - this is where segfaults often occur
-            # Wrap in multiprocessing to isolate segfaults (future)
             log.info(f"    Accessing .image property for {name}...")
             sys.stdout.flush()
+
+            # On macOS, format 28 (DXT1) causes segfaults in UnityPy's decoder
+            # Skip it on macOS but allow on Linux
+            import platform
+            if platform.system() == 'Darwin' and texture_format == 28:
+                log.warning(f"    Skipping format 28 (DXT1) on macOS - known decoder crash")
+                return {
+                    "name": name,
+                    "bundle": bundle_name,
+                    "type": texture_type,
+                    "width": width,
+                    "height": height,
+                    "image_data": None,
+                    **self._create_default_status(),
+                }
+
             image = texture_obj.image
             log.info(f"    Image accessed successfully")
             sys.stdout.flush()
