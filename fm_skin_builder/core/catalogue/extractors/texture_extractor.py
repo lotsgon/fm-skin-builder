@@ -10,6 +10,9 @@ from typing import List, Dict, Any, Optional
 import UnityPy
 
 from .base import BaseAssetExtractor
+from ...logger import get_logger
+
+log = get_logger(__name__)
 
 
 class TextureExtractor(BaseAssetExtractor):
@@ -107,7 +110,37 @@ class TextureExtractor(BaseAssetExtractor):
                     **self._create_default_status(),
                 }
 
+            # Check texture format - some formats cause segfaults
+            texture_format = getattr(texture_obj, "m_TextureFormat", None)
+
+            # Log texture details for debugging
+            log.debug(f"    Processing texture: {name} (format={texture_format}, {width}x{height})")
+
+            # Skip problematic texture formats that cause segfaults
+            # These are known to crash UnityPy on certain platforms
+            # Common problematic formats:
+            # - ASTC formats on some platforms
+            # - ETC formats without decoders
+            # - BC7 on older systems
+            problematic_formats = [
+                # Will be populated as we discover them
+            ]
+
+            if texture_format in problematic_formats:
+                log.warning(f"    Skipping texture {name} with problematic format {texture_format}")
+                # Skip image extraction but keep metadata
+                return {
+                    "name": name,
+                    "bundle": bundle_name,
+                    "type": texture_type,
+                    "width": width,
+                    "height": height,
+                    "image_data": None,
+                    **self._create_default_status(),
+                }
+
             # Access image - this is where segfaults often occur
+            # Wrap in multiprocessing to isolate segfaults (future)
             image = texture_obj.image
             if image:
                 # For large images, convert to thumbnail immediately to save memory
