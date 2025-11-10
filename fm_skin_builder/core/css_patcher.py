@@ -905,6 +905,8 @@ class SkinPatchPipeline:
                 )
                 return PipelineResult.empty()
 
+        bundle_files = self._sorted_bundle_files(bundle_files)
+
         bundles_requested = len(bundle_files)
 
         skin_is_known = (self.css_dir / "config.json").exists()
@@ -1000,6 +1002,20 @@ class SkinPatchPipeline:
             summary_lines=summary_lines,
         )
 
+    @staticmethod
+    def _bundle_sort_key(path: Path) -> Tuple[int, str]:
+        name_lower = path.name.lower()
+        if "spriteatlas" in name_lower:
+            return (0, name_lower)
+        if "atlas" in name_lower:
+            return (1, name_lower)
+        return (2, name_lower)
+
+    def _sorted_bundle_files(self, bundle_files: List[Path]) -> List[Path]:
+        if len(bundle_files) <= 1:
+            return list(bundle_files)
+        return sorted(bundle_files, key=self._bundle_sort_key)
+
     def _process_bundle(
         self,
         bundle_path: Path,
@@ -1069,14 +1085,17 @@ class SkinPatchPipeline:
                         skin_cache_dir=skin_cache_dir,
                     )
                 texture_names = gather_texture_names_from_index(bundle_index)
-                if should_swap_textures(
+                should_swap = should_swap_textures(
                     bundle_name=bundle_path.name,
                     texture_names=texture_names,
                     target_names=target_names_from_map,
                     replace_stems=replace_stems,
                     want_icons=want_icons,
                     want_backgrounds=want_bgs,
-                ):
+                )
+                has_pending_jobs = texture_service.has_pending_jobs(
+                    bundle_path.name)
+                if should_swap or has_pending_jobs:
                     try:
                         texture_service.apply(
                             bundle_ctx,
@@ -1089,7 +1108,7 @@ class SkinPatchPipeline:
                             f"[WARN] Texture swap skipped due to error: {exc}")
                 else:
                     log.debug(
-                        "[TEXTURE] Prefilter: skipping bundle with no matching names.")
+                        "[TEXTURE] Prefilter: skipping bundle with no matching names or pending sprite rebinds.")
 
             saved_path = bundle_ctx.save_modified(
                 self.out_dir, dry_run=self.options.dry_run

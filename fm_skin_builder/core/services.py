@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Sequence, Set, Tuple, TYPE_CHECKING
+from typing import Optional, Sequence, Set, Tuple, TYPE_CHECKING, DefaultDict, List
 
 from .context import BundleContext, PatchReport
-from .textures import swap_textures, TextureSwapResult
+from .textures import (
+    swap_textures,
+    TextureSwapResult,
+    apply_dynamic_sprite_rebinds,
+    DynamicSpriteRebind,
+)
 from .css_sources import CollectedCss
 
 if TYPE_CHECKING:  # pragma: no cover - circular import safe typing
@@ -68,7 +74,11 @@ class TextureSwapService:
 
     def __init__(self, options: TextureSwapOptions):
         self.options = options
-        self._includes_lower = {x.lower() for x in options.includes}
+        # Dynamic Sprite Replacement (SIImage Fix): queue rebind jobs for paired bundles.
+        self._pending_dynamic_jobs: DefaultDict[str, List[DynamicSpriteRebind]] = defaultdict(list)
+
+    def has_pending_jobs(self, bundle_name: str) -> bool:
+        return bool(self._pending_dynamic_jobs.get(bundle_name.lower(), []))
 
     def apply(
         self,
@@ -77,24 +87,50 @@ class TextureSwapService:
         out_dir: Path,
         report: PatchReport,
     ) -> TextureSwapResult:
-        if not self._should_swap():
-            return TextureSwapResult(0, None)
+        bundle_key = bundle.bundle_path.name.lower()
+        pending_jobs = self._pending_dynamic_jobs.pop(bundle_key, [])
+        should_swap = self._should_swap()
+
+        if not should_swap and not pending_jobs:
+            return TextureSwapResult(0, None, {})
 
         bundle.load()
-        result: TextureSwapResult = swap_textures(
-            bundle_path=bundle.bundle_path,
-            skin_dir=skin_dir,
-            includes=list(self.options.includes),
-            out_dir=out_dir,
-            dry_run=self.options.dry_run,
-            env=bundle.env,
-            defer_save=True,
-        )
-        if result.replaced_count:
-            report.texture_replacements += result.replaced_count
-            if not self.options.dry_run:
-                bundle.mark_dirty()
-        return result
+
+        pointer_updates_total = apply_dynamic_sprite_rebinds(bundle.env, pending_jobs)
+
+        result: TextureSwapResult = TextureSwapResult(0, None, {})
+        if should_swap:
+            result = swap_textures(
+                bundle_path=bundle.bundle_path,
+                skin_dir=skin_dir,
+                includes=list(self.options.includes),
+                out_dir=out_dir,
+                dry_run=self.options.dry_run,
+                env=bundle.env,
+                defer_save=True,
+            )
+            if result.replaced_count:
+                report.texture_replacements += result.replaced_count
+
+        immediate_jobs: List[DynamicSpriteRebind] = []
+        for target_name, job_list in result.dynamic_sprite_jobs.items():
+            target_key = target_name.lower()
+            if target_key == bundle_key:
+                immediate_jobs.extend(job_list)
+            else:
+                self._pending_dynamic_jobs[target_key].extend(job_list)
+
+        if immediate_jobs:
+            pointer_updates_total += apply_dynamic_sprite_rebinds(bundle.env, immediate_jobs)
+
+        if pointer_updates_total:
+            report.texture_replacements += pointer_updates_total
+
+        total_swaps = result.replaced_count + pointer_updates_total
+        if total_swaps and not self.options.dry_run:
+            bundle.mark_dirty()
+
+        return TextureSwapResult(total_swaps, result.out_file, {})
 
     def _should_swap(self) -> bool:
         return any(

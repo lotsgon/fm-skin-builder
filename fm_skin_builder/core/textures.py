@@ -1,9 +1,12 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, DefaultDict, NamedTuple
+from typing import Any, Dict, List, Optional, Tuple, DefaultDict, NamedTuple, Iterable, Set
 from collections import defaultdict
 import os
 from io import BytesIO
+import re
+import xml.etree.ElementTree as ET
+import fnmatch
 
 import UnityPy
 import gc
@@ -11,6 +14,87 @@ import gc
 from .logger import get_logger
 
 log = get_logger(__name__)
+
+
+def _svg_to_png_bytes(svg_path: Path, width: int = 512, height: int = 512) -> Optional[bytes]:
+    """Convert an SVG file to PNG bytes, preferring cairosvg with fallbacks."""
+
+    try:
+        if width <= 0:
+            width = 512
+        if height <= 0:
+            height = 512
+
+        try:
+            import cairosvg  # type: ignore
+
+            return cairosvg.svg2png(
+                url=str(svg_path),
+                output_width=width,
+                output_height=height,
+            )
+        except ImportError:
+            pass
+
+        try:
+            from svglib.svglib import svg2rlg  # type: ignore
+            from reportlab.graphics import renderPM  # type: ignore
+
+            drawing = svg2rlg(str(svg_path))
+            if drawing:
+                # Scale drawing to requested size when possible
+                try:
+                    if getattr(drawing, "width", 0) and getattr(drawing, "height", 0):
+                        scale_x = width / drawing.width
+                        scale_y = height / drawing.height
+                        drawing.scale(scale_x, scale_y)
+                except Exception as exc:
+                    log.debug(f"[VECTOR] Failed to scale drawing for {svg_path}: {exc}")
+                try:
+                    png_bytes = renderPM.drawToString(drawing, fmt="PNG")
+                except AttributeError:
+                    buf = BytesIO()
+                    renderPM.drawToFile(drawing, buf, fmt="PNG")
+                    png_bytes = buf.getvalue()
+                return png_bytes
+        except ImportError:
+            # svglib/reportlab not installed; try next fallback for SVG conversion
+            pass
+        except Exception as exc:
+            log.debug(
+                f"[VECTOR] svglib conversion failed for {svg_path}: {exc}")
+
+        try:
+            from PIL import Image  # type: ignore
+
+            img = Image.open(svg_path)
+            img = img.resize((width, height), Image.Resampling.LANCZOS)
+            buf = BytesIO()
+            img.save(buf, format="PNG")
+            return buf.getvalue()
+        except Exception:
+            pass
+
+        log.warning(
+            f"SVG support not available. Install 'cairosvg' or 'svglib' to use SVG images: {svg_path.name}"
+        )
+        return None
+    except Exception as exc:
+        log.warning(f"Failed to convert SVG {svg_path.name}: {exc}")
+        return None
+
+
+class DynamicSpriteRebind(NamedTuple):
+    """Dynamic Sprite Replacement (SIImage Fix): describes a sprite pointer rebind."""
+
+    sprite_name: str
+    texture_path_id: int
+    texture_file_id: Optional[int] = None
+
+
+class TextureSwapInternalResult(NamedTuple):
+    replaced: int
+    dynamic_jobs: Dict[str, List[DynamicSpriteRebind]]
 
 
 def _collect_image_bytes(root: Path) -> Tuple[Dict[str, bytes], Dict[str, str]]:
@@ -23,54 +107,6 @@ def _collect_image_bytes(root: Path) -> Tuple[Dict[str, bytes], Dict[str, str]]:
     exts: Dict[str, str] = {}
     if not root.exists():
         return replacements, exts
-
-    def _svg_to_png_bytes(svg_path: Path, width: int = 512, height: int = 512) -> Optional[bytes]:
-        """Convert SVG to PNG bytes. Returns None if conversion fails."""
-        try:
-            # Try cairosvg first (best quality)
-            try:
-                import cairosvg
-                png_bytes = cairosvg.svg2png(
-                    url=str(svg_path), output_width=width, output_height=height)
-                return png_bytes
-            except ImportError:
-                pass
-
-            # Fallback to svglib + reportlab
-            try:
-                from svglib.svglib import svg2rlg
-                from reportlab.graphics import renderPM
-                from io import BytesIO
-                drawing = svg2rlg(svg_path)
-                if drawing:
-                    # Scale to target size
-                    drawing.width = width
-                    drawing.height = height
-                    drawing.scale(width / drawing.width,
-                                  height / drawing.height)
-                    buf = BytesIO()
-                    renderPM.drawToFile(drawing, buf, fmt="PNG")
-                    return buf.getvalue()
-            except ImportError:
-                pass
-
-            # Fallback to PIL with SVG plugin (requires Pillow with librsvg)
-            try:
-                from PIL import Image
-                img = Image.open(svg_path)
-                img = img.resize((width, height), Image.Resampling.LANCZOS)
-                buf = BytesIO()
-                img.save(buf, format="PNG")
-                return buf.getvalue()
-            except Exception:
-                pass
-
-            log.warning(
-                f"SVG support not available. Install 'cairosvg' or 'svglib' to use SVG images: {svg_path.name}")
-            return None
-        except Exception as e:
-            log.warning(f"Failed to convert SVG {svg_path.name}: {e}")
-            return None
 
     for p in sorted(root.rglob("*")):
         if not p.is_file():
@@ -132,6 +168,7 @@ class SpriteAtlasInfo(NamedTuple):
     sprite_index: int
     sprite_path_id: int
     texture_path_id: int
+    texture_file_id: Optional[int]
     rect_x: int
     rect_y: int
     rect_width: int
@@ -247,6 +284,7 @@ def _parse_sprite_atlas(env) -> Dict[str, SpriteAtlasInfo]:
                     # Handle negative path IDs
                     if texture_path_id < 0:
                         texture_path_id = texture_path_id & 0xFFFFFFFFFFFFFFFF
+                    texture_file_id = getattr(texture_ptr, "m_FileID", None)
 
                     # Store sprite info (round floats to ints)
                     sprite_atlas_map[str(sprite_name)] = SpriteAtlasInfo(
@@ -254,6 +292,8 @@ def _parse_sprite_atlas(env) -> Dict[str, SpriteAtlasInfo]:
                         sprite_index=idx,
                         sprite_path_id=sprite_path_id,
                         texture_path_id=texture_path_id,
+                        texture_file_id=texture_file_id if isinstance(
+                            texture_file_id, int) else None,
                         rect_x=int(round(rect_x)),
                         rect_y=int(round(rect_y)),
                         rect_width=int(round(rect_width)),
@@ -276,13 +316,424 @@ def _parse_sprite_atlas(env) -> Dict[str, SpriteAtlasInfo]:
     return sprite_atlas_map
 
 
-def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Optional[Dict[str, str]] = None, name_map: Optional[Dict[str, str]] = None) -> int:
+def _derive_sprite_bundle_candidates(bundle_name: str) -> List[str]:
+    """Dynamic Sprite Replacement (SIImage Fix): infer sprite bundle names paired with an atlas."""
+
+    bundle_name = bundle_name.lower()
+    stem, ext = os.path.splitext(bundle_name)
+    candidates: Set[str] = set()
+
+    # Replace common atlas tokens with sprite indicators
+    replacements = (
+        ("spriteatlases", "s"),
+        ("spriteatlas", "sprites"),
+        ("atlases", "sprites"),
+        ("atlas", "sprites"),
+    )
+    for old, new in replacements:
+        if old in stem:
+            candidates.add(stem.replace(old, new) + ext)
+
+    # Insert _sprites before scale suffixes as fallback
+    for suffix in ("_1x", "_2x", "_3x", "_4x", "_assets_1x", "_assets_2x", "_assets_3x", "_assets_4x"):
+        if stem.endswith(suffix):
+            prefix = stem[: -len(suffix)]
+            candidates.add(prefix + "_sprites" + suffix + ext)
+            candidates.add(prefix + "sprites" + suffix + ext)
+
+    if not candidates:
+        candidates.add(stem + ext)
+    return list(candidates)
+
+
+def _read_svg_path_commands(svg_file: Path) -> Optional[str]:
+    """Return concatenated SVG path commands from file."""
+
+    try:
+        tree = ET.parse(svg_file)
+    except Exception as exc:
+        log.warning(f"[VECTOR] Failed to parse SVG '{svg_file}': {exc}")
+        return None
+
+    root = tree.getroot()
+    paths: List[str] = []
+
+    def _fmt(value: float) -> str:
+        out = f"{value:.6f}"
+        out = out.rstrip("0").rstrip(".")
+        return out if out else "0"
+
+    def _parse_length(raw: Optional[str], default: float = 0.0) -> float:
+        if raw is None:
+            return default
+        value = raw.strip()
+        if not value:
+            return default
+        try:
+            return float(value)
+        except ValueError:
+            match = re.match(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", value)
+            if match:
+                try:
+                    return float(match.group(0))
+                except ValueError:
+                    return default
+        return default
+
+    def _circle_to_path(elem: ET.Element) -> Optional[str]:
+        cx = _parse_length(elem.get("cx"))
+        cy = _parse_length(elem.get("cy"))
+        r = _parse_length(elem.get("r"))
+        if r <= 0:
+            return None
+        return (
+            f"M {_fmt(cx - r)} {_fmt(cy)} "
+            f"A {_fmt(r)} {_fmt(r)} 0 1 0 {_fmt(cx + r)} {_fmt(cy)} "
+            f"A {_fmt(r)} {_fmt(r)} 0 1 0 {_fmt(cx - r)} {_fmt(cy)} Z"
+        )
+
+    def _ellipse_to_path(elem: ET.Element) -> Optional[str]:
+        cx = _parse_length(elem.get("cx"))
+        cy = _parse_length(elem.get("cy"))
+        rx = _parse_length(elem.get("rx"))
+        ry = _parse_length(elem.get("ry"))
+        if rx <= 0 or ry <= 0:
+            return None
+        return (
+            f"M {_fmt(cx - rx)} {_fmt(cy)} "
+            f"A {_fmt(rx)} {_fmt(ry)} 0 1 0 {_fmt(cx + rx)} {_fmt(cy)} "
+            f"A {_fmt(rx)} {_fmt(ry)} 0 1 0 {_fmt(cx - rx)} {_fmt(cy)} Z"
+        )
+
+    def _rect_to_path(elem: ET.Element) -> Optional[str]:
+        x = _parse_length(elem.get("x"))
+        y = _parse_length(elem.get("y"))
+        width = _parse_length(elem.get("width"))
+        height = _parse_length(elem.get("height"))
+        if width <= 0 or height <= 0:
+            return None
+        x2 = x + width
+        y2 = y + height
+        return (
+            f"M {_fmt(x)} {_fmt(y)} "
+            f"L {_fmt(x2)} {_fmt(y)} "
+            f"L {_fmt(x2)} {_fmt(y2)} "
+            f"L {_fmt(x)} {_fmt(y2)} Z"
+        )
+
+    def _points_to_path(points_attr: Optional[str]) -> Optional[str]:
+        if not points_attr:
+            return None
+        coords = re.findall(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", points_attr)
+        if len(coords) < 4 or len(coords) % 2 != 0:
+            return None
+        pairs = [(_fmt(float(coords[i])), _fmt(float(coords[i + 1])))
+                 for i in range(0, len(coords), 2)]
+        if len(pairs) < 2:
+            return None
+        path = [f"M {pairs[0][0]} {pairs[0][1]}"]
+        for x, y in pairs[1:]:
+            path.append(f"L {x} {y}")
+        path.append("Z")
+        return " ".join(path)
+
+    for elem in root.iter():
+        tag = elem.tag.split('}', 1)[-1] if '}' in elem.tag else elem.tag
+        tag_lower = tag.lower()
+        path_cmd: Optional[str] = None
+        if tag_lower == "path":
+            d_attr = elem.get("d")
+            if d_attr:
+                path_cmd = d_attr.strip()
+        elif tag_lower == "circle":
+            path_cmd = _circle_to_path(elem)
+        elif tag_lower == "ellipse":
+            path_cmd = _ellipse_to_path(elem)
+        elif tag_lower == "rect":
+            path_cmd = _rect_to_path(elem)
+        elif tag_lower in {"polygon", "polyline"}:
+            path_cmd = _points_to_path(elem.get("points"))
+
+        if path_cmd:
+            paths.append(path_cmd)
+
+    if not paths:
+        log.warning(f"[VECTOR] No <path> commands found in SVG '{svg_file}'")
+        return None
+
+    return " ".join(paths)
+
+
+def _coerce_vector_color(value: Any) -> Optional[Tuple[int, int, int, int]]:
+    """Normalise vector config colour values to 0-255 RGBA."""
+
+    if value is None:
+        return None
+
+    def _clamp_byte(component: float) -> int:
+        return max(0, min(255, int(round(component))))
+
+    if isinstance(value, str):
+        v = value.strip()
+        if v.startswith("#"):
+            s = v.lstrip("#")
+            if len(s) in {3, 4}:
+                s = "".join(ch * 2 for ch in s)
+            if len(s) == 6:
+                s += "ff"
+            if len(s) == 8:
+                r = int(s[0:2], 16)
+                g = int(s[2:4], 16)
+                b = int(s[4:6], 16)
+                a = int(s[6:8], 16)
+                return (_clamp_byte(r), _clamp_byte(g), _clamp_byte(b), _clamp_byte(a))
+        else:
+            match = re.match(r"rgba?\(([^)]+)\)", v, re.IGNORECASE)
+            if match:
+                parts = [p.strip() for p in match.group(1).split(',')]
+                if len(parts) in {3, 4}:
+                    comps: List[float] = []
+                    for idx, comp in enumerate(parts):
+                        if comp.endswith('%'):
+                            comps.append(float(comp[:-1]) * 2.55)
+                        else:
+                            try:
+                                val = float(comp)
+                            except ValueError:
+                                comps.append(0.0)
+                                continue
+                            if idx == 3 and len(parts) == 4 and val <= 1.0:
+                                comps.append(val * 255.0)
+                            elif val <= 1.0:
+                                comps.append(val * 255.0)
+                            else:
+                                comps.append(val)
+                    if len(comps) == len(parts):
+                        if len(comps) == 3:
+                            comps.append(255.0)
+                        return tuple(_clamp_byte(c) for c in comps)  # type: ignore[return-value]
+
+    if isinstance(value, (list, tuple)):
+        comps = list(value)
+        if len(comps) not in (3, 4):
+            return None
+        normalised: List[int] = []
+        for comp in comps:
+            try:
+                num = float(comp)
+            except (TypeError, ValueError):
+                return None
+            if num <= 1.0:
+                normalised.append(_clamp_byte(num * 255.0))
+            else:
+                normalised.append(_clamp_byte(num))
+        if len(normalised) == 3:
+            normalised.append(255)
+        return tuple(normalised)  # type: ignore[return-value]
+
+    return None
+
+
+def _resolve_svg_path(
+    svg_value: str,
+    skin_root: Optional[Path],
+    map_dir: Optional[Path],
+) -> Optional[Path]:
+    path = Path(svg_value)
+    candidates: List[Path] = []
+
+    if path.is_absolute():
+        candidates.append(path)
+    else:
+        if map_dir is not None:
+            candidates.append(map_dir / path)
+        if skin_root is not None:
+            candidates.append(skin_root / path)
+            if not path.parts or path.parts[0] != "assets":
+                candidates.append(skin_root / "assets" / path)
+            if len(path.parts) <= 1:
+                candidates.append(skin_root / "assets" / "icons" / path)
+                candidates.append(skin_root / "assets" / "backgrounds" / path)
+
+    seen: Set[Path] = set()
+    for candidate in candidates:
+        resolved = candidate
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        if resolved.exists():
+            return resolved
+
+    log.warning(
+        f"[VECTOR] SVG file not found: {svg_value} (searched: {[str(c) for c in candidates]})")
+    return None
+
+
+def _normalise_vector_config(config: Dict[str, Any], skin_root: Optional[Path]) -> Optional[Dict[str, Any]]:
+    """Prepare vector replacement config, resolving files and colours."""
+
+    if not isinstance(config, dict):
+        return None
+
+    normalized = dict(config)
+    normalized.pop("type", None)
+    map_dir_str = normalized.pop("__map_dir", None)
+    map_dir = Path(map_dir_str) if map_dir_str else None
+
+    svg_value = None
+    for key in ("svg_file", "svg", "source"):
+        candidate = normalized.pop(key, None)
+        if isinstance(candidate, str):
+            svg_value = candidate
+            break
+
+    if svg_value:
+        svg_path = _resolve_svg_path(svg_value, skin_root, map_dir)
+        if svg_path is None:
+            return None
+        svg_commands = _read_svg_path_commands(svg_path)
+        if not svg_commands:
+            return None
+        normalized.setdefault("shape", "custom")
+        normalized["svg_path"] = svg_commands
+        normalized["__svg_file_path"] = str(svg_path)
+
+    color_value = normalized.get("color")
+    coerced = _coerce_vector_color(color_value)
+    if coerced is not None:
+        normalized["color"] = coerced
+
+    return normalized
+
+
+def _render_vector_config_to_png(
+    config: Dict[str, Any],
+    width: int,
+    height: int,
+) -> Optional[bytes]:
+    """Rasterise a vector config to PNG bytes sized for a sprite atlas slot."""
+
+    if width <= 0 or height <= 0:
+        return None
+
+    svg_file = config.get("__svg_file_path")
+    if svg_file:
+        svg_path = Path(svg_file)
+        png_bytes = _svg_to_png_bytes(svg_path, width=width, height=height)
+        if png_bytes:
+            return png_bytes
+
+    shape = config.get("shape")
+    color = config.get("color")
+
+    try:
+        from PIL import Image, ImageDraw  # type: ignore
+
+        img = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        fill = (255, 255, 255, 255)
+        if isinstance(color, (list, tuple)) and len(color) in {3, 4}:
+            rgba = list(color) + [255] * (4 - len(color))
+            fill = tuple(int(v) for v in rgba)
+
+        if shape == "circle":
+            draw.ellipse([(0, 0), (width - 1, height - 1)], fill=fill)
+        elif shape == "square":
+            draw.rectangle([(0, 0), (width, height)], fill=fill)
+        else:
+            log.warning(
+                "[VECTOR] Unable to rasterise custom vector without SVG source")
+            return None
+
+        buf = BytesIO()
+        img.save(buf, format="PNG")
+        return buf.getvalue()
+    except ImportError:
+        log.warning("[VECTOR] Pillow not available for vector rasterisation")
+    except Exception as exc:
+        log.warning(f"[VECTOR] Failed to rasterise vector config: {exc}")
+
+    return None
+
+
+def apply_dynamic_sprite_rebinds(env, jobs: Iterable[DynamicSpriteRebind]) -> int:
+    """Dynamic Sprite Replacement (SIImage Fix): rebind Sprite texture pointers in-place."""
+
+    jobs_list = list(jobs)
+    if not jobs_list:
+        return 0
+
+    jobs_by_name = {job.sprite_name.lower(): job for job in jobs_list}
+    updated = 0
+    for obj in getattr(env, "objects", []):
+        if getattr(getattr(obj, "type", None), "name", None) != "Sprite":
+            continue
+        try:
+            data = obj.read()
+        except Exception:
+            continue
+        sprite_name = getattr(data, "m_Name", None) or getattr(
+            data, "name", None)
+        if not sprite_name:
+            continue
+        job = jobs_by_name.get(str(sprite_name).lower())
+        if not job:
+            continue
+        rd = getattr(data, "m_RD", None)
+        texture_ptr = None
+        if rd is not None:
+            texture_ptr = getattr(rd, "texture", None) or getattr(
+                rd, "m_Texture", None)
+        if texture_ptr is None:
+            texture_ptr = getattr(data, "m_Texture", None)
+        if texture_ptr is None:
+            continue
+        try:
+            texture_ptr.m_PathID = job.texture_path_id
+            if job.texture_file_id is not None:
+                setattr(texture_ptr, "m_FileID", job.texture_file_id)
+            if hasattr(data, "save"):
+                data.save()
+            updated += 1
+        except Exception:
+            continue
+    return updated
+
+
+def _swap_textures_in_env(
+    env,
+    replacements: Dict[str, bytes],
+    repl_exts: Optional[Dict[str, str]] = None,
+    name_map: Optional[Dict[str, Any]] = None,
+    *,
+    bundle_path: Optional[Path] = None,
+    skin_root: Optional[Path] = None,
+) -> TextureSwapInternalResult:
     """Apply replacements to Texture2D assets and sprite atlas overlays in UnityPy env.
 
     Returns number of textures replaced + sprites overlaid.
     """
-    if not replacements:
-        return 0
+    has_vector_configs = False
+    if name_map:
+        for value in name_map.values():
+            if isinstance(value, dict) and value.get("type") == "vector":
+                has_vector_configs = True
+                break
+
+    if not replacements and not has_vector_configs:
+        return TextureSwapInternalResult(0, {})
+
+    dynamic_jobs: DefaultDict[str,
+                              List[DynamicSpriteRebind]] = defaultdict(list)
+    current_bundle_key = bundle_path.name.lower() if bundle_path else None
+    candidate_sprite_keys: List[str] = []
+    if bundle_path is not None:
+        for candidate in _derive_sprite_bundle_candidates(bundle_path.name):
+            key = candidate.lower()
+            if key not in candidate_sprite_keys:
+                candidate_sprite_keys.append(key)
+    if current_bundle_key and current_bundle_key not in candidate_sprite_keys:
+        candidate_sprite_keys.append(current_bundle_key)
 
     # Group env textures by base name and scale
     env_by_base: DefaultDict[str, Dict[int, object]] = defaultdict(dict)
@@ -519,22 +970,86 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
     sprite_atlas_map = _parse_sprite_atlas(env)
 
     # Track vector sprite replacements (processed separately)
-    vector_sprite_replacements: Dict[str, dict] = {}
+    vector_sprite_replacements: Dict[str, Dict[str, Any]] = {}
+    vector_mesh_pattern_map: Dict[str, Dict[str, Any]] = {}
+    vector_overlay_entries: Dict[str, str] = {}
 
     # Separate vector sprites from texture sprites in name_map
     texture_name_map: Dict[str, str] = {}
     if name_map:
         for key, value in name_map.items():
             if isinstance(value, dict) and value.get("type") == "vector":
-                vector_sprite_replacements[key] = value
+                vector_sprite_replacements[key] = dict(value)
             elif isinstance(value, str):
                 texture_name_map[key] = value
+
+    if vector_sprite_replacements:
+        vector_source_counter = 0
+        for target_name, vector_config in vector_sprite_replacements.items():
+            normalized = _normalise_vector_config(vector_config, skin_root)
+            if not normalized:
+                continue
+
+            force_mesh = str(normalized.get("mode", "")).lower() in {
+                "mesh", "vector", "mesh-only"}
+
+            base_pattern = target_name.lower()
+            patterns: Set[str] = {base_pattern}
+            if not re.search(r"[\*\?\[]", base_pattern):
+                if not any(base_pattern.endswith(f"_{scale}") for scale in ["1x", "2x", "3x", "4x"]):
+                    for scale in ["1x", "2x", "3x", "4x"]:
+                        patterns.add(f"{base_pattern}_{scale}")
+
+            matched_sprites: List[str] = []
+            if sprite_atlas_map and not force_mesh:
+                for pattern in patterns:
+                    for sprite_name in sprite_atlas_map.keys():
+                        if fnmatch.fnmatch(sprite_name.lower(), pattern):
+                            if sprite_name not in matched_sprites:
+                                matched_sprites.append(sprite_name)
+
+            rasterised_any = False
+            if matched_sprites:
+                for sprite_name in matched_sprites:
+                    atlas_info = sprite_atlas_map.get(sprite_name)
+                    if atlas_info is None:
+                        continue
+                    png_bytes = _render_vector_config_to_png(
+                        normalized,
+                        atlas_info.rect_width,
+                        atlas_info.rect_height,
+                    )
+                    if not png_bytes:
+                        continue
+                    replacement_key = f"__vector_sprite_{vector_source_counter}"
+                    vector_source_counter += 1
+                    src_by_base[replacement_key][1] = png_bytes
+                    if repl_exts is not None:
+                        src_ext_by_base[replacement_key][1] = "png"
+                    vector_overlay_entries[sprite_name] = replacement_key
+                    rasterised_any = True
+                    log.info(
+                        f"[VECTOR] Rasterised '{sprite_name}' to PNG {atlas_info.rect_width}x{atlas_info.rect_height}"
+                    )
+
+            if not rasterised_any or force_mesh:
+                for pattern in patterns:
+                    if pattern not in vector_mesh_pattern_map:
+                        vector_mesh_pattern_map[pattern] = dict(normalized)
+
+            if matched_sprites and not rasterised_any and not force_mesh:
+                log.warning(
+                    f"[VECTOR] Failed to rasterise any matches for '{target_name}'; falling back to mesh replacement"
+                )
+
+    if vector_overlay_entries:
+        for sprite_name, replacement_key in vector_overlay_entries.items():
+            texture_name_map[sprite_name] = replacement_key
 
     # Perform sprite atlas overlays
     sprite_overlays = 0
     if sprite_atlas_map and texture_name_map:
         # Expand wildcard patterns and scale-agnostic mappings
-        import fnmatch
         expanded_name_map: Dict[str, str] = {}
 
         for pattern, source_name in texture_name_map.items():
@@ -685,6 +1200,15 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
                 log.info(
                     f"[ATLAS] Overlaid sprite '{target_sprite_name}' with '{source_image_name}' at ({rect_x}, {rect_y}) size {rect_width}x{rect_height} in atlas '{atlas_info.atlas_name}'")
 
+                if candidate_sprite_keys:
+                    job = DynamicSpriteRebind(
+                        sprite_name=atlas_info.sprite_name,
+                        texture_path_id=texture_path_id,
+                        texture_file_id=atlas_info.texture_file_id,
+                    )
+                    for key in candidate_sprite_keys:
+                        dynamic_jobs[key].append(job)
+
             # Save modified atlas textures back
             for texture_path_id, (atlas_tex, atlas_img, tw, th) in modified_atlases.items():
                 try:
@@ -738,25 +1262,24 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
 
                 # Find the Sprite object by path_id
                 sprite_path_id = atlas_info.sprite_path_id
+                sprite_obj_found = False
                 for obj in getattr(env, "objects", []):
-                    if getattr(getattr(obj, "type", None), "name", None) != "Sprite":
-                        continue
-                    if getattr(obj, "path_id", None) != sprite_path_id:
-                        continue
-
-                    try:
-                        sprite_obj = obj.read()
-
-                        # Force sprite to regenerate its cached image from the modified atlas
-                        # by clearing any cached data and calling save
-                        if hasattr(sprite_obj, "save"):
-                            sprite_obj.save()
-                            sprites_updated += 1
-                            log.debug(
-                                f"[ATLAS] Updated Sprite object '{sprite_name}'")
-                    except Exception as e:
-                        log.debug(
-                            f"[ATLAS] Failed to update Sprite '{sprite_name}': {e}")
+                    if getattr(obj, "path_id", None) == sprite_path_id:
+                        try:
+                            sprite_data = obj.read()
+                            if hasattr(sprite_data, "save"):
+                                sprite_data.save()
+                                sprites_updated += 1
+                                sprite_obj_found = True
+                                log.info(
+                                    f"[ATLAS] Touched/saved Sprite object '{sprite_name}' (path_id={sprite_path_id})")
+                                break
+                        except Exception as e:
+                            log.warning(
+                                f"[ATLAS] Failed to save sprite object for '{sprite_name}': {e}")
+                if not sprite_obj_found:
+                    log.warning(
+                        f"[ATLAS] Could not find Sprite object for '{sprite_name}' with path_id {sprite_path_id} to save.")
 
             if sprites_updated > 0:
                 log.info(
@@ -770,62 +1293,92 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
 
     # Process vector sprite replacements (for Sprite objects with mesh data, no texture)
     vectors_replaced = 0
-    if vector_sprite_replacements:
+    vector_mesh_patterns = list(vector_mesh_pattern_map.items())
+    if vector_mesh_patterns:
         try:
             from .vector_sprites import replace_vector_sprite
 
-            # Expand scale-agnostic patterns for vector sprites
-            expanded_vector_map: Dict[str, dict] = {}
-            for target_name, vector_config in vector_sprite_replacements.items():
-                # Check if target already has scale suffix
-                if any(target_name.endswith(f"_{scale}") for scale in ["1x", "2x", "3x", "4x"]):
-                    expanded_vector_map[target_name] = vector_config
-                else:
-                    # Expand to all scales
-                    for scale in ["1x", "2x", "3x", "4x"]:
-                        expanded_vector_map[f"{target_name}_{scale}"] = vector_config
+            overlay_skip = {name.lower()
+                            for name in vector_overlay_entries.keys()}
 
-            # Find and process Sprite objects
-            for obj in env.objects:
-                if obj.type.name != "Sprite":
+            for obj in getattr(env, "objects", []):
+                if getattr(getattr(obj, "type", None), "name", None) != "Sprite":
                     continue
-
-                sprite_obj = obj.read()
-                sprite_name = getattr(sprite_obj, "m_Name", None) or getattr(
-                    sprite_obj, "name", None)
-
-                if not sprite_name or sprite_name not in expanded_vector_map:
-                    continue
-
-                # Check if this is actually a vector sprite (no texture reference)
-                rd = sprite_obj.m_RD
-                if rd.texture.m_FileID != 0 or rd.texture.m_PathID != 0:
-                    log.debug(
-                        f"[VECTOR] Skipping '{sprite_name}' - has texture reference (not a vector sprite)")
-                    continue
-
-                # Get vector configuration
-                vector_config = expanded_vector_map[sprite_name]
-                shape = vector_config.get("shape", "circle")
-                color = vector_config.get("color", [255, 255, 255, 255])
-
-                # Extract shape-specific parameters
-                kwargs = {k: v for k, v in vector_config.items() if k not in [
-                    "type", "shape", "color"]}
 
                 try:
-                    replace_vector_sprite(sprite_obj, shape, color, **kwargs)
-                    vectors_replaced += 1
-                    log.info(
-                        f"[VECTOR] Replaced '{sprite_name}' with {shape} (color={color})")
-                except Exception as e:
-                    log.warning(
-                        f"[VECTOR] Failed to replace '{sprite_name}': {e}")
+                    sprite_obj = obj.read()
+                except Exception:
+                    continue
 
-        except ImportError as e:
-            log.warning(f"[VECTOR] Vector sprite module not available: {e}")
-        except Exception as e:
-            log.warning(f"[VECTOR] Vector sprite replacement failed: {e}")
+                sprite_name = getattr(sprite_obj, "m_Name", None) or getattr(
+                    sprite_obj, "name", None)
+                if not sprite_name:
+                    continue
+
+                sprite_name_lower = str(sprite_name).lower()
+                if sprite_name_lower in overlay_skip:
+                    continue
+
+                vector_config: Optional[Dict[str, Any]] = None
+                for pattern, cfg in vector_mesh_patterns:
+                    if fnmatch.fnmatch(sprite_name_lower, pattern):
+                        vector_config = dict(cfg)
+                        break
+
+                if vector_config is None:
+                    continue
+
+                rd = getattr(sprite_obj, "m_RD", None)
+                texture_ptr = None
+                if rd is not None:
+                    texture_ptr = getattr(rd, "texture", None) or getattr(
+                        rd, "m_Texture", None)
+                if texture_ptr is None:
+                    texture_ptr = getattr(sprite_obj, "m_Texture", None)
+
+                file_id = getattr(texture_ptr, "m_FileID",
+                                  None) if texture_ptr is not None else None
+                path_id = getattr(texture_ptr, "m_PathID",
+                                  None) if texture_ptr is not None else None
+                if (isinstance(file_id, int) and file_id != 0) or (isinstance(path_id, int) and path_id != 0):
+                    log.debug(
+                        f"[VECTOR] Skipping '{sprite_name}' - retains texture reference (not a vector sprite)"
+                    )
+                    continue
+
+                shape = vector_config.get("shape", "circle")
+                color = vector_config.get("color")
+                kwargs = {
+                    k: v
+                    for k, v in vector_config.items()
+                    if k not in {"type", "shape", "color"}
+                }
+
+                try:
+                    success = replace_vector_sprite(
+                        sprite_obj,
+                        shape,
+                        color,
+                        **kwargs,
+                    )
+                except Exception as exc:
+                    log.warning(
+                        f"[VECTOR] Failed to replace '{sprite_name}': {exc}")
+                else:
+                    if success:
+                        vectors_replaced += 1
+                        log.info(
+                            f"[VECTOR] Replaced '{sprite_name}' with {shape} (color={color})"
+                        )
+                    else:
+                        log.warning(
+                            f"[VECTOR] Replacement reported failure for '{sprite_name}'"
+                        )
+
+        except ImportError as exc:
+            log.warning(f"[VECTOR] Vector sprite module not available: {exc}")
+        except Exception as exc:
+            log.warning(f"[VECTOR] Vector sprite replacement failed: {exc}")
 
     if replaced == 0 and sprite_overlays == 0 and vectors_replaced == 0:
         # Help users discover names when no matches occurred
@@ -840,13 +1393,16 @@ def _swap_textures_in_env(env, replacements: Dict[str, bytes], repl_exts: Option
                 missing_refs.append(alias_name)
         if missing_refs:
             log.info("[TEXTURE] This bundle contains Sprites/aliases whose Texture2D data is in another bundle. Try patching the bundle that actually contains the textures (often '*_assets_common.bundle').")
-
-    return replaced + sprite_overlays + vectors_replaced
+    return TextureSwapInternalResult(
+        replaced + sprite_overlays + vectors_replaced,
+        {key: list(value) for key, value in dynamic_jobs.items()},
+    )
 
 
 class TextureSwapResult(NamedTuple):
     replaced_count: int
     out_file: Optional[Path]
+    dynamic_sprite_jobs: Dict[str, List[DynamicSpriteRebind]]
 
 
 def swap_textures(
@@ -883,7 +1439,7 @@ def swap_textures(
         repl_exts.update(e)
 
     # Optional name mapping files. Precedence: global assets/mapping.json, then type-specific mapping (icons/backgrounds) overrides.
-    name_map: Dict[str, str] = {}
+    name_map: Dict[str, Any] = {}
 
     def _load_map_file(p: Path) -> None:
         nonlocal name_map
@@ -895,13 +1451,16 @@ def swap_textures(
             if isinstance(loaded, dict):
                 for k, v in loaded.items():
                     if isinstance(k, str):
-                        # Accept both string values (texture sprites) and dict values (vector sprites)
+                        key = k
+                        k_noext, _ = _strip_image_extension(key)
+                        target_key = k_noext
+
                         if isinstance(v, str):
-                            k_noext, _ = _strip_image_extension(k)
-                            name_map[k_noext] = v
+                            name_map[target_key] = v
                         elif isinstance(v, dict):
-                            k_noext, _ = _strip_image_extension(k)
-                            name_map[k_noext] = v
+                            cfg = dict(v)
+                            cfg.setdefault("__map_dir", str(p.parent))
+                            name_map[target_key] = cfg
             else:
                 log.warning(f"[TEXTURE] mapping file is not an object: {p}")
         except Exception as e:
@@ -919,14 +1478,22 @@ def swap_textures(
         "type") == "vector" for v in name_map.values())
 
     if not replacements and not has_vector_sprites:
-        return TextureSwapResult(0, None)
+        return TextureSwapResult(0, None, {})
 
     own_env = env is None
     if own_env:
         env = UnityPy.load(str(bundle_path))
 
-    count = _swap_textures_in_env(
-        env, replacements, repl_exts, name_map or None)
+    swap_result = _swap_textures_in_env(
+        env,
+        replacements,
+        repl_exts,
+        name_map or None,
+        bundle_path=bundle_path,
+        skin_root=skin_dir,
+    )
+    count = swap_result.replaced
+    dynamic_jobs = swap_result.dynamic_jobs
     if count == 0:
         if own_env:
             try:
@@ -939,7 +1506,7 @@ def swap_textures(
             except Exception:
                 # Ignore exceptions during garbage collection; cleanup failure is non-critical.
                 pass
-        return TextureSwapResult(0, None)
+        return TextureSwapResult(0, None, dynamic_jobs)
     if dry_run:
         log.info(
             f"[DRY-RUN] Would modify {count} textures/sprites in {bundle_path.name}")
@@ -954,12 +1521,12 @@ def swap_textures(
             except Exception:
                 # Ignore exceptions during garbage collection; cleanup failure is non-critical.
                 pass
-        return TextureSwapResult(count, None)
+        return TextureSwapResult(count, None, dynamic_jobs)
     if defer_save:
-        return TextureSwapResult(count, None)
+        return TextureSwapResult(count, None, dynamic_jobs)
 
     if not own_env:
-        return TextureSwapResult(count, None)
+        return TextureSwapResult(count, None, dynamic_jobs)
 
     out_dir.mkdir(parents=True, exist_ok=True)
     name, ext = os.path.splitext(bundle_path.name)
@@ -978,4 +1545,4 @@ def swap_textures(
         except Exception:
             # Ignore exceptions during garbage collection; cleanup failure is non-critical.
             pass
-    return TextureSwapResult(count, out_file)
+    return TextureSwapResult(count, out_file, dynamic_jobs)
