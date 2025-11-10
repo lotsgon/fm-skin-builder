@@ -252,11 +252,15 @@ class TextureExtractor(BaseAssetExtractor):
                 process.start()
                 process.join(timeout=30)  # 30 second timeout
 
+                log.info(f"    Subprocess finished - alive={process.is_alive()}, exitcode={process.exitcode}")
+                sys.stdout.flush()
+
                 if process.is_alive():
                     # Process timed out
                     process.terminate()
                     process.join()
                     log.warning(f"    Subprocess timeout for {name}")
+                    sys.stdout.flush()
                     return {
                         "name": name,
                         "bundle": bundle_name,
@@ -269,7 +273,8 @@ class TextureExtractor(BaseAssetExtractor):
 
                 if process.exitcode != 0:
                     # Process crashed (segfault)
-                    log.warning(f"    Subprocess crashed (segfault) for {name} - skipping image")
+                    log.warning(f"    Subprocess crashed (exitcode={process.exitcode}) for {name} - skipping image")
+                    sys.stdout.flush()
                     return {
                         "name": name,
                         "bundle": bundle_name,
