@@ -92,15 +92,42 @@ jobs:
         if: matrix.platform == 'windows-latest'
         shell: pwsh
         run: |
-          # Download prebuilt Cairo DLL for Windows
-          $url = "https://github.com/preshing/cairo-windows/releases/download/v1.17.2/cairo-windows-1.17.2.zip"
-          $output = "cairo-windows.zip"
-          Invoke-WebRequest -Uri $url -OutFile $output
-          Expand-Archive -Path $output -DestinationPath cairo-windows
+          # Use MSYS2 to install Cairo (MSYS2 is pre-installed on GitHub Actions Windows runners)
+          C:\msys64\usr\bin\bash.exe -lc "pacman -S --noconfirm mingw-w64-x86_64-cairo"
 
-          # Copy DLL to Python directory so PyInstaller can find it
-          Copy-Item cairo-windows/cairo.dll "$env:PYTHON_LOCATION/DLLs/libcairo-2.dll" -Force
-          Write-Host "Cairo DLL installed successfully"
+          # Copy Cairo DLL to Python directory so PyInstaller can find it
+          $cairoDll = "C:\msys64\mingw64\bin\libcairo-2.dll"
+          if (Test-Path $cairoDll) {
+            Copy-Item $cairoDll "$env:PYTHON_LOCATION\DLLs\libcairo-2.dll" -Force
+            Write-Host "Cairo DLL installed successfully from MSYS2"
+
+            # Also copy dependent DLLs that Cairo needs
+            $dependencies = @(
+              "libpng16-16.dll",
+              "libfreetype-6.dll",
+              "libfontconfig-1.dll",
+              "libpixman-1-0.dll",
+              "zlib1.dll",
+              "libbz2-1.dll",
+              "libexpat-1.dll",
+              "libiconv-2.dll",
+              "libintl-8.dll",
+              "libglib-2.0-0.dll",
+              "libpcre2-8-0.dll"
+            )
+
+            foreach ($dll in $dependencies) {
+              $sourcePath = "C:\msys64\mingw64\bin\$dll"
+              if (Test-Path $sourcePath) {
+                Copy-Item $sourcePath "$env:PYTHON_LOCATION\DLLs\$dll" -Force -ErrorAction SilentlyContinue
+              }
+            }
+
+            Write-Host "Cairo and dependencies installed"
+          } else {
+            Write-Error "Failed to install Cairo from MSYS2"
+            exit 1
+          }
 
       - name: Build backend binary
         shell: bash

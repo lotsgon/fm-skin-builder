@@ -36,10 +36,11 @@ def find_cairo_library():
     search_paths = []
 
     if platform == 'win32':
-        # Windows: Check GTK installation paths, conda, pip packages
+        # Windows: Check MSYS2, GTK installation paths, conda, pip packages
         potential_paths = [
-            Path(sys.prefix) / 'Library' / 'bin',  # Conda
-            Path(sys.prefix) / 'DLLs',
+            Path('C:/msys64/mingw64/bin'),       # MSYS2 (default location)
+            Path(sys.prefix) / 'DLLs',           # Python DLLs directory
+            Path(sys.prefix) / 'Library' / 'bin', # Conda
             Path(sys.prefix) / 'bin',
             Path(os.environ.get('PROGRAMFILES', 'C:/Program Files')) / 'GTK3-Runtime' / 'bin',
         ]

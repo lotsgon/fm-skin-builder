@@ -12,24 +12,38 @@ Cairo is a 2D graphics library that provides low-level rendering capabilities. W
 
 ### Windows
 
-**Option 1: Download pre-built binaries (Recommended)**
-```powershell
-# Download Cairo for Windows
-$url = "https://github.com/preshing/cairo-windows/releases/download/v1.17.2/cairo-windows-1.17.2.zip"
-Invoke-WebRequest -Uri $url -OutFile cairo-windows.zip
-Expand-Archive -Path cairo-windows.zip -DestinationPath cairo-windows
+**Option 1: Install via MSYS2 (Recommended)**
 
-# Copy to Python DLLs directory (adjust path to your Python installation)
-Copy-Item cairo-windows/cairo.dll $env:PYTHON_LOCATION/DLLs/libcairo-2.dll
-```
+[MSYS2](https://www.msys2.org/) provides a Unix-like environment for Windows and includes pre-built Cairo binaries.
 
-**Option 2: Install via MSYS2**
-```bash
-pacman -S mingw-w64-x86_64-cairo
-```
+1. Download and install MSYS2 from https://www.msys2.org/
+2. Open MSYS2 MinGW 64-bit terminal
+3. Install Cairo:
+   ```bash
+   pacman -S mingw-w64-x86_64-cairo
+   ```
+4. Copy the DLL to your Python installation:
+   ```powershell
+   # In PowerShell (adjust Python path as needed)
+   Copy-Item C:\msys64\mingw64\bin\libcairo-2.dll $env:PYTHON_LOCATION\DLLs\
 
-**Option 3: Install GTK3 Runtime**
+   # Also copy Cairo's dependencies
+   Copy-Item C:\msys64\mingw64\bin\libpng16-16.dll $env:PYTHON_LOCATION\DLLs\
+   Copy-Item C:\msys64\mingw64\bin\libfreetype-6.dll $env:PYTHON_LOCATION\DLLs\
+   Copy-Item C:\msys64\mingw64\bin\libfontconfig-1.dll $env:PYTHON_LOCATION\DLLs\
+   Copy-Item C:\msys64\mingw64\bin\libpixman-1-0.dll $env:PYTHON_LOCATION\DLLs\
+   Copy-Item C:\msys64\mingw64\bin\zlib1.dll $env:PYTHON_LOCATION\DLLs\
+   ```
+
+**Option 2: Install GTK3 Runtime**
 Download and install [GTK3 Runtime for Windows](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases)
+
+**Option 3: Add MSYS2 to PATH**
+Instead of copying DLLs, you can add MSYS2's bin directory to your PATH:
+```powershell
+# Add to your system PATH environment variable
+C:\msys64\mingw64\bin
+```
 
 ### macOS
 
