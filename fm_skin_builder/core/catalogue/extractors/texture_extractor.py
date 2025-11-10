@@ -69,7 +69,7 @@ class TextureExtractor(BaseAssetExtractor):
                     continue
 
                 try:
-                    texture_data = self._extract_texture_data(data, bundle_name)
+                    texture_data = self._extract_texture_data(data, bundle_path)
                     if texture_data:
                         textures.append(texture_data)
                 except Exception:
@@ -86,19 +86,21 @@ class TextureExtractor(BaseAssetExtractor):
         return textures
 
     def _extract_texture_data(
-        self, texture_obj: Any, bundle_name: str
+        self, texture_obj: Any, bundle_path: Path
     ) -> Optional[Dict[str, Any]]:
         """
         Extract texture data and image.
 
         Args:
             texture_obj: Unity texture object
-            bundle_name: Name of the bundle
+            bundle_path: Path to the bundle file
 
         Returns:
             Dictionary with texture metadata and image data
         """
         import sys
+
+        bundle_name = bundle_path.name
 
         log.info(f"    Getting asset name...")
         sys.stdout.flush()
@@ -206,16 +208,98 @@ class TextureExtractor(BaseAssetExtractor):
             use_fallback_decoder = platform.system() == 'Darwin' and texture_format in [28, 29]
 
             if use_fallback_decoder:
+                # On macOS, use subprocess isolation to prevent crashes
+                format_name = "DXT1" if texture_format == 28 else "DXT5"
+                log.info(f"    Using subprocess isolation for {format_name} (format {texture_format}) on macOS")
+                sys.stdout.flush()
+
+                from multiprocessing import Process, Queue
+                import io
+
+                def extract_in_subprocess(bundle_path_str, tex_name, queue):
+                    """Extract texture in isolated subprocess - if it crashes, only subprocess dies."""
+                    try:
+                        import UnityPy
+                        from PIL import Image as PILImage
+                        import io
+
+                        # Reload bundle in subprocess
+                        env = UnityPy.load(bundle_path_str)
+                        for obj in env.objects:
+                            if obj.type.name != "Texture2D":
+                                continue
+                            data = obj.read()
+                            obj_name = getattr(data, "m_Name", None) or getattr(data, "name", None)
+                            if obj_name == tex_name:
+                                # Try to get image (may crash subprocess)
+                                img = data.image
+                                if img:
+                                    buf = io.BytesIO()
+                                    # Pre-downsample if needed
+                                    if img.width > 2048 or img.height > 2048:
+                                        img.thumbnail((2048, 2048), PILImage.Resampling.LANCZOS)
+                                    img.save(buf, format='PNG')
+                                    queue.put(('success', buf.getvalue()))
+                                else:
+                                    queue.put(('empty', None))
+                                return
+                        queue.put(('notfound', None))
+                    except Exception as e:
+                        queue.put(('error', str(e)))
+
+                queue = Queue()
+                process = Process(target=extract_in_subprocess, args=(str(bundle_path), name, queue))
+                process.start()
+                process.join(timeout=30)  # 30 second timeout
+
+                if process.is_alive():
+                    # Process timed out
+                    process.terminate()
+                    process.join()
+                    log.warning(f"    Subprocess timeout for {name}")
+                    return {
+                        "name": name,
+                        "bundle": bundle_name,
+                        "type": texture_type,
+                        "width": width,
+                        "height": height,
+                        "image_data": None,
+                        **self._create_default_status(),
+                    }
+
+                if process.exitcode != 0:
+                    # Process crashed (segfault)
+                    log.warning(f"    Subprocess crashed (segfault) for {name} - skipping image")
+                    return {
+                        "name": name,
+                        "bundle": bundle_name,
+                        "type": texture_type,
+                        "width": width,
+                        "height": height,
+                        "image_data": None,
+                        **self._create_default_status(),
+                    }
+
+                # Get result from queue
                 try:
-                    format_name = "DXT1" if texture_format == 28 else "DXT5"
-                    log.info(f"    Using texture2ddecoder for {format_name} (format {texture_format}) on macOS")
-                    sys.stdout.flush()
-                    image = self._decode_dxt_texture(texture_obj, texture_format, width, height)
-                    if image:
-                        log.info(f"    Image decoded successfully via texture2ddecoder")
+                    result = queue.get_nowait()
+                    if result[0] == 'success':
+                        image_data = result[1]
+                        log.info(f"    Success! Image extracted via subprocess")
                         sys.stdout.flush()
+                    elif result[0] == 'notfound':
+                        log.warning(f"    Texture not found in subprocess reload")
+                        return {
+                            "name": name,
+                            "bundle": bundle_name,
+                            "type": texture_type,
+                            "width": width,
+                            "height": height,
+                            "image_data": None,
+                            **self._create_default_status(),
+                        }
                     else:
-                        log.warning(f"    Failed to decode texture with texture2ddecoder")
+                        log.warning(f"    Subprocess error: {result[1]}")
                         return {
                             "name": name,
                             "bundle": bundle_name,
@@ -226,7 +310,7 @@ class TextureExtractor(BaseAssetExtractor):
                             **self._create_default_status(),
                         }
                 except Exception as e:
-                    log.warning(f"    Error using texture2ddecoder: {e}")
+                    log.warning(f"    Failed to get result from subprocess: {e}")
                     return {
                         "name": name,
                         "bundle": bundle_name,
@@ -236,33 +320,37 @@ class TextureExtractor(BaseAssetExtractor):
                         "image_data": None,
                         **self._create_default_status(),
                     }
+
+                # Continue with the image_data extracted by subprocess
+                # image_data already set by subprocess
             else:
                 # Use UnityPy's built-in decoder (works fine on Linux)
                 image = texture_obj.image
                 log.info(f"    Image accessed successfully")
                 sys.stdout.flush()
-            if image:
-                # For large images, convert to thumbnail immediately to save memory
-                # Don't store full 4K+ images in memory
-                from PIL import Image
-                import io
 
-                # Create a copy to avoid modifying original
-                img_copy = image.copy()
+                if image:
+                    # For large images, convert to thumbnail immediately to save memory
+                    # Don't store full 4K+ images in memory
+                    from PIL import Image
+                    import io
 
-                # If image is very large, create thumbnail immediately
-                if img_copy.width > 2048 or img_copy.height > 2048:
-                    # Create thumbnail at 2048x2048 max (will be thumbnailed again to 256x256 later)
-                    img_copy.thumbnail((2048, 2048), Image.Resampling.LANCZOS)
+                    # Create a copy to avoid modifying original
+                    img_copy = image.copy()
 
-                # Convert to PNG bytes
-                buf = io.BytesIO()
-                img_copy.save(buf, format='PNG')
-                image_data = buf.getvalue()
+                    # If image is very large, create thumbnail immediately
+                    if img_copy.width > 2048 or img_copy.height > 2048:
+                        # Create thumbnail at 2048x2048 max (will be thumbnailed again to 256x256 later)
+                        img_copy.thumbnail((2048, 2048), Image.Resampling.LANCZOS)
 
-                # Clean up
-                del img_copy
-                del buf
+                    # Convert to PNG bytes
+                    buf = io.BytesIO()
+                    img_copy.save(buf, format='PNG')
+                    image_data = buf.getvalue()
+
+                    # Clean up
+                    del img_copy
+                    del buf
         except Exception as e:
             # Image extraction failed, continue without image data
             # Don't fail the entire extraction for one bad image
@@ -298,15 +386,36 @@ class TextureExtractor(BaseAssetExtractor):
             from PIL import Image
             import numpy as np
 
+            # Debug: log available attributes
+            attrs = [attr for attr in dir(texture_obj) if not attr.startswith('_')]
+            log.debug(f"    Available attributes: {attrs[:20]}")  # First 20 to avoid spam
+
             # Get raw compressed data from Unity texture
-            # The image_data property contains the raw compressed bytes
-            raw_data = getattr(texture_obj, "image_data", None)
-            if not raw_data:
-                # Try m_Data as fallback
-                raw_data = getattr(texture_obj, "m_Data", None)
+            # Try various property names that might contain the data
+            raw_data = None
+
+            # Try image_data property
+            if hasattr(texture_obj, 'image_data'):
+                raw_data = texture_obj.image_data
+                log.debug(f"    Found image_data: {type(raw_data)}, len={len(raw_data) if raw_data else 0}")
+
+            # Try m_ImageData
+            if not raw_data and hasattr(texture_obj, 'm_ImageData'):
+                raw_data = texture_obj.m_ImageData
+                log.debug(f"    Found m_ImageData: {type(raw_data)}, len={len(raw_data) if raw_data else 0}")
+
+            # Try m_Data
+            if not raw_data and hasattr(texture_obj, 'm_Data'):
+                raw_data = texture_obj.m_Data
+                log.debug(f"    Found m_Data: {type(raw_data)}, len={len(raw_data) if raw_data else 0}")
+
+            # Try get_image_data() method if it exists
+            if not raw_data and hasattr(texture_obj, 'get_image_data'):
+                raw_data = texture_obj.get_image_data()
+                log.debug(f"    Found get_image_data(): {type(raw_data)}, len={len(raw_data) if raw_data else 0}")
 
             if not raw_data:
-                log.warning(f"    No raw texture data available")
+                log.warning(f"    No raw texture data available in any known property")
                 return None
 
             # Decode based on format
@@ -329,6 +438,8 @@ class TextureExtractor(BaseAssetExtractor):
             return None
         except Exception as e:
             log.warning(f"    Error decoding DXT texture: {e}")
+            import traceback
+            log.debug(f"    Traceback: {traceback.format_exc()}")
             return None
 
     def _classify_texture_type(self, name: str) -> str:
