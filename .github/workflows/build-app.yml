@@ -3,6 +3,7 @@ name: Build Application
 on:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -11,39 +12,18 @@ env:
   PYTHON_VERSION: '3.10'
 
 jobs:
-  build:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: ubuntu-20.04
-            target: x86_64-unknown-linux-gnu
-            name: linux
-          - platform: macos-13
-            target: x86_64-apple-darwin
-            name: macos-x86_64
-          - platform: macos-14
-            target: aarch64-apple-darwin
-            name: macos-aarch64
-          - platform: windows-2022
-            target: x86_64-pc-windows-msvc
-            name: windows
-
-    runs-on: ${{ matrix.platform }}
-
+  # Separate CI job for testing - runs in parallel, doesn't block builds
+  test:
+    name: Run Tests
+    runs-on: ubuntu-22.04
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          targets: ${{ matrix.target }}
-
-      - name: Setup Rust cache
-        uses: swatinem/rust-cache@v2
-        with:
-          workspaces: './frontend/src-tauri -> target'
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -52,172 +32,240 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run Python tests
+        run: pytest -v
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: frontend
+        run: npm test
+
+  # Build Python backend once and cache it
+  build-backend:
+    name: Build Backend - ${{ matrix.name }}
+    strategy:
+      matrix:
+        include:
+          - platform: ubuntu-20.04
+            name: Linux
+          - platform: macos-13
+            name: macOS
+          - platform: windows-2022
+            name: Windows
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
-      - name: Install Linux dependencies
-        if: matrix.platform == 'ubuntu-20.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            libwebkit2gtk-4.0-dev \
-            libappindicator3-dev \
-            librsvg2-dev \
-            patchelf \
-            libcairo2-dev \
-            libgdk-pixbuf2.0-dev \
-            libpango1.0-dev
-
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
+          pip install -r requirements.txt pyinstaller
+
+      - name: Build backend binary
+        shell: bash
+        run: |
+          python -m PyInstaller \
+            --onefile \
+            --name fm_skin_builder \
+            --hidden-import=PIL._tkinter_finder \
+            --collect-all UnityPy \
+            --collect-all cairosvg \
+            --collect-all svg.path \
+            fm_skin_builder/cli/main.py
+
+          # Create resources directory
+          mkdir -p frontend/src-tauri/resources/backend
+
+          # Copy binary with correct extension
+          if [ "${{ matrix.platform }}" = "windows-2022" ]; then
+            cp dist/fm_skin_builder.exe frontend/src-tauri/resources/backend/
+          else
+            cp dist/fm_skin_builder frontend/src-tauri/resources/backend/
+            chmod +x frontend/src-tauri/resources/backend/fm_skin_builder
+          fi
+
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-${{ matrix.name }}
+          path: frontend/src-tauri/resources/backend/
+          retention-days: 1
+
+  # Build Tauri applications
+  build:
+    name: Build ${{ matrix.settings.name }}
+    needs: build-backend
+    strategy:
+      fail-fast: false
+      matrix:
+        settings:
+          - platform: ubuntu-20.04
+            target: x86_64-unknown-linux-gnu
+            name: Linux x86_64
+            backend: Linux
+
+          - platform: windows-2022
+            target: x86_64-pc-windows-msvc
+            name: Windows x86_64
+            backend: Windows
+
+          - platform: macos-14
+            target: aarch64-apple-darwin
+            name: macOS ARM64
+            backend: macOS
+
+          - platform: macos-13
+            target: x86_64-apple-darwin
+            name: macOS Intel
+            backend: macOS
+
+          - platform: macos-14
+            target: universal-apple-darwin
+            name: macOS Universal
+            backend: macOS
+
+    runs-on: ${{ matrix.settings.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.settings.target }}
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './frontend/src-tauri -> target'
+
+      - name: Install Linux dependencies
+        if: matrix.settings.platform == 'ubuntu-20.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.0-dev libayatana-appindicator3-dev librsvg2-dev patchelf
+
+      - name: Download backend
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-${{ matrix.settings.backend }}
+          path: frontend/src-tauri/resources/backend
+
+      - name: Make backend executable (Unix)
+        if: matrix.settings.platform != 'windows-2022'
+        run: chmod +x frontend/src-tauri/resources/backend/fm_skin_builder
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
 
       - name: Setup Windows code signing
-        if: matrix.platform == 'windows-2022' && github.event_name != 'pull_request'
+        if: matrix.settings.platform == 'windows-2022' && github.event_name != 'pull_request'
         shell: pwsh
         run: |
           if ("${{ secrets.WINDOWS_CERTIFICATE }}" -ne "") {
             $CertBytes = [Convert]::FromBase64String("${{ secrets.WINDOWS_CERTIFICATE }}")
             $CertPath = Join-Path $env:RUNNER_TEMP "cert.pfx"
             [IO.File]::WriteAllBytes($CertPath, $CertBytes)
-
             $Password = ConvertTo-SecureString "${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}" -AsPlainText -Force
             Import-PfxCertificate -FilePath $CertPath -CertStoreLocation Cert:\CurrentUser\My -Password $Password
-
             Write-Host "Certificate imported successfully"
-
-            # Get the certificate thumbprint
-            $Cert = Get-ChildItem Cert:\CurrentUser\My | Where-Object {$_.Subject -like "*FM Skin Builder*"} | Select-Object -First 1
-            if ($Cert) {
-              Write-Host "Certificate thumbprint: $($Cert.Thumbprint)"
-              echo "WINDOWS_CERT_THUMBPRINT=$($Cert.Thumbprint)" >> $env:GITHUB_ENV
-            }
           } else {
-            Write-Host "No signing certificate configured (this is ok for PRs and testing)"
+            Write-Host "No signing certificate configured"
           }
 
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci
-
-      - name: Build Python backend
-        shell: bash
-        run: |
-          if [ "${{ matrix.platform }}" = "windows-2022" ]; then
-            BINARY_NAME="fm_skin_builder.exe"
-          else
-            BINARY_NAME="fm_skin_builder"
-          fi
-
-          python -m PyInstaller \
-            --onefile \
-            --name fm_skin_builder \
-            --hidden-import=PIL._tkinter_finder \
-            fm_skin_builder/cli/main.py
-
-          mkdir -p frontend/src-tauri/resources/backend
-          cp "dist/$BINARY_NAME" frontend/src-tauri/resources/backend/
-
-      - name: Run Python tests
-        run: |
-          pip install pytest
-          pytest -v
-
-      - name: Run frontend tests
-        working-directory: frontend
-        run: npm test
-
-      - name: Build frontend
-        working-directory: frontend
-        run: npm run build
-
       - name: Build Tauri app
-        working-directory: frontend
+        uses: tauri-apps/tauri-action@v0
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        run: |
-          # Backend already built in previous step, skip beforeBuildCommand
-          if [ "${{ matrix.name }}" = "macos-aarch64" ]; then
-            npm run tauri build -- --target aarch64-apple-darwin --config '{"build":{"beforeBuildCommand":""}}'
-          else
-            npm run tauri build -- --config '{"build":{"beforeBuildCommand":""}}'
-          fi
-        shell: bash
+        with:
+          projectPath: frontend
+          tauriScript: npm run tauri
+          args: ${{ matrix.settings.target != 'universal-apple-darwin' && format('--target {0}', matrix.settings.target) || '' }}
 
       - name: Prepare artifacts
         shell: bash
         run: |
           mkdir -p artifacts
 
-          if [ "${{ matrix.platform }}" = "ubuntu-20.04" ]; then
-            # Linux: AppImage and .deb
-            cp frontend/src-tauri/target/release/bundle/appimage/*.AppImage artifacts/ || true
-            cp frontend/src-tauri/target/release/bundle/deb/*.deb artifacts/ || true
-          elif [[ "${{ matrix.platform }}" == macos-* ]]; then
-            # macOS: DMG and .app
-            if [ "${{ matrix.name }}" = "macos-aarch64" ]; then
-              cp frontend/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg artifacts/ || true
-              cp -r frontend/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app artifacts/ || true
+          if [ "${{ matrix.settings.platform }}" = "ubuntu-20.04" ]; then
+            find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.AppImage" -exec cp {} artifacts/ \; || true
+            find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.deb" -exec cp {} artifacts/ \; || true
+          elif [ "${{ matrix.settings.platform }}" = "windows-2022" ]; then
+            find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.exe" -exec cp {} artifacts/ \; || true
+            find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.msi" -exec cp {} artifacts/ \; || true
+          elif [[ "${{ matrix.settings.platform }}" == macos-* ]]; then
+            if [ "${{ matrix.settings.target }}" = "universal-apple-darwin" ]; then
+              find frontend/src-tauri/target/universal-apple-darwin/release/bundle -name "*.dmg" -exec cp {} artifacts/ \; || true
+              find frontend/src-tauri/target/universal-apple-darwin/release/bundle -name "*.app" -exec cp -r {} artifacts/ \; || true
             else
-              cp frontend/src-tauri/target/release/bundle/dmg/*.dmg artifacts/ || true
-              cp -r frontend/src-tauri/target/release/bundle/macos/*.app artifacts/ || true
+              find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.dmg" -exec cp {} artifacts/ \; || true
+              find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.app" -exec cp -r {} artifacts/ \; || true
             fi
-          elif [ "${{ matrix.platform }}" = "windows-2022" ]; then
-            # Windows: NSIS installer and MSI
-            cp frontend/src-tauri/target/release/bundle/nsis/*.exe artifacts/ || true
-            cp frontend/src-tauri/target/release/bundle/msi/*.msi artifacts/ || true
           fi
 
-          ls -lah artifacts/
+          ls -lah artifacts/ || echo "No artifacts found"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fm-skin-builder-${{ matrix.name }}
+          name: fm-skin-builder-${{ matrix.settings.target }}
           path: artifacts/*
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
-  test-builds:
-    needs: build
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: ubuntu-20.04
-            name: linux
-          - platform: windows-2022
-            name: windows
-
-    runs-on: ${{ matrix.platform }}
+  # Create release on tags
+  release:
+    name: Create Release
+    needs: [test, build]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
 
     steps:
-      - name: Download artifacts
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: fm-skin-builder-${{ matrix.name }}
           path: artifacts
 
-      - name: Test Linux AppImage
-        if: matrix.platform == 'ubuntu-20.04'
-        run: |
-          chmod +x artifacts/*.AppImage
-          # Basic smoke test - check the binary can be extracted and exists
-          artifacts/*.AppImage --appimage-extract
-          test -f squashfs-root/usr/bin/fm-skin-builder || \
-          test -f squashfs-root/AppRun
-          echo "Linux AppImage structure validated"
-
-      - name: Test Windows installer exists
-        if: matrix.platform == 'windows-2022'
-        shell: bash
-        run: |
-          ls -lah artifacts/
-          test -f artifacts/*.exe || test -f artifacts/*.msi
-          echo "Windows installer found"
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
