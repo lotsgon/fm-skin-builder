@@ -200,24 +200,47 @@ class TextureExtractor(BaseAssetExtractor):
             log.info(f"    Accessing .image property for {name}...")
             sys.stdout.flush()
 
-            # On macOS, format 28 (DXT1) causes segfaults in UnityPy's decoder
-            # Skip it on macOS but allow on Linux
+            # On macOS, formats 28 (DXT1) and 29 (DXT5) cause segfaults in UnityPy's decoder
+            # Use texture2ddecoder as a fallback on macOS
             import platform
-            if platform.system() == 'Darwin' and texture_format == 28:
-                log.warning(f"    Skipping format 28 (DXT1) on macOS - known decoder crash")
-                return {
-                    "name": name,
-                    "bundle": bundle_name,
-                    "type": texture_type,
-                    "width": width,
-                    "height": height,
-                    "image_data": None,
-                    **self._create_default_status(),
-                }
+            use_fallback_decoder = platform.system() == 'Darwin' and texture_format in [28, 29]
 
-            image = texture_obj.image
-            log.info(f"    Image accessed successfully")
-            sys.stdout.flush()
+            if use_fallback_decoder:
+                try:
+                    format_name = "DXT1" if texture_format == 28 else "DXT5"
+                    log.info(f"    Using texture2ddecoder for {format_name} (format {texture_format}) on macOS")
+                    sys.stdout.flush()
+                    image = self._decode_dxt_texture(texture_obj, texture_format, width, height)
+                    if image:
+                        log.info(f"    Image decoded successfully via texture2ddecoder")
+                        sys.stdout.flush()
+                    else:
+                        log.warning(f"    Failed to decode texture with texture2ddecoder")
+                        return {
+                            "name": name,
+                            "bundle": bundle_name,
+                            "type": texture_type,
+                            "width": width,
+                            "height": height,
+                            "image_data": None,
+                            **self._create_default_status(),
+                        }
+                except Exception as e:
+                    log.warning(f"    Error using texture2ddecoder: {e}")
+                    return {
+                        "name": name,
+                        "bundle": bundle_name,
+                        "type": texture_type,
+                        "width": width,
+                        "height": height,
+                        "image_data": None,
+                        **self._create_default_status(),
+                    }
+            else:
+                # Use UnityPy's built-in decoder (works fine on Linux)
+                image = texture_obj.image
+                log.info(f"    Image accessed successfully")
+                sys.stdout.flush()
             if image:
                 # For large images, convert to thumbnail immediately to save memory
                 # Don't store full 4K+ images in memory
@@ -254,6 +277,59 @@ class TextureExtractor(BaseAssetExtractor):
             "image_data": image_data,
             **self._create_default_status(),
         }
+
+    def _decode_dxt_texture(self, texture_obj: Any, texture_format: int, width: int, height: int):
+        """
+        Decode DXT compressed texture using texture2ddecoder.
+
+        This is a fallback decoder for macOS where UnityPy's decoder crashes.
+
+        Args:
+            texture_obj: Unity texture object
+            texture_format: Format enum (28=DXT1, 29=DXT5)
+            width: Texture width
+            height: Texture height
+
+        Returns:
+            PIL Image or None
+        """
+        try:
+            import texture2ddecoder
+            from PIL import Image
+            import numpy as np
+
+            # Get raw compressed data from Unity texture
+            # The image_data property contains the raw compressed bytes
+            raw_data = getattr(texture_obj, "image_data", None)
+            if not raw_data:
+                # Try m_Data as fallback
+                raw_data = getattr(texture_obj, "m_Data", None)
+
+            if not raw_data:
+                log.warning(f"    No raw texture data available")
+                return None
+
+            # Decode based on format
+            if texture_format == 28:  # DXT1/BC1
+                decoded = texture2ddecoder.decode_bc1(raw_data, width, height)
+            elif texture_format == 29:  # DXT5/BC3
+                decoded = texture2ddecoder.decode_bc3(raw_data, width, height)
+            else:
+                log.warning(f"    Unsupported format for texture2ddecoder: {texture_format}")
+                return None
+
+            # Convert decoded bytes to PIL Image
+            # texture2ddecoder returns raw RGBA bytes
+            img = Image.frombytes("RGBA", (width, height), decoded, "raw", "BGRA")
+
+            return img
+
+        except ImportError:
+            log.warning(f"    texture2ddecoder not installed, cannot decode DXT textures on macOS")
+            return None
+        except Exception as e:
+            log.warning(f"    Error decoding DXT texture: {e}")
+            return None
 
     def _classify_texture_type(self, name: str) -> str:
         """
