@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Test files
+test_bundles/
+tests/__pycache__/
+.pytest_cache/
+
+# Output
+build/
+output/
+*.log
+
+# macOS
+.DS_Store
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import argparse
-from .commands import build as cmd_build, extract as cmd_extract, verify as cmd_verify, swap as cmd_swap, patch as cmd_patch, scan as cmd_scan
+from .commands import build as cmd_build, extract as cmd_extract, verify as cmd_verify, swap as cmd_swap, patch as cmd_patch, scan as cmd_scan, catalogue as cmd_catalogue
 import os
 import sys
 import gc
@@ -51,6 +51,20 @@ def main() -> None:
     s.add_argument("--export-uss", action="store_true",
                    help="Export all stylesheet assets as .uss alongside the index")
 
+    c = sub.add_parser("catalogue", help="Build comprehensive asset catalogue from FM bundles")
+    c.add_argument("--bundle", type=str, required=True,
+                   help="Bundle file or directory to scan")
+    c.add_argument("--out", type=str, default="build/catalogue",
+                   help="Output directory for catalogue")
+    c.add_argument("--fm-version", type=str, required=True,
+                   help="FM version string (e.g., '2026.4.0')")
+    c.add_argument("--catalogue-version", type=int, default=1,
+                   help="Catalogue version number (default: 1)")
+    c.add_argument("--pretty", action="store_true",
+                   help="Pretty-print JSON output")
+    c.add_argument("--dry-run", action="store_true",
+                   help="Preview without writing files")
+
     args = parser.parse_args()
 
     if args.command == "build":
@@ -65,6 +79,8 @@ def main() -> None:
         cmd_patch.run(args)
     elif args.command == "scan":
         cmd_scan.run(args)
+    elif args.command == "catalogue":
+        cmd_catalogue.run(args)
 
     # Mitigate rare CPython finalization crash observed with C extensions (e.g., compression libs)
     # by forcing an immediate process exit after flushing. Can be disabled by setting FM_HARD_EXIT=0.
