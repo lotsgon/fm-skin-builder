@@ -129,7 +129,11 @@ fn parse_progress(line: &str) -> Option<(u32, u32, String)> {
                     parts[i + 1].parse::<u32>(),
                     parts[i + 3].trim_end_matches(':').parse::<u32>(),
                 ) {
-                    let status = format!("Processing bundle {}", parts.get(i + 4).unwrap_or(&""));
+                    let status = if i + 4 < parts.len() {
+                        format!("Processing bundle {}", parts[i + 4..].join(" "))
+                    } else {
+                        "Processing bundle".to_string()
+                    };
                     return Some((current, total, status));
                 }
             }
@@ -185,20 +189,12 @@ async fn run_python_task(
     );
 
     // Get the window to emit events to
-    // Try "main" first, then try to get any available webview window
+    // Only use the "main" window; fail if not found
     let window = app_handle
         .get_webview_window("main")
-        .or_else(|| {
-            eprintln!("[RUST] 'main' window not found, trying to get first available window");
-            app_handle
-                .webview_windows()
-                .into_iter()
-                .next()
-                .map(|(_, w)| w)
-        })
         .ok_or_else(|| {
-            eprintln!("[RUST] ERROR: No webview windows available");
-            "No webview windows available".to_string()
+            eprintln!("[RUST] ERROR: 'main' window not found. This indicates a configuration or lifecycle problem.");
+            "'main' window not found".to_string()
         })?;
     eprintln!("[RUST] Got window successfully: {:?}", window.label());
 
@@ -462,8 +458,10 @@ async fn run_python_task(
     eprintln!("[RUST] Stdout reader task spawned");
 
     // Stream stderr
+    eprintln!("[RUST] Spawning stderr reader task...");
     let window_stderr = window.clone();
     let stderr_task = tokio::spawn(async move {
+        eprintln!("[RUST] Stderr reader task starting...");
         let mut lines = Vec::new();
         while let Ok(Some(line)) = stderr_reader.next_line().await {
             lines.push(line.clone());
@@ -479,20 +477,31 @@ async fn run_python_task(
                 },
             );
         }
+        eprintln!(
+            "[RUST] Stderr reader task complete, got {} lines",
+            lines.len()
+        );
         lines
     });
+    eprintln!("[RUST] Stderr reader task spawned");
 
     // Wait for process to complete
+    // Take the child out of the mutex so we don't hold the lock while waiting
+    // This allows stop_python_task to check if a task is running
     eprintln!("[RUST] About to wait for child process to complete...");
     let exit_status = {
         let child_ref = state.child.clone();
-        eprintln!("[RUST] Acquiring mutex lock to get child...");
+        eprintln!("[RUST] Acquiring mutex lock to take child...");
         let mut child_guard = child_ref.lock().await;
         eprintln!("[RUST] Mutex lock acquired");
 
-        if let Some(child_mut) = child_guard.as_mut() {
-            eprintln!("[RUST] Child found in mutex, calling wait()...");
-            let status = child_mut.wait().await.map_err(|error| {
+        let child_opt = child_guard.take();
+        eprintln!("[RUST] Mutex lock released");
+        drop(child_guard);
+
+        if let Some(mut child) = child_opt {
+            eprintln!("[RUST] Child found, calling wait()...");
+            let status = child.wait().await.map_err(|error| {
                 eprintln!("[RUST] ERROR: Failed to wait for process: {}", error);
                 let err_msg = format!("Failed to wait for process: {error}");
                 let _ = window.emit(
@@ -505,10 +514,6 @@ async fn run_python_task(
                 err_msg
             })?;
             eprintln!("[RUST] Child process completed with status: {:?}", status);
-
-            // Clear the stored child process
-            *child_guard = None;
-            eprintln!("[RUST] Child cleared from mutex");
             status
         } else {
             eprintln!("[RUST] ERROR: Child not found in mutex (was cancelled?)");
@@ -523,7 +528,7 @@ async fn run_python_task(
             return Err(err_msg);
         }
     };
-    eprintln!("[RUST] Mutex lock released after wait");
+    eprintln!("[RUST] Process wait completed");
 
     // Wait for all output to be consumed
     eprintln!("[RUST] Waiting for stdout task to complete...");
@@ -602,11 +607,25 @@ async fn stop_python_task(state: State<'_, ProcessState>) -> Result<String, Stri
     let child_ref = state.child.clone();
     let mut child_guard = child_ref.lock().await;
 
-    if let Some(mut child) = child_guard.take() {
+    if let Some(child) = child_guard.as_mut() {
         // Try to kill the child process
         match child.kill().await {
-            Ok(_) => Ok("Task cancelled successfully".to_string()),
-            Err(e) => Err(format!("Failed to cancel task: {}", e)),
+            Ok(_) => {
+                // Clear the child only on successful kill
+                *child_guard = None;
+                Ok("Task cancelled successfully".to_string())
+            }
+            Err(e) => {
+                // Check if the error is because the process already exited
+                let err_str = e.to_string();
+                if err_str.contains("already exited") || err_str.contains("No such process") {
+                    // Process completed naturally, clear it
+                    *child_guard = None;
+                    Ok("Task already completed".to_string())
+                } else {
+                    Err(format!("Failed to cancel task: {}", e))
+                }
+            }
         }
     } else {
         Err("No task is currently running".to_string())
@@ -632,7 +651,6 @@ fn select_folder(dialog_title: Option<String>, initial_path: Option<String>) -> 
         .map(|folder| folder.to_string_lossy().to_string())
 }
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 fn main() {
     tauri::Builder::default()
         .manage(ProcessState::default())

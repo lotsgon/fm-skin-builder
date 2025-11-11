@@ -81,7 +81,7 @@ function App() {
   const [runtimeState, setRuntimeState] = useState<'unknown' | 'preview' | 'ready'>(
     () => detectTauriRuntime()
   );
-  const [listenersReady, setListenersReady] = useState(false);
+  const [listenersReady, setListenersReady] = useState(true);
 
   const logsEndRef = useRef<HTMLDivElement>(null);
 
@@ -210,14 +210,15 @@ function App() {
         console.log('[FRONTEND] All listeners configured successfully');
       } catch (error) {
         console.error('[FRONTEND] Error setting up listeners:', error);
+        setListenersReady(false);
         throw error;
       }
     };
 
-    // Set a timeout to ensure buttons don't stay disabled forever
+    // Set a timeout to ensure buttons don't stay disabled forever if setup fails
     timeoutId = setTimeout(() => {
       if (!setupComplete && isMounted) {
-        console.warn('[FRONTEND] Listener setup timeout - enabling buttons anyway');
+        console.warn('[FRONTEND] Listener setup timeout - re-enabling buttons');
         setListenersReady(true);
       }
     }, 3000); // 3 second timeout
@@ -240,8 +241,8 @@ function App() {
         console.error('[FRONTEND] Failed to set up event listeners:', error);
         setupComplete = true;
         if (timeoutId) clearTimeout(timeoutId);
-        // Set ready anyway so buttons aren't permanently stuck
-        setListenersReady(true);
+        // Mark listeners as not ready on explicit failure
+        setListenersReady(false);
       });
 
     // Cleanup listeners on unmount (StrictMode safe)
@@ -331,26 +332,21 @@ function App() {
         });
         markRuntimeReady();
 
-        // Note: Most logs are already displayed via events, but we handle
-        // any remaining output here for backward compatibility
+        // Note: Most logs are already displayed via events
+        // Any remaining output is likely redundant, so we skip deduplication
         if (response.stdout.trim().length) {
           const lines = response.stdout.trim().split('\n');
-          // Filter out lines we've already shown via events
-          const newLines = lines.filter(line => {
-            // Simple dedup: if the last 10 logs contain this line, skip it
-            const recent = logs.slice(-10).map(l => l.message);
-            return !recent.includes(line);
-          });
-          newLines.forEach((line) => appendLog(line));
+          lines.forEach((line) => appendLog(line));
         }
       } catch (error) {
         appendLog(`✗ Command failed: ${String(error)}`, 'error');
+        setLastBuildSuccess(false);
+      } finally {
         setIsRunning(false);
         setCurrentTask(null);
-        setLastBuildSuccess(false);
       }
     },
-    [appendLog, buildConfig, markRuntimeReady, logs]
+    [appendLog, buildConfig, markRuntimeReady]
   );
 
   const clearLogs = useCallback(() => {

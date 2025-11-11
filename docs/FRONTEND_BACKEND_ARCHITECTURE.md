@@ -2,11 +2,12 @@
 
 ## Executive Summary
 
-The FM Skin Builder uses a **Tauri-based architecture** that bridges a TypeScript/React frontend with a Python backend. The communication follows a simple command-based pattern where the frontend invokes Python processes through Rust/Tauri commands, with synchronous communication and blocking waits for results.
+The FM Skin Builder uses a **Tauri-based architecture** that bridges a TypeScript/React frontend with a Python backend. The communication follows an **asynchronous event-based pattern** where the frontend receives real-time log updates, progress information, and completion events from the Python backend as the process runs.
 
 ### Key Characteristics:
-- **Synchronous execution**: Frontend waits for entire Python process to complete
-- **No real-time streaming**: All logs collected after process completion
+- **Asynchronous, event-based execution**: Frontend receives real-time log updates from the Python backend as the process runs
+- **Real-time streaming**: Logs and progress are streamed and displayed live in the UI during process execution
+- **Task cancellation support**: Users can stop running builds mid-execution
 - **Single-threaded pipelines**: Sequential bundle processing
 - **Optimization focus**: Content hashing and deduplication for catalogues
 - **Platform-specific handling**: Special subprocess isolation on macOS for texture extraction
@@ -27,7 +28,12 @@ runTask(mode: 'preview' | 'build')
     │  └─ Sets skinPath, bundlesPath, debugExport, dryRun (true for preview)
     │
     ├─ invoke('run_python_task', { config })
-    │  └─ Awaits entire process completion
+    │  └─ Invokes async Tauri command (non-blocking)
+    │
+    └─ Event listeners receive real-time updates:
+       ├─ 'build_log': Individual log messages as they're produced
+       ├─ 'build_progress': Progress updates (current/total bundles)
+       └─ 'build_complete': Final success/failure status
     │
     └─ Response handling:
        ├─ Split stdout by newlines
