@@ -96,6 +96,9 @@ function App() {
   // Set up event listeners for real-time build feedback
   useEffect(() => {
     console.log('[FRONTEND] useEffect for event listeners starting...');
+    console.log('[FRONTEND] Window object:', typeof window);
+    console.log('[FRONTEND] Tauri available:', typeof window !== 'undefined' && '__TAURI__' in window);
+
     let unlistenLog: (() => void) | null = null;
     let unlistenProgress: (() => void) | null = null;
     let unlistenComplete: (() => void) | null = null;
@@ -105,6 +108,10 @@ function App() {
 
     const setupListeners = async () => {
       console.log('[FRONTEND] setupListeners called');
+
+      // Add a small delay to ensure Tauri runtime is fully ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log('[FRONTEND] After 100ms delay');
 
       try {
         // Listen for task started event
