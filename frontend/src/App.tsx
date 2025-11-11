@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import { Folder, Play, Package, Bug, Loader2, Terminal, CheckCircle2, XCircle } from 'lucide-react';
+import { Folder, Play, Package, Bug, Loader2, Terminal, CheckCircle2, XCircle, StopCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -97,8 +97,25 @@ function App() {
     let unlistenLog: (() => void) | null = null;
     let unlistenProgress: (() => void) | null = null;
     let unlistenComplete: (() => void) | null = null;
+    let unlistenTaskStarted: (() => void) | null = null;
 
     const setupListeners = async () => {
+      // Listen for task started event
+      unlistenTaskStarted = await listen<{ message: string }>(
+        'task_started',
+        (event) => {
+          const timestamp = new Date().toLocaleTimeString();
+          setLogs((prev) => [
+            ...prev,
+            {
+              message: event.payload.message,
+              level: 'info',
+              timestamp,
+            },
+          ]);
+        }
+      );
+
       // Listen for log events
       unlistenLog = await listen<{ message: string; level: string }>(
         'build_log',
@@ -156,6 +173,7 @@ function App() {
       if (unlistenLog) unlistenLog();
       if (unlistenProgress) unlistenProgress();
       if (unlistenComplete) unlistenComplete();
+      if (unlistenTaskStarted) unlistenTaskStarted();
     };
   }, []);
 
@@ -259,6 +277,19 @@ function App() {
     setLastBuildSuccess(null);
     setBuildProgress(null);
   }, []);
+
+  const stopTask = useCallback(async () => {
+    try {
+      const result = await invoke<string>('stop_python_task');
+      appendLog(`Task cancelled: ${result}`, 'warning');
+      setIsRunning(false);
+      setCurrentTask(null);
+      setBuildProgress(null);
+      setLastBuildSuccess(false);
+    } catch (error) {
+      appendLog(`Failed to stop task: ${String(error)}`, 'error');
+    }
+  }, [appendLog]);
 
   const runtimeIndicator = useMemo(() => {
     switch (runtimeState) {
@@ -466,7 +497,18 @@ function App() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-medium">{currentTask}</span>
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={stopTask}
+                          className="gap-1.5"
+                        >
+                          <StopCircle className="h-3.5 w-3.5" />
+                          Stop
+                        </Button>
+                      </div>
                     </div>
 
                     {buildProgress && buildProgress.total > 0 ? (

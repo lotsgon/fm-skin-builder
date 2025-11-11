@@ -2,10 +2,25 @@
 
 use rfd::FileDialog;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use std::{path::PathBuf, process::Stdio};
-use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager};
+use tauri::{path::BaseDirectory, AppHandle, Emitter, Manager, State};
 use tokio::io::{AsyncBufReadExt, BufReader};
-use tokio::process::Command;
+use tokio::process::{Child, Command};
+use tokio::sync::Mutex;
+
+// Global state for managing the running process
+struct ProcessState {
+    child: Arc<Mutex<Option<Child>>>,
+}
+
+impl Default for ProcessState {
+    fn default() -> Self {
+        Self {
+            child: Arc::new(Mutex::new(None)),
+        }
+    }
+}
 
 #[derive(Serialize, Clone)]
 struct LogEvent {
@@ -24,6 +39,11 @@ struct ProgressEvent {
 struct CompletionEvent {
     success: bool,
     exit_code: i32,
+    message: String,
+}
+
+#[derive(Serialize, Clone)]
+struct TaskStartedEvent {
     message: String,
 }
 
@@ -102,21 +122,24 @@ fn build_cli_args(config: &TaskConfig) -> Result<Vec<String>, String> {
 /// Expected format: "=== Patching bundle X of Y: path/to/bundle ==="
 /// Or: "🔍 Scanning bundle: name (X/Y)"
 fn parse_progress(line: &str) -> Option<(u32, u32, String)> {
-    // Pattern 1: "=== Patching bundle: path ===" followed by total count
-    if line.contains("=== Patching bundle:") {
-        // Try to extract bundle name
-        if let Some(start) = line.find("bundle:") {
-            let bundle_part = &line[start + 7..].trim();
-            if let Some(end) = bundle_part.find("===") {
-                let bundle_name = bundle_part[..end].trim();
-                return Some((0, 0, format!("Processing: {}", bundle_name)));
+    // Pattern 1: "=== Processing bundle X of Y: ..."
+    if line.contains("=== Processing bundle") {
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        for i in 0..parts.len().saturating_sub(3) {
+            if parts[i] == "bundle" && parts.get(i + 2) == Some(&"of") {
+                if let (Ok(current), Ok(total)) = (
+                    parts[i + 1].parse::<u32>(),
+                    parts[i + 3].trim_end_matches(':').parse::<u32>(),
+                ) {
+                    let status = format!("Processing bundle {}", parts.get(i + 4).unwrap_or(&""));
+                    return Some((current, total, status));
+                }
             }
         }
     }
 
-    // Pattern 2: Look for progress indicators in format "X of Y" or "X/Y"
-    if line.contains(" of ") || line.contains("/") {
-        // Simple heuristic: if we see numbers in format "X of Y"
+    // Pattern 2: Look for general "X of Y" patterns
+    if line.contains(" of ") {
         let words: Vec<&str> = line.split_whitespace().collect();
         for i in 0..words.len().saturating_sub(2) {
             if words[i + 1] == "of" {
@@ -144,8 +167,29 @@ fn get_log_level(line: &str) -> String {
 }
 
 #[tauri::command]
-async fn run_python_task(app_handle: AppHandle, config: TaskConfig) -> Result<CommandResult, String> {
+async fn run_python_task(
+    app_handle: AppHandle,
+    config: TaskConfig,
+    state: State<'_, ProcessState>,
+) -> Result<CommandResult, String> {
+    // Immediately emit that the task is starting (before cold start)
+    let _ = app_handle.emit(
+        "task_started",
+        TaskStartedEvent {
+            message: "Initializing backend...".to_string(),
+        },
+    );
+
     let cli_args = build_cli_args(&config)?;
+
+    // Emit status update
+    let _ = app_handle.emit(
+        "build_log",
+        LogEvent {
+            message: "Starting Python backend (cold start may take a moment)...".to_string(),
+            level: "info".to_string(),
+        },
+    );
 
     // Build the command
     let mut command = if cfg!(debug_assertions) {
@@ -192,11 +236,45 @@ async fn run_python_task(app_handle: AppHandle, config: TaskConfig) -> Result<Co
     // Spawn the process
     let mut child = command
         .spawn()
-        .map_err(|error| format!("Failed to spawn process: {error}"))?;
+        .map_err(|error| {
+            let err_msg = format!("Failed to spawn Python process: {}. Check that Python is installed and accessible.", error);
+            let _ = app_handle.emit(
+                "build_log",
+                LogEvent {
+                    message: err_msg.clone(),
+                    level: "error".to_string(),
+                },
+            );
+            err_msg
+        })?;
+
+    // Store child process for potential cancellation
+    {
+        let mut child_guard = state.child.lock().await;
+        *child_guard = Some(child);
+        drop(child_guard); // Explicitly drop to release lock
+    }
+
+    // Get a new reference to the child from state
+    let child_ref = state.child.clone();
+    let mut child_guard = child_ref.lock().await;
+    let child_mut = child_guard.as_mut().ok_or("Child process disappeared")?;
+
+    // Emit that backend has started
+    let _ = app_handle.emit(
+        "build_log",
+        LogEvent {
+            message: "Backend started, processing...".to_string(),
+            level: "info".to_string(),
+        },
+    );
 
     // Get stdout and stderr handles
-    let stdout = child.stdout.take().ok_or("Failed to capture stdout")?;
-    let stderr = child.stderr.take().ok_or("Failed to capture stderr")?;
+    let stdout = child_mut.stdout.take().ok_or("Failed to capture stdout")?;
+    let stderr = child_mut.stderr.take().ok_or("Failed to capture stderr")?;
+
+    // Release the lock before spawning tasks
+    drop(child_guard);
 
     // Create buffered readers
     let mut stdout_reader = BufReader::new(stdout).lines();
@@ -205,10 +283,6 @@ async fn run_python_task(app_handle: AppHandle, config: TaskConfig) -> Result<Co
     // Storage for complete output (for backward compatibility)
     let mut stdout_lines = Vec::new();
     let mut stderr_lines = Vec::new();
-
-    // Progress tracking
-    let mut current_progress = 0u32;
-    let mut total_progress = 0u32;
 
     // Stream stdout
     let app_handle_stdout = app_handle.clone();
@@ -264,10 +338,18 @@ async fn run_python_task(app_handle: AppHandle, config: TaskConfig) -> Result<Co
     });
 
     // Wait for process to complete
-    let exit_status = child
+    let child_ref = state.child.clone();
+    let mut child_guard = child_ref.lock().await;
+    let child_mut = child_guard.as_mut().ok_or("Child process disappeared")?;
+
+    let exit_status = child_mut
         .wait()
         .await
         .map_err(|error| format!("Failed to wait for process: {error}"))?;
+
+    // Clear the stored child process
+    *child_guard = None;
+    drop(child_guard);
 
     // Wait for all output to be consumed
     stdout_lines = stdout_task
@@ -302,6 +384,22 @@ async fn run_python_task(app_handle: AppHandle, config: TaskConfig) -> Result<Co
 }
 
 #[tauri::command]
+async fn stop_python_task(state: State<'_, ProcessState>) -> Result<String, String> {
+    let child_ref = state.child.clone();
+    let mut child_guard = child_ref.lock().await;
+
+    if let Some(mut child) = child_guard.take() {
+        // Try to kill the child process
+        match child.kill().await {
+            Ok(_) => Ok("Task cancelled successfully".to_string()),
+            Err(e) => Err(format!("Failed to cancel task: {}", e)),
+        }
+    } else {
+        Err("No task is currently running".to_string())
+    }
+}
+
+#[tauri::command]
 fn select_folder(dialog_title: Option<String>, initial_path: Option<String>) -> Option<String> {
     let mut dialog = FileDialog::new();
 
@@ -323,7 +421,12 @@ fn select_folder(dialog_title: Option<String>, initial_path: Option<String>) -> 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![run_python_task, select_folder])
+        .manage(ProcessState::default())
+        .invoke_handler(tauri::generate_handler![
+            run_python_task,
+            stop_python_task,
+            select_folder
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
