@@ -141,7 +141,9 @@ fn parse_progress(line: &str) -> Option<(u32, u32, String)> {
         let words: Vec<&str> = line.split_whitespace().collect();
         for i in 0..words.len().saturating_sub(2) {
             if words[i + 1] == "of" {
-                if let (Ok(current), Ok(total)) = (words[i].parse::<u32>(), words[i + 2].parse::<u32>()) {
+                if let (Ok(current), Ok(total)) =
+                    (words[i].parse::<u32>(), words[i + 2].parse::<u32>())
+                {
                     let status = line.split("===").next().unwrap_or(line).trim().to_string();
                     return Some((current, total, status));
                 }
@@ -157,7 +159,8 @@ fn get_log_level(line: &str) -> String {
     let line_upper = line.to_uppercase();
 
     // Check for explicit log level markers (Python logging format)
-    if line_upper.contains("ERROR") || line_upper.contains("✗") || line_upper.contains("CRITICAL") {
+    if line_upper.contains("ERROR") || line_upper.contains("✗") || line_upper.contains("CRITICAL")
+    {
         "error".to_string()
     } else if line_upper.contains("WARN") || line_upper.contains("WARNING") {
         "warning".to_string()
@@ -176,15 +179,22 @@ async fn run_python_task(
     state: State<'_, ProcessState>,
 ) -> Result<CommandResult, String> {
     eprintln!("[RUST] run_python_task called!");
-    eprintln!("[RUST] Config: skin_path={}, bundles_path={}, dry_run={}",
-        config.skin_path, config.bundles_path, config.dry_run);
+    eprintln!(
+        "[RUST] Config: skin_path={}, bundles_path={}, dry_run={}",
+        config.skin_path, config.bundles_path, config.dry_run
+    );
 
     // Get the window to emit events to
     // Try "main" first, then try to get any available webview window
-    let window = app_handle.get_webview_window("main")
+    let window = app_handle
+        .get_webview_window("main")
         .or_else(|| {
             eprintln!("[RUST] 'main' window not found, trying to get first available window");
-            app_handle.webview_windows().into_iter().next().map(|(_, w)| w)
+            app_handle
+                .webview_windows()
+                .into_iter()
+                .next()
+                .map(|(_, w)| w)
         })
         .ok_or_else(|| {
             eprintln!("[RUST] ERROR: No webview windows available");
@@ -194,28 +204,32 @@ async fn run_python_task(
 
     // Emit startup event - check for errors
     eprintln!("[RUST] About to emit task_started event...");
-    window.emit(
-        "task_started",
-        TaskStartedEvent {
-            message: "Initializing backend...".to_string(),
-        },
-    ).map_err(|e| {
-        eprintln!("[RUST] ERROR: Failed to emit task_started: {}", e);
-        format!("Failed to emit task_started: {}", e)
-    })?;
+    window
+        .emit(
+            "task_started",
+            TaskStartedEvent {
+                message: "Initializing backend...".to_string(),
+            },
+        )
+        .map_err(|e| {
+            eprintln!("[RUST] ERROR: Failed to emit task_started: {}", e);
+            format!("Failed to emit task_started: {}", e)
+        })?;
     eprintln!("[RUST] task_started event emitted successfully");
 
     eprintln!("[RUST] About to emit build_log (validating)...");
-    window.emit(
-        "build_log",
-        LogEvent {
-            message: "Validating configuration...".to_string(),
-            level: "info".to_string(),
-        },
-    ).map_err(|e| {
-        eprintln!("[RUST] ERROR: Failed to emit build_log: {}", e);
-        format!("Failed to emit build_log: {}", e)
-    })?;
+    window
+        .emit(
+            "build_log",
+            LogEvent {
+                message: "Validating configuration...".to_string(),
+                level: "info".to_string(),
+            },
+        )
+        .map_err(|e| {
+            eprintln!("[RUST] ERROR: Failed to emit build_log: {}", e);
+            format!("Failed to emit build_log: {}", e)
+        })?;
     eprintln!("[RUST] build_log emitted successfully");
 
     eprintln!("[RUST] Building CLI args...");
@@ -234,24 +248,28 @@ async fn run_python_task(
     eprintln!("[RUST] CLI args built: {:?}", cli_args);
 
     // Emit status update
-    window.emit(
-        "build_log",
-        LogEvent {
-            message: "Starting Python backend (cold start may take a moment)...".to_string(),
-            level: "info".to_string(),
-        },
-    ).map_err(|e| format!("Failed to emit: {}", e))?;
+    window
+        .emit(
+            "build_log",
+            LogEvent {
+                message: "Starting Python backend (cold start may take a moment)...".to_string(),
+                level: "info".to_string(),
+            },
+        )
+        .map_err(|e| format!("Failed to emit: {}", e))?;
 
     // Build the command
     let python_path = python_command();
 
-    window.emit(
-        "build_log",
-        LogEvent {
-            message: format!("Using Python: {}", python_path.display()),
-            level: "info".to_string(),
-        },
-    ).map_err(|e| format!("Failed to emit: {}", e))?;
+    window
+        .emit(
+            "build_log",
+            LogEvent {
+                message: format!("Using Python: {}", python_path.display()),
+                level: "info".to_string(),
+            },
+        )
+        .map_err(|e| format!("Failed to emit: {}", e))?;
 
     let mut command = if cfg!(debug_assertions) {
         let mut cmd = Command::new(&python_path);
@@ -313,44 +331,49 @@ async fn run_python_task(
     }
 
     eprintln!("[RUST] About to emit spawning message...");
-    window.emit(
-        "build_log",
-        LogEvent {
-            message: format!("Spawning process with args: {:?}", cli_args),
-            level: "info".to_string(),
-        },
-    ).map_err(|e| {
-        eprintln!("[RUST] ERROR: Failed to emit: {}", e);
-        format!("Failed to emit: {}", e)
-    })?;
+    window
+        .emit(
+            "build_log",
+            LogEvent {
+                message: format!("Spawning process with args: {:?}", cli_args),
+                level: "info".to_string(),
+            },
+        )
+        .map_err(|e| {
+            eprintln!("[RUST] ERROR: Failed to emit: {}", e);
+            format!("Failed to emit: {}", e)
+        })?;
     eprintln!("[RUST] Spawning message emitted");
 
     // Spawn the process
     eprintln!("[RUST] About to spawn child process...");
-    let mut child = command
-        .spawn()
-        .map_err(|error| {
-            eprintln!("[RUST] ERROR: Failed to spawn process: {}", error);
-            let err_msg = format!("Failed to spawn Python process: {}. Check that Python is installed and accessible.", error);
-            let _ = window.emit(
-                "build_log",
-                LogEvent {
-                    message: err_msg.clone(),
-                    level: "error".to_string(),
-                },
-            );
-            err_msg
-        })?;
+    let mut child = command.spawn().map_err(|error| {
+        eprintln!("[RUST] ERROR: Failed to spawn process: {}", error);
+        let err_msg = format!(
+            "Failed to spawn Python process: {}. Check that Python is installed and accessible.",
+            error
+        );
+        let _ = window.emit(
+            "build_log",
+            LogEvent {
+                message: err_msg.clone(),
+                level: "error".to_string(),
+            },
+        );
+        err_msg
+    })?;
     eprintln!("[RUST] Child process spawned successfully!");
 
     // Emit that backend has started
-    window.emit(
-        "build_log",
-        LogEvent {
-            message: "Backend process spawned successfully, processing...".to_string(),
-            level: "info".to_string(),
-        },
-    ).map_err(|e| format!("Failed to emit: {}", e))?;
+    window
+        .emit(
+            "build_log",
+            LogEvent {
+                message: "Backend process spawned successfully, processing...".to_string(),
+                level: "info".to_string(),
+            },
+        )
+        .map_err(|e| format!("Failed to emit: {}", e))?;
 
     // CRITICAL: Take stdout and stderr BEFORE storing the child in the mutex
     eprintln!("[RUST] Taking stdout from child...");
@@ -396,8 +419,6 @@ async fn run_python_task(
     let mut stdout_reader = BufReader::new(stdout).lines();
     let mut stderr_reader = BufReader::new(stderr).lines();
 
-
-
     // Stream stdout
     eprintln!("[RUST] Spawning stdout reader task...");
     let window_stdout = window.clone();
@@ -432,7 +453,10 @@ async fn run_python_task(
                 },
             );
         }
-        eprintln!("[RUST STDOUT TASK] Finished reading stdout, {} lines", lines.len());
+        eprintln!(
+            "[RUST STDOUT TASK] Finished reading stdout, {} lines",
+            lines.len()
+        );
         lines
     });
     eprintln!("[RUST] Stdout reader task spawned");
@@ -468,21 +492,18 @@ async fn run_python_task(
 
         if let Some(child_mut) = child_guard.as_mut() {
             eprintln!("[RUST] Child found in mutex, calling wait()...");
-            let status = child_mut
-                .wait()
-                .await
-                .map_err(|error| {
-                    eprintln!("[RUST] ERROR: Failed to wait for process: {}", error);
-                    let err_msg = format!("Failed to wait for process: {error}");
-                    let _ = window.emit(
-                        "build_log",
-                        LogEvent {
-                            message: err_msg.clone(),
-                            level: "error".to_string(),
-                        },
-                    );
-                    err_msg
-                })?;
+            let status = child_mut.wait().await.map_err(|error| {
+                eprintln!("[RUST] ERROR: Failed to wait for process: {}", error);
+                let err_msg = format!("Failed to wait for process: {error}");
+                let _ = window.emit(
+                    "build_log",
+                    LogEvent {
+                        message: err_msg.clone(),
+                        level: "error".to_string(),
+                    },
+                );
+                err_msg
+            })?;
             eprintln!("[RUST] Child process completed with status: {:?}", status);
 
             // Clear the stored child process
@@ -506,52 +527,66 @@ async fn run_python_task(
 
     // Wait for all output to be consumed
     eprintln!("[RUST] Waiting for stdout task to complete...");
-    let stdout_lines: Vec<String> = stdout_task
-        .await
-        .map_err(|error| {
-            eprintln!("[RUST] ERROR: Failed to read stdout: {}", error);
-            format!("Failed to read stdout: {error}")
-        })?;
-    eprintln!("[RUST] Stdout task complete, got {} lines", stdout_lines.len());
+    let stdout_lines: Vec<String> = stdout_task.await.map_err(|error| {
+        eprintln!("[RUST] ERROR: Failed to read stdout: {}", error);
+        format!("Failed to read stdout: {error}")
+    })?;
+    eprintln!(
+        "[RUST] Stdout task complete, got {} lines",
+        stdout_lines.len()
+    );
 
     eprintln!("[RUST] Waiting for stderr task to complete...");
-    let stderr_lines: Vec<String> = stderr_task
-        .await
-        .map_err(|error| {
-            eprintln!("[RUST] ERROR: Failed to read stderr: {}", error);
-            format!("Failed to read stderr: {error}")
-        })?;
-    eprintln!("[RUST] Stderr task complete, got {} lines", stderr_lines.len());
+    let stderr_lines: Vec<String> = stderr_task.await.map_err(|error| {
+        eprintln!("[RUST] ERROR: Failed to read stderr: {}", error);
+        format!("Failed to read stderr: {error}")
+    })?;
+    eprintln!(
+        "[RUST] Stderr task complete, got {} lines",
+        stderr_lines.len()
+    );
 
     let exit_code = exit_status.code().unwrap_or(-1);
     let success = exit_status.success();
-    eprintln!("[RUST] Process exit code: {}, success: {}", exit_code, success);
+    eprintln!(
+        "[RUST] Process exit code: {}, success: {}",
+        exit_code, success
+    );
 
     // Emit completion event with appropriate message
     eprintln!("[RUST] Emitting build_complete event...");
     let completion_message = if success {
         if config.dry_run {
-            "✓ Preview completed successfully. No bundles were modified during this dry run.".to_string()
+            "✓ Preview completed successfully. No bundles were modified during this dry run."
+                .to_string()
         } else {
             "✓ Build completed successfully. All bundles have been created.".to_string()
         }
     } else if config.dry_run {
-        format!("✗ Preview failed with exit code {}. Check the logs for details.", exit_code)
+        format!(
+            "✗ Preview failed with exit code {}. Check the logs for details.",
+            exit_code
+        )
     } else {
-        format!("✗ Build failed with exit code {}. Check the logs for details.", exit_code)
+        format!(
+            "✗ Build failed with exit code {}. Check the logs for details.",
+            exit_code
+        )
     };
 
-    window.emit(
-        "build_complete",
-        CompletionEvent {
-            success,
-            exit_code,
-            message: completion_message,
-        },
-    ).map_err(|e| {
-        eprintln!("[RUST] ERROR: Failed to emit completion: {}", e);
-        format!("Failed to emit completion: {}", e)
-    })?;
+    window
+        .emit(
+            "build_complete",
+            CompletionEvent {
+                success,
+                exit_code,
+                message: completion_message,
+            },
+        )
+        .map_err(|e| {
+            eprintln!("[RUST] ERROR: Failed to emit completion: {}", e);
+            format!("Failed to emit completion: {}", e)
+        })?;
     eprintln!("[RUST] build_complete event emitted");
 
     eprintln!("[RUST] run_python_task returning successfully");
