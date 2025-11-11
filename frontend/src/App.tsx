@@ -77,6 +77,7 @@ function App() {
   const [currentTask, setCurrentTask] = useState<string | null>(null);
   const [buildProgress, setBuildProgress] = useState<BuildProgress | null>(null);
   const [lastBuildSuccess, setLastBuildSuccess] = useState<boolean | null>(null);
+  const [lastTaskType, setLastTaskType] = useState<TaskMode | null>(null);
   const [runtimeState, setRuntimeState] = useState<'unknown' | 'preview' | 'ready'>(
     () => detectTauriRuntime()
   );
@@ -312,6 +313,7 @@ function App() {
 
       setIsRunning(true);
       setLastBuildSuccess(null);
+      setLastTaskType(mode);
       setBuildProgress(null);
       setCurrentTask(mode === 'preview' ? 'Previewing Build' : 'Building Bundles');
       setActiveTab('logs');
@@ -559,15 +561,23 @@ function App() {
                       <>
                         <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
                         <div>
-                          <p className="font-semibold text-green-600 dark:text-green-400">Build Successful</p>
-                          <p className="text-sm text-muted-foreground">Your skin has been built successfully</p>
+                          <p className="font-semibold text-green-600 dark:text-green-400">
+                            {lastTaskType === 'preview' ? 'Preview Successful' : 'Build Successful'}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {lastTaskType === 'preview'
+                              ? 'No bundles were modified during this dry run'
+                              : 'Your skin bundles have been created successfully'}
+                          </p>
                         </div>
                       </>
                     ) : (
                       <>
                         <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
                         <div>
-                          <p className="font-semibold text-red-600 dark:text-red-400">Build Failed</p>
+                          <p className="font-semibold text-red-600 dark:text-red-400">
+                            {lastTaskType === 'preview' ? 'Preview Failed' : 'Build Failed'}
+                          </p>
                           <p className="text-sm text-muted-foreground">Check the logs for error details</p>
                         </div>
                       </>

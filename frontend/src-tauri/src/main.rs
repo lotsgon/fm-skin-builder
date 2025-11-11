@@ -155,11 +155,16 @@ fn parse_progress(line: &str) -> Option<(u32, u32, String)> {
 /// Determine log level from line content
 fn get_log_level(line: &str) -> String {
     let line_upper = line.to_uppercase();
-    if line_upper.contains("ERROR") || line_upper.contains("✗") || line_upper.contains("[STDERR]") {
+
+    // Check for explicit log level markers (Python logging format)
+    if line_upper.contains("ERROR") || line_upper.contains("✗") || line_upper.contains("CRITICAL") {
         "error".to_string()
     } else if line_upper.contains("WARN") || line_upper.contains("WARNING") {
         "warning".to_string()
+    } else if line_upper.contains("DEBUG") {
+        "info".to_string()
     } else {
+        // Default to info for normal messages
         "info".to_string()
     }
 }
@@ -441,12 +446,14 @@ async fn run_python_task(
         while let Ok(Some(line)) = stderr_reader.next_line().await {
             lines.push(line.clone());
 
-            // Emit stderr as error log
+            // Parse stderr for log level instead of assuming error
+            // Python's logging module writes to stderr by default, even for INFO
+            let level = get_log_level(&line);
             let _ = window_stderr.emit(
                 "build_log",
                 LogEvent {
-                    message: format!("[STDERR] {}", line),
-                    level: "error".to_string(),
+                    message: line,
+                    level,
                 },
             );
         }
@@ -522,18 +529,28 @@ async fn run_python_task(
     let success = exit_status.success();
     eprintln!("[RUST] Process exit code: {}, success: {}", exit_code, success);
 
-    // Emit completion event
+    // Emit completion event with appropriate message
     eprintln!("[RUST] Emitting build_complete event...");
+    let completion_message = if success {
+        if config.dry_run {
+            "✓ Preview completed successfully. No bundles were modified during this dry run.".to_string()
+        } else {
+            "✓ Build completed successfully. All bundles have been created.".to_string()
+        }
+    } else {
+        if config.dry_run {
+            format!("✗ Preview failed with exit code {}. Check the logs for details.", exit_code)
+        } else {
+            format!("✗ Build failed with exit code {}. Check the logs for details.", exit_code)
+        }
+    };
+
     window.emit(
         "build_complete",
         CompletionEvent {
             success,
             exit_code,
-            message: if success {
-                "Build completed successfully".to_string()
-            } else {
-                format!("Build failed with exit code {}", exit_code)
-            },
+            message: completion_message,
         },
     ).map_err(|e| {
         eprintln!("[RUST] ERROR: Failed to emit completion: {}", e);
