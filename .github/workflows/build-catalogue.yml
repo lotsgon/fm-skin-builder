@@ -260,16 +260,7 @@ jobs:
 
           if [ -f "$CATALOGUE_DIR/metadata.json" ]; then
             echo "Catalogue Statistics:"
-            python3 -c "
-import json
-with open('$CATALOGUE_DIR/metadata.json') as f:
-    data = json.load(f)
-bundles = data.get('bundles_scanned', [])
-assets = data.get('total_assets', {})
-print(f'  Bundles Scanned: {len(bundles)}')
-for key, count in assets.items():
-    print(f'  {key.replace(\"_\", \" \").title()}: {count}')
-"
+            cat "$CATALOGUE_DIR/metadata.json" | python3 -c 'import sys, json; d = json.load(sys.stdin); print(f"  Bundles Scanned: {len(d.get(\"bundles_scanned\", []))}"); [print(f"  {k.replace(\"_\", \" \").title()}: {v}") for k, v in d.get("total_assets", {}).items()]'
           else
             echo "⚠️  Warning: metadata.json not found at $CATALOGUE_DIR/metadata.json"
           fi
