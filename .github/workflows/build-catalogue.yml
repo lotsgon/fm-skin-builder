@@ -1,7 +1,7 @@
-name: Build FM Asset Catalogue
+name: Build FM Asset Catalogue (Parallel)
 
 on:
-  # Manual trigger with version input
+  # Manual trigger only
   workflow_dispatch:
     inputs:
       fm_version:
@@ -17,10 +17,16 @@ on:
         description: 'R2 prefix for bundles (e.g., fm2025/StandaloneOSX)'
         required: true
         type: string
-
-  # Schedule: Run weekly on Monday at 2am UTC
-  schedule:
-    - cron: '0 2 * * 1'
+      num_groups:
+        description: 'Number of parallel groups (recommend: 10-15)'
+        required: false
+        type: number
+        default: 10
+      exclude_bundles:
+        description: 'Exclude patterns (space-separated, e.g., "ui-newgen-portraits regen")'
+        required: false
+        type: string
+        default: 'ui-newgen-portraits regen'
 
 env:
   # R2 Configuration
@@ -29,18 +35,25 @@ env:
   #   - R2_ACCESS_KEY (Access Key ID from Cloudflare R2 token)
   #   - R2_SECRET_ACCESS_KEY (Secret Access Key from Cloudflare R2 token)
   # Required variables (set in repo variables):
-  #   - R2_BUNDLES_BUCKET (e.g., "fm-bundles")
-  #   - R2_CATALOGUE_BUCKET (e.g., "fm-asset-catalogue")
+  #   - R2_BUNDLES_BUCKET (e.g., "fm-skin-builder-bundles")
+  #   - R2_CATALOGUE_BUCKET (e.g., "fm-skin-builder-asset-catalogue")
   R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
   R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY }}
   R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
   R2_BUNDLES_BUCKET: ${{ vars.R2_BUNDLES_BUCKET }}
   R2_CATALOGUE_BUCKET: ${{ vars.R2_CATALOGUE_BUCKET }}
 
+  # Python version
+  PYTHON_VERSION: '3.11'
+
 jobs:
-  build-catalogue:
+  # Job 1: Split bundles into groups for parallel processing
+  split:
+    name: Split Bundles
     runs-on: ubuntu-latest
-    timeout-minutes: 120  # 2 hour timeout
+    outputs:
+      matrix: ${{ steps.split.outputs.matrix }}
+      num_groups: ${{ steps.split.outputs.num_groups }}
 
     steps:
       - name: Checkout repository
@@ -49,46 +62,256 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3
+
+      - name: Split bundles into groups
+        id: split
+        run: |
+          echo "Splitting bundles from R2..."
+          python scripts/split_bundles.py \
+            --prefix "${{ github.event.inputs.bundles_prefix }}" \
+            --groups ${{ github.event.inputs.num_groups }} \
+            --output bundle_groups \
+            --exclude ${{ github.event.inputs.exclude_bundles }}
+
+          # Generate matrix array [0, 1, 2, ..., N-1]
+          SUMMARY=$(cat bundle_groups/split_summary.json)
+          NUM_GROUPS=$(echo "$SUMMARY" | python -c "import sys, json; print(json.load(sys.stdin)['num_groups'])")
+
+          # Create matrix JSON: {"group": [0, 1, 2, ...]}
+          MATRIX=$(python -c "import json; print(json.dumps({'group': list(range($NUM_GROUPS))}))")
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+          echo "num_groups=$NUM_GROUPS" >> $GITHUB_OUTPUT
+
+          echo "Split into $NUM_GROUPS groups"
+          echo "$SUMMARY" | python -c "import sys, json; summary = json.load(sys.stdin); [print(f\"  Group {g['group_id']}: {g['bundle_count']} bundles\") for g in summary['groups']]"
+
+      - name: Upload group manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-groups
+          path: bundle_groups/
+          retention-days: 1
+
+  # Job 2: Process each group in parallel
+  extract:
+    name: Extract Group ${{ matrix.group }}
+    needs: split
+    runs-on: ubuntu-latest
+    timeout-minutes: 60  # 1 hour timeout per group (adjust based on testing)
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.split.outputs.matrix) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: 'pip'
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcairo2 libcairo2-dev
+          sudo apt-get install -y \
+            libgl1 \
+            libglib2.0-0 \
+            libcairo2 \
+            libcairo2-dev
 
       - name: Install Python dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -e .
-          pip install boto3  # For R2/S3 API
 
-      - name: Download bundles from R2
-        run: |
-          python scripts/download_bundles_from_r2.py \
-            --prefix "${{ github.event.inputs.bundles_prefix }}" \
-            --output bundles/
+      - name: Download group manifests
+        uses: actions/download-artifact@v4
+        with:
+          name: bundle-groups
+          path: bundle_groups/
 
-      - name: Build catalogue
+      - name: Download bundles for group
         run: |
+          echo "Downloading bundles for Group ${{ matrix.group }}..."
+          python scripts/download_bundle_group.py \
+            --group-file bundle_groups/group_${{ matrix.group }}.json \
+            --output bundles
+
+      - name: Build partial catalogue
+        run: |
+          echo "Building catalogue for Group ${{ matrix.group }}..."
           python -m fm_skin_builder.cli.main catalogue \
-            --bundle bundles/ \
+            --bundle bundles \
             --fm-version "${{ github.event.inputs.fm_version }}" \
             --catalogue-version "${{ github.event.inputs.catalogue_version }}" \
-            --out build/catalogue
+            --out catalogue_group_${{ matrix.group }}
 
-      - name: Upload catalogue to R2
+      - name: Upload partial catalogue
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalogue-group-${{ matrix.group }}
+          path: catalogue_group_${{ matrix.group }}/
+          retention-days: 1
+
+  # Job 3: Merge all partial catalogues
+  merge:
+    name: Merge Catalogues
+    needs: [split, extract]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30  # Merge should be fast
+    outputs:
+      version_dir: ${{ steps.set-output.outputs.version_dir }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
         run: |
-          python scripts/upload_catalogue_to_r2.py \
-            --catalogue-dir "build/catalogue/${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}" \
-            --fm-version "${{ github.event.inputs.fm_version }}" \
-            --catalogue-version "${{ github.event.inputs.catalogue_version }}"
+          python -m pip install --upgrade pip
+          pip install boto3
 
-      - name: Upload artifacts (for debugging)
-        if: always()
+      - name: Download all partial catalogues
+        uses: actions/download-artifact@v4
+        with:
+          pattern: catalogue-group-*
+          path: partial_catalogues/
+
+      - name: List downloaded artifacts
+        run: |
+          echo "Downloaded partial catalogues:"
+          ls -la partial_catalogues/
+          echo ""
+          echo "Artifact structure:"
+          find partial_catalogues -type f -name "*.json" | head -20 | while read f; do
+            echo "  $f ($(wc -c < "$f") bytes)"
+          done
+
+      - name: Merge catalogues
+        run: |
+          echo "Merging ${{ needs.split.outputs.num_groups }} partial catalogues..."
+
+          # Find the actual catalogue directories (inside artifact directories)
+          # Artifacts are downloaded as: partial_catalogues/catalogue-group-X/2025.0.0-v1/
+          # We need to pass the version directories to the merge script
+          VERSION_DIR="${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}"
+          PARTIAL_DIRS=$(find partial_catalogues -mindepth 2 -maxdepth 2 -type d -name "$VERSION_DIR" | sort)
+
+          if [ -z "$PARTIAL_DIRS" ]; then
+            echo "Error: No partial catalogues found"
+            echo "Looking for directories named: $VERSION_DIR"
+            echo "Contents of partial_catalogues:"
+            find partial_catalogues -type f | head -20
+            exit 1
+          fi
+
+          echo "Found catalogue directories:"
+          echo "$PARTIAL_DIRS"
+
+          # Create output directory with correct name
+          OUTPUT_DIR="merged_catalogue/$VERSION_DIR"
+          mkdir -p "$OUTPUT_DIR"
+
+          # Merge all partials into unified catalogue
+          python scripts/merge_catalogues.py \
+            --partial-dirs $PARTIAL_DIRS \
+            --output "$OUTPUT_DIR"
+
+      - name: Set output variables
+        id: set-output
+        run: |
+          VERSION_DIR="${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}"
+          echo "version_dir=$VERSION_DIR" >> $GITHUB_OUTPUT
+
+      - name: Upload JSON files to R2
+        run: |
+          echo "Uploading JSON metadata files to R2..."
+          python scripts/upload_catalogue_to_r2.py \
+            --catalogue-dir "merged_catalogue/${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}" \
+            --fm-version "${{ github.event.inputs.fm_version }}" \
+            --catalogue-version "${{ github.event.inputs.catalogue_version }}" \
+            --json-only
+
+      - name: Upload merged catalogue as artifact
         uses: actions/upload-artifact@v4
         with:
           name: catalogue-${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}
-          path: build/catalogue/
+          path: merged_catalogue/
           retention-days: 7
+
+      - name: Summary
+        run: |
+          echo "✅ Parallel catalogue build complete!"
+          echo ""
+          echo "Configuration:"
+          echo "  FM Version: ${{ github.event.inputs.fm_version }}"
+          echo "  Catalogue Version: ${{ github.event.inputs.catalogue_version }}"
+          echo "  Bundle Prefix: ${{ github.event.inputs.bundles_prefix }}"
+          echo "  Parallel Groups: ${{ needs.split.outputs.num_groups }}"
+          echo ""
+
+          VERSION_DIR="${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}"
+          CATALOGUE_DIR="merged_catalogue/$VERSION_DIR"
+
+          if [ -f "$CATALOGUE_DIR/metadata.json" ]; then
+            echo "Catalogue Statistics:"
+            cat "$CATALOGUE_DIR/metadata.json" | python3 -c 'import sys, json; d = json.load(sys.stdin); print("  Bundles Scanned:", len(d.get("bundles_scanned", []))); [print("  " + k.replace("_", " ").title() + ":", v) for k, v in d.get("total_assets", {}).items()]'
+          else
+            echo "⚠️  Warning: metadata.json not found at $CATALOGUE_DIR/metadata.json"
+          fi
+
+  # Job 4: Upload thumbnails in parallel (by hash prefix)
+  upload-thumbnails:
+    name: Upload Thumbnails (${{ matrix.prefix }})
+    needs: merge
+    runs-on: ubuntu-latest
+    timeout-minutes: 20  # Per upload job
+    strategy:
+      fail-fast: false
+      max-parallel: 16
+      matrix:
+        prefix: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install boto3
+
+      - name: Download merged catalogue
+        uses: actions/download-artifact@v4
+        with:
+          name: catalogue-${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}
+          path: merged_catalogue/
+
+      - name: Upload thumbnails for prefix ${{ matrix.prefix }}
+        run: |
+          echo "Uploading thumbnails starting with ${{ matrix.prefix }}..."
+          python scripts/upload_catalogue_to_r2.py \
+            --catalogue-dir "merged_catalogue/${{ needs.merge.outputs.version_dir }}" \
+            --fm-version "${{ github.event.inputs.fm_version }}" \
+            --catalogue-version "${{ github.event.inputs.catalogue_version }}" \
+            --thumbnails-only \
+            --hash-prefix "${{ matrix.prefix }}"

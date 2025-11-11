@@ -95,7 +95,7 @@ class BundleContext:
                 # UnityPy can load from bytes directly
                 self._env = UnityPy.load(bundle_data)
                 return
-            except (OSError, IOError) as e:
+            except (OSError, IOError):
                 # If reading fails, fall through to try the normal path
                 pass
 

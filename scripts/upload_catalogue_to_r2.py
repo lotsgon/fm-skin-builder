@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """
 Upload generated catalogue to R2 bucket.
+
+Supports parallel uploads by filtering files:
+- --json-only: Upload only JSON metadata files
+- --thumbnails-only: Upload only thumbnail images
+- --hash-prefix: Upload only thumbnails starting with specific hash prefix (0-f)
 """
 
 import argparse
@@ -13,7 +18,14 @@ import boto3
 from botocore.client import Config
 
 
-def upload_catalogue(catalogue_dir: Path, fm_version: str, catalogue_version: str):
+def upload_catalogue(
+    catalogue_dir: Path,
+    fm_version: str,
+    catalogue_version: str,
+    json_only: bool = False,
+    thumbnails_only: bool = False,
+    hash_prefix: str = None,
+):
     """
     Upload catalogue to R2 bucket.
 
@@ -21,6 +33,9 @@ def upload_catalogue(catalogue_dir: Path, fm_version: str, catalogue_version: st
         catalogue_dir: Local directory containing catalogue files
         fm_version: FM version (e.g., "2025.0.0")
         catalogue_version: Catalogue version number
+        json_only: Only upload JSON files (skip thumbnails)
+        thumbnails_only: Only upload thumbnails (skip JSON)
+        hash_prefix: Only upload thumbnails starting with this prefix (0-9, a-f)
     """
     # Get R2 credentials from environment
     account_id = os.getenv("R2_ACCOUNT_ID")
@@ -50,17 +65,41 @@ def upload_catalogue(catalogue_dir: Path, fm_version: str, catalogue_version: st
     print(f"Uploading catalogue to R2: {bucket_name}")
     print(f"  FM Version: {fm_version}")
     print(f"  Catalogue Version: {catalogue_version}")
+    if json_only:
+        print(f"  Mode: JSON files only")
+    elif thumbnails_only:
+        print(f"  Mode: Thumbnails only (prefix: {hash_prefix or 'all'})")
 
     # R2 prefix for this catalogue version
     prefix = f"{fm_version}/v{catalogue_version}"
 
-    # Upload all files recursively
+    # Upload files with filtering
     file_count = 0
     total_size = 0
+    skipped = 0
 
     for file_path in catalogue_dir.rglob("*"):
         if file_path.is_dir():
             continue
+
+        # Apply filters
+        is_json = file_path.suffix == ".json"
+        is_thumbnail = file_path.suffix == ".webp" and "thumbnails" in str(file_path)
+
+        # Filter by mode
+        if json_only and not is_json:
+            skipped += 1
+            continue
+        if thumbnails_only and not is_thumbnail:
+            skipped += 1
+            continue
+
+        # Filter by hash prefix (for thumbnails only)
+        if hash_prefix and is_thumbnail:
+            filename = file_path.stem  # e.g., "a3f5d9e8c2b1" from "a3f5d9e8c2b1.webp"
+            if not filename.startswith(hash_prefix):
+                skipped += 1
+                continue
 
         # Calculate relative path for R2 key
         relative_path = file_path.relative_to(catalogue_dir)
@@ -77,7 +116,9 @@ def upload_catalogue(catalogue_dir: Path, fm_version: str, catalogue_version: st
         elif file_path.suffix == ".webp":
             content_type = "image/webp"
 
-        print(f"  Uploading: {relative_path} ({file_path.stat().st_size / 1024:.1f} KB)")
+        file_size_kb = file_path.stat().st_size / 1024
+        if file_count % 100 == 0 or file_size_kb > 100:  # Log every 100 files or large files
+            print(f"  Uploading: {relative_path} ({file_size_kb:.1f} KB)")
 
         extra_args = {
             "ContentType": content_type,
@@ -101,10 +142,13 @@ def upload_catalogue(catalogue_dir: Path, fm_version: str, catalogue_version: st
             continue
 
     print(f"\n✅ Uploaded {file_count} files ({total_size / 1024 / 1024:.1f} MB)")
+    if skipped > 0:
+        print(f"   Skipped {skipped} files (filtered)")
     print(f"   R2 Location: {bucket_name}/{prefix}/")
 
     # If R2 bucket has public access, print the public URL
-    print(f"\n   Public URL: https://your-r2-domain.com/{prefix}/metadata.json")
+    if json_only:
+        print(f"\n   Public URL: https://your-r2-domain.com/{prefix}/metadata.json")
 
 
 def main():
@@ -125,9 +169,37 @@ def main():
         required=True,
         help="Catalogue version number",
     )
+    parser.add_argument(
+        "--json-only",
+        action="store_true",
+        help="Only upload JSON files (skip thumbnails)",
+    )
+    parser.add_argument(
+        "--thumbnails-only",
+        action="store_true",
+        help="Only upload thumbnail images (skip JSON)",
+    )
+    parser.add_argument(
+        "--hash-prefix",
+        type=str,
+        help="Only upload thumbnails starting with this hash prefix (0-9, a-f)",
+    )
 
     args = parser.parse_args()
-    upload_catalogue(args.catalogue_dir, args.fm_version, args.catalogue_version)
+
+    # Validate mutually exclusive flags
+    if args.json_only and args.thumbnails_only:
+        print("Error: --json-only and --thumbnails-only are mutually exclusive")
+        sys.exit(1)
+
+    upload_catalogue(
+        args.catalogue_dir,
+        args.fm_version,
+        args.catalogue_version,
+        json_only=args.json_only,
+        thumbnails_only=args.thumbnails_only,
+        hash_prefix=args.hash_prefix,
+    )
 
 
 if __name__ == "__main__":
