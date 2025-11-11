@@ -13,6 +13,7 @@ from .textures import (
     DynamicSpriteRebind,
 )
 from .css_sources import CollectedCss
+from .font_swap_service import FontSwapService, FontSwapOptions, FontSwapResult
 
 if TYPE_CHECKING:  # pragma: no cover - circular import safe typing
     from .css_patcher import CssPatcher

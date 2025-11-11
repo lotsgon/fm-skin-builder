@@ -23,6 +23,7 @@ class PatchReport:
     summary_lines: list[str] = field(default_factory=list)
     saved_path: Optional[Path] = None
     texture_replacements: int = 0
+    font_replacements: int = 0
 
     @property
     def has_changes(self) -> bool:
@@ -31,6 +32,7 @@ class PatchReport:
             or self.variables_patched
             or self.direct_patched
             or self.texture_replacements
+            or self.font_replacements
         )
 
     def mark_saved(self, path: Path) -> None:

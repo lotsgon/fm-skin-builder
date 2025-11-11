@@ -45,3 +45,15 @@ def run(args) -> None:
                 result.texture_replacements_total,
                 result.texture_bundles_written,
             )
+    if result.font_replacements_total or result.font_bundles_written:
+        if args.dry_run:
+            log.info(
+                "[DRY-RUN] Would replace %s fonts across bundles",
+                result.font_replacements_total,
+            )
+        else:
+            log.info(
+                "Fonts replaced: %s across %s bundles",
+                result.font_replacements_total,
+                result.font_bundles_written,
+            )

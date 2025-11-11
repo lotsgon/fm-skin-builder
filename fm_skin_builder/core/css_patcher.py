@@ -21,6 +21,8 @@ from .services import (
     CssPatchService,
     TextureSwapOptions,
     TextureSwapService,
+    FontSwapOptions,
+    FontSwapService,
 )
 from .css_utils import (
     build_selector_from_parts,
@@ -928,6 +930,8 @@ class PipelineResult:
         css_bundles_modified: Number of CSS bundles that were actually modified.
         texture_replacements_total: Total count of texture replacements across all bundles.
         texture_bundles_written: Number of bundles written with texture changes.
+        font_replacements_total: Total count of font replacements across all bundles.
+        font_bundles_written: Number of bundles written with font changes.
         bundles_requested: Total number of bundles requested for processing.
         summary_lines: Human-readable summary lines for CLI output.
     """
@@ -936,6 +940,8 @@ class PipelineResult:
     css_bundles_modified: int
     texture_replacements_total: int
     texture_bundles_written: int
+    font_replacements_total: int
+    font_bundles_written: int
     bundles_requested: int
     summary_lines: List[str] = field(default_factory=list)
 
@@ -946,6 +952,8 @@ class PipelineResult:
             css_bundles_modified=0,
             texture_replacements_total=0,
             texture_bundles_written=0,
+            font_replacements_total=0,
+            font_bundles_written=0,
             bundles_requested=0,
             summary_lines=[],
         )
@@ -1047,17 +1055,31 @@ class SkinPatchPipeline:
                 TextureSwapOptions(includes=includes_list, dry_run=self.options.dry_run)
             )
 
+        # Font swap service
+        font_targets_present = any(
+            x.strip().lower() in {"fonts", "assets/fonts", "all"}
+            for x in includes_list
+        )
+        font_service: Optional[FontSwapService] = None
+        if font_targets_present:
+            font_service = FontSwapService(
+                FontSwapOptions(includes=includes_list, dry_run=self.options.dry_run)
+            )
+
         summary_lines: List[str] = []
         bundle_reports: List[PatchReport] = []
         css_bundles_modified = 0
         texture_replacements_total = 0
         texture_bundles_written = 0
+        font_replacements_total = 0
+        font_bundles_written = 0
 
         for bundle_path in bundle_files:
             report = self._process_bundle(
                 bundle_path,
                 css_service=css_service,
                 texture_service=texture_service,
+                font_service=font_service,
                 cache_candidates=cache_candidates,
                 hints_assets=hints_assets,
                 skin_cache_dir=skin_cache_dir,
@@ -1080,6 +1102,10 @@ class SkinPatchPipeline:
             if not self.options.dry_run and report.texture_replacements > 0:
                 texture_bundles_written += 1
 
+            font_replacements_total += report.font_replacements
+            if not self.options.dry_run and report.font_replacements > 0:
+                font_bundles_written += 1
+
             bundle_reports.append(report)
 
         return PipelineResult(
@@ -1087,6 +1113,8 @@ class SkinPatchPipeline:
             css_bundles_modified=css_bundles_modified,
             texture_replacements_total=texture_replacements_total,
             texture_bundles_written=texture_bundles_written,
+            font_replacements_total=font_replacements_total,
+            font_bundles_written=font_bundles_written,
             bundles_requested=bundles_requested,
             summary_lines=summary_lines,
         )
@@ -1111,6 +1139,7 @@ class SkinPatchPipeline:
         *,
         css_service: CssPatchService,
         texture_service: Optional[TextureSwapService],
+        font_service: Optional[FontSwapService],
         cache_candidates: Dict[Path, Optional[Set[str]]],
         hints_assets: Optional[Set[str]],
         skin_cache_dir: Optional[Path],
@@ -1198,6 +1227,17 @@ class SkinPatchPipeline:
                     log.debug(
                         "[TEXTURE] Prefilter: skipping bundle with no matching names or pending sprite rebinds."
                     )
+
+            # Font replacement
+            if font_service:
+                try:
+                    font_service.apply(
+                        bundle_ctx,
+                        self.css_dir,
+                        report,
+                    )
+                except Exception as exc:
+                    log.warning(f"[WARN] Font swap skipped due to error: {exc}")
 
             saved_path = bundle_ctx.save_modified(
                 self.out_dir, dry_run=self.options.dry_run
