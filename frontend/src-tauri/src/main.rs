@@ -176,7 +176,7 @@ async fn run_python_task(
 
     // Emit startup event - check for errors
     eprintln!("[RUST] About to emit task_started event...");
-    app_handle.emit(
+    app_handle.emit_all(
         "task_started",
         TaskStartedEvent {
             message: "Initializing backend...".to_string(),
@@ -188,7 +188,7 @@ async fn run_python_task(
     eprintln!("[RUST] task_started event emitted successfully");
 
     eprintln!("[RUST] About to emit build_log (validating)...");
-    app_handle.emit(
+    app_handle.emit_all(
         "build_log",
         LogEvent {
             message: "Validating configuration...".to_string(),
@@ -204,7 +204,7 @@ async fn run_python_task(
     let cli_args = build_cli_args(&config).map_err(|e| {
         eprintln!("[RUST] ERROR: Failed to build CLI args: {}", e);
         let err_msg = format!("Configuration error: {}", e);
-        let _ = app_handle.emit(
+        let _ = app_handle.emit_all(
             "build_log",
             LogEvent {
                 message: err_msg.clone(),
@@ -216,7 +216,7 @@ async fn run_python_task(
     eprintln!("[RUST] CLI args built: {:?}", cli_args);
 
     // Emit status update
-    app_handle.emit(
+    app_handle.emit_all(
         "build_log",
         LogEvent {
             message: "Starting Python backend (cold start may take a moment)...".to_string(),
@@ -227,7 +227,7 @@ async fn run_python_task(
     // Build the command
     let python_path = python_command();
 
-    app_handle.emit(
+    app_handle.emit_all(
         "build_log",
         LogEvent {
             message: format!("Using Python: {}", python_path.display()),
@@ -253,7 +253,7 @@ async fn run_python_task(
             .resolve(binary_name, BaseDirectory::Resource)
             .map_err(|error| {
                 let err_msg = format!("Failed to resolve backend binary path: {error}");
-                let _ = app_handle.emit(
+                let _ = app_handle.emit_all(
                     "build_log",
                     LogEvent {
                         message: err_msg.clone(),
@@ -269,7 +269,7 @@ async fn run_python_task(
                 backend_binary.display(),
                 binary_name
             );
-            let _ = app_handle.emit(
+            let _ = app_handle.emit_all(
                 "build_log",
                 LogEvent {
                     message: err_msg.clone(),
@@ -295,7 +295,7 @@ async fn run_python_task(
     }
 
     eprintln!("[RUST] About to emit spawning message...");
-    app_handle.emit(
+    app_handle.emit_all(
         "build_log",
         LogEvent {
             message: format!("Spawning process with args: {:?}", cli_args),
@@ -314,7 +314,7 @@ async fn run_python_task(
         .map_err(|error| {
             eprintln!("[RUST] ERROR: Failed to spawn process: {}", error);
             let err_msg = format!("Failed to spawn Python process: {}. Check that Python is installed and accessible.", error);
-            let _ = app_handle.emit(
+            let _ = app_handle.emit_all(
                 "build_log",
                 LogEvent {
                     message: err_msg.clone(),
@@ -326,7 +326,7 @@ async fn run_python_task(
     eprintln!("[RUST] Child process spawned successfully!");
 
     // Emit that backend has started
-    app_handle.emit(
+    app_handle.emit_all(
         "build_log",
         LogEvent {
             message: "Backend process spawned successfully, processing...".to_string(),
@@ -339,7 +339,7 @@ async fn run_python_task(
     let stdout = child.stdout.take().ok_or_else(|| {
         eprintln!("[RUST] ERROR: Failed to capture stdout");
         let err_msg = "Failed to capture stdout".to_string();
-        let _ = app_handle.emit(
+        let _ = app_handle.emit_all(
             "build_log",
             LogEvent {
                 message: err_msg.clone(),
@@ -354,7 +354,7 @@ async fn run_python_task(
     let stderr = child.stderr.take().ok_or_else(|| {
         eprintln!("[RUST] ERROR: Failed to capture stderr");
         let err_msg = "Failed to capture stderr".to_string();
-        let _ = app_handle.emit(
+        let _ = app_handle.emit_all(
             "build_log",
             LogEvent {
                 message: err_msg.clone(),
@@ -395,7 +395,7 @@ async fn run_python_task(
             // Parse for progress information
             if let Some((current, total, status)) = parse_progress(&line) {
                 if total > 0 {
-                    let _ = app_handle_stdout.emit(
+                    let _ = app_handle_stdout.emit_all(
                         "build_progress",
                         ProgressEvent {
                             current,
@@ -408,7 +408,7 @@ async fn run_python_task(
 
             // Emit log event
             let level = get_log_level(&line);
-            let _ = app_handle_stdout.emit(
+            let _ = app_handle_stdout.emit_all(
                 "build_log",
                 LogEvent {
                     message: line,
@@ -429,7 +429,7 @@ async fn run_python_task(
             lines.push(line.clone());
 
             // Emit stderr as error log
-            let _ = app_handle_stderr.emit(
+            let _ = app_handle_stderr.emit_all(
                 "build_log",
                 LogEvent {
                     message: format!("[STDERR] {}", line),
@@ -456,7 +456,7 @@ async fn run_python_task(
                 .map_err(|error| {
                     eprintln!("[RUST] ERROR: Failed to wait for process: {}", error);
                     let err_msg = format!("Failed to wait for process: {error}");
-                    let _ = app_handle.emit(
+                    let _ = app_handle.emit_all(
                         "build_log",
                         LogEvent {
                             message: err_msg.clone(),
@@ -474,7 +474,7 @@ async fn run_python_task(
         } else {
             eprintln!("[RUST] ERROR: Child not found in mutex (was cancelled?)");
             let err_msg = "Child process was cancelled".to_string();
-            let _ = app_handle.emit(
+            let _ = app_handle.emit_all(
                 "build_log",
                 LogEvent {
                     message: err_msg.clone(),
@@ -511,7 +511,7 @@ async fn run_python_task(
 
     // Emit completion event
     eprintln!("[RUST] Emitting build_complete event...");
-    app_handle.emit(
+    app_handle.emit_all(
         "build_complete",
         CompletionEvent {
             success,
