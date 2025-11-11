@@ -119,8 +119,6 @@ fn build_cli_args(config: &TaskConfig) -> Result<Vec<String>, String> {
 }
 
 /// Parse progress information from log lines
-/// Expected format: "=== Patching bundle X of Y: path/to/bundle ==="
-/// Or: "🔍 Scanning bundle: name (X/Y)"
 fn parse_progress(line: &str) -> Option<(u32, u32, String)> {
     // Pattern 1: "=== Processing bundle X of Y: ..."
     if line.contains("=== Processing bundle") {
@@ -172,28 +170,56 @@ async fn run_python_task(
     config: TaskConfig,
     state: State<'_, ProcessState>,
 ) -> Result<CommandResult, String> {
-    // Immediately emit that the task is starting (before cold start)
-    let _ = app_handle.emit(
+    // Emit startup event - check for errors
+    app_handle.emit(
         "task_started",
         TaskStartedEvent {
             message: "Initializing backend...".to_string(),
         },
-    );
+    ).map_err(|e| format!("Failed to emit task_started: {}", e))?;
 
-    let cli_args = build_cli_args(&config)?;
+    app_handle.emit(
+        "build_log",
+        LogEvent {
+            message: "Validating configuration...".to_string(),
+            level: "info".to_string(),
+        },
+    ).map_err(|e| format!("Failed to emit build_log: {}", e))?;
+
+    let cli_args = build_cli_args(&config).map_err(|e| {
+        let err_msg = format!("Configuration error: {}", e);
+        let _ = app_handle.emit(
+            "build_log",
+            LogEvent {
+                message: err_msg.clone(),
+                level: "error".to_string(),
+            },
+        );
+        err_msg
+    })?;
 
     // Emit status update
-    let _ = app_handle.emit(
+    app_handle.emit(
         "build_log",
         LogEvent {
             message: "Starting Python backend (cold start may take a moment)...".to_string(),
             level: "info".to_string(),
         },
-    );
+    ).map_err(|e| format!("Failed to emit: {}", e))?;
 
     // Build the command
+    let python_path = python_command();
+
+    app_handle.emit(
+        "build_log",
+        LogEvent {
+            message: format!("Using Python: {}", python_path.display()),
+            level: "info".to_string(),
+        },
+    ).map_err(|e| format!("Failed to emit: {}", e))?;
+
     let mut command = if cfg!(debug_assertions) {
-        let mut cmd = Command::new(python_command());
+        let mut cmd = Command::new(&python_path);
         cmd.arg("-m").arg("fm_skin_builder");
         cmd.current_dir(workspace_root());
         cmd.env("PYTHONPATH", "fm_skin_builder");
@@ -208,14 +234,32 @@ async fn run_python_task(
         let backend_binary = app_handle
             .path()
             .resolve(binary_name, BaseDirectory::Resource)
-            .map_err(|error| format!("Failed to resolve backend binary path: {error}"))?;
+            .map_err(|error| {
+                let err_msg = format!("Failed to resolve backend binary path: {error}");
+                let _ = app_handle.emit(
+                    "build_log",
+                    LogEvent {
+                        message: err_msg.clone(),
+                        level: "error".to_string(),
+                    },
+                );
+                err_msg
+            })?;
 
         if !backend_binary.exists() {
-            return Err(format!(
+            let err_msg = format!(
                 "Backend binary not found at: {}\nExpected binary name: {}",
                 backend_binary.display(),
                 binary_name
-            ));
+            );
+            let _ = app_handle.emit(
+                "build_log",
+                LogEvent {
+                    message: err_msg.clone(),
+                    level: "error".to_string(),
+                },
+            );
+            return Err(err_msg);
         }
 
         Command::new(backend_binary)
@@ -233,6 +277,14 @@ async fn run_python_task(
         command.creation_flags(CREATE_NO_WINDOW);
     }
 
+    app_handle.emit(
+        "build_log",
+        LogEvent {
+            message: format!("Spawning process with args: {:?}", cli_args),
+            level: "info".to_string(),
+        },
+    ).map_err(|e| format!("Failed to emit: {}", e))?;
+
     // Spawn the process
     let mut child = command
         .spawn()
@@ -249,17 +301,38 @@ async fn run_python_task(
         })?;
 
     // Emit that backend has started
-    let _ = app_handle.emit(
+    app_handle.emit(
         "build_log",
         LogEvent {
-            message: "Backend started, processing...".to_string(),
+            message: "Backend process spawned successfully, processing...".to_string(),
             level: "info".to_string(),
         },
-    );
+    ).map_err(|e| format!("Failed to emit: {}", e))?;
 
     // CRITICAL: Take stdout and stderr BEFORE storing the child in the mutex
-    let stdout = child.stdout.take().ok_or("Failed to capture stdout")?;
-    let stderr = child.stderr.take().ok_or("Failed to capture stderr")?;
+    let stdout = child.stdout.take().ok_or_else(|| {
+        let err_msg = "Failed to capture stdout".to_string();
+        let _ = app_handle.emit(
+            "build_log",
+            LogEvent {
+                message: err_msg.clone(),
+                level: "error".to_string(),
+            },
+        );
+        err_msg
+    })?;
+
+    let stderr = child.stderr.take().ok_or_else(|| {
+        let err_msg = "Failed to capture stderr".to_string();
+        let _ = app_handle.emit(
+            "build_log",
+            LogEvent {
+                message: err_msg.clone(),
+                level: "error".to_string(),
+            },
+        );
+        err_msg
+    })?;
 
     // NOW store child process for potential cancellation (after taking stdout/stderr)
     {
@@ -271,7 +344,7 @@ async fn run_python_task(
     let mut stdout_reader = BufReader::new(stdout).lines();
     let mut stderr_reader = BufReader::new(stderr).lines();
 
-    // Storage for complete output (for backward compatibility)
+    // Storage for complete output
     let stdout_lines: Vec<String>;
     let stderr_lines: Vec<String>;
 
@@ -337,13 +410,31 @@ async fn run_python_task(
             let status = child_mut
                 .wait()
                 .await
-                .map_err(|error| format!("Failed to wait for process: {error}"))?;
+                .map_err(|error| {
+                    let err_msg = format!("Failed to wait for process: {error}");
+                    let _ = app_handle.emit(
+                        "build_log",
+                        LogEvent {
+                            message: err_msg.clone(),
+                            level: "error".to_string(),
+                        },
+                    );
+                    err_msg
+                })?;
 
             // Clear the stored child process
             *child_guard = None;
             status
         } else {
-            return Err("Child process was cancelled".to_string());
+            let err_msg = "Child process was cancelled".to_string();
+            let _ = app_handle.emit(
+                "build_log",
+                LogEvent {
+                    message: err_msg.clone(),
+                    level: "warning".to_string(),
+                },
+            );
+            return Err(err_msg);
         }
     };
 
@@ -359,7 +450,7 @@ async fn run_python_task(
     let success = exit_status.success();
 
     // Emit completion event
-    let _ = app_handle.emit(
+    app_handle.emit(
         "build_complete",
         CompletionEvent {
             success,
@@ -370,7 +461,7 @@ async fn run_python_task(
                 format!("Build failed with exit code {}", exit_code)
             },
         },
-    );
+    ).map_err(|e| format!("Failed to emit completion: {}", e))?;
 
     Ok(CommandResult {
         stdout: stdout_lines.join("\n"),
