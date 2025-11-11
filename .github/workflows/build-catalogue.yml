@@ -193,21 +193,35 @@ jobs:
         run: |
           echo "Downloaded partial catalogues:"
           ls -la partial_catalogues/
+          echo ""
+          echo "Artifact structure:"
+          find partial_catalogues -type f -name "*.json" | head -20 | while read f; do
+            echo "  $f ($(wc -c < "$f") bytes)"
+          done
 
       - name: Merge catalogues
         run: |
           echo "Merging ${{ needs.split.outputs.num_groups }} partial catalogues..."
 
-          # Find all partial catalogue directories
-          PARTIAL_DIRS=$(find partial_catalogues -mindepth 1 -maxdepth 1 -type d | sort)
+          # Find the actual catalogue directories (inside artifact directories)
+          # Artifacts are downloaded as: partial_catalogues/catalogue-group-X/2025.0.0-v1/
+          # We need to pass the version directories to the merge script
+          VERSION_DIR="${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}"
+          PARTIAL_DIRS=$(find partial_catalogues -mindepth 2 -maxdepth 2 -type d -name "$VERSION_DIR" | sort)
 
           if [ -z "$PARTIAL_DIRS" ]; then
             echo "Error: No partial catalogues found"
+            echo "Looking for directories named: $VERSION_DIR"
+            echo "Contents of partial_catalogues:"
+            find partial_catalogues -type f | head -20
             exit 1
           fi
 
+          echo "Found catalogue directories:"
+          echo "$PARTIAL_DIRS"
+
           # Create output directory with correct name
-          OUTPUT_DIR="merged_catalogue/${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}"
+          OUTPUT_DIR="merged_catalogue/$VERSION_DIR"
           mkdir -p "$OUTPUT_DIR"
 
           # Merge all partials into unified catalogue
@@ -241,8 +255,21 @@ jobs:
           echo "  Parallel Groups: ${{ needs.split.outputs.num_groups }}"
           echo ""
 
-          CATALOGUE_DIR="merged_catalogue/${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}"
+          VERSION_DIR="${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}"
+          CATALOGUE_DIR="merged_catalogue/$VERSION_DIR"
+
           if [ -f "$CATALOGUE_DIR/metadata.json" ]; then
             echo "Catalogue Statistics:"
-            cat "$CATALOGUE_DIR/metadata.json" | python3 -c 'import sys, json; data = json.load(sys.stdin); print(f"  Bundles Scanned: {len(data.get(\"bundles_scanned\", []))}"); [print(f"  {k.replace(\"_\", \" \").title()}: {v}") for k, v in data.get("total_assets", {}).items()]'
+            python3 -c "
+import json
+with open('$CATALOGUE_DIR/metadata.json') as f:
+    data = json.load(f)
+bundles = data.get('bundles_scanned', [])
+assets = data.get('total_assets', {})
+print(f'  Bundles Scanned: {len(bundles)}')
+for key, count in assets.items():
+    print(f'  {key.replace(\"_\", \" \").title()}: {count}')
+"
+          else
+            echo "⚠️  Warning: metadata.json not found at $CATALOGUE_DIR/metadata.json"
           fi
