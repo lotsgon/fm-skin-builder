@@ -14,7 +14,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 try:
     import boto3
@@ -170,16 +170,16 @@ def update_metadata(
     )
 
     print("✅ Metadata updated successfully")
-    print(f"\nCurrent releases:")
+    print("\nCurrent releases:")
     if metadata["stable"]:
         print(f"  Stable: {metadata['stable']['version']}")
     else:
-        print(f"  Stable: None")
+        print("  Stable: None")
 
     if metadata["beta"]:
         print(f"  Beta: {metadata['beta']['version']}")
     else:
-        print(f"  Beta: None")
+        print("  Beta: None")
 
     # Also create version-specific metadata for Tauri updater
     print(f"\nCreating version-specific metadata: {version}.json")

@@ -66,7 +66,7 @@ def upload_catalogue(
     print(f"  FM Version: {fm_version}")
     print(f"  Catalogue Version: {catalogue_version}")
     if json_only:
-        print(f"  Mode: JSON files only")
+        print("  Mode: JSON files only")
     elif thumbnails_only:
         print(f"  Mode: Thumbnails only (prefix: {hash_prefix or 'all'})")
 

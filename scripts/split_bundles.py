@@ -17,7 +17,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Dict, Set
+from typing import List, Dict
 
 import boto3
 from botocore.client import Config
@@ -178,12 +178,12 @@ def list_and_split_bundles(
         sys.exit(1)
 
     # Group related bundles and exclude unwanted ones
-    print(f"\n📋 Grouping related bundles...")
+    print("\n📋 Grouping related bundles...")
     bundle_groups = group_related_bundles(bundle_keys, exclude_patterns)
     print(f"✅ Created {len(bundle_groups)} bundle groups")
 
     # Show some examples of grouped bundles
-    print(f"\n📊 Example grouped bundles:")
+    print("\n📊 Example grouped bundles:")
     for i, group in enumerate(bundle_groups[:5]):
         if len(group) > 1:
             base = get_bundle_base_name(group[0])
@@ -236,7 +236,7 @@ def list_and_split_bundles(
 
     # Show distribution stats
     bundle_counts = [len(g) for g in groups]
-    print(f"\n📊 Distribution:")
+    print("\n📊 Distribution:")
     print(f"   Min: {min(bundle_counts)} bundles")
     print(f"   Max: {max(bundle_counts)} bundles")
     print(f"   Avg: {sum(bundle_counts) / len(bundle_counts):.1f} bundles")

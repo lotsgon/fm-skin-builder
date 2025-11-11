@@ -315,7 +315,7 @@ def merge_catalogues(partial_dirs: List[Path], output_dir: Path):
     merge_thumbnails(partial_dirs, output_dir)
 
     print(f"\n✅ Merged catalogue saved to: {output_dir}")
-    print(f"   Total unique assets:")
+    print("   Total unique assets:")
     print(f"   - Sprites: {len(sprites)}")
     print(f"   - Textures: {len(textures)}")
     print(f"   - CSS Variables: {len(css_variables)}")

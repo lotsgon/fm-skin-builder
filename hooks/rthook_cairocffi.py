@@ -69,7 +69,7 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
                         # Some DLLs might fail to load individually, that's okay
                         pass
 
-        except Exception as e:
+        except Exception:
             # If pre-loading fails, cairocffi will try its own loading
             pass
 
