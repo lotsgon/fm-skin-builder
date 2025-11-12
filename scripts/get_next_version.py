@@ -153,6 +153,7 @@ def get_build_number() -> str:
     """Get build number from environment or generate from commit count."""
     # Try to get from GitHub Actions
     import os
+
     build_num = os.environ.get("GITHUB_RUN_NUMBER")
     if build_num:
         return build_num
@@ -164,6 +165,7 @@ def get_build_number() -> str:
     except Exception:
         # Last resort: use timestamp
         import time
+
         return str(int(time.time()) % 65535)
 
 
