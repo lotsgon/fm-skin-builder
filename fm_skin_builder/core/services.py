@@ -75,6 +75,7 @@ class TextureSwapService:
 
     def __init__(self, options: TextureSwapOptions):
         self.options = options
+        self._includes_lower = [inc.lower() for inc in options.includes]
         # Dynamic Sprite Replacement (SIImage Fix): queue rebind jobs for paired bundles.
         self._pending_dynamic_jobs: DefaultDict[str, List[DynamicSpriteRebind]] = (
             defaultdict(list)

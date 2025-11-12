@@ -706,6 +706,9 @@ class CssPatcher:
             else []
         )
 
+        # Track which CSS variables have been matched/patched
+        matched_css_vars: Set[str] = set()
+
         # Direct property patches (by var name == prop m_Name)
         direct_property_patched_indices = set()
         for rule in rules:
@@ -722,6 +725,7 @@ class CssPatcher:
                     match_key = next((k for k in candidates if k in css_vars), None)
                 if match_key:
                     value_str = css_vars[match_key]
+                    matched_css_vars.add(match_key)  # Track matched variable
 
                     # Check if it's a color property (backwards compatibility)
                     if _is_color_property(prop_name, value_str):
@@ -791,6 +795,8 @@ class CssPatcher:
                     continue
 
                 value_str = css_vars[match_key]
+                matched_css_vars.add(match_key)  # Track matched variable
+
                 values = list(getattr(prop, "m_Values", []))
                 if not values:
                     continue
@@ -1164,12 +1170,152 @@ class CssPatcher:
                                         except Exception:
                                             pass
 
+        # Phase 3: Add new CSS variables that don't exist in the stylesheet
+        unmatched_vars = set(css_vars.keys()) - matched_css_vars
+        if unmatched_vars:
+            new_vars_created = self._add_new_css_variables(
+                data, unmatched_vars, css_vars, name
+            )
+            if new_vars_created > 0:
+                patched_vars += new_vars_created
+                changed = True
+                log.info(f"  [ADDED] {new_vars_created} new CSS variables to {name}")
+
         if self.debug_export_dir and changed and not self.dry_run:
             # Ensure dir exists before exporting
             self.debug_export_dir.mkdir(parents=True, exist_ok=True)
             self._export_debug_patched(name, data)
 
         return patched_vars, patched_direct, changed
+
+    def _add_new_css_variables(
+        self,
+        data: Any,
+        unmatched_vars: Set[str],
+        css_vars: Dict[str, Any],
+        stylesheet_name: str,
+    ) -> int:
+        """
+        Add new CSS variables that don't exist in the stylesheet.
+
+        Creates properties in a root-level rule for variables that weren't
+        matched during normal patching. This allows users to add completely
+        new CSS variables.
+
+        Args:
+            data: Unity StyleSheet data object
+            unmatched_vars: Set of CSS variable names that weren't matched
+            css_vars: Dictionary mapping variable names to values
+            stylesheet_name: Name of the stylesheet for logging
+
+        Returns:
+            Number of new variables created
+        """
+        if not unmatched_vars:
+            return 0
+
+        # Get arrays
+        colors = getattr(data, "colors", [])
+        strings = getattr(data, "strings", [])
+        floats = getattr(data, "floats", [])
+        rules = getattr(data, "m_Rules", [])
+
+        if not hasattr(data, "floats"):
+            setattr(data, "floats", floats)
+
+        # Find or create root-level rule (rule with no selector)
+        root_rule = None
+        for rule in rules:
+            # Check if rule has no selectors (root level)
+            selectors = getattr(data, "m_ComplexSelectors", [])
+            has_selector = any(
+                getattr(sel, "ruleIndex", None) == rules.index(rule)
+                for sel in selectors
+            )
+            if not has_selector:
+                root_rule = rule
+                break
+
+        # If no root rule exists, create one
+        if root_rule is None:
+            root_rule = SimpleNamespace()
+            setattr(root_rule, "m_Properties", [])
+            setattr(root_rule, "line", -1)
+            rules.append(root_rule)
+            log.info(f"  [CREATED] New root rule in {stylesheet_name} for CSS variables")
+
+        properties = getattr(root_rule, "m_Properties", [])
+        if not isinstance(properties, list):
+            properties = []
+            setattr(root_rule, "m_Properties", properties)
+
+        created_count = 0
+        for var_name in sorted(unmatched_vars):  # Sort for consistent ordering
+            value_str = css_vars[var_name]
+
+            # Determine value type and create property
+            prop = SimpleNamespace()
+            setattr(prop, "m_Name", var_name)
+            setattr(prop, "m_Values", [])
+
+            values_list = getattr(prop, "m_Values")
+
+            # Create value object
+            value_obj = SimpleNamespace()
+
+            # Detect value type and add to appropriate array
+            if _is_color_property(var_name, value_str):
+                # Color value
+                r, g, b, a = hex_to_rgba(value_str)
+                new_color = _build_unity_color(colors, r, g, b, a)
+                colors.append(new_color)
+                value_index = len(colors) - 1
+
+                setattr(value_obj, "m_ValueType", 4)
+                setattr(value_obj, "valueIndex", value_index)
+                log.info(f"  [NEW VAR - color] {stylesheet_name}: {var_name} → {value_str} (color index {value_index})")
+
+            elif (parsed_float := parse_float_value(value_str)) is not None:
+                # Float value
+                floats.append(parsed_float.unity_value)
+                value_index = len(floats) - 1
+
+                setattr(value_obj, "m_ValueType", 2)
+                setattr(value_obj, "valueIndex", value_index)
+                log.info(f"  [NEW VAR - float] {stylesheet_name}: {var_name} → {parsed_float.unity_value} (float index {value_index})")
+
+            elif (parsed_keyword := parse_keyword_value(value_str)) is not None:
+                # Keyword value
+                strings.append(parsed_keyword.keyword)
+                value_index = len(strings) - 1
+
+                setattr(value_obj, "m_ValueType", 8)
+                setattr(value_obj, "valueIndex", value_index)
+                log.info(f"  [NEW VAR - keyword] {stylesheet_name}: {var_name} → {parsed_keyword.keyword} (string index {value_index})")
+
+            elif (parsed_resource := parse_resource_value(value_str)) is not None:
+                # Resource value
+                strings.append(parsed_resource.unity_path)
+                value_index = len(strings) - 1
+
+                setattr(value_obj, "m_ValueType", 7)
+                setattr(value_obj, "valueIndex", value_index)
+                log.info(f"  [NEW VAR - resource] {stylesheet_name}: {var_name} → {parsed_resource.unity_path} (string index {value_index})")
+
+            else:
+                # Fallback: store as string (Type 8)
+                strings.append(value_str)
+                value_index = len(strings) - 1
+
+                setattr(value_obj, "m_ValueType", 8)
+                setattr(value_obj, "valueIndex", value_index)
+                log.warning(f"  [NEW VAR - unknown] {stylesheet_name}: {var_name} → {value_str} (stored as string)")
+
+            values_list.append(value_obj)
+            properties.append(prop)
+            created_count += 1
+
+        return created_count
 
     def _export_debug_original(self, name: str, data) -> None:
         assert self.debug_export_dir is not None
