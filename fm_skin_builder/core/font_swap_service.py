@@ -4,12 +4,11 @@ Font Swap Service
 Handles font replacement in Unity bundles by discovering font files
 in the skin directory and swapping them with game fonts.
 
-IMPORTANT: Font format (OTF vs TTF) notes:
-- Unity can often handle format mismatches (OTF→TTF, TTF→OTF)
-- However, some fonts may render incorrectly with mismatched formats
-- This service can auto-convert fonts if needed
+CRITICAL: Font format (OTF vs TTF) MUST match the original for proper rendering.
 - OTF fonts use CFF (Compact Font Format) tables
 - TTF fonts use glyf (glyph data) tables
+- Unity expects matching formats: OTF→OTF, TTF→TTF
+- This service auto-converts fonts by default to ensure format matching
 """
 
 from __future__ import annotations
@@ -44,8 +43,8 @@ class FontSwapOptions:
 
     includes: Sequence[str]
     dry_run: bool = False
-    auto_convert: bool = False  # Auto-convert fonts to match original format
-    strict_format: bool = False  # Block mismatched formats (default: warn only)
+    auto_convert: bool = True   # Auto-convert fonts to match original format (RECOMMENDED)
+    strict_format: bool = False  # Block mismatched formats even with conversion disabled
 
 
 @dataclass

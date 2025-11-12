@@ -1066,8 +1066,8 @@ class SkinPatchPipeline:
                 FontSwapOptions(
                     includes=includes_list,
                     dry_run=self.options.dry_run,
-                    auto_convert=False,  # Permissive: Unity often handles format mismatches
-                    strict_format=False,  # Don't block mismatches, just warn
+                    auto_convert=True,   # Auto-convert to match original format (critical!)
+                    strict_format=False, # Allow conversion to handle mismatches
                 )
             )
 
