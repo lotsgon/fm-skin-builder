@@ -54,7 +54,9 @@ def calculate_file_hash(file_path: Path) -> str:
     return sha256_hash.hexdigest()
 
 
-def get_artifact_info(artifacts_dir: Path, version: str, is_beta: bool = False) -> Dict[str, Any]:
+def get_artifact_info(
+    artifacts_dir: Path, version: str, is_beta: bool = False
+) -> Dict[str, Any]:
     """
     Extract artifact information from build artifacts.
 
@@ -103,7 +105,9 @@ def get_artifact_info(artifacts_dir: Path, version: str, is_beta: bool = False) 
                 platform_key = "windows-x86_64"
 
             # Windows installers (.exe, .msi)
-            elif file.endswith(".exe") or (file.endswith(".msi") and not file.endswith(".msi.zip")):
+            elif file.endswith(".exe") or (
+                file.endswith(".msi") and not file.endswith(".msi.zip")
+            ):
                 is_installer = True
                 installer_format = "exe" if file.endswith(".exe") else "msi"
                 platform_key = "windows-x86_64"
