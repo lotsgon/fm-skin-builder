@@ -23,18 +23,26 @@ type SettingsProps = {
   skinPath: string;
   bundlesPath: string;
   betaUpdates: boolean;
+  autoUpdate: boolean;
+  isCheckingUpdates: boolean;
   onClearSkinPath: () => void;
   onClearBundlesPath: () => void;
   onBetaUpdatesChange: (enabled: boolean) => void; // eslint-disable-line no-unused-vars
+  onAutoUpdateChange: (enabled: boolean) => void; // eslint-disable-line no-unused-vars
+  onCheckForUpdates: () => void;
 };
 
 export function Settings({
   skinPath,
   bundlesPath,
   betaUpdates,
+  autoUpdate,
+  isCheckingUpdates,
   onClearSkinPath,
   onClearBundlesPath,
   onBetaUpdatesChange,
+  onAutoUpdateChange,
+  onCheckForUpdates,
 }: SettingsProps) {
   const [cacheSize, setCacheSize] = useState<number | null>(null);
   const [cacheDir, setCacheDir] = useState<string>("");
@@ -302,6 +310,19 @@ export function Settings({
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
+              <Label>Automatic Updates</Label>
+              <p className="text-sm text-muted-foreground">
+                Automatically check for and install updates on startup
+              </p>
+            </div>
+            <Switch
+              checked={autoUpdate}
+              onCheckedChange={onAutoUpdateChange}
+            />
+          </div>
+
+          <div className="flex items-center justify-between border-t pt-4">
+            <div className="space-y-0.5">
               <Label>Enable Beta Updates</Label>
               <p className="text-sm text-muted-foreground">
                 Receive early access to new features (may be unstable)
@@ -310,6 +331,7 @@ export function Settings({
             <Switch
               checked={betaUpdates}
               onCheckedChange={onBetaUpdatesChange}
+              disabled={!autoUpdate}
             />
           </div>
 
@@ -319,12 +341,26 @@ export function Settings({
                 <Label>Current Version</Label>
                 <p className="text-lg font-semibold">{appVersion}</p>
               </div>
-              <Button variant="outline" size="sm" disabled>
-                Check for Updates
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onCheckForUpdates}
+                disabled={isCheckingUpdates}
+              >
+                {isCheckingUpdates ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Checking...
+                  </>
+                ) : (
+                  "Check for Updates"
+                )}
               </Button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              Auto-updater will be available in a future update
+              {autoUpdate
+                ? "Updates will be checked automatically on startup"
+                : "Enable automatic updates to receive updates automatically"}
             </p>
           </div>
         </CardContent>

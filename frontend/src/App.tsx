@@ -17,6 +17,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
 import { Settings } from '@/components/Settings';
 import { useStore } from '@/hooks/useStore';
+import { useUpdater } from '@/hooks/useUpdater';
 
 type CommandResult = {
   stdout: string;
@@ -74,6 +75,10 @@ function App() {
   const [bundlesPath, setBundlesPath] = useState('');
   const [debugMode, setDebugMode] = useState(false);
   const { settings, saveSetting, clearSetting } = useStore();
+  const { isChecking: isCheckingUpdates, checkForUpdates } = useUpdater({
+    autoUpdate: settings.checkForUpdates ?? true,
+    betaUpdates: settings.betaUpdates ?? false,
+  });
   const [pathErrors, setPathErrors] = useState<{ skin?: string; bundles?: string }>({});
   const [pathWarnings, setPathWarnings] = useState<{ skin?: string; bundles?: string }>({});
   const [logs, setLogs] = useState<LogEntry[]>([
@@ -836,6 +841,8 @@ function App() {
               skinPath={skinPath}
               bundlesPath={bundlesPath}
               betaUpdates={settings.betaUpdates ?? false}
+              autoUpdate={settings.checkForUpdates ?? true}
+              isCheckingUpdates={isCheckingUpdates}
               onClearSkinPath={() => {
                 setSkinPath('');
                 clearSetting('skinPath').catch(console.error);
@@ -846,6 +853,12 @@ function App() {
               }}
               onBetaUpdatesChange={(enabled) => {
                 saveSetting('betaUpdates', enabled).catch(console.error);
+              }}
+              onAutoUpdateChange={(enabled) => {
+                saveSetting('checkForUpdates', enabled).catch(console.error);
+              }}
+              onCheckForUpdates={() => {
+                checkForUpdates(true);
               }}
             />
           </TabsContent>

@@ -25,8 +25,18 @@
       "capabilities": ["default"]
     }
   },
+  "plugins": {
+    "updater": {
+      "endpoints": ["https://release.fmskinbuilder.com/latest.json"],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdBMEJENDM5NkExNzE4MjIKUldRaUdCZHFPZFFMZXBMR0hvcTVWejdXalY0Um9VTnJvaVdxZWxCalFzbXpGVURDN1YzNWcvVVIK",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -35,10 +45,8 @@
       "icons/icon.ico"
     ],
     "targets": "all",
-    "resources": [
-      "resources/backend"
-    ],
-    "copyright": "Copyright (c) 2024 FM Skin Builder",
+    "resources": ["resources/backend"],
+    "copyright": "Copyright (c) 2025 FM Skin Builder",
     "category": "DeveloperTool",
     "shortDescription": "Football Manager Skin Builder",
     "longDescription": "A comprehensive tool for building and customizing Football Manager skins",

@@ -45,6 +45,11 @@
     "store:default",
     "store:allow-load",
     "dialog:allow-ask",
-    "dialog:default"
+    "dialog:default",
+    "updater:allow-check",
+    "updater:default",
+    "updater:allow-download-and-install",
+    "updater:allow-install",
+    "updater:allow-download"
   ]
 }
