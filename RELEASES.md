@@ -51,8 +51,10 @@ Beta releases are automatically created when pushing to the `beta` branch:
    - Builds for all platforms (Linux, macOS, Windows)
    - Uploads to R2 bucket at `beta/` path
    - Creates GitHub pre-release with artifacts
-3. Version format: `X.Y.Z-beta.{short-commit-sha}`
-   - Example: `0.2.0-beta.79f77d5`
+3. Version format: `X.Y.Z-{build-number}`
+   - Example: `0.2.0-123`
+   - Build number is GitHub Actions run number (ensures uniqueness)
+   - Numeric-only format for Windows MSI compatibility (MSI requires pre-release identifiers to be numeric)
 
 **Workflow File:** `.github/workflows/build-app.yml` → `publish-beta` job
 
@@ -164,10 +166,16 @@ Each build generates the following artifacts:
 
 ### Version Display
 
-The app displays its version in the bottom-left corner:
+The app displays its version in the bottom-left corner with a badge indicator:
 - Stable: `v0.2.0`
-- Beta: `v0.2.0-beta.79f77d5`
+- Beta: `v0.2.0-123` + `Beta` badge
 - Dev: `vdev` (when running locally)
+
+**Note:** Beta versions use numeric-only pre-release identifiers (`0.2.0-123` instead of `0.2.0-beta.123`) to comply with Windows MSI requirements. The word "beta" contains letters which MSI doesn't allow in pre-release identifiers. Beta status is indicated by:
+- A yellow "Beta" badge in the app UI
+- GitHub pre-release tag
+- Upload to `beta/` path in R2
+- Pre-release flag in `latest.json`
 
 ## Testing Releases
 
@@ -243,11 +251,11 @@ releases/
 ├── metadata/
 │   └── 0.2.0.json      # Version-specific metadata
 └── beta/
-    ├── 0.2.0-beta.79f77d5/
+    ├── 0.2.0-123/
     │   ├── ... (same structure as stable)
     ├── latest.json      # Beta channel manifest (for auto-updater)
     └── metadata/
-        └── 0.2.0-beta.79f77d5.json
+        └── 0.2.0-123.json
 ```
 
 ## Troubleshooting

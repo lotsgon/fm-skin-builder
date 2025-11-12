@@ -690,10 +690,15 @@ function App() {
       </main>
 
       {/* Version Display */}
-      <div className="fixed bottom-4 left-4">
+      <div className="fixed bottom-4 left-4 flex gap-2">
         <Badge variant="secondary" className="text-xs">
           v{appVersion}
         </Badge>
+        {appVersion && appVersion.includes('-') && appVersion !== 'dev' && (
+          <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-600 dark:text-yellow-400">
+            Beta
+          </Badge>
+        )}
       </div>
     </div>
   );

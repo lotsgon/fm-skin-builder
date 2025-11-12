@@ -54,7 +54,9 @@ def calculate_file_hash(file_path: Path) -> str:
     return sha256_hash.hexdigest()
 
 
-def get_artifact_info(artifacts_dir: Path, version: str) -> Dict[str, Any]:
+def get_artifact_info(
+    artifacts_dir: Path, version: str, is_beta: bool = False
+) -> Dict[str, Any]:
     """
     Extract artifact information from build artifacts.
 
@@ -65,7 +67,7 @@ def get_artifact_info(artifacts_dir: Path, version: str) -> Dict[str, Any]:
     platforms = {}
 
     # Base URL for downloads
-    base_path = "beta" if "-beta" in version else "releases"
+    base_path = "beta" if is_beta else "releases"
     base_url = f"https://releases.fm-skin-builder.com/{base_path}/{version}"
 
     # Find all artifacts
@@ -180,7 +182,7 @@ def update_metadata(
     metadata = get_current_metadata(s3, bucket)
 
     # Get artifact information
-    platforms = get_artifact_info(artifacts_dir, version)
+    platforms = get_artifact_info(artifacts_dir, version, is_beta)
 
     # Create release entry
     release_entry = {
