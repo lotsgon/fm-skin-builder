@@ -34,9 +34,6 @@ def run(args: Namespace) -> None:
     # Get FM version
     fm_version = args.fm_version
 
-    # Get catalogue version (default: 1)
-    catalogue_version = getattr(args, "catalogue_version", 1)
-
     # Pretty-print JSON flag
     pretty = getattr(args, "pretty", False)
 
@@ -65,12 +62,11 @@ def run(args: Namespace) -> None:
             output_dir=output_dir,
             icon_white_path=icon_white,
             icon_black_path=icon_black,
-            catalogue_version=catalogue_version,
             pretty_json=pretty,
         )
 
         if dry_run:
-            log.info(f"Would build catalogue for FM {fm_version} v{catalogue_version}")
+            log.info(f"Would build catalogue for FM {fm_version}")
             log.info(f"Would scan: {bundle_path}")
             log.info(f"Would output to: {builder.output_dir}")
             return

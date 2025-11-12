@@ -109,15 +109,55 @@ def main() -> None:
         required=True,
         help="FM version string (e.g., '2026.4.0')",
     )
-    c.add_argument(
-        "--catalogue-version",
-        type=int,
-        default=1,
-        help="Catalogue version number (default: 1)",
-    )
     c.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
     c.add_argument(
         "--dry-run", action="store_true", help="Preview without writing files"
+    )
+
+    # Catalogue diff command
+    d = sub.add_parser(
+        "catalogue-diff", help="Compare two catalogue versions and generate changelog"
+    )
+    d.add_argument(
+        "--old",
+        type=str,
+        required=True,
+        help="Path to old catalogue version directory",
+    )
+    d.add_argument(
+        "--new",
+        type=str,
+        required=True,
+        help="Path to new catalogue version directory",
+    )
+    d.add_argument(
+        "--out",
+        type=str,
+        default=None,
+        help="Output directory for changelog (defaults to new version directory)",
+    )
+    d.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
+
+    # Catalogue note command
+    n = sub.add_parser(
+        "catalogue-note", help="Add or view notes for a catalogue version"
+    )
+    n.add_argument(
+        "--catalogue-dir",
+        type=str,
+        required=True,
+        help="Path to catalogue version directory",
+    )
+    n.add_argument(
+        "--note",
+        type=str,
+        default=None,
+        help="Note to add (if omitted, displays current notes)",
+    )
+    n.add_argument(
+        "--append",
+        action="store_true",
+        help="Append to existing notes instead of replacing",
     )
 
     args = parser.parse_args()
@@ -136,6 +176,12 @@ def main() -> None:
         cmd_scan.run(args)
     elif args.command == "catalogue":
         cmd_catalogue.run(args)
+    elif args.command == "catalogue-diff":
+        from .commands import catalogue_diff as cmd_catalogue_diff
+        cmd_catalogue_diff.run(args)
+    elif args.command == "catalogue-note":
+        from .commands import catalogue_note as cmd_catalogue_note
+        cmd_catalogue_note.run(args)
 
     # Mitigate rare CPython finalization crash observed with C extensions (e.g., compression libs)
     # by forcing an immediate process exit after flushing. Can be disabled by setting FM_HARD_EXIT=0.

@@ -8,11 +8,6 @@ on:
         description: 'FM Version (e.g., 2025.0.0)'
         required: true
         type: string
-      catalogue_version:
-        description: 'Catalogue version number'
-        required: false
-        default: '1'
-        type: string
       bundles_prefix:
         description: 'R2 prefix for bundles (e.g., fm2025/StandaloneOSX)'
         required: true
@@ -152,7 +147,6 @@ jobs:
           python -m fm_skin_builder.cli.main catalogue \
             --bundle bundles \
             --fm-version "${{ github.event.inputs.fm_version }}" \
-            --catalogue-version "${{ github.event.inputs.catalogue_version }}" \
             --out catalogue_group_${{ matrix.group }}
 
       - name: Upload partial catalogue
@@ -206,9 +200,9 @@ jobs:
           echo "Merging ${{ needs.split.outputs.num_groups }} partial catalogues..."
 
           # Find the actual catalogue directories (inside artifact directories)
-          # Artifacts are downloaded as: partial_catalogues/catalogue-group-X/2025.0.0-v1/
+          # Artifacts are downloaded as: partial_catalogues/catalogue-group-X/2025.0.0/
           # We need to pass the version directories to the merge script
-          VERSION_DIR="${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}"
+          VERSION_DIR="${{ github.event.inputs.fm_version }}"
           PARTIAL_DIRS=$(find partial_catalogues -mindepth 2 -maxdepth 2 -type d -name "$VERSION_DIR" | sort)
 
           if [ -z "$PARTIAL_DIRS" ]; then
@@ -234,22 +228,21 @@ jobs:
       - name: Set output variables
         id: set-output
         run: |
-          VERSION_DIR="${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}"
+          VERSION_DIR="${{ github.event.inputs.fm_version }}"
           echo "version_dir=$VERSION_DIR" >> $GITHUB_OUTPUT
 
       - name: Upload JSON files to R2
         run: |
           echo "Uploading JSON metadata files to R2..."
           python scripts/upload_catalogue_to_r2.py \
-            --catalogue-dir "merged_catalogue/${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}" \
+            --catalogue-dir "merged_catalogue/${{ github.event.inputs.fm_version }}" \
             --fm-version "${{ github.event.inputs.fm_version }}" \
-            --catalogue-version "${{ github.event.inputs.catalogue_version }}" \
             --json-only
 
       - name: Upload merged catalogue as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: catalogue-${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}
+          name: catalogue-${{ github.event.inputs.fm_version }}
           path: merged_catalogue/
           retention-days: 7
 
@@ -259,12 +252,11 @@ jobs:
           echo ""
           echo "Configuration:"
           echo "  FM Version: ${{ github.event.inputs.fm_version }}"
-          echo "  Catalogue Version: ${{ github.event.inputs.catalogue_version }}"
           echo "  Bundle Prefix: ${{ github.event.inputs.bundles_prefix }}"
           echo "  Parallel Groups: ${{ needs.split.outputs.num_groups }}"
           echo ""
 
-          VERSION_DIR="${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}"
+          VERSION_DIR="${{ github.event.inputs.fm_version }}"
           CATALOGUE_DIR="merged_catalogue/$VERSION_DIR"
 
           if [ -f "$CATALOGUE_DIR/metadata.json" ]; then
@@ -303,7 +295,7 @@ jobs:
       - name: Download merged catalogue
         uses: actions/download-artifact@v4
         with:
-          name: catalogue-${{ github.event.inputs.fm_version }}-v${{ github.event.inputs.catalogue_version }}
+          name: catalogue-${{ github.event.inputs.fm_version }}
           path: merged_catalogue/
 
       - name: Upload thumbnails for prefix ${{ matrix.prefix }}
@@ -312,6 +304,5 @@ jobs:
           python scripts/upload_catalogue_to_r2.py \
             --catalogue-dir "merged_catalogue/${{ needs.merge.outputs.version_dir }}" \
             --fm-version "${{ github.event.inputs.fm_version }}" \
-            --catalogue-version "${{ github.event.inputs.catalogue_version }}" \
             --thumbnails-only \
             --hash-prefix "${{ matrix.prefix }}"

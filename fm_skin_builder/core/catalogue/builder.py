@@ -24,7 +24,8 @@ from .image_processor import ImageProcessor
 from .auto_tagger import generate_tags
 from .search_builder import SearchIndexBuilder
 from .deduplicator import deduplicate_by_filename
-from .exporter import CatalogueExporter, create_version_directory_name
+from .exporter import CatalogueExporter
+from .version_differ import VersionDiffer
 from ..logger import get_logger
 
 
@@ -40,7 +41,6 @@ class CatalogueBuilder:
         output_dir: Path,
         icon_white_path: Path,
         icon_black_path: Path,
-        catalogue_version: int = 1,
         pretty_json: bool = False,
     ):
         """
@@ -48,20 +48,17 @@ class CatalogueBuilder:
 
         Args:
             fm_version: FM version string (e.g., "2026.4.0")
-            output_dir: Base output directory
+            output_dir: Base output directory (catalogue will be created in fm_version subdirectory)
             icon_white_path: Path to white watermark icon
             icon_black_path: Path to black watermark icon
-            catalogue_version: Catalogue version number
             pretty_json: Pretty-print JSON
         """
         self.fm_version = fm_version
-        self.catalogue_version = catalogue_version
         self.base_output_dir = output_dir
         self.pretty_json = pretty_json
 
-        # Create version-specific output directory
-        version_dir_name = create_version_directory_name(fm_version, catalogue_version)
-        self.output_dir = output_dir / version_dir_name
+        # Create version-specific output directory (just FM version, no -vN suffix)
+        self.output_dir = output_dir / fm_version
 
         # Initialize components
         self.css_extractor = CSSExtractor(fm_version)
@@ -91,9 +88,7 @@ class CatalogueBuilder:
         Args:
             bundle_paths: List of paths to .bundle files or directories containing bundles
         """
-        log.info(
-            f"Building catalogue for FM {self.fm_version} v{self.catalogue_version}"
-        )
+        log.info(f"Building catalogue for FM {self.fm_version}")
 
         # Expand directories to bundle files
         bundles = self._expand_bundle_paths(bundle_paths)
@@ -139,6 +134,10 @@ class CatalogueBuilder:
         log.info(f"   - {len(self.sprites)} sprites")
         log.info(f"   - {len(self.textures)} textures")
         log.info(f"   - {len(self.fonts)} fonts")
+
+        # Phase 7: Generate changelog if previous version exists
+        log.info("Phase 7: Checking for previous version...")
+        self._generate_changelog_if_needed()
 
     def _expand_bundle_paths(self, paths: List[Path]) -> List[Path]:
         """Expand directories to .bundle files."""
@@ -467,9 +466,8 @@ class CatalogueBuilder:
     def _create_metadata(self) -> CatalogueMetadata:
         """Create catalogue metadata."""
         return CatalogueMetadata(
-            catalogue_version=self.catalogue_version,
             fm_version=self.fm_version,
-            schema_version="1.0.0",
+            schema_version="2.0.0",
             generated_at=datetime.utcnow(),
             bundles_scanned=self.bundles_scanned,
             total_assets={
@@ -480,3 +478,88 @@ class CatalogueBuilder:
                 "fonts": len(self.fonts),
             },
         )
+
+    def _find_previous_version(self) -> Optional[Path]:
+        """
+        Find the most recent previous FM version in the catalogue directory.
+
+        Returns:
+            Path to previous version directory, or None if not found
+        """
+        if not self.base_output_dir.exists():
+            return None
+
+        # Get all version directories (assume they're named like "2026.4.0")
+        version_dirs = [
+            d
+            for d in self.base_output_dir.iterdir()
+            if d.is_dir() and d.name != self.fm_version
+        ]
+
+        if not version_dirs:
+            return None
+
+        # Sort by directory name (assumes semantic versioning like 2026.4.0)
+        # This is a simple sort - for more complex version comparison, use packaging.version
+        version_dirs.sort(reverse=True)
+
+        # Return the most recent version
+        prev_dir = version_dirs[0]
+        log.info(f"  Found previous version: {prev_dir.name}")
+        return prev_dir
+
+    def _generate_changelog_if_needed(self) -> None:
+        """Generate changelog by comparing with previous version if it exists."""
+        import json
+
+        prev_version_dir = self._find_previous_version()
+
+        if not prev_version_dir:
+            log.info("  No previous version found - skipping changelog generation")
+            return
+
+        try:
+            log.info(
+                f"  Generating changelog from {prev_version_dir.name} to {self.fm_version}"
+            )
+
+            # Create differ and compare
+            differ = VersionDiffer(prev_version_dir, self.output_dir)
+            differ.load_catalogues()
+            changelog = differ.compare()
+
+            # Save changelog as JSON
+            changelog_path = self.output_dir / "changelog.json"
+            with open(changelog_path, "w", encoding="utf-8") as f:
+                indent = 2 if self.pretty_json else None
+                json.dump(changelog, f, ensure_ascii=False, indent=indent)
+
+            log.info(f"  ✅ Changelog saved: {changelog_path}")
+
+            # Also generate HTML report
+            html_report = differ.generate_html_report(changelog)
+            html_path = self.output_dir / "changelog.html"
+            with open(html_path, "w", encoding="utf-8") as f:
+                f.write(html_report)
+
+            log.info(f"  ✅ HTML report saved: {html_path}")
+
+            # Update metadata with changelog summary
+            metadata_path = self.output_dir / "metadata.json"
+            with open(metadata_path, "r", encoding="utf-8") as f:
+                metadata = json.load(f)
+
+            metadata["previous_fm_version"] = prev_version_dir.name
+            metadata["changes_since_previous"] = changelog["summary"]
+
+            with open(metadata_path, "w", encoding="utf-8") as f:
+                indent = 2 if self.pretty_json else None
+                json.dump(metadata, f, ensure_ascii=False, indent=indent)
+
+            log.info("  ✅ Metadata updated with changelog summary")
+
+        except Exception as e:
+            log.error(f"  Failed to generate changelog: {e}")
+            import traceback
+
+            log.debug(traceback.format_exc())
