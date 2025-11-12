@@ -55,57 +55,94 @@ def calculate_file_hash(file_path: Path) -> str:
 
 
 def get_artifact_info(artifacts_dir: Path, version: str) -> Dict[str, Any]:
-    """Extract artifact information from build artifacts."""
+    """
+    Extract artifact information from build artifacts.
+
+    Returns a dict with platform keys containing:
+    - Tauri updater info (url, signature for .tar.gz/.zip archives)
+    - User installer info (download links for .dmg, .exe, .AppImage, .deb)
+    """
     platforms = {}
 
-    # Map file extensions to platform info
-    platform_map = {
-        ".AppImage": {"platform": "linux", "arch": "x86_64"},
-        ".deb": {"platform": "linux", "arch": "x86_64", "format": "deb"},
-        ".msi": {"platform": "windows", "arch": "x86_64"},
-        ".exe": {"platform": "windows", "arch": "x86_64", "format": "nsis"},
-    }
+    # Base URL for downloads
+    base_path = "beta" if "-beta" in version else "releases"
+    base_url = f"https://releases.fm-skin-builder.com/{base_path}/{version}"
 
     # Find all artifacts
     for root, _, files in os.walk(artifacts_dir):
         for file in files:
             file_path = Path(root) / file
+            file_size = file_path.stat().st_size
 
-            # Check file extension
-            for ext, info in platform_map.items():
-                if file.endswith(ext):
-                    # Calculate hash
-                    file_hash = calculate_file_hash(file_path)
-                    file_size = file_path.stat().st_size
+            # Determine platform and architecture from filename
+            platform_key = None
+            is_updater = False
+            is_installer = False
+            installer_format = None
 
-                    # Determine platform key
-                    platform = info["platform"]
-                    arch = info["arch"]
-                    format_type = info.get("format", ext.lstrip("."))
+            # macOS updater files (.app.tar.gz)
+            if file.endswith(".app.tar.gz") and not file.endswith(".sig"):
+                is_updater = True
+                if "aarch64" in file.lower() or "arm64" in file.lower():
+                    platform_key = "darwin-aarch64"
+                else:
+                    platform_key = "darwin-x86_64"
 
-                    # Handle macOS special cases
-                    if file.endswith(".dmg"):
-                        if "arm64" in file.lower() or "aarch64" in file.lower():
-                            arch = "aarch64"
-                            platform = "darwin"
-                        elif "intel" in file.lower() or "x86_64" in file.lower():
-                            arch = "x86_64"
-                            platform = "darwin"
-                        format_type = "dmg"
+            # macOS installers (.dmg)
+            elif file.endswith(".dmg"):
+                is_installer = True
+                installer_format = "dmg"
+                if "aarch64" in file.lower() or "arm64" in file.lower():
+                    platform_key = "darwin-aarch64"
+                else:
+                    platform_key = "darwin-x86_64"
 
-                    # Create platform entry
-                    key = f"{platform}-{arch}"
-                    if key not in platforms:
-                        platforms[key] = []
+            # Windows updater files (.msi.zip)
+            elif file.endswith(".msi.zip") and not file.endswith(".sig"):
+                is_updater = True
+                platform_key = "windows-x86_64"
 
-                    platforms[key].append(
-                        {
-                            "url": f"https://releases.fm-skin-builder.com/{'beta' if '-beta' in version else 'releases'}/{version}/{file}",
-                            "signature": file_hash,
-                            "format": format_type,
-                            "size": file_size,
-                        }
-                    )
+            # Windows installers (.exe, .msi)
+            elif file.endswith(".exe") or (file.endswith(".msi") and not file.endswith(".msi.zip")):
+                is_installer = True
+                installer_format = "exe" if file.endswith(".exe") else "msi"
+                platform_key = "windows-x86_64"
+
+            # Linux updater files (.AppImage.tar.gz)
+            elif file.endswith(".AppImage.tar.gz") and not file.endswith(".sig"):
+                is_updater = True
+                platform_key = "linux-x86_64"
+
+            # Linux installers (.AppImage, .deb)
+            elif file.endswith(".AppImage") and not file.endswith(".tar.gz"):
+                is_installer = True
+                installer_format = "AppImage"
+                platform_key = "linux-x86_64"
+            elif file.endswith(".deb"):
+                is_installer = True
+                installer_format = "deb"
+                platform_key = "linux-x86_64"
+
+            # Initialize platform entry if needed
+            if platform_key and platform_key not in platforms:
+                platforms[platform_key] = {
+                    "installers": []
+                }
+
+            # Add updater info (for Tauri)
+            if is_updater and platform_key:
+                sig_file = file_path.parent / f"{file}.sig"
+                if sig_file.exists():
+                    platforms[platform_key]["url"] = f"{base_url}/{file}"
+                    platforms[platform_key]["signature"] = sig_file.read_text().strip()
+
+            # Add installer info (for website downloads)
+            if is_installer and platform_key and installer_format:
+                platforms[platform_key]["installers"].append({
+                    "url": f"{base_url}/{file}",
+                    "format": installer_format,
+                    "size": file_size
+                })
 
     return platforms
 
