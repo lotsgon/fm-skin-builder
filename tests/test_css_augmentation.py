@@ -254,3 +254,216 @@ class TestNewCssVariables:
 
         # Should be sorted alphabetically
         assert var_names == ["--alpha", "--middle", "--zebra"]
+
+
+class TestNewCssSelectors:
+    """Test injecting new CSS selectors that don't exist in the stylesheet."""
+
+    def test_add_new_class_selector_with_color(self):
+        """Test adding a new class selector with a color property."""
+        data = SimpleNamespace()
+        setattr(data, "colors", [])
+        setattr(data, "strings", [])
+        setattr(data, "floats", [])
+        setattr(data, "m_Rules", [])
+        setattr(data, "m_ComplexSelectors", [])
+
+        unmatched_selectors = {(".button", "color")}
+        selector_overrides = {(".button", "color"): "#FF0000"}
+
+        css_data = CollectedCss(global_vars={}, global_selectors={})
+        patcher = CssPatcher(css_data)
+
+        count = patcher._add_new_css_selectors(
+            data, unmatched_selectors, selector_overrides, "test.uss"
+        )
+
+        assert count == 1
+        assert len(data.colors) == 1
+        assert len(data.m_Rules) == 1
+        assert len(data.m_ComplexSelectors) == 1
+
+        # Check rule
+        rule = data.m_Rules[0]
+        props = getattr(rule, "m_Properties")
+        assert len(props) == 1
+        assert getattr(props[0], "m_Name") == "color"
+
+        # Check ComplexSelector
+        complex_sel = data.m_ComplexSelectors[0]
+        assert getattr(complex_sel, "ruleIndex") == 0
+
+    def test_add_new_class_selector_with_float(self):
+        """Test adding a new class selector with a float property."""
+        data = SimpleNamespace()
+        setattr(data, "colors", [])
+        setattr(data, "strings", [])
+        setattr(data, "floats", [])
+        setattr(data, "m_Rules", [])
+        setattr(data, "m_ComplexSelectors", [])
+
+        unmatched_selectors = {(".button", "font-size")}
+        selector_overrides = {(".button", "font-size"): "16px"}
+
+        css_data = CollectedCss(global_vars={}, global_selectors={})
+        patcher = CssPatcher(css_data)
+
+        count = patcher._add_new_css_selectors(
+            data, unmatched_selectors, selector_overrides, "test.uss"
+        )
+
+        assert count == 1
+        assert len(data.floats) == 1
+        assert data.floats[0] == 16.0
+
+    def test_add_multiple_properties_to_same_selector(self):
+        """Test adding multiple properties to the same new selector."""
+        data = SimpleNamespace()
+        setattr(data, "colors", [])
+        setattr(data, "strings", [])
+        setattr(data, "floats", [])
+        setattr(data, "m_Rules", [])
+        setattr(data, "m_ComplexSelectors", [])
+
+        unmatched_selectors = {
+            (".button", "color"),
+            (".button", "font-size"),
+            (".button", "visibility"),
+        }
+        selector_overrides = {
+            (".button", "color"): "#FF0000",
+            (".button", "font-size"): "16px",
+            (".button", "visibility"): "visible",
+        }
+
+        css_data = CollectedCss(global_vars={}, global_selectors={})
+        patcher = CssPatcher(css_data)
+
+        count = patcher._add_new_css_selectors(
+            data, unmatched_selectors, selector_overrides, "test.uss"
+        )
+
+        assert count == 3
+        # Only one rule and one complex selector for all properties
+        assert len(data.m_Rules) == 1
+        assert len(data.m_ComplexSelectors) == 1
+
+        # Rule should have 3 properties
+        rule = data.m_Rules[0]
+        props = getattr(rule, "m_Properties")
+        assert len(props) == 3
+
+        prop_names = [getattr(p, "m_Name") for p in props]
+        assert "color" in prop_names
+        assert "font-size" in prop_names
+        assert "visibility" in prop_names
+
+    def test_add_multiple_different_selectors(self):
+        """Test adding multiple different selectors."""
+        data = SimpleNamespace()
+        setattr(data, "colors", [])
+        setattr(data, "strings", [])
+        setattr(data, "floats", [])
+        setattr(data, "m_Rules", [])
+        setattr(data, "m_ComplexSelectors", [])
+
+        unmatched_selectors = {
+            (".button", "color"),
+            (".title", "font-size"),
+            ("#myid", "opacity"),
+        }
+        selector_overrides = {
+            (".button", "color"): "#FF0000",
+            (".title", "font-size"): "24px",
+            ("#myid", "opacity"): "0.9",
+        }
+
+        css_data = CollectedCss(global_vars={}, global_selectors={})
+        patcher = CssPatcher(css_data)
+
+        count = patcher._add_new_css_selectors(
+            data, unmatched_selectors, selector_overrides, "test.uss"
+        )
+
+        assert count == 3
+        # Three rules and three complex selectors (one per selector)
+        assert len(data.m_Rules) == 3
+        assert len(data.m_ComplexSelectors) == 3
+
+    def test_parse_class_selector(self):
+        """Test parsing of class selector (.button)."""
+        css_data = CollectedCss(global_vars={}, global_selectors={})
+        patcher = CssPatcher(css_data)
+
+        part = patcher._parse_selector_to_part(".button", [])
+
+        assert getattr(part, "m_Type") == 3  # Class type
+        assert getattr(part, "m_Value") == "button"  # Without dot
+
+    def test_parse_id_selector(self):
+        """Test parsing of ID selector (#myid)."""
+        css_data = CollectedCss(global_vars={}, global_selectors={})
+        patcher = CssPatcher(css_data)
+
+        part = patcher._parse_selector_to_part("#myid", [])
+
+        assert getattr(part, "m_Type") == 2  # ID type
+        assert getattr(part, "m_Value") == "myid"  # Without #
+
+    def test_parse_element_selector(self):
+        """Test parsing of element selector (Label)."""
+        css_data = CollectedCss(global_vars={}, global_selectors={})
+        patcher = CssPatcher(css_data)
+
+        part = patcher._parse_selector_to_part("Label", [])
+
+        assert getattr(part, "m_Type") == 1  # Element type
+        assert getattr(part, "m_Value") == "Label"
+
+    def test_parse_pseudo_selector(self):
+        """Test parsing of pseudo-class selector (:hover)."""
+        css_data = CollectedCss(global_vars={}, global_selectors={})
+        patcher = CssPatcher(css_data)
+
+        part = patcher._parse_selector_to_part(":hover", [])
+
+        assert getattr(part, "m_Type") == 4  # Pseudo type
+        assert getattr(part, "m_Value") == "hover"  # Without :
+
+    def test_create_complex_selector(self):
+        """Test creating a ComplexSelector structure."""
+        css_data = CollectedCss(global_vars={}, global_selectors={})
+        patcher = CssPatcher(css_data)
+
+        complex_sel = patcher._create_complex_selector(".button", 5, [])
+
+        assert getattr(complex_sel, "ruleIndex") == 5
+
+        selectors = getattr(complex_sel, "m_Selectors")
+        assert len(selectors) == 1
+
+        simple_sel = selectors[0]
+        parts = getattr(simple_sel, "m_Parts")
+        assert len(parts) == 1
+
+        part = parts[0]
+        assert getattr(part, "m_Type") == 3  # Class
+        assert getattr(part, "m_Value") == "button"
+
+    def test_no_selectors_to_add(self):
+        """Test when there are no unmatched selectors."""
+        data = SimpleNamespace()
+        setattr(data, "colors", [])
+        setattr(data, "strings", [])
+        setattr(data, "floats", [])
+        setattr(data, "m_Rules", [])
+        setattr(data, "m_ComplexSelectors", [])
+
+        css_data = CollectedCss(global_vars={}, global_selectors={})
+        patcher = CssPatcher(css_data)
+
+        count = patcher._add_new_css_selectors(data, set(), {}, "test.uss")
+
+        assert count == 0
+        assert len(data.m_Rules) == 0
+        assert len(data.m_ComplexSelectors) == 0

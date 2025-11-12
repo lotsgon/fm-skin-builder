@@ -708,6 +708,8 @@ class CssPatcher:
 
         # Track which CSS variables have been matched/patched
         matched_css_vars: Set[str] = set()
+        # Track which selector+property pairs have been matched/patched
+        matched_selectors: Set[Tuple[str, str]] = set()
 
         # Direct property patches (by var name == prop m_Name)
         direct_property_patched_indices = set()
@@ -1042,6 +1044,7 @@ class CssPatcher:
                                 continue
                         if key in selector_overrides:
                             value_str = selector_overrides[key]
+                            matched_selectors.add(key)  # Track matched selector+property
                             log.info(
                                 f"  [DEBUG] Selector/property match: {key} in {name}, patching to {value_str}"
                             )
@@ -1170,7 +1173,7 @@ class CssPatcher:
                                         except Exception:
                                             pass
 
-        # Phase 3: Add new CSS variables that don't exist in the stylesheet
+        # Phase 3.1: Add new CSS variables that don't exist in the stylesheet
         unmatched_vars = set(css_vars.keys()) - matched_css_vars
         if unmatched_vars:
             new_vars_created = self._add_new_css_variables(
@@ -1180,6 +1183,17 @@ class CssPatcher:
                 patched_vars += new_vars_created
                 changed = True
                 log.info(f"  [ADDED] {new_vars_created} new CSS variables to {name}")
+
+        # Phase 3.2: Add new CSS selectors that don't exist in the stylesheet
+        unmatched_selectors = set(selector_overrides.keys()) - matched_selectors
+        if unmatched_selectors:
+            new_props_created = self._add_new_css_selectors(
+                data, unmatched_selectors, selector_overrides, name
+            )
+            if new_props_created > 0:
+                patched_vars += new_props_created
+                changed = True
+                log.info(f"  [ADDED] {new_props_created} new selector properties to {name}")
 
         if self.debug_export_dir and changed and not self.dry_run:
             # Ensure dir exists before exporting
@@ -1316,6 +1330,218 @@ class CssPatcher:
             created_count += 1
 
         return created_count
+
+    def _add_new_css_selectors(
+        self,
+        data: Any,
+        unmatched_selectors: Set[Tuple[str, str]],
+        selector_overrides: Dict[Tuple[str, str], Any],
+        stylesheet_name: str,
+    ) -> int:
+        """
+        Add new CSS selectors that don't exist in the stylesheet.
+
+        Creates new rules and complex selectors for selector+property pairs that
+        weren't matched during normal patching. This allows users to add completely
+        new CSS classes or selectors.
+
+        Args:
+            data: Unity StyleSheet data object
+            unmatched_selectors: Set of (selector, property) tuples that weren't matched
+            selector_overrides: Dictionary mapping (selector, property) to values
+            stylesheet_name: Name of the stylesheet for logging
+
+        Returns:
+            Number of new properties created across all selectors
+        """
+        if not unmatched_selectors:
+            return 0
+
+        # Get arrays
+        colors = getattr(data, "colors", [])
+        strings = getattr(data, "strings", [])
+        floats = getattr(data, "floats", [])
+        rules = getattr(data, "m_Rules", [])
+        complex_selectors = getattr(data, "m_ComplexSelectors", [])
+
+        if not hasattr(data, "floats"):
+            setattr(data, "floats", floats)
+        if not hasattr(data, "m_ComplexSelectors"):
+            setattr(data, "m_ComplexSelectors", complex_selectors)
+
+        # Group properties by selector
+        from collections import defaultdict
+
+        selector_props: DefaultDict[str, List[Tuple[str, Any]]] = defaultdict(list)
+        for selector, prop_name in unmatched_selectors:
+            value = selector_overrides.get((selector, prop_name))
+            if value is not None:
+                selector_props[selector].append((prop_name, value))
+
+        created_count = 0
+        for selector_text in sorted(selector_props.keys()):
+            props_to_add = selector_props[selector_text]
+
+            # Create new rule
+            new_rule = SimpleNamespace()
+            setattr(new_rule, "m_Properties", [])
+            setattr(new_rule, "line", -1)
+            rule_index = len(rules)
+            rules.append(new_rule)
+
+            # Add all properties to the rule
+            properties = getattr(new_rule, "m_Properties")
+            for prop_name, value_str in props_to_add:
+                # Create property
+                prop = SimpleNamespace()
+                setattr(prop, "m_Name", prop_name)
+                setattr(prop, "m_Values", [])
+
+                values_list = getattr(prop, "m_Values")
+                value_obj = SimpleNamespace()
+
+                # Detect value type and add to appropriate array
+                if _is_color_property(prop_name, value_str):
+                    # Color value
+                    r, g, b, a = hex_to_rgba(value_str)
+                    new_color = _build_unity_color(colors, r, g, b, a)
+                    colors.append(new_color)
+                    value_index = len(colors) - 1
+
+                    setattr(value_obj, "m_ValueType", 4)
+                    setattr(value_obj, "valueIndex", value_index)
+                    log.info(
+                        f"  [NEW SELECTOR - color] {stylesheet_name}: {selector_text} {{ {prop_name}: {value_str}; }}"
+                    )
+
+                elif (parsed_float := parse_float_value(value_str)) is not None:
+                    # Float value
+                    floats.append(parsed_float.unity_value)
+                    value_index = len(floats) - 1
+
+                    setattr(value_obj, "m_ValueType", 2)
+                    setattr(value_obj, "valueIndex", value_index)
+                    log.info(
+                        f"  [NEW SELECTOR - float] {stylesheet_name}: {selector_text} {{ {prop_name}: {parsed_float.unity_value}; }}"
+                    )
+
+                elif (parsed_keyword := parse_keyword_value(value_str)) is not None:
+                    # Keyword value
+                    strings.append(parsed_keyword.keyword)
+                    value_index = len(strings) - 1
+
+                    setattr(value_obj, "m_ValueType", 8)
+                    setattr(value_obj, "valueIndex", value_index)
+                    log.info(
+                        f"  [NEW SELECTOR - keyword] {stylesheet_name}: {selector_text} {{ {prop_name}: {parsed_keyword.keyword}; }}"
+                    )
+
+                elif (parsed_resource := parse_resource_value(value_str)) is not None:
+                    # Resource value
+                    strings.append(parsed_resource.unity_path)
+                    value_index = len(strings) - 1
+
+                    setattr(value_obj, "m_ValueType", 7)
+                    setattr(value_obj, "valueIndex", value_index)
+                    log.info(
+                        f"  [NEW SELECTOR - resource] {stylesheet_name}: {selector_text} {{ {prop_name}: {parsed_resource.unity_path}; }}"
+                    )
+
+                else:
+                    # Fallback: store as string
+                    strings.append(value_str)
+                    value_index = len(strings) - 1
+
+                    setattr(value_obj, "m_ValueType", 8)
+                    setattr(value_obj, "valueIndex", value_index)
+                    log.warning(
+                        f"  [NEW SELECTOR - unknown] {stylesheet_name}: {selector_text} {{ {prop_name}: {value_str}; }}"
+                    )
+
+                values_list.append(value_obj)
+                properties.append(prop)
+                created_count += 1
+
+            # Create ComplexSelector for this rule
+            complex_selector = self._create_complex_selector(selector_text, rule_index, strings)
+            complex_selectors.append(complex_selector)
+
+            log.info(
+                f"  [NEW SELECTOR] {stylesheet_name}: Created selector '{selector_text}' with {len(props_to_add)} properties"
+            )
+
+        return created_count
+
+    def _create_complex_selector(
+        self, selector_text: str, rule_index: int, strings: List[str]
+    ) -> SimpleNamespace:
+        """
+        Create a ComplexSelector from a selector string (e.g., ".button", "#myid", "Label").
+
+        Args:
+            selector_text: CSS selector string
+            rule_index: Index of the rule this selector points to
+            strings: Strings array (for storing selector values)
+
+        Returns:
+            ComplexSelector object
+        """
+        complex_selector = SimpleNamespace()
+        setattr(complex_selector, "ruleIndex", rule_index)
+        setattr(complex_selector, "m_Selectors", [])
+
+        # Create a simple selector with parts
+        simple_selector = SimpleNamespace()
+        setattr(simple_selector, "m_Parts", [])
+        setattr(simple_selector, "m_PreviousRelationship", 0)  # No relationship
+
+        # Parse selector text into parts
+        parts = getattr(simple_selector, "m_Parts")
+        selector_part = self._parse_selector_to_part(selector_text, strings)
+        parts.append(selector_part)
+
+        selectors_list = getattr(complex_selector, "m_Selectors")
+        selectors_list.append(simple_selector)
+
+        return complex_selector
+
+    def _parse_selector_to_part(
+        self, selector_text: str, strings: List[str]
+    ) -> SimpleNamespace:
+        """
+        Parse a selector string into a Unity selector part.
+
+        Args:
+            selector_text: CSS selector string (e.g., ".button", "#myid", "Label", ":hover")
+            strings: Strings array (for storing values)
+
+        Returns:
+            Selector part object with m_Value and m_Type
+        """
+        part = SimpleNamespace()
+
+        # Determine selector type and value
+        if selector_text.startswith("#"):
+            # ID selector
+            value = selector_text[1:]  # Remove #
+            setattr(part, "m_Type", 2)
+            setattr(part, "m_Value", value)
+        elif selector_text.startswith("."):
+            # Class selector
+            value = selector_text[1:]  # Remove .
+            setattr(part, "m_Type", 3)
+            setattr(part, "m_Value", value)
+        elif selector_text.startswith(":"):
+            # Pseudo-class selector
+            value = selector_text[1:]  # Remove :
+            setattr(part, "m_Type", 4)
+            setattr(part, "m_Value", value)
+        else:
+            # Element/type selector
+            setattr(part, "m_Type", 1)
+            setattr(part, "m_Value", selector_text)
+
+        return part
 
     def _export_debug_original(self, name: str, data) -> None:
         assert self.debug_export_dir is not None
