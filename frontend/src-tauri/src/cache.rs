@@ -30,11 +30,22 @@ pub fn get_cache_size(app_handle: AppHandle) -> Result<u64, String> {
         .app_cache_dir()
         .map_err(|e| format!("Failed to get cache directory: {}", e))?;
 
+    println!("[DEBUG] Cache directory path: {:?}", cache_dir);
+
     if !cache_dir.exists() {
+        println!("[DEBUG] Cache directory does not exist");
         return Ok(0);
     }
 
-    calculate_dir_size(&cache_dir).map_err(|e| format!("Failed to calculate cache size: {}", e))
+    let size = calculate_dir_size(&cache_dir)
+        .map_err(|e| format!("Failed to calculate cache size: {}", e))?;
+    println!(
+        "[DEBUG] Calculated cache size: {} bytes ({:.2} MB)",
+        size,
+        size as f64 / 1_048_576.0
+    );
+
+    Ok(size)
 }
 
 /// Clear all files in the cache directory
@@ -45,7 +56,10 @@ pub fn clear_cache(app_handle: AppHandle) -> Result<String, String> {
         .app_cache_dir()
         .map_err(|e| format!("Failed to get cache directory: {}", e))?;
 
+    println!("[DEBUG] clear_cache called for: {:?}", cache_dir);
+
     if !cache_dir.exists() {
+        println!("[DEBUG] Cache directory does not exist");
         return Ok("Cache directory is already empty".to_string());
     }
 
@@ -53,21 +67,37 @@ pub fn clear_cache(app_handle: AppHandle) -> Result<String, String> {
     let size_before = calculate_dir_size(&cache_dir)
         .map_err(|e| format!("Failed to calculate cache size: {}", e))?;
 
+    println!(
+        "[DEBUG] Size before clearing: {} bytes ({:.2} MB)",
+        size_before,
+        size_before as f64 / 1_048_576.0
+    );
+
     // Remove all contents but keep the directory
+    let mut items_deleted = 0;
     if let Ok(entries) = fs::read_dir(&cache_dir) {
         for entry in entries.flatten() {
             let path = entry.path();
+            println!("[DEBUG] Removing: {:?}", path);
             if path.is_dir() {
                 fs::remove_dir_all(&path)
-                    .map_err(|e| format!("Failed to remove directory: {}", e))?;
+                    .map_err(|e| format!("Failed to remove directory {:?}: {}", path, e))?;
+                items_deleted += 1;
             } else {
-                fs::remove_file(&path).map_err(|e| format!("Failed to remove file: {}", e))?;
+                fs::remove_file(&path)
+                    .map_err(|e| format!("Failed to remove file {:?}: {}", path, e))?;
+                items_deleted += 1;
             }
         }
     }
 
+    println!("[DEBUG] Deleted {} items", items_deleted);
+
     let mb_cleared = size_before as f64 / 1_048_576.0;
-    Ok(format!("Cleared {:.2} MB from cache", mb_cleared))
+    Ok(format!(
+        "Cleared {:.2} MB from cache ({} items)",
+        mb_cleared, items_deleted
+    ))
 }
 
 /// Open the cache directory in the system file browser

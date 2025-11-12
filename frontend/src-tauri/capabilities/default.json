@@ -43,6 +43,8 @@
     "core:path:allow-basename",
     "core:path:allow-is-absolute",
     "store:default",
-    "store:allow-load"
+    "store:allow-load",
+    "dialog:allow-ask",
+    "dialog:default"
   ]
 }

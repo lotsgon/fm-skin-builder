@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { ask, message } from "@tauri-apps/plugin-dialog";
 import { Button } from "./ui/button";
 import {
   Card,
@@ -95,26 +96,49 @@ export function Settings({
   }, []);
 
   const handleClearCache = useCallback(async () => {
-    if (
-      !confirm(
-        "Are you sure you want to clear the cache? This will delete all cached skin configurations."
-      )
-    ) {
+    console.log("[FRONTEND DEBUG] handleClearCache called!");
+    console.log("[FRONTEND DEBUG] isClearingCache:", isClearingCache);
+    console.log("[FRONTEND DEBUG] cacheSize:", cacheSize);
+
+    const confirmed = await ask(
+      "Are you sure you want to clear the cache? This will delete all cached skin configurations.",
+      {
+        title: "Clear Cache",
+        kind: "warning",
+      }
+    );
+
+    if (!confirmed) {
+      console.log("[FRONTEND DEBUG] User cancelled confirmation");
       return;
     }
 
+    console.log("[FRONTEND DEBUG] User confirmed, clearing cache...");
     setIsClearingCache(true);
     try {
-      const message = await invoke<string>("clear_cache");
-      alert(message);
+      const backendMessage = await invoke<string>("clear_cache");
+      console.log("[FRONTEND DEBUG] Backend response:", backendMessage);
+
+      // Show success message using Tauri dialog
+      await message(backendMessage, {
+        title: "Success",
+        kind: "info",
+      });
+
       // Refresh cache size after clearing
       await handleRefreshCacheSize();
     } catch (error) {
-      alert(`Failed to clear cache: ${String(error)}`);
+      console.error("[FRONTEND DEBUG] Error clearing cache:", error);
+
+      // Show error message using Tauri dialog
+      await message(`Failed to clear cache: ${String(error)}`, {
+        title: "Error",
+        kind: "error",
+      });
     } finally {
       setIsClearingCache(false);
     }
-  }, [handleRefreshCacheSize]);
+  }, [handleRefreshCacheSize, isClearingCache, cacheSize]);
 
   const handleOpenCacheDir = useCallback(async () => {
     try {
@@ -238,7 +262,10 @@ export function Settings({
           <div className="pt-2">
             <Button
               variant="destructive"
-              onClick={handleClearCache}
+              onClick={() => {
+                console.log("[FRONTEND DEBUG] Clear Cache button clicked!");
+                handleClearCache();
+              }}
               disabled={isClearingCache}
             >
               {isClearingCache ? (
