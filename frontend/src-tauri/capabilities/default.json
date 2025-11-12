@@ -41,6 +41,8 @@
     "core:path:allow-dirname",
     "core:path:allow-extname",
     "core:path:allow-basename",
-    "core:path:allow-is-absolute"
+    "core:path:allow-is-absolute",
+    "store:default",
+    "store:allow-load"
   ]
 }

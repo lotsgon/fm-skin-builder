@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { getVersion } from '@tauri-apps/api/app';
-import { Folder, Play, Package, Bug, Loader2, Terminal, CheckCircle2, XCircle, StopCircle, Zap, AlertCircle } from 'lucide-react';
+import { Folder, Play, Package, Bug, Loader2, Terminal, CheckCircle2, XCircle, StopCircle, Zap, AlertCircle, Settings as SettingsIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,8 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Logo } from '@/components/logo';
+import { Settings } from '@/components/Settings';
+import { useStore } from '@/hooks/useStore';
 
 type CommandResult = {
   stdout: string;
@@ -67,10 +69,11 @@ const detectTauriRuntime = () => {
 };
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'build' | 'logs'>('build');
+  const [activeTab, setActiveTab] = useState<'build' | 'logs' | 'settings'>('build');
   const [skinPath, setSkinPath] = useState('');
   const [bundlesPath, setBundlesPath] = useState('');
   const [debugMode, setDebugMode] = useState(false);
+  const { settings, saveSetting, clearSetting } = useStore();
   const [pathErrors, setPathErrors] = useState<{ skin?: string; bundles?: string }>({});
   const [pathWarnings, setPathWarnings] = useState<{ skin?: string; bundles?: string }>({});
   const [logs, setLogs] = useState<LogEntry[]>([
@@ -97,6 +100,30 @@ function App() {
       .then(version => setAppVersion(version))
       .catch(() => setAppVersion('dev'));
   }, []);
+
+  // Load saved paths from store on mount
+  useEffect(() => {
+    if (settings.skinPath) {
+      setSkinPath(settings.skinPath);
+    }
+    if (settings.bundlesPath) {
+      setBundlesPath(settings.bundlesPath);
+    }
+  }, [settings.skinPath, settings.bundlesPath]);
+
+  // Save skin path when it changes
+  useEffect(() => {
+    if (skinPath && skinPath !== settings.skinPath) {
+      saveSetting('skinPath', skinPath).catch(console.error);
+    }
+  }, [skinPath, settings.skinPath, saveSetting]);
+
+  // Save bundles path when it changes
+  useEffect(() => {
+    if (bundlesPath && bundlesPath !== settings.bundlesPath) {
+      saveSetting('bundlesPath', bundlesPath).catch(console.error);
+    }
+  }, [bundlesPath, settings.bundlesPath, saveSetting]);
 
   useEffect(() => {
     // Auto-scroll logs to bottom
@@ -480,8 +507,8 @@ function App() {
       </header>
 
       <main className="container mx-auto max-w-6xl px-6 py-8 pb-16">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'build' | 'logs')}>
-          <TabsList className="grid w-full max-w-md grid-cols-2">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'build' | 'logs' | 'settings')}>
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="build" className="gap-2">
               <Package className="h-4 w-4" />
               Build
@@ -490,6 +517,10 @@ function App() {
               <Terminal className="h-4 w-4" />
               Logs
               {isRunning && <Loader2 className="h-3 w-3 animate-spin" />}
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <SettingsIcon className="h-4 w-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -798,6 +829,25 @@ function App() {
                 </ScrollArea>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <Settings
+              skinPath={skinPath}
+              bundlesPath={bundlesPath}
+              betaUpdates={settings.betaUpdates ?? false}
+              onClearSkinPath={() => {
+                setSkinPath('');
+                clearSetting('skinPath').catch(console.error);
+              }}
+              onClearBundlesPath={() => {
+                setBundlesPath('');
+                clearSetting('bundlesPath').catch(console.error);
+              }}
+              onBetaUpdatesChange={(enabled) => {
+                saveSetting('betaUpdates', enabled).catch(console.error);
+              }}
+            />
           </TabsContent>
         </Tabs>
       </main>
