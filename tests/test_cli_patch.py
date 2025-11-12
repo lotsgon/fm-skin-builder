@@ -213,6 +213,6 @@ def test_cli_patch_dry_run_produces_no_outputs(tmp_path, monkeypatch):
     if out_dir.exists():
         # directory should be empty (no modified bundles, no debug)
         entries = list(out_dir.iterdir())
-        assert (
-            not entries
-        ), f"Dry-run should not produce files, found: {[e.name for e in entries]}"
+        assert not entries, (
+            f"Dry-run should not produce files, found: {[e.name for e in entries]}"
+        )
