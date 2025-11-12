@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { getVersion } from '@tauri-apps/api/app';
 import { Folder, Play, Package, Bug, Loader2, Terminal, CheckCircle2, XCircle, StopCircle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -82,11 +83,17 @@ function App() {
     () => detectTauriRuntime()
   );
   const [listenersReady, setListenersReady] = useState(true);
+  const [appVersion, setAppVersion] = useState<string>('');
 
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setRuntimeState(detectTauriRuntime());
+
+    // Get app version
+    getVersion()
+      .then(version => setAppVersion(version))
+      .catch(() => setAppVersion('dev'));
   }, []);
 
   useEffect(() => {
@@ -412,7 +419,7 @@ function App() {
         </div>
       </header>
 
-      <main className="container mx-auto max-w-6xl px-6 py-8">
+      <main className="container mx-auto max-w-6xl px-6 py-8 pb-16">
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'build' | 'logs')}>
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="build" className="gap-2">
@@ -681,6 +688,13 @@ function App() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Version Display */}
+      <div className="fixed bottom-4 left-4">
+        <Badge variant="secondary" className="text-xs">
+          v{appVersion}
+        </Badge>
+      </div>
     </div>
   );
 }
