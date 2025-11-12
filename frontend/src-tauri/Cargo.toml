@@ -11,7 +11,7 @@ tauri-plugin-store = "2.0"
 tauri-plugin-shell = "2.0"
 tauri-plugin-dialog = "2.0"
 tauri-plugin-updater = "2.0"
-rfd = { version = "0.15", default-features = false, features = ["xdg-portal"] }
+rfd = "0.15"
 tokio = { version = "1", features = ["process", "io-util", "rt", "sync", "time"] }
 
 [build-dependencies]
