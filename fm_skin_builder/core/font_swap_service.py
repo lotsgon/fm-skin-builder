@@ -3,6 +3,12 @@ Font Swap Service
 
 Handles font replacement in Unity bundles by discovering font files
 in the skin directory and swapping them with game fonts.
+
+IMPORTANT: Font format (OTF vs TTF) must match the original. Unity
+expects specific internal font tables:
+- OTF fonts use CFF (Compact Font Format) tables
+- TTF fonts use glyf (glyph data) tables
+Renaming .ttf to .otf or vice versa will NOT work.
 """
 
 from __future__ import annotations
@@ -11,11 +17,13 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional, Sequence
+from typing import Dict, Optional, Sequence, Literal
 
 from .context import BundleContext, PatchReport
 
 logger = logging.getLogger(__name__)
+
+FontFormat = Literal["TTF", "OTF", "UNKNOWN"]
 
 
 @dataclass
@@ -41,15 +49,26 @@ class FontSwapService:
 
     Discovers fonts in assets/fonts/ directory and replaces matching fonts
     in game bundles. Supports both stem-based matching and explicit mapping.
+
+    CRITICAL: Font format (OTF vs TTF) must match the original Unity Font asset.
+    The service validates this using magic bytes to prevent silent failures.
     """
 
     SUPPORTED_EXTENSIONS = {".ttf", ".otf"}
     MAX_SIZE_MB = 50
     WARN_SIZE_MB = 5
 
+    # Font format magic bytes
+    TTF_MAGIC = [
+        b"\x00\x01\x00\x00",  # TrueType 1.0
+        b"true",              # TrueType (Mac)
+    ]
+    OTF_MAGIC = b"OTTO"  # OpenType with CFF
+
     def __init__(self, options: FontSwapOptions):
         self.options = options
         self._font_mapping: Optional[Dict[str, Path]] = None
+        self._original_font_formats: Dict[str, FontFormat] = {}  # Cache original formats
 
     def apply(
         self,
@@ -87,8 +106,11 @@ class FontSwapService:
         skipped_fonts: Dict[str, str] = {}
 
         for font_name, font_file in self._font_mapping.items():
+            # Get original format if we've seen this font before
+            original_format = self._original_font_formats.get(font_name)
+
             # Validate font file before attempting replacement
-            validation_error = self._validate_font_file(font_file)
+            validation_error = self._validate_font_file(font_file, original_format)
             if validation_error:
                 skipped_fonts[font_name] = validation_error
                 logger.warning(f"Skipping font '{font_name}': {validation_error}")
@@ -203,12 +225,15 @@ class FontSwapService:
 
         return font_mapping
 
-    def _validate_font_file(self, font_file: Path) -> Optional[str]:
+    def _validate_font_file(
+        self, font_file: Path, original_format: Optional[FontFormat] = None
+    ) -> Optional[str]:
         """
         Validate a font file.
 
         Args:
             font_file: Path to font file
+            original_format: Expected format from original Unity Font (if known)
 
         Returns:
             Error message if validation fails, None if valid
@@ -235,15 +260,79 @@ class FontSwapService:
                 f"Large font file: {font_file.name} ({size_mb:.1f} MB) - consider optimizing"
             )
 
-        # TODO Phase 2: Check magic bytes for format validation
+        # Detect actual format from magic bytes
+        replacement_format = self._detect_font_format_from_file(font_file)
+        if replacement_format == "UNKNOWN":
+            return f"Unable to detect font format (invalid magic bytes)"
+
+        # Validate format matches original if we know it
+        if original_format and original_format != "UNKNOWN":
+            if replacement_format != original_format:
+                return (
+                    f"Format mismatch: original is {original_format}, "
+                    f"replacement is {replacement_format}. "
+                    f"Unity expects matching formats (OTF→OTF, TTF→TTF)"
+                )
 
         return None
+
+    def _detect_font_format_from_bytes(self, font_bytes: bytes) -> FontFormat:
+        """
+        Detect font format from magic bytes.
+
+        Args:
+            font_bytes: Font file bytes
+
+        Returns:
+            "TTF", "OTF", or "UNKNOWN"
+        """
+        if len(font_bytes) < 4:
+            return "UNKNOWN"
+
+        # Check first 4 bytes for magic
+        header = font_bytes[:4]
+
+        # OTF check (OpenType with CFF)
+        if header == self.OTF_MAGIC:
+            return "OTF"
+
+        # TTF checks
+        for ttf_magic in self.TTF_MAGIC:
+            if header == ttf_magic:
+                return "TTF"
+
+        return "UNKNOWN"
+
+    def _detect_font_format_from_file(self, font_file: Path) -> FontFormat:
+        """
+        Detect font format from file.
+
+        Args:
+            font_file: Path to font file
+
+        Returns:
+            "TTF", "OTF", or "UNKNOWN"
+        """
+        try:
+            with font_file.open("rb") as f:
+                header = f.read(4)
+            return self._detect_font_format_from_bytes(header)
+        except Exception as e:
+            logger.debug(f"Failed to read font file header: {e}")
+            return "UNKNOWN"
 
     def _replace_font_in_bundle(
         self, bundle: BundleContext, font_name: str, font_file: Path
     ) -> bool:
         """
-        Replace a font in the bundle using BundleManager-style logic.
+        Replace a font in the bundle using UABEA-style logic.
+
+        This mimics what UABEA's "Import .ttf/.otf" plugin does:
+        1. Find the Font object by name (m_Name)
+        2. Deserialize to Python object (obj.read())
+        3. Replace m_FontData with new font bytes
+        4. Keep m_Name unchanged (so USS/UXML refs work)
+        5. Reserialize (obj.save_typetree) to preserve Unity structure
 
         Args:
             bundle: Bundle context
@@ -269,6 +358,13 @@ class FontSwapService:
             if obj_name != font_name:
                 continue
 
+            # Extract and cache original font format
+            original_bytes = getattr(data, "m_FontData", b"")
+            original_format = self._detect_font_format_from_bytes(original_bytes)
+            if original_format != "UNKNOWN":
+                self._original_font_formats[font_name] = original_format
+                logger.debug(f"Original font '{font_name}' format: {original_format}")
+
             # Read new font data
             try:
                 font_bytes = font_file.read_bytes()
@@ -276,12 +372,23 @@ class FontSwapService:
                 logger.error(f"Failed to read font file {font_file}: {e}")
                 return False
 
-            # Replace font data
+            # Validate format compatibility
+            replacement_format = self._detect_font_format_from_bytes(font_bytes)
+            if original_format != "UNKNOWN" and replacement_format != original_format:
+                logger.error(
+                    f"❌ Format mismatch for '{font_name}': "
+                    f"original is {original_format}, replacement is {replacement_format}. "
+                    f"Unity expects matching formats. Skipping."
+                )
+                return False
+
+            # Replace font data (keep m_Name unchanged!)
             try:
                 data.m_FontData = font_bytes
-                obj.save_typetree(data)
+                obj.save_typetree(data)  # Critical: reserialize to Unity format
                 logger.debug(
-                    f"Replaced font data for '{font_name}' ({len(font_bytes)} bytes)"
+                    f"Replaced font data for '{font_name}' "
+                    f"({len(font_bytes)} bytes, format: {replacement_format})"
                 )
                 replaced = True
             except Exception as e:

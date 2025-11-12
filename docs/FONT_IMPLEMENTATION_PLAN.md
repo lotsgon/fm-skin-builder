@@ -34,31 +34,41 @@ Decision made: 2025-11-11
 
 ## Implementation Phases
 
-### Phase 1: Core Font Replacement Service (Week 1)
+### Phase 1: Core Font Replacement Service (Week 1) ✅ COMPLETED
 **Estimated effort: 20-25 hours**
 
-#### 1.1 Create FontSwapService
-**File**: `fm_skin_builder/services/font_swap_service.py`
+#### 1.1 Create FontSwapService ✅
+**File**: `fm_skin_builder/core/font_swap_service.py` (implemented)
 
-Pattern from TextureSwapService:
+**CRITICAL UPDATE**: After reviewing UABEA methodology, added format validation:
 ```python
 class FontSwapService:
-    def __init__(self, skin_dir: Path):
-        self.font_dir = skin_dir / "assets" / "fonts"
-        self.font_mapping = self._discover_fonts()
+    # Font format magic bytes
+    TTF_MAGIC = [b"\x00\x01\x00\x00", b"true"]
+    OTF_MAGIC = b"OTTO"
 
-    def _discover_fonts(self) -> Dict[str, Path]:
-        """Discover fonts in assets/fonts/ directory."""
-        # FontName.ttf → replaces "FontName" in bundles
-        # FontName.otf → replaces "FontName" in bundles
+    def __init__(self, options: FontSwapOptions):
+        self.options = options
+        self._font_mapping: Optional[Dict[str, Path]] = None
+        self._original_font_formats: Dict[str, FontFormat] = {}  # Cache formats
 
-    def apply(self, bundle_ctx: BundleContext, report: PatchReport) -> None:
-        """Apply font replacements to bundle."""
-        for font_name, font_file in self.font_mapping.items():
-            if bundle_ctx.manager.replace_asset(font_name, font_file):
-                report.fonts_replaced += 1
-                logger.info(f"Replaced font: {font_name}")
+    def _replace_font_in_bundle(self, bundle, font_name, font_file):
+        """
+        Replace font using UABEA-style logic:
+        1. Find Font object by m_Name
+        2. Deserialize with obj.read()
+        3. Extract original format from m_FontData
+        4. Validate replacement format matches
+        5. Replace m_FontData (keep m_Name unchanged!)
+        6. Reserialize with obj.save_typetree()
+        """
 ```
+
+**Key improvements**:
+- ✅ Magic byte detection (TTF vs OTF)
+- ✅ Format validation before replacement
+- ✅ Clear error messages for format mismatches
+- ✅ Follows UABEA plugin approach exactly
 
 #### 1.2 Font Discovery Conventions
 
