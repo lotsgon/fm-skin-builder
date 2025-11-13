@@ -1197,6 +1197,9 @@ class CssPatcher:
                 log.info(f"  [ADDED] {new_vars_created} new CSS variables to {name}")
 
         # Phase 3.2: Add new CSS selectors that don't exist in the stylesheet
+        # Calculate unmatched selectors (similar to unmatched_vars calculation)
+        unmatched_selectors = set(selector_overrides.keys()) - matched_selectors
+
         # First, check which selectors already exist to avoid duplicates
         existing_selector_texts = set()
         complex_selectors = getattr(data, "m_ComplexSelectors", [])
