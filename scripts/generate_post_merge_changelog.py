@@ -49,6 +49,12 @@ def save_json(data: Any, file_path: Path, pretty: bool = True):
         else:
             json.dump(data, f, ensure_ascii=False)
 
+    # Verify file was written
+    if not file_path.exists():
+        raise RuntimeError(f"Failed to write {file_path}")
+    file_size = file_path.stat().st_size
+    print(f"    Written: {file_path.name} ({file_size / 1024:.1f} KB)")
+
 
 def download_previous_from_r2(
     fm_version: str, output_base: Path
@@ -383,6 +389,19 @@ def apply_change_tracking(
 
     save_json(search_index, catalogue_dir / "search-index.json")
     print("  ✅ Updated search index")
+
+    # Verify change tracking was applied by reading back a sample
+    verify_path = catalogue_dir / "css-variables.json"
+    if verify_path.exists():
+        verify_data = load_json(verify_path)
+        if verify_data and len(verify_data) > 0:
+            sample = verify_data[0]
+            status = sample.get("change_status")
+            if status:
+                print(f"  ✅ Verified: Sample asset has change_status='{status}'")
+            else:
+                print(f"  ⚠️  WARNING: Sample asset has NULL change_status!")
+                print(f"     This indicates files were written but data is wrong!")
 
 
 def generate_changelog(catalogue_dir: Path, fm_version: str):
