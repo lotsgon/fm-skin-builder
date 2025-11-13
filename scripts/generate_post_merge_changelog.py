@@ -218,13 +218,13 @@ def apply_change_tracking(
             # Modified asset - preserve first_seen, update last_seen and modified_in
             var["change_status"] = "modified"
             var["changed_in_version"] = fm_version
-            var["first_seen"] = prev_var["first_seen"] if prev_var else fm_version
+            var["first_seen"] = prev_var.get("first_seen", fm_version) if prev_var else fm_version
             var["last_seen"] = fm_version
             var["modified_in"] = fm_version
         else:
             # Unchanged asset - preserve first_seen, update last_seen
             var["change_status"] = "unchanged"
-            var["first_seen"] = prev_var["first_seen"] if prev_var else fm_version
+            var["first_seen"] = prev_var.get("first_seen", fm_version) if prev_var else fm_version
             var["last_seen"] = fm_version
 
     # Apply changes to CSS classes (note: changelog uses SINGULAR "css_class")
@@ -243,12 +243,12 @@ def apply_change_tracking(
         elif cls["name"] in modified:
             cls["change_status"] = "modified"
             cls["changed_in_version"] = fm_version
-            cls["first_seen"] = prev_cls["first_seen"] if prev_cls else fm_version
+            cls["first_seen"] = prev_cls.get("first_seen", fm_version) if prev_cls else fm_version
             cls["last_seen"] = fm_version
             cls["modified_in"] = fm_version
         else:
             cls["change_status"] = "unchanged"
-            cls["first_seen"] = prev_cls["first_seen"] if prev_cls else fm_version
+            cls["first_seen"] = prev_cls.get("first_seen", fm_version) if prev_cls else fm_version
             cls["last_seen"] = fm_version
 
     # Apply changes to sprites (note: changelog uses SINGULAR "sprite")
@@ -268,7 +268,7 @@ def apply_change_tracking(
             sprite["change_status"] = "modified"
             sprite["changed_in_version"] = fm_version
             sprite["first_seen"] = (
-                prev_sprite["first_seen"] if prev_sprite else fm_version
+                prev_sprite.get("first_seen", fm_version) if prev_sprite else fm_version
             )
             sprite["last_seen"] = fm_version
             sprite["modified_in"] = fm_version
@@ -278,7 +278,7 @@ def apply_change_tracking(
         else:
             sprite["change_status"] = "unchanged"
             sprite["first_seen"] = (
-                prev_sprite["first_seen"] if prev_sprite else fm_version
+                prev_sprite.get("first_seen", fm_version) if prev_sprite else fm_version
             )
             sprite["last_seen"] = fm_version
 
@@ -299,7 +299,7 @@ def apply_change_tracking(
             texture["change_status"] = "modified"
             texture["changed_in_version"] = fm_version
             texture["first_seen"] = (
-                prev_texture["first_seen"] if prev_texture else fm_version
+                prev_texture.get("first_seen", fm_version) if prev_texture else fm_version
             )
             texture["last_seen"] = fm_version
             texture["modified_in"] = fm_version
@@ -309,7 +309,7 @@ def apply_change_tracking(
         else:
             texture["change_status"] = "unchanged"
             texture["first_seen"] = (
-                prev_texture["first_seen"] if prev_texture else fm_version
+                prev_texture.get("first_seen", fm_version) if prev_texture else fm_version
             )
             texture["last_seen"] = fm_version
 
@@ -329,12 +329,12 @@ def apply_change_tracking(
         elif font["name"] in modified:
             font["change_status"] = "modified"
             font["changed_in_version"] = fm_version
-            font["first_seen"] = prev_font["first_seen"] if prev_font else fm_version
+            font["first_seen"] = prev_font.get("first_seen", fm_version) if prev_font else fm_version
             font["last_seen"] = fm_version
             font["modified_in"] = fm_version
         else:
             font["change_status"] = "unchanged"
-            font["first_seen"] = prev_font["first_seen"] if prev_font else fm_version
+            font["first_seen"] = prev_font.get("first_seen", fm_version) if prev_font else fm_version
             font["last_seen"] = fm_version
 
     # Save updated files
