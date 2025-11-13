@@ -26,6 +26,8 @@ class CssPatchOptions:
     dry_run: bool = False
     selectors_filter: Optional[Set[str]] = None
     selector_props_filter: Optional[Set[Tuple[str, str]]] = None
+    primary_variable_stylesheet: Optional[str] = None
+    primary_selector_stylesheet: Optional[str] = None
 
 
 class CssPatchService:
@@ -60,6 +62,8 @@ class CssPatchService:
                 dry_run=self._options.dry_run,
                 selectors_filter=self._options.selectors_filter,
                 selector_props_filter=self._options.selector_props_filter,
+                primary_variable_stylesheet=self._options.primary_variable_stylesheet,
+                primary_selector_stylesheet=self._options.primary_selector_stylesheet,
             )
         return self._patcher
 

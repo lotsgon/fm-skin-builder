@@ -289,6 +289,8 @@ class CssPatcher:
         dry_run: bool = False,
         selectors_filter: Optional[Set[str]] = None,
         selector_props_filter: Optional[Set[Tuple[str, str]]] = None,
+        primary_variable_stylesheet: Optional[str] = None,
+        primary_selector_stylesheet: Optional[str] = None,
     ) -> None:
         self.css_data = css_data
         self.patch_direct = patch_direct
@@ -300,6 +302,15 @@ class CssPatcher:
         # selector_props_filter contains (selector, property) tuples (selector can be with or without '.')
         self.selectors_filter = selectors_filter
         self.selector_props_filter = selector_props_filter
+        # Primary stylesheets for new content (Phase 3)
+        # If set, new variables go to primary_variable_stylesheet (default: FMColours)
+        # If set, new selectors go to primary_selector_stylesheet (default: inlineStyle)
+        self.primary_variable_stylesheet = (
+            primary_variable_stylesheet.lower() if primary_variable_stylesheet else "fmcolours"
+        )
+        self.primary_selector_stylesheet = (
+            primary_selector_stylesheet.lower() if primary_selector_stylesheet else "inlinestyle"
+        )
 
     def patch_bundle_file(
         self,
@@ -350,7 +361,7 @@ class CssPatcher:
         log.info(f"🔍 Scanning bundle: {bundle_name}")
 
         original_uss: List[
-            Tuple[Any, Any, str, Dict[str, str], Dict[Tuple[str, str], str]]
+            Tuple[Any, Any, str, Dict[str, str], Dict[Tuple[str, str], str], bool]
         ] = []
         for obj in env.objects:
             if obj.type.name != "MonoBehaviour":
@@ -361,7 +372,7 @@ class CssPatcher:
             name = getattr(data, "m_Name", "UnnamedStyleSheet")
             if candidate_assets is not None and name not in candidate_assets:
                 continue
-            css_vars_for_asset, selector_overrides_for_asset = (
+            css_vars_for_asset, selector_overrides_for_asset, has_targeted_sources = (
                 self._effective_overrides(name)
             )
             will_patch = self._will_patch(
@@ -379,6 +390,7 @@ class CssPatcher:
                     name,
                     css_vars_for_asset,
                     selector_overrides_for_asset,
+                    has_targeted_sources,
                 )
             )
 
@@ -388,6 +400,7 @@ class CssPatcher:
             name,
             css_vars_for_asset,
             selector_overrides_for_asset,
+            has_targeted_sources,
         ) in original_uss:
             found_styles += 1
             pv, pd, changed = self._apply_patches_to_stylesheet(
@@ -395,6 +408,7 @@ class CssPatcher:
                 data,
                 css_vars_for_asset,
                 selector_overrides_for_asset,
+                has_targeted_sources,
             )
             patched_vars += pv
             patched_direct += pd
@@ -472,7 +486,15 @@ class CssPatcher:
     def _effective_overrides(
         self,
         stylesheet_name: str,
-    ) -> Tuple[Dict[str, str], Dict[Tuple[str, str], str]]:
+    ) -> Tuple[Dict[str, str], Dict[Tuple[str, str], str], bool]:
+        """Get effective CSS overrides for a stylesheet.
+
+        Returns:
+            (vars_combined, selectors_combined, has_targeted_sources)
+            - vars_combined: All variables for this stylesheet (global + targeted)
+            - selectors_combined: All selectors for this stylesheet (global + targeted)
+            - has_targeted_sources: True if this stylesheet has explicit targeting (asset_map or files_by_stem)
+        """
         vars_combined: Dict[str, str] = dict(self.css_data.global_vars)
         selectors_combined: Dict[Tuple[str, str], str] = dict(
             self.css_data.global_selectors
@@ -480,8 +502,10 @@ class CssPatcher:
 
         key = stylesheet_name.lower()
         seen_sources: Set[int] = set()
+        has_targeted_sources = False
 
         if key in self.css_data.asset_map:
+            has_targeted_sources = True
             for overrides in self.css_data.asset_map[key]:
                 seen_sources.add(id(overrides))
                 vars_combined.update(overrides.vars)
@@ -492,10 +516,11 @@ class CssPatcher:
                 ident = id(overrides)
                 if ident in seen_sources:
                     continue
+                has_targeted_sources = True
                 vars_combined.update(overrides.vars)
                 selectors_combined.update(overrides.selectors)
 
-        return vars_combined, selectors_combined
+        return vars_combined, selectors_combined, has_targeted_sources
 
     def _will_patch(
         self,
@@ -694,7 +719,20 @@ class CssPatcher:
         data,
         css_vars: Dict[str, str],
         selector_overrides: Dict[Tuple[str, str], str],
+        has_targeted_sources: bool = False,
     ) -> Tuple[int, int, bool]:
+        """Apply CSS patches to a stylesheet.
+
+        Args:
+            name: Stylesheet name (e.g., "FMColours", "inlineStyle")
+            data: Unity stylesheet data object
+            css_vars: CSS variables to patch
+            selector_overrides: Selector overrides to patch
+            has_targeted_sources: True if this stylesheet has explicit CSS targeting (not just global)
+
+        Returns:
+            (patched_vars, patched_direct, changed) tuple
+        """
         patched_vars = 0
         patched_direct = 0
         changed = False
@@ -1175,7 +1213,7 @@ class CssPatcher:
                                         except Exception:
                                             pass
 
-        # Phase 3.1: Add new CSS variables that don't exist in the stylesheet
+        # Phase 3.1: Smart new variable placement
         # First, check which variables already exist to avoid duplicates
         existing_var_names = set()
         for rule in rules:
@@ -1184,19 +1222,41 @@ class CssPatcher:
                 if prop_name.startswith("--"):
                     existing_var_names.add(prop_name)
 
-        # Only add truly new variables (not matched AND not already in stylesheet)
+        # Calculate unmatched variables (not matched AND not already in stylesheet)
         unmatched_vars = set(css_vars.keys()) - matched_css_vars - existing_var_names
-        if unmatched_vars:
-            log.info(f"  [PHASE 3.1] Adding {len(unmatched_vars)} new CSS variables to {name}")
-            new_vars_created = self._add_new_css_variables(
-                data, unmatched_vars, css_vars, name
-            )
-            if new_vars_created > 0:
-                patched_vars += new_vars_created
-                changed = True
-                log.info(f"  [ADDED] {new_vars_created} new CSS variables to {name}")
 
-        # Phase 3.2: Add new CSS selectors that don't exist in the stylesheet
+        if unmatched_vars:
+            # Smart placement: Only add new variables if:
+            # 1. This stylesheet has explicit targeting (has_targeted_sources), OR
+            # 2. This stylesheet is the primary variable stylesheet
+            name_lower = name.lower()
+            should_add_vars = has_targeted_sources or (name_lower == self.primary_variable_stylesheet)
+
+            if should_add_vars:
+                reason = "explicit targeting" if has_targeted_sources else "primary variable stylesheet"
+                log.info(
+                    f"  [PHASE 3.1] Adding {len(unmatched_vars)} new CSS variables to {name} ({reason})"
+                )
+                new_vars_created = self._add_new_css_variables(
+                    data, unmatched_vars, css_vars, name
+                )
+                if new_vars_created > 0:
+                    patched_vars += new_vars_created
+                    changed = True
+                    log.info(f"  [ADDED] {new_vars_created} new CSS variables to {name}")
+            else:
+                # Skip adding new variables to this stylesheet
+                log.info(
+                    f"  [PHASE 3.1] Skipping {len(unmatched_vars)} new variables for {name} "
+                    f"(not targeted, primary is '{self.primary_variable_stylesheet}')"
+                )
+                if len(unmatched_vars) <= 5:
+                    log.info(f"    Variables: {', '.join(sorted(unmatched_vars))}")
+                else:
+                    log.info(f"    Variables: {', '.join(sorted(list(unmatched_vars)[:5]))}... (and {len(unmatched_vars) - 5} more)")
+
+
+        # Phase 3.2: Smart new selector placement
         # Calculate unmatched selectors (similar to unmatched_vars calculation)
         unmatched_selectors = set(selector_overrides.keys()) - matched_selectors
 
@@ -1219,14 +1279,35 @@ class CssPatcher:
         }
 
         if truly_new_selectors:
-            log.info(f"  [PHASE 3.2] Adding {len(truly_new_selectors)} new selector properties to {name}")
-            new_props_created = self._add_new_css_selectors(
-                data, truly_new_selectors, selector_overrides, name
-            )
-            if new_props_created > 0:
-                patched_vars += new_props_created
-                changed = True
-                log.info(f"  [ADDED] {new_props_created} new selector properties to {name}")
+            # Smart placement: Only add new selectors if:
+            # 1. This stylesheet has explicit targeting (has_targeted_sources), OR
+            # 2. This stylesheet is the primary selector stylesheet
+            name_lower = name.lower()
+            should_add_selectors = has_targeted_sources or (name_lower == self.primary_selector_stylesheet)
+
+            if should_add_selectors:
+                reason = "explicit targeting" if has_targeted_sources else "primary selector stylesheet"
+                log.info(
+                    f"  [PHASE 3.2] Adding {len(truly_new_selectors)} new selector properties to {name} ({reason})"
+                )
+                new_props_created = self._add_new_css_selectors(
+                    data, truly_new_selectors, selector_overrides, name
+                )
+                if new_props_created > 0:
+                    patched_vars += new_props_created
+                    changed = True
+                    log.info(f"  [ADDED] {new_props_created} new selector properties to {name}")
+            else:
+                # Skip adding new selectors to this stylesheet
+                selector_list = sorted(set(sel for sel, prop in truly_new_selectors))
+                log.info(
+                    f"  [PHASE 3.2] Skipping {len(truly_new_selectors)} new selector properties for {name} "
+                    f"(not targeted, primary is '{self.primary_selector_stylesheet}')"
+                )
+                if len(selector_list) <= 5:
+                    log.info(f"    Selectors: {', '.join(selector_list)}")
+                else:
+                    log.info(f"    Selectors: {', '.join(selector_list[:5])}... (and {len(selector_list) - 5} more)")
 
         if self.debug_export_dir and changed and not self.dry_run:
             # Ensure dir exists before exporting
