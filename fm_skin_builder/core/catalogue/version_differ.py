@@ -95,6 +95,8 @@ class VersionDiffer:
         """Load both catalogue versions from disk."""
         log.info(f"Loading old catalogue from {self.old_version_dir}")
         self.old_metadata = self._load_json(self.old_version_dir / "metadata.json")
+        self._check_schema_version(self.old_metadata, "old")
+
         self.old_css_variables = self._load_json(
             self.old_version_dir / "css-variables.json"
         )
@@ -105,6 +107,8 @@ class VersionDiffer:
 
         log.info(f"Loading new catalogue from {self.new_version_dir}")
         self.new_metadata = self._load_json(self.new_version_dir / "metadata.json")
+        self._check_schema_version(self.new_metadata, "new")
+
         self.new_css_variables = self._load_json(
             self.new_version_dir / "css-variables.json"
         )
@@ -112,6 +116,28 @@ class VersionDiffer:
         self.new_sprites = self._load_json(self.new_version_dir / "sprites.json")
         self.new_textures = self._load_json(self.new_version_dir / "textures.json")
         self.new_fonts = self._load_json(self.new_version_dir / "fonts.json")
+
+    def _check_schema_version(self, metadata: Dict[str, Any], label: str) -> None:
+        """
+        Check schema version and warn about compatibility.
+
+        Args:
+            metadata: Metadata dictionary
+            label: Label for logging (old/new)
+        """
+        schema_version = metadata.get("schema_version", "1.0.0")
+
+        if schema_version == "1.0.0":
+            log.warning(
+                f"  {label.capitalize()} catalogue uses old schema v1.0.0 (pre-change tracking)"
+            )
+            log.warning("  Some comparison features may be limited")
+        elif schema_version.startswith("2.0"):
+            log.info(f"  {label.capitalize()} catalogue schema: {schema_version}")
+        elif schema_version.startswith("2.1"):
+            log.info(f"  {label.capitalize()} catalogue schema: {schema_version} (with change tracking)")
+        else:
+            log.warning(f"  {label.capitalize()} catalogue has unknown schema: {schema_version}")
 
     def _load_json(self, path: Path) -> Any:
         """Load JSON file."""
