@@ -200,147 +200,142 @@ def apply_change_tracking(
     prev_textures_map = {t["name"]: t for t in prev_textures_raw}
     prev_fonts_map = {f["name"]: f for f in prev_fonts_raw}
 
-    # Apply changes to CSS variables
-    if "css_variables" in changes_by_type:
-        changes = changes_by_type["css_variables"]
-        added = {c["name"] for c in changes.get("added", [])}
-        modified = {c["name"]: c for c in changes.get("modified", [])}
+    # Apply changes to CSS variables (note: changelog uses SINGULAR "css_variable")
+    changes = changes_by_type.get("css_variable", {})
+    added = {c["name"] for c in changes.get("added", [])}
+    modified = {c["name"]: c for c in changes.get("modified", [])}
 
-        for var in css_vars_raw:
-            prev_var = prev_css_vars_map.get(var["name"])
+    for var in css_vars_raw:
+        prev_var = prev_css_vars_map.get(var["name"])
 
-            if var["name"] in added:
-                # New asset - set first_seen to current version
-                var["change_status"] = "new"
-                var["changed_in_version"] = fm_version
-                var["first_seen"] = fm_version
-                var["last_seen"] = fm_version
-            elif var["name"] in modified:
-                # Modified asset - preserve first_seen, update last_seen and modified_in
-                var["change_status"] = "modified"
-                var["changed_in_version"] = fm_version
-                var["first_seen"] = prev_var["first_seen"] if prev_var else fm_version
-                var["last_seen"] = fm_version
-                var["modified_in"] = fm_version
-            else:
-                # Unchanged asset - preserve first_seen, update last_seen
-                var["change_status"] = "unchanged"
-                var["first_seen"] = prev_var["first_seen"] if prev_var else fm_version
-                var["last_seen"] = fm_version
+        if var["name"] in added:
+            # New asset - set first_seen to current version
+            var["change_status"] = "new"
+            var["changed_in_version"] = fm_version
+            var["first_seen"] = fm_version
+            var["last_seen"] = fm_version
+        elif var["name"] in modified:
+            # Modified asset - preserve first_seen, update last_seen and modified_in
+            var["change_status"] = "modified"
+            var["changed_in_version"] = fm_version
+            var["first_seen"] = prev_var["first_seen"] if prev_var else fm_version
+            var["last_seen"] = fm_version
+            var["modified_in"] = fm_version
+        else:
+            # Unchanged asset - preserve first_seen, update last_seen
+            var["change_status"] = "unchanged"
+            var["first_seen"] = prev_var["first_seen"] if prev_var else fm_version
+            var["last_seen"] = fm_version
 
-    # Apply changes to CSS classes
-    if "css_classes" in changes_by_type:
-        changes = changes_by_type["css_classes"]
-        added = {c["name"] for c in changes.get("added", [])}
-        modified = {c["name"] for c in changes.get("modified", [])}
+    # Apply changes to CSS classes (note: changelog uses SINGULAR "css_class")
+    changes = changes_by_type.get("css_class", {})
+    added = {c["name"] for c in changes.get("added", [])}
+    modified = {c["name"] for c in changes.get("modified", [])}
 
-        for cls in css_classes_raw:
-            prev_cls = prev_css_classes_map.get(cls["name"])
+    for cls in css_classes_raw:
+        prev_cls = prev_css_classes_map.get(cls["name"])
 
-            if cls["name"] in added:
-                cls["change_status"] = "new"
-                cls["changed_in_version"] = fm_version
-                cls["first_seen"] = fm_version
-                cls["last_seen"] = fm_version
-            elif cls["name"] in modified:
-                cls["change_status"] = "modified"
-                cls["changed_in_version"] = fm_version
-                cls["first_seen"] = prev_cls["first_seen"] if prev_cls else fm_version
-                cls["last_seen"] = fm_version
-                cls["modified_in"] = fm_version
-            else:
-                cls["change_status"] = "unchanged"
-                cls["first_seen"] = prev_cls["first_seen"] if prev_cls else fm_version
-                cls["last_seen"] = fm_version
+        if cls["name"] in added:
+            cls["change_status"] = "new"
+            cls["changed_in_version"] = fm_version
+            cls["first_seen"] = fm_version
+            cls["last_seen"] = fm_version
+        elif cls["name"] in modified:
+            cls["change_status"] = "modified"
+            cls["changed_in_version"] = fm_version
+            cls["first_seen"] = prev_cls["first_seen"] if prev_cls else fm_version
+            cls["last_seen"] = fm_version
+            cls["modified_in"] = fm_version
+        else:
+            cls["change_status"] = "unchanged"
+            cls["first_seen"] = prev_cls["first_seen"] if prev_cls else fm_version
+            cls["last_seen"] = fm_version
 
-    # Apply changes to sprites
-    if "sprites" in changes_by_type:
-        changes = changes_by_type["sprites"]
-        added = {c["name"] for c in changes.get("added", [])}
-        modified = {c["name"]: c for c in changes.get("modified", [])}
+    # Apply changes to sprites (note: changelog uses SINGULAR "sprite")
+    changes = changes_by_type.get("sprite", {})
+    added = {c["name"] for c in changes.get("added", [])}
+    modified = {c["name"]: c for c in changes.get("modified", [])}
 
-        for sprite in sprites_raw:
-            prev_sprite = prev_sprites_map.get(sprite["name"])
+    for sprite in sprites_raw:
+        prev_sprite = prev_sprites_map.get(sprite["name"])
 
-            if sprite["name"] in added:
-                sprite["change_status"] = "new"
-                sprite["changed_in_version"] = fm_version
-                sprite["first_seen"] = fm_version
-                sprite["last_seen"] = fm_version
-            elif sprite["name"] in modified:
-                sprite["change_status"] = "modified"
-                sprite["changed_in_version"] = fm_version
-                sprite["first_seen"] = (
-                    prev_sprite["first_seen"] if prev_sprite else fm_version
-                )
-                sprite["last_seen"] = fm_version
-                sprite["modified_in"] = fm_version
-                mod = modified[sprite["name"]]
-                if "old_hash" in mod:
-                    sprite["previous_content_hash"] = mod["old_hash"]
-            else:
-                sprite["change_status"] = "unchanged"
-                sprite["first_seen"] = (
-                    prev_sprite["first_seen"] if prev_sprite else fm_version
-                )
-                sprite["last_seen"] = fm_version
+        if sprite["name"] in added:
+            sprite["change_status"] = "new"
+            sprite["changed_in_version"] = fm_version
+            sprite["first_seen"] = fm_version
+            sprite["last_seen"] = fm_version
+        elif sprite["name"] in modified:
+            sprite["change_status"] = "modified"
+            sprite["changed_in_version"] = fm_version
+            sprite["first_seen"] = (
+                prev_sprite["first_seen"] if prev_sprite else fm_version
+            )
+            sprite["last_seen"] = fm_version
+            sprite["modified_in"] = fm_version
+            mod = modified[sprite["name"]]
+            if "old_hash" in mod:
+                sprite["previous_content_hash"] = mod["old_hash"]
+        else:
+            sprite["change_status"] = "unchanged"
+            sprite["first_seen"] = (
+                prev_sprite["first_seen"] if prev_sprite else fm_version
+            )
+            sprite["last_seen"] = fm_version
 
-    # Apply changes to textures
-    if "textures" in changes_by_type:
-        changes = changes_by_type["textures"]
-        added = {c["name"] for c in changes.get("added", [])}
-        modified = {c["name"]: c for c in changes.get("modified", [])}
+    # Apply changes to textures (note: changelog uses SINGULAR "texture")
+    changes = changes_by_type.get("texture", {})
+    added = {c["name"] for c in changes.get("added", [])}
+    modified = {c["name"]: c for c in changes.get("modified", [])}
 
-        for texture in textures_raw:
-            prev_texture = prev_textures_map.get(texture["name"])
+    for texture in textures_raw:
+        prev_texture = prev_textures_map.get(texture["name"])
 
-            if texture["name"] in added:
-                texture["change_status"] = "new"
-                texture["changed_in_version"] = fm_version
-                texture["first_seen"] = fm_version
-                texture["last_seen"] = fm_version
-            elif texture["name"] in modified:
-                texture["change_status"] = "modified"
-                texture["changed_in_version"] = fm_version
-                texture["first_seen"] = (
-                    prev_texture["first_seen"] if prev_texture else fm_version
-                )
-                texture["last_seen"] = fm_version
-                texture["modified_in"] = fm_version
-                mod = modified[texture["name"]]
-                if "old_hash" in mod:
-                    texture["previous_content_hash"] = mod["old_hash"]
-            else:
-                texture["change_status"] = "unchanged"
-                texture["first_seen"] = (
-                    prev_texture["first_seen"] if prev_texture else fm_version
-                )
-                texture["last_seen"] = fm_version
+        if texture["name"] in added:
+            texture["change_status"] = "new"
+            texture["changed_in_version"] = fm_version
+            texture["first_seen"] = fm_version
+            texture["last_seen"] = fm_version
+        elif texture["name"] in modified:
+            texture["change_status"] = "modified"
+            texture["changed_in_version"] = fm_version
+            texture["first_seen"] = (
+                prev_texture["first_seen"] if prev_texture else fm_version
+            )
+            texture["last_seen"] = fm_version
+            texture["modified_in"] = fm_version
+            mod = modified[texture["name"]]
+            if "old_hash" in mod:
+                texture["previous_content_hash"] = mod["old_hash"]
+        else:
+            texture["change_status"] = "unchanged"
+            texture["first_seen"] = (
+                prev_texture["first_seen"] if prev_texture else fm_version
+            )
+            texture["last_seen"] = fm_version
 
-    # Apply changes to fonts
-    if "fonts" in changes_by_type:
-        changes = changes_by_type["fonts"]
-        added = {c["name"] for c in changes.get("added", [])}
-        modified = {c["name"] for c in changes.get("modified", [])}
+    # Apply changes to fonts (note: changelog uses SINGULAR "font")
+    changes = changes_by_type.get("font", {})
+    added = {c["name"] for c in changes.get("added", [])}
+    modified = {c["name"] for c in changes.get("modified", [])}
 
-        for font in fonts_raw:
-            prev_font = prev_fonts_map.get(font["name"])
+    for font in fonts_raw:
+        prev_font = prev_fonts_map.get(font["name"])
 
-            if font["name"] in added:
-                font["change_status"] = "new"
-                font["changed_in_version"] = fm_version
-                font["first_seen"] = fm_version
-                font["last_seen"] = fm_version
-            elif font["name"] in modified:
-                font["change_status"] = "modified"
-                font["changed_in_version"] = fm_version
-                font["first_seen"] = prev_font["first_seen"] if prev_font else fm_version
-                font["last_seen"] = fm_version
-                font["modified_in"] = fm_version
-            else:
-                font["change_status"] = "unchanged"
-                font["first_seen"] = prev_font["first_seen"] if prev_font else fm_version
-                font["last_seen"] = fm_version
+        if font["name"] in added:
+            font["change_status"] = "new"
+            font["changed_in_version"] = fm_version
+            font["first_seen"] = fm_version
+            font["last_seen"] = fm_version
+        elif font["name"] in modified:
+            font["change_status"] = "modified"
+            font["changed_in_version"] = fm_version
+            font["first_seen"] = prev_font["first_seen"] if prev_font else fm_version
+            font["last_seen"] = fm_version
+            font["modified_in"] = fm_version
+        else:
+            font["change_status"] = "unchanged"
+            font["first_seen"] = prev_font["first_seen"] if prev_font else fm_version
+            font["last_seen"] = fm_version
 
     # Save updated files
     save_json(css_vars_raw, catalogue_dir / "css-variables.json")
