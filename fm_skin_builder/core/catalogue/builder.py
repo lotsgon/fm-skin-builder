@@ -50,6 +50,9 @@ class CatalogueBuilder:
         icon_white_path: Path,
         icon_black_path: Path,
         pretty_json: bool = False,
+        previous_version: Optional[str] = None,
+        skip_changelog: bool = False,
+        r2_config: Optional[Dict[str, str]] = None,
     ):
         """
         Initialize catalogue builder.
@@ -60,10 +63,16 @@ class CatalogueBuilder:
             icon_white_path: Path to white watermark icon
             icon_black_path: Path to black watermark icon
             pretty_json: Pretty-print JSON
+            previous_version: Override previous version for comparison (default: auto-detect)
+            skip_changelog: Skip changelog generation
+            r2_config: R2 configuration dict with keys: endpoint, bucket, access_key, secret_key, base_path
         """
         self.fm_version = fm_version
         self.base_output_dir = output_dir
         self.pretty_json = pretty_json
+        self.previous_version_override = previous_version
+        self.skip_changelog = skip_changelog
+        self.r2_config = r2_config or {}
 
         # Create version-specific output directory (just FM version, no -vN suffix)
         self.output_dir = output_dir / fm_version
@@ -630,6 +639,62 @@ class CatalogueBuilder:
         log.info(f"  Found previous version (fallback): {prev_dir.name}")
         return prev_dir
 
+    def _try_download_previous_from_r2(self) -> None:
+        """
+        Try to download previous versions from R2 if not available locally.
+
+        This downloads the comparison target(s) that will be needed for changelog generation.
+        """
+        from .r2_downloader import R2Downloader
+
+        try:
+            downloader = R2Downloader(
+                endpoint_url=self.r2_config['endpoint'],
+                bucket=self.r2_config['bucket'],
+                access_key=self.r2_config.get('access_key'),
+                secret_key=self.r2_config.get('secret_key'),
+            )
+
+            base_path = self.r2_config.get('base_path', '')
+
+            # Determine which versions we might need
+            current_version, is_current_beta = self._parse_version_with_beta(self.fm_version)
+
+            # List local versions
+            local_versions = [d.name for d in self.base_output_dir.iterdir() if d.is_dir() and d.name != self.fm_version]
+
+            # Check if we need to download previous stable
+            if self.previous_version_override:
+                # User specified explicit version
+                versions_to_check = [self.previous_version_override]
+            else:
+                # Auto-detect what we'll need
+                versions_to_check = []
+
+                prev_stable = self._find_previous_stable()
+                if prev_stable and prev_stable.name not in local_versions:
+                    versions_to_check.append(prev_stable.name)
+
+                if not is_current_beta:
+                    # Building stable - might need beta version too
+                    matching_beta = self._find_matching_beta()
+                    if matching_beta and matching_beta.name not in local_versions:
+                        versions_to_check.append(matching_beta.name)
+
+            # Download needed versions
+            for version in versions_to_check:
+                version_dir = self.base_output_dir / version
+                if not version_dir.exists() or not (version_dir / "metadata.json").exists():
+                    log.info(f"  Attempting to download version {version} from R2...")
+                    if downloader.download_version(version, self.base_output_dir, base_path):
+                        log.info(f"  ✅ Successfully downloaded {version} from R2")
+                    else:
+                        log.warning(f"  ⚠️  Could not download {version} from R2")
+
+        except Exception as e:
+            log.warning(f"  ⚠️  R2 download failed: {e}")
+            log.debug(f"R2 config: {self.r2_config}")
+
     def _determine_comparison_targets(self) -> Dict[str, Any]:
         """
         Determine which versions to compare against for changelog generation.
@@ -649,6 +714,18 @@ class CatalogueBuilder:
             'primary_type': None,
             'secondary_type': None
         }
+
+        # Check for override first
+        if self.previous_version_override:
+            override_path = self.base_output_dir / self.previous_version_override
+            if override_path.exists() and (override_path / "metadata.json").exists():
+                log.info(f"  Using override previous version: {self.previous_version_override}")
+                result['primary'] = override_path
+                result['primary_type'] = 'manual-override'
+                return result
+            else:
+                log.warning(f"  Override version not found: {self.previous_version_override}")
+                log.warning(f"  Falling back to auto-detection")
 
         # Find previous stable version
         prev_stable = self._find_previous_stable()
@@ -679,6 +756,15 @@ class CatalogueBuilder:
             Primary changelog dictionary or None if no previous version exists
         """
         import json
+
+        # Check if changelog generation is disabled
+        if self.skip_changelog:
+            log.info("  Changelog generation skipped (--no-changelog flag)")
+            return None
+
+        # Try to download previous version from R2 if configured
+        if self.r2_config.get('endpoint') and self.r2_config.get('bucket'):
+            self._try_download_previous_from_r2()
 
         targets = self._determine_comparison_targets()
 

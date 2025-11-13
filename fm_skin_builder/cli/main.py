@@ -113,6 +113,41 @@ def main() -> None:
     c.add_argument(
         "--dry-run", action="store_true", help="Preview without writing files"
     )
+    c.add_argument(
+        "--previous-version",
+        type=str,
+        default=None,
+        help="Override previous version for comparison (default: auto-detect from output directory)",
+    )
+    c.add_argument(
+        "--no-changelog",
+        action="store_true",
+        help="Skip changelog generation (no comparison with previous version)",
+    )
+    c.add_argument(
+        "--r2-endpoint",
+        type=str,
+        default=None,
+        help="R2 endpoint URL for downloading previous versions (e.g., 'https://account.r2.cloudflarestorage.com')",
+    )
+    c.add_argument(
+        "--r2-bucket",
+        type=str,
+        default=None,
+        help="R2 bucket name for catalogue storage",
+    )
+    c.add_argument(
+        "--r2-access-key",
+        type=str,
+        default=None,
+        help="R2 access key ID (or use R2_ACCESS_KEY env var)",
+    )
+    c.add_argument(
+        "--r2-secret-key",
+        type=str,
+        default=None,
+        help="R2 secret access key (or use R2_SECRET_KEY env var)",
+    )
 
     # Catalogue diff command
     d = sub.add_parser(
