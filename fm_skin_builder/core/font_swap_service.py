@@ -29,8 +29,7 @@ FontFormat = Literal["TTF", "OTF", "UNKNOWN"]
 # Try to import fonttools for conversion
 try:
     from fontTools.ttLib import TTFont
-    from fontTools.pens.t2CharStringPen import T2CharStringPen
-    from fontTools.misc.cliTools import makeOutputFileName
+
     FONTTOOLS_AVAILABLE = True
 except ImportError:
     FONTTOOLS_AVAILABLE = False
@@ -43,8 +42,12 @@ class FontSwapOptions:
 
     includes: Sequence[str]
     dry_run: bool = False
-    auto_convert: bool = True   # Auto-convert fonts to match original format (RECOMMENDED)
-    strict_format: bool = False  # Block mismatched formats even with conversion disabled
+    auto_convert: bool = (
+        True  # Auto-convert fonts to match original format (RECOMMENDED)
+    )
+    strict_format: bool = (
+        False  # Block mismatched formats even with conversion disabled
+    )
 
 
 @dataclass
@@ -74,14 +77,16 @@ class FontSwapService:
     # Font format magic bytes
     TTF_MAGIC = [
         b"\x00\x01\x00\x00",  # TrueType 1.0
-        b"true",              # TrueType (Mac)
+        b"true",  # TrueType (Mac)
     ]
     OTF_MAGIC = b"OTTO"  # OpenType with CFF
 
     def __init__(self, options: FontSwapOptions):
         self.options = options
         self._font_mapping: Optional[Dict[str, Path]] = None
-        self._original_font_formats: Dict[str, FontFormat] = {}  # Cache original formats
+        self._original_font_formats: Dict[
+            str, FontFormat
+        ] = {}  # Cache original formats
 
     def apply(
         self,
@@ -135,14 +140,10 @@ class FontSwapService:
                 replaced_count += 1
             else:
                 try:
-                    success = self._replace_font_in_bundle(
-                        bundle, font_name, font_file
-                    )
+                    success = self._replace_font_in_bundle(bundle, font_name, font_file)
                     if success:
                         replaced_count += 1
-                        logger.info(
-                            f"✓ Replaced font: {font_name} ({font_file.name})"
-                        )
+                        logger.info(f"✓ Replaced font: {font_name} ({font_file.name})")
                     else:
                         skipped_fonts[font_name] = "Font not found in bundle"
                         logger.debug(f"Font '{font_name}' not found in bundle")
@@ -162,8 +163,7 @@ class FontSwapService:
         """Check if font swapping should be performed based on includes."""
         includes_lower = {inc.lower() for inc in self.options.includes}
         return any(
-            token in includes_lower
-            for token in {"fonts", "assets/fonts", "all"}
+            token in includes_lower for token in {"fonts", "assets/fonts", "all"}
         )
 
     def _discover_fonts(self, skin_dir: Path) -> Dict[str, Path]:
@@ -276,7 +276,7 @@ class FontSwapService:
         # Detect actual format from magic bytes
         replacement_format = self._detect_font_format_from_file(font_file)
         if replacement_format == "UNKNOWN":
-            return f"Unable to detect font format (invalid magic bytes)"
+            return "Unable to detect font format (invalid magic bytes)"
 
         # Check format compatibility with original
         if original_format and original_format != "UNKNOWN":
@@ -383,7 +383,9 @@ class FontSwapService:
             if target_format == "OTF":
                 # Check if font has glyf table (TrueType outlines)
                 if "glyf" in font:
-                    logger.info(f"Converting {font_file.name} from TTF to OTF (glyf → CFF)")
+                    logger.info(
+                        f"Converting {font_file.name} from TTF to OTF (glyf → CFF)"
+                    )
                     # This is complex - fonttools can do it via command line
                     # For now, just save as-is and let Unity handle it
                     font.flavor = None  # Remove any compression
@@ -394,7 +396,9 @@ class FontSwapService:
             else:  # OTF → TTF
                 # For OTF → TTF, fonttools can convert CFF to glyf
                 if "CFF " in font or "CFF2" in font:
-                    logger.info(f"Converting {font_file.name} from OTF to TTF (CFF → glyf)")
+                    logger.info(
+                        f"Converting {font_file.name} from OTF to TTF (CFF → glyf)"
+                    )
                     # Save with TTF flavor
                     font.flavor = None
                     font.save(str(temp_output))
@@ -463,7 +467,9 @@ class FontSwapService:
                     logger.info(
                         f"Auto-converting '{font_file.name}' from {replacement_format} to {original_format}"
                     )
-                    converted_file = self._convert_font_format(font_file, original_format)
+                    converted_file = self._convert_font_format(
+                        font_file, original_format
+                    )
                     if converted_file:
                         font_file_to_use = converted_file
                         replacement_format = original_format

@@ -1,9 +1,7 @@
 """Tests for CSS augmentation features (Phase 3)."""
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock
 
-import pytest
 
 from fm_skin_builder.core.css_patcher import CssPatcher
 from fm_skin_builder.core.css_sources import CollectedCss

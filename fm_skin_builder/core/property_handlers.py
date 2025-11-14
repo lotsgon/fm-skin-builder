@@ -9,22 +9,18 @@ keywords, resources, etc.).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
-from types import SimpleNamespace
+from typing import Any, Dict, List, Optional
 
 from .logger import get_logger
 from .value_parsers import (
-    parse_css_value,
     parse_float_value,
     parse_keyword_value,
     parse_resource_value,
-    CssValueType,
-    ParsedValue,
     FloatValue,
     KeywordValue,
     ResourceValue,
 )
-from .css_utils import hex_to_rgba, normalize_css_color
+from .css_utils import normalize_css_color
 
 log = get_logger(__name__)
 
@@ -41,8 +37,11 @@ class PropertyType:
     """
     Defines the expected type(s) for a USS property.
     """
+
     name: str
-    unity_types: List[int]  # Unity StyleSheet value types (1=keyword, 2=float, 4=color, 7=resource)
+    unity_types: List[
+        int
+    ]  # Unity StyleSheet value types (1=keyword, 2=float, 4=color, 7=resource)
     default_type: int  # Default type to use when creating new values
 
 
@@ -52,17 +51,23 @@ PROPERTY_TYPE_MAP: Dict[str, PropertyType] = {
     # Font properties
     "font-size": PropertyType("font-size", [2], 2),  # Float with unit
     "-unity-font": PropertyType("-unity-font", [7], 7),  # Resource reference
-    "-unity-font-definition": PropertyType("-unity-font-definition", [7], 7),  # Resource reference
+    "-unity-font-definition": PropertyType(
+        "-unity-font-definition", [7], 7
+    ),  # Resource reference
     "-unity-font-style": PropertyType("-unity-font-style", [1, 8], 1),  # Keyword/enum
-    "font-weight": PropertyType("font-weight", [2, 1, 8], 2),  # Float or keyword (normal, bold)
-
+    "font-weight": PropertyType(
+        "font-weight", [2, 1, 8], 2
+    ),  # Float or keyword (normal, bold)
     # Text properties
     "color": PropertyType("color", [4], 4),  # Color
     "-unity-text-align": PropertyType("-unity-text-align", [1, 8], 1),  # Keyword
-    "-unity-text-outline-width": PropertyType("-unity-text-outline-width", [2], 2),  # Float
-    "-unity-text-outline-color": PropertyType("-unity-text-outline-color", [4], 4),  # Color
+    "-unity-text-outline-width": PropertyType(
+        "-unity-text-outline-width", [2], 2
+    ),  # Float
+    "-unity-text-outline-color": PropertyType(
+        "-unity-text-outline-color", [4], 4
+    ),  # Color
     "white-space": PropertyType("white-space", [1, 8], 1),  # Keyword
-
     # Dimension properties
     "width": PropertyType("width", [2, 1, 8], 2),  # Float or keyword (auto)
     "height": PropertyType("height", [2, 1, 8], 2),  # Float or keyword (auto)
@@ -70,96 +75,96 @@ PROPERTY_TYPE_MAP: Dict[str, PropertyType] = {
     "min-height": PropertyType("min-height", [2, 1, 8], 2),
     "max-width": PropertyType("max-width", [2, 1, 8], 2),
     "max-height": PropertyType("max-height", [2, 1, 8], 2),
-
     # Padding properties
     "padding": PropertyType("padding", [2], 2),  # Shorthand
     "padding-top": PropertyType("padding-top", [2], 2),
     "padding-right": PropertyType("padding-right", [2], 2),
     "padding-bottom": PropertyType("padding-bottom", [2], 2),
     "padding-left": PropertyType("padding-left", [2], 2),
-
     # Margin properties
     "margin": PropertyType("margin", [2, 1, 8], 2),  # Shorthand, can be keyword (auto)
     "margin-top": PropertyType("margin-top", [2, 1, 8], 2),
     "margin-right": PropertyType("margin-right", [2, 1, 8], 2),
     "margin-bottom": PropertyType("margin-bottom", [2, 1, 8], 2),
     "margin-left": PropertyType("margin-left", [2, 1, 8], 2),
-
     # Border properties
     "border-width": PropertyType("border-width", [2], 2),  # Shorthand
     "border-top-width": PropertyType("border-top-width", [2], 2),
     "border-right-width": PropertyType("border-right-width", [2], 2),
     "border-bottom-width": PropertyType("border-bottom-width", [2], 2),
     "border-left-width": PropertyType("border-left-width", [2], 2),
-
     "border-radius": PropertyType("border-radius", [2], 2),  # Shorthand
     "border-top-left-radius": PropertyType("border-top-left-radius", [2], 2),
     "border-top-right-radius": PropertyType("border-top-right-radius", [2], 2),
     "border-bottom-left-radius": PropertyType("border-bottom-left-radius", [2], 2),
     "border-bottom-right-radius": PropertyType("border-bottom-right-radius", [2], 2),
-
     "border-color": PropertyType("border-color", [4], 4),  # Shorthand, color
     "border-top-color": PropertyType("border-top-color", [4], 4),
     "border-right-color": PropertyType("border-right-color", [4], 4),
     "border-bottom-color": PropertyType("border-bottom-color", [4], 4),
     "border-left-color": PropertyType("border-left-color", [4], 4),
-
     # Background properties
     "background-color": PropertyType("background-color", [4], 4),  # Color
     "background-image": PropertyType("background-image", [7], 7),  # Resource
-    "-unity-background-image-tint-color": PropertyType("-unity-background-image-tint-color", [4], 4),
-    "-unity-background-scale-mode": PropertyType("-unity-background-scale-mode", [1, 8], 1),  # Keyword
-
+    "-unity-background-image-tint-color": PropertyType(
+        "-unity-background-image-tint-color", [4], 4
+    ),
+    "-unity-background-scale-mode": PropertyType(
+        "-unity-background-scale-mode", [1, 8], 1
+    ),  # Keyword
     # Visual effects
     "opacity": PropertyType("opacity", [2], 2),  # Float (0-1)
     "visibility": PropertyType("visibility", [1, 8], 1),  # Keyword (visible, hidden)
     "display": PropertyType("display", [1, 8], 1),  # Keyword (flex, none)
-    "overflow": PropertyType("overflow", [1, 8], 1),  # Keyword (visible, hidden, scroll)
-
+    "overflow": PropertyType(
+        "overflow", [1, 8], 1
+    ),  # Keyword (visible, hidden, scroll)
     # Position and layout
     "position": PropertyType("position", [1, 8], 1),  # Keyword (relative, absolute)
     "left": PropertyType("left", [2, 1, 8], 2),  # Float or keyword (auto)
     "top": PropertyType("top", [2, 1, 8], 2),
     "right": PropertyType("right", [2, 1, 8], 2),
     "bottom": PropertyType("bottom", [2, 1, 8], 2),
-
     "flex-direction": PropertyType("flex-direction", [1, 8], 1),  # Keyword
     "flex-wrap": PropertyType("flex-wrap", [1, 8], 1),  # Keyword
     "flex-grow": PropertyType("flex-grow", [2], 2),  # Float
     "flex-shrink": PropertyType("flex-shrink", [2], 2),  # Float
     "flex-basis": PropertyType("flex-basis", [2, 1, 8], 2),  # Float or keyword (auto)
-
     "align-items": PropertyType("align-items", [1, 8], 1),  # Keyword
     "align-self": PropertyType("align-self", [1, 8], 1),  # Keyword
     "justify-content": PropertyType("justify-content", [1, 8], 1),  # Keyword
-
     # Transform properties
     "rotate": PropertyType("rotate", [2], 2),  # Angle (float in degrees)
     "scale": PropertyType("scale", [2], 2),  # Scale factor (float)
     "translate": PropertyType("translate", [2], 2),  # X and Y translation
     "transform-origin": PropertyType("transform-origin", [2], 2),  # X and Y origin
-
     # Transition properties
-    "transition-property": PropertyType("transition-property", [8], 8),  # Property name(s)
-    "transition-duration": PropertyType("transition-duration", [2], 2),  # Time in seconds
-    "transition-timing-function": PropertyType("transition-timing-function", [1, 8], 1),  # Keyword/function
+    "transition-property": PropertyType(
+        "transition-property", [8], 8
+    ),  # Property name(s)
+    "transition-duration": PropertyType(
+        "transition-duration", [2], 2
+    ),  # Time in seconds
+    "transition-timing-function": PropertyType(
+        "transition-timing-function", [1, 8], 1
+    ),  # Keyword/function
     "transition-delay": PropertyType("transition-delay", [2], 2),  # Time in seconds
-
     # Cursor
     "cursor": PropertyType("cursor", [1, 8, 7], 1),  # Keyword or resource
-
     # Text overflow
-    "text-overflow": PropertyType("text-overflow", [1, 8], 1),  # Keyword (clip, ellipsis)
-
+    "text-overflow": PropertyType(
+        "text-overflow", [1, 8], 1
+    ),  # Keyword (clip, ellipsis)
     # Unity-specific slice properties for 9-slice scaling
     "-unity-slice-left": PropertyType("-unity-slice-left", [2], 2),
     "-unity-slice-top": PropertyType("-unity-slice-top", [2], 2),
     "-unity-slice-right": PropertyType("-unity-slice-right", [2], 2),
     "-unity-slice-bottom": PropertyType("-unity-slice-bottom", [2], 2),
-
     # Unity-specific paragraph properties
     "-unity-paragraph-spacing": PropertyType("-unity-paragraph-spacing", [2], 2),
-    "-unity-text-overflow-position": PropertyType("-unity-text-overflow-position", [1, 8], 1),
+    "-unity-text-overflow-position": PropertyType(
+        "-unity-text-overflow-position", [1, 8], 1
+    ),
 }
 
 
@@ -204,7 +209,9 @@ class FloatPropertyHandler(PropertyHandler):
         if isinstance(value, str):
             parsed = parse_float_value(value)
             if parsed is None:
-                log.warning(f"Could not parse float value '{value}' for property '{property_name}'")
+                log.warning(
+                    f"Could not parse float value '{value}' for property '{property_name}'"
+                )
                 return False
             float_value = parsed.unity_value
         elif isinstance(value, FloatValue):
@@ -212,7 +219,9 @@ class FloatPropertyHandler(PropertyHandler):
         elif isinstance(value, (int, float)):
             float_value = float(value)
         else:
-            log.warning(f"Unsupported value type {type(value)} for float property '{property_name}'")
+            log.warning(
+                f"Unsupported value type {type(value)} for float property '{property_name}'"
+            )
             return False
 
         # Get or create floats array
@@ -226,13 +235,17 @@ class FloatPropertyHandler(PropertyHandler):
             if abs(old_value - float_value) < 1e-6:  # No change
                 return False
             floats[value_index] = float_value
-            log.info(f"  [PATCHED - float] {property_name} (index {value_index}): {old_value} → {float_value}")
+            log.info(
+                f"  [PATCHED - float] {property_name} (index {value_index}): {old_value} → {float_value}"
+            )
             return True
         else:
             # Append new float
             floats.append(float_value)
             new_index = len(floats) - 1
-            log.info(f"  [PATCHED - float] {property_name} (new index {new_index}): → {float_value}")
+            log.info(
+                f"  [PATCHED - float] {property_name} (new index {new_index}): → {float_value}"
+            )
             return True
 
 
@@ -241,7 +254,9 @@ class KeywordPropertyHandler(PropertyHandler):
 
     def can_handle(self, property_name: str) -> bool:
         prop_type = PROPERTY_TYPE_MAP.get(property_name)
-        return prop_type is not None and (1 in prop_type.unity_types or 8 in prop_type.unity_types)
+        return prop_type is not None and (
+            1 in prop_type.unity_types or 8 in prop_type.unity_types
+        )
 
     def apply(
         self,
@@ -255,13 +270,17 @@ class KeywordPropertyHandler(PropertyHandler):
         if isinstance(value, str):
             parsed = parse_keyword_value(value)
             if parsed is None:
-                log.warning(f"Could not parse keyword value '{value}' for property '{property_name}'")
+                log.warning(
+                    f"Could not parse keyword value '{value}' for property '{property_name}'"
+                )
                 return False
             keyword = parsed.keyword
         elif isinstance(value, KeywordValue):
             keyword = value.keyword
         else:
-            log.warning(f"Unsupported value type {type(value)} for keyword property '{property_name}'")
+            log.warning(
+                f"Unsupported value type {type(value)} for keyword property '{property_name}'"
+            )
             return False
 
         # Keywords are stored in the strings array
@@ -275,13 +294,17 @@ class KeywordPropertyHandler(PropertyHandler):
             if old_value == keyword:  # No change
                 return False
             strings[value_index] = keyword
-            log.info(f"  [PATCHED - keyword] {property_name} (index {value_index}): {old_value} → {keyword}")
+            log.info(
+                f"  [PATCHED - keyword] {property_name} (index {value_index}): {old_value} → {keyword}"
+            )
             return True
         else:
             # Append new keyword
             strings.append(keyword)
             new_index = len(strings) - 1
-            log.info(f"  [PATCHED - keyword] {property_name} (new index {new_index}): → {keyword}")
+            log.info(
+                f"  [PATCHED - keyword] {property_name} (new index {new_index}): → {keyword}"
+            )
             return True
 
 
@@ -304,13 +327,17 @@ class ResourcePropertyHandler(PropertyHandler):
         if isinstance(value, str):
             parsed = parse_resource_value(value)
             if parsed is None:
-                log.warning(f"Could not parse resource value '{value}' for property '{property_name}'")
+                log.warning(
+                    f"Could not parse resource value '{value}' for property '{property_name}'"
+                )
                 return False
             resource_path = parsed.unity_path
         elif isinstance(value, ResourceValue):
             resource_path = value.unity_path
         else:
-            log.warning(f"Unsupported value type {type(value)} for resource property '{property_name}'")
+            log.warning(
+                f"Unsupported value type {type(value)} for resource property '{property_name}'"
+            )
             return False
 
         # Resources are stored in the strings array
@@ -324,13 +351,17 @@ class ResourcePropertyHandler(PropertyHandler):
             if old_value == resource_path:  # No change
                 return False
             strings[value_index] = resource_path
-            log.info(f"  [PATCHED - resource] {property_name} (index {value_index}): {old_value} → {resource_path}")
+            log.info(
+                f"  [PATCHED - resource] {property_name} (index {value_index}): {old_value} → {resource_path}"
+            )
             return True
         else:
             # Append new resource
             strings.append(resource_path)
             new_index = len(strings) - 1
-            log.info(f"  [PATCHED - resource] {property_name} (new index {new_index}): → {resource_path}")
+            log.info(
+                f"  [PATCHED - resource] {property_name} (new index {new_index}): → {resource_path}"
+            )
             return True
 
 

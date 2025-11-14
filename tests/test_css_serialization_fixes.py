@@ -10,7 +10,6 @@ These tests verify:
 """
 
 from types import SimpleNamespace
-from typing import List, Any
 
 
 class TestValueTypeInterpretation:
@@ -222,8 +221,8 @@ class TestColorPropertyDetection:
         """Test dimension values are filtered for color properties."""
         from fm_skin_builder.core.css_utils import _is_invalid_value
 
-        assert _is_invalid_value("100px", "color", 3, {"color"}) == True
-        assert _is_invalid_value("#FF0000", "color", 4, {"color"}) == False
+        assert _is_invalid_value("100px", "color", 3, {"color"})
+        assert not _is_invalid_value("#FF0000", "color", 4, {"color"})
 
 
 if __name__ == "__main__":

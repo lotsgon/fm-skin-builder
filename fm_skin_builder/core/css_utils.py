@@ -249,7 +249,9 @@ def build_selector_from_parts(parts) -> str:
     return selector or "*"
 
 
-def serialize_stylesheet_to_uss(data, debug_comments: bool = False, sort_properties: bool = True) -> str:
+def serialize_stylesheet_to_uss(
+    data, debug_comments: bool = False, sort_properties: bool = True
+) -> str:
     """
     Serialize a StyleSheet MonoBehaviour to a .uss-like text.
 
@@ -261,9 +263,8 @@ def serialize_stylesheet_to_uss(data, debug_comments: bool = False, sort_propert
     Returns:
         USS-formatted string
     """
-    import re as _re
     from collections import defaultdict
-    from typing import Dict, List as TList, Tuple as TTuple
+    from typing import List as TList, Tuple as TTuple
 
     def color_to_hex(c):
         r = int(round(c.r * 255))
@@ -310,10 +311,10 @@ def serialize_stylesheet_to_uss(data, debug_comments: bool = False, sort_propert
 
     # Multi-value shorthand properties (space-separated)
     multi_value_shorthands = {
-        "margin": 4,        # top right bottom left
-        "padding": 4,       # top right bottom left
+        "margin": 4,  # top right bottom left
+        "padding": 4,  # top right bottom left
         "border-width": 4,  # top right bottom left
-        "border-radius": 4, # top-left top-right bottom-right bottom-left
+        "border-radius": 4,  # top-left top-right bottom-right bottom-left
         "border-color": 4,  # top right bottom left
     }
 
@@ -361,7 +362,9 @@ def serialize_stylesheet_to_uss(data, debug_comments: bool = False, sort_propert
                 )
 
                 if formatted_value:
-                    property_values[prop_name].append((value_type, value_index, formatted_value))
+                    property_values[prop_name].append(
+                        (value_type, value_index, formatted_value)
+                    )
 
         # Output each property once with the correct value(s)
         # Sort properties in a logical order if requested
@@ -402,13 +405,11 @@ def _sort_properties(prop_names: List[str]) -> List[str]:
         "right": 2,
         "bottom": 3,
         "left": 4,
-
         # Display
         "display": 10,
         "visibility": 11,
         "opacity": 12,
         "overflow": 13,
-
         # Flexbox
         "flex-direction": 20,
         "flex-wrap": 21,
@@ -418,7 +419,6 @@ def _sort_properties(prop_names: List[str]) -> List[str]:
         "flex-grow": 25,
         "flex-shrink": 26,
         "flex-basis": 27,
-
         # Dimensions
         "width": 30,
         "height": 31,
@@ -426,21 +426,18 @@ def _sort_properties(prop_names: List[str]) -> List[str]:
         "min-height": 33,
         "max-width": 34,
         "max-height": 35,
-
         # Margin
         "margin": 40,
         "margin-top": 41,
         "margin-right": 42,
         "margin-bottom": 43,
         "margin-left": 44,
-
         # Padding
         "padding": 50,
         "padding-top": 51,
         "padding-right": 52,
         "padding-bottom": 53,
         "padding-left": 54,
-
         # Border
         "border-width": 60,
         "border-top-width": 61,
@@ -457,13 +454,11 @@ def _sort_properties(prop_names: List[str]) -> List[str]:
         "border-top-right-radius": 72,
         "border-bottom-left-radius": 73,
         "border-bottom-right-radius": 74,
-
         # Background
         "background-color": 80,
         "background-image": 81,
         "-unity-background-image-tint-color": 82,
         "-unity-background-scale-mode": 83,
-
         # Text/Font
         "color": 90,
         "font-size": 91,
@@ -476,22 +471,18 @@ def _sort_properties(prop_names: List[str]) -> List[str]:
         "-unity-text-outline-color": 98,
         "white-space": 99,
         "text-overflow": 100,
-
         # Transform
         "rotate": 110,
         "scale": 111,
         "translate": 112,
         "transform-origin": 113,
-
         # Transition
         "transition-property": 120,
         "transition-duration": 121,
         "transition-timing-function": 122,
         "transition-delay": 123,
-
         # Cursor
         "cursor": 130,
-
         # Unity-specific (lower priority)
         "-unity-slice-left": 200,
         "-unity-slice-top": 201,
@@ -561,17 +552,23 @@ def _format_uss_value(
         if 0 <= value_index < len(strings):
             path = strings[value_index]
             # For very long paths (project:// URIs), quote them for readability
-            if path and (path.startswith("project://") or path.startswith("resource://")):
+            if path and (
+                path.startswith("project://") or path.startswith("resource://")
+            ):
                 return f'url("{path}")'
             return f"url('{path}')"
         return None
 
-    elif value_type == 7:  # Enum/Resource (Unity stores resource paths as Type 7 sometimes)
+    elif (
+        value_type == 7
+    ):  # Enum/Resource (Unity stores resource paths as Type 7 sometimes)
         # Check if this is actually a string index pointing to a resource URL
         if 0 <= value_index < len(strings):
             value = strings[value_index]
             # If it's a project:// or resource:// URL, quote it
-            if value and (value.startswith("project://") or value.startswith("resource://")):
+            if value and (
+                value.startswith("project://") or value.startswith("resource://")
+            ):
                 return f'"{value}"'
         # Otherwise it's an integer enum value
         return str(value_index)
@@ -583,7 +580,9 @@ def _format_uss_value(
             if _re.match(r"^-[\w-]+$", value):
                 value = _re.sub(r"^-+", "--", value)
             # Quote resource URLs for better formatting
-            elif value and (value.startswith("project://") or value.startswith("resource://")):
+            elif value and (
+                value.startswith("project://") or value.startswith("resource://")
+            ):
                 value = f'"{value}"'
             return value
         return None
@@ -631,7 +630,8 @@ def _pick_best_value(
         expected_count = multi_value_shorthands[prop_name]
         # Filter out invalid values
         valid_values = [
-            (vtype, idx, val) for vtype, idx, val in values
+            (vtype, idx, val)
+            for vtype, idx, val in values
             if not _is_invalid_value(val, prop_name, vtype, color_properties)
         ]
 
@@ -647,7 +647,8 @@ def _pick_best_value(
 
     # Filter out invalid values first
     valid_values = [
-        (vtype, idx, val) for vtype, idx, val in values
+        (vtype, idx, val)
+        for vtype, idx, val in values
         if not _is_invalid_value(val, prop_name, vtype, color_properties)
     ]
 
@@ -673,7 +674,9 @@ def _pick_best_value(
     return (val, f"type={vtype}")
 
 
-def _is_invalid_value(value: str, prop_name: str, value_type: int, color_properties: set) -> bool:
+def _is_invalid_value(
+    value: str, prop_name: str, value_type: int, color_properties: set
+) -> bool:
     """
     Check if a value is invalid for the given property.
 

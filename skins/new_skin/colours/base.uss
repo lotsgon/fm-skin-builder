@@ -1,0 +1,268 @@
+:root {
+  --colours-linear-scale-20: #5cd65e;
+  /* rule=0, type=4, index=23, src=colors */
+  --colours-linear-scale-19: #72cf4f;
+  /* rule=0, type=4, index=24, src=colors */
+  --colours-linear-scale-18: #85c940;
+  /* rule=0, type=4, index=25, src=colors */
+  --colours-linear-scale-17: #94c232;
+  /* rule=0, type=4, index=26, src=colors */
+  --colours-linear-scale-16: #a2bc24;
+  /* rule=0, type=4, index=27, src=colors */
+  --colours-linear-scale-15: #adb415;
+  /* rule=0, type=4, index=28, src=colors */
+  --colours-linear-scale-14: #b7ad04;
+  /* rule=0, type=4, index=29, src=colors */
+  --colours-linear-scale-13: #c0a600;
+  /* rule=0, type=4, index=30, src=colors */
+  --colours-linear-scale-12: #c79f00;
+  /* rule=0, type=4, index=31, src=colors */
+  --colours-linear-scale-11: #cd9700;
+  /* rule=0, type=4, index=32, src=colors */
+  --colours-linear-scale-10: #d39000;
+  /* rule=0, type=4, index=33, src=colors */
+  --colours-linear-scale-9: #d88804;
+  /* rule=0, type=4, index=34, src=colors */
+  --colours-linear-scale-8: #dc8016;
+  /* rule=0, type=4, index=35, src=colors */
+  --colours-linear-scale-7: #dd7a22;
+  /* rule=0, type=4, index=36, src=colors */
+  --colours-linear-scale-6: #de742d;
+  /* rule=0, type=4, index=37, src=colors */
+  --colours-linear-scale-5: #de6e37;
+  /* rule=0, type=4, index=38, src=colors */
+  --colours-linear-scale-4: #dd6842;
+  /* rule=0, type=4, index=39, src=colors */
+  --colours-linear-scale-3: #dc634c;
+  /* rule=0, type=4, index=40, src=colors */
+  --colours-linear-scale-2: #d95f57;
+  /* rule=0, type=4, index=41, src=colors */
+  --colours-linear-scale-1: #d65c64;
+  /* rule=0, type=4, index=42, src=colors */
+
+
+
+  /* BG behind Cards */
+  --midnight: rgba(19, 23, 32, 1);
+  /* rule=0, type=4, index=158, src=colors */
+
+
+  --light: rgba(230, 230, 250, 1);
+  /* rule=0, type=4, index=159, src=colors */
+
+  /* BG behind popups */
+  --midnight-alpha-80: rgba(0, 0, 0, 0.5);
+  /* rule=0, type=4, index=164, src=colors */
+
+  /* Bookmark Button BG */
+  --horizon-alpha-8: rgba(37, 42, 55, 1);
+  /* rule=0, type=4, index=165, src=colors */
+
+
+  /* Internal and external border of search/FMPedia/World/Settings widget */
+  --horizon-alpha-35: rgba(234, 66, 96, 0.75);
+  /* rule=0, type=4, index=310, src=colors */
+  --horizon-alpha-16: rgba(234, 66, 96, 0.56);
+  /* rule=0, type=4, index=311, src=colors */
+
+
+  /* Continue Button */
+  --continue-button-default-background-secondary: rgba(234, 66, 96, 0.5);
+  /* rule=0, type=4, index=196, src=colors */
+  --continue-button-default-background: rgba(147, 31, 53, 1);
+  /* rule=0, type=4, index=197, src=colors */
+  --continue-button-default-border: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=198, src=colors */
+  --continue-button-default-background-hover: rgba(255, 255, 255, 0.5);
+  /* rule=0, type=4, index=199, src=colors */
+
+  --global-text-men-secondary: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=322, src=colors */
+
+  /* Nav selected/Tile title text */
+  --colours-brand-highlight-pink: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=161, src=colors */
+
+  /* Nav bar BG, Inbox BG, Full-screen card BG */
+  --colours-brand-foundation-midnight: rgba(18, 22, 33, 1);
+  /* rule=0, type=4, index=137, src=colors */
+
+
+  --colours-brand-foundation-midnight-60: rgba(18, 22, 33, 0.6);
+  /* rule=0, type=4, index=138, src=colors */
+  --colours-brand-foundation-midnight-70: rgba(18, 22, 33, 0.7);
+  /* rule=0, type=4, index=139, src=colors */
+
+  /* Player Popup BG */
+  --colours-brand-foundation-midnight-100: rgba(14, 18, 26, 0.98);
+  /* rule=0, type=4, index=140, src=colors */
+
+  --colours-brand-foundation-twilight: rgba(147, 31, 53, 1);
+  /* rule=0, type=4, index=141, src=colors */
+  --colours-brand-foundation-horizon: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=142, src=colors */
+  --colours-brand-foundation-cloud: rgba(199, 211, 236, 1);
+  /* rule=0, type=4, index=143, src=colors */
+  --colours-brand-foundation-air: rgba(230, 230, 250, 1);
+  /* rule=0, type=4, index=144, src=colors */
+  --colours-brand-foundation-white: rgba(255, 255, 255, 1);
+  /* rule=0, type=4, index=145, src=colors */
+
+  --colours-brand-tints-midnight-85: rgba(0, 68, 255, 0.85);
+  /* rule=0, type=4, index=146, src=colors */
+
+  --colours-brand-tints-midnight-5: rgba(18, 22, 33, 0.05);
+  /* rule=0, type=4, index=147, src=colors */
+  --colours-brand-tints-horizon-120: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=148, src=colors */
+  --colours-brand-foundation-twinight: rgba(18, 22, 33, 1);
+  /* rule=0, type=4, index=149, src=colors */
+
+  /* Popup Box Background */
+  --colours-brand-foundation-twinight-120: rgba(14, 18, 26, 0.98);
+  /* rule=0, type=4, index=150, src=colors */
+
+  --colours-brand-tints-twilight-120: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=151, src=colors */
+  --colours-brand-tints-highlight-red-80: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=152, src=colors */
+
+  --colours-brand-fm-grey: rgba(240, 240, 240, 1);
+  /* rule=0, type=4, index=273, src=colors */
+  --colours-brand-fm-purple-dark: rgba(25, 10, 40, 1);
+  /* rule=0, type=4, index=274, src=colors */
+  --colours-brand-fm-purple: rgba(50, 20, 80, 1);
+  /* rule=0, type=4, index=275, src=colors */
+  --colours-brand-fm-purple-light: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=276, src=colors */
+  --colours-brand-fm-ultra-violet: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=277, src=colors */
+  --colours-brand-tertiary: rgba(28, 32, 47, 1);
+  /* rule=0, type=4, index=279, src=colors */
+
+  --colours-brand-fm25-midnight: rgba(10, 15, 30, 1);
+  /* rule=0, type=4, index=289, src=colors */
+  --colours-brand-fm25-twiight: rgba(147, 31, 53, 1);
+  /* rule=0, type=4, index=290, src=colors */
+  --colours-brand-fm25-lilac: rgba(147, 31, 53, 1);
+  /* rule=0, type=4, index=291, src=colors */
+  --colours-brand-light: rgba(242, 235, 235, 1);
+  /* rule=0, type=4, index=292, src=colors */
+  --colours-brand-fm25-midnight-60: rgba(35, 39, 53, 1);
+  /* rule=0, type=4, index=293, src=colors */
+  --colours-brand-fm25twlight-light: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=294, src=colors */
+
+
+  --colours-alpha-dark-alpha-56: rgba(10, 15, 30, 0.56);
+  /* rule=0, type=4, index=5, src=colors */
+  --colours-alpha-light-alpha-85: rgba(239, 246, 255, 0.85);
+  /* rule=0, type=4, index=6, src=colors */
+
+  --colours-alpha-dark-card-alpha-95: rgba(18, 22, 33, 0.95);
+  /* rule=0, type=4, index=7, src=colors */
+  --colours-alpha-dark-card-alpha-85: rgba(18, 22, 33, 0.85);
+  /* rule=0, type=4, index=8, src=colors */
+  --colours-alpha-dark-card-alpha-70: rgba(18, 22, 33, 0.7);
+  /* rule=0, type=4, index=9, src=colors */
+  --colours-alpha-dark-card-alpha-57: rgba(18, 22, 33, 0.57);
+  /* rule=0, type=4, index=10, src=colors */
+
+
+  --colours-alpha-dark-alpha-48: rgba(18, 22, 33, 0.48);
+  /* rule=0, type=4, index=11, src=colors */
+  --colours-alpha-light-alpha-65: rgba(242, 242, 242, 0.15);
+  /* rule=0, type=4, index=12, src=colors */
+  --colours-alpha-light-alpha-75: rgba(246, 246, 245, 0.75);
+  /* rule=0, type=4, index=13, src=colors */
+  --colours-alpha-dark-alpha-40: rgba(239, 246, 255, 0.1);
+  /* rule=0, type=4, index=14, src=colors */
+  --colours-alpha-dark-alpha-90: rgba(239, 246, 255, 0.4);
+  /* rule=0, type=4, index=15, src=colors */
+  --colours-alpha-light-alpha-35: rgba(239, 246, 255, 0.1);
+  /* rule=0, type=4, index=16, src=colors */
+  --colours-alpha-light-alpha-20: rgba(239, 246, 255, 0.05);
+  /* rule=0, type=4, index=17, src=colors */
+  --colours-alpha-light-alpha-16: rgba(239, 246, 255, 0.1);
+  /* rule=0, type=4, index=18, src=colors */
+  --colours-alpha-light-alpha-14: rgba(239, 246, 255, 0.05);
+  /* rule=0, type=4, index=19, src=colors */
+  --colours-alpha-light-alpha-12: rgba(18, 22, 33, 1);
+  /* rule=0, type=4, index=20, src=colors */
+  --colours-alpha-light-alpha-8: rgba(239, 246, 255, 0.08);
+  /* rule=0, type=4, index=21, src=colors */
+  --colours-alpha-transparent-0: rgba(255, 255, 255, 0);
+  /* rule=0, type=4, index=22, src=colors */
+
+
+
+  --layout-ui-tiles-light-background: rgba(0, 68, 255, 1);
+  /* rule=0, type=4, index=302, src=colors */
+
+  --data-tables-background-odd: rgba(255, 255, 255, 0.01);
+  /* rule=0, type=4, index=303, src=colors */
+
+  --colours-tactics-goalkeeper-background: rgba(19, 23, 32, 1);
+  /* rule=0, type=4, index=300, src=colors */
+  --colours-tactics-goalkeeper-foreground: rgba(60, 60, 90, 1);
+  /* rule=0, type=4, index=131, src=colors */
+  --colours-tactics-defender-background: rgba(6, 62, 66, 1);
+  /* rule=0, type=4, index=132, src=colors */
+  --colours-tactics-defender-foreground: rgba(20, 121, 111, 1);
+  /* rule=0, type=4, index=114, src=colors */
+  --colours-tactics-defensive-midfield-background: rgba(11, 61, 45, 1);
+  /* rule=0, type=4, index=118, src=colors */
+  --colours-tactics-defensive-midfield-foreground: rgba(13, 119, 65, 1);
+  /* rule=0, type=4, index=116, src=colors */
+  --colours-tactics-midfield-background: rgba(9, 33, 72, 1);
+  /* rule=0, type=4, index=123, src=colors */
+  --colours-tactics-midfield-foreground: rgba(8, 57, 125, 1);
+  /* rule=0, type=4, index=121, src=colors */
+  --colours-tactics-attacking-midfield-background: rgba(47, 15, 75, 1);
+  /* rule=0, type=4, index=126, src=colors */
+  --colours-tactics-attacking-midfield-foreground: rgba(95, 16, 132, 1);
+  /* rule=0, type=4, index=124, src=colors */
+  --colours-tactics-striker-background: rgba(68, 17, 60, 1);
+  /* rule=0, type=4, index=130, src=colors */
+  --colours-tactics-striker-foreground: rgba(141, 19, 99, 1);
+  /* rule=0, type=4, index=127, src=colors */
+
+  --colours-speak-to-background-default: rgba(18, 22, 33, 1);
+  /* rule=0, type=4, index=117, src=colors */
+
+  --colours-tactics-teaminstruction-background: rgba(0, 129, 138, 0.2);
+  /* rule=0, type=4, index=301, src=colors */
+  --colours-tactics-base-00: rgba(234, 66, 96, 1);
+  /* rule=0, type=4, index=129, src=colors */
+  --colours-tactics-base-20: rgba(147, 31, 53, 1);
+  /* rule=0, type=4, index=128, src=colors */
+  --colours-tactics-base-40: rgba(19, 23, 32, 1);
+  /* rule=0, type=4, index=125, src=colors */
+  --colours-tactics-base-50: rgba(37, 42, 55, 1);
+  /* rule=0, type=4, index=122, src=colors */
+  --colours-tactics-base-60: rgba(19, 23, 32, 1);
+  /* rule=0, type=4, index=120, src=colors */
+  --colours-tactics-base-80: rgba(19, 23, 32, 1);
+  /* rule=0, type=4, index=119, src=colors */
+
+  --colours-tactics-green-80: rgba(19, 23, 32, 1);
+  /* rule=0, type=4, index=284, src=colors */
+  --colours-tactics-green-60: rgba(19, 23, 32, 1);
+  /* rule=0, type=4, index=285, src=colors */
+  --colours-tactics-green-50: rgba(19, 23, 32, 1);
+  /* rule=0, type=4, index=286, src=colors */
+  --colours-tactics-green-40: rgba(19, 23, 32, 1);
+  /* rule=0, type=4, index=287, src=colors */
+  --colours-tactics-green-20: rgba(19, 23, 32, 1);
+  /* rule=0, type=4, index=288, src=colors */
+
+  --my-custom-colour: #172ad0;
+
+  .green {
+    color: var(--my-custom-colour);
+  }
+
+  .test-class {
+    background-color: var(--my-custom-colour);
+  }
+}

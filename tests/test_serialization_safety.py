@@ -89,8 +89,12 @@ class TestSerializationSafety:
         # Add same variable to both bundles
         css_vars = {"--button-size": "16px"}
 
-        patcher._add_new_css_variables(data1, set(css_vars.keys()), css_vars, "bundle1.uss")
-        patcher._add_new_css_variables(data2, set(css_vars.keys()), css_vars, "bundle2.uss")
+        patcher._add_new_css_variables(
+            data1, set(css_vars.keys()), css_vars, "bundle1.uss"
+        )
+        patcher._add_new_css_variables(
+            data2, set(css_vars.keys()), css_vars, "bundle2.uss"
+        )
 
         # Both should have index 0 in their own float arrays (no conflict)
         assert len(data1.floats) == 1
@@ -164,18 +168,12 @@ class TestSerializationSafety:
 
         # Add to bundle A
         patcher._add_new_css_variables(
-            bundle_a_data,
-            {"--var-a"},
-            {"--var-a": "20px"},
-            "bundle_a.uss"
+            bundle_a_data, {"--var-a"}, {"--var-a": "20px"}, "bundle_a.uss"
         )
 
         # Add to bundle B
         patcher._add_new_css_variables(
-            bundle_b_data,
-            {"--var-b"},
-            {"--var-b": "30px"},
-            "bundle_b.uss"
+            bundle_b_data, {"--var-b"}, {"--var-b": "30px"}, "bundle_b.uss"
         )
 
         # Bundle A should have its own independent arrays

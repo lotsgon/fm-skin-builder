@@ -4,7 +4,6 @@ Tests for font replacement functionality.
 
 from types import SimpleNamespace
 import json
-import pytest
 
 from fm_skin_builder.core.css_patcher import run_patch
 
@@ -65,9 +64,7 @@ def test_font_swap_with_includes(tmp_path, monkeypatch):
     skin = tmp_path / "skins" / "demo"
     (skin / "assets" / "fonts").mkdir(parents=True)
     (skin / "config.json").write_text(
-        json.dumps(
-            {"schema_version": 2, "name": "Demo", "includes": ["fonts"]}
-        ),
+        json.dumps({"schema_version": 2, "name": "Demo", "includes": ["fonts"]}),
         encoding="utf-8",
     )
 
@@ -106,9 +103,7 @@ def test_font_swap_with_assets_fonts_include(tmp_path, monkeypatch):
     skin = tmp_path / "skins" / "demo"
     (skin / "assets" / "fonts").mkdir(parents=True)
     (skin / "config.json").write_text(
-        json.dumps(
-            {"schema_version": 2, "name": "Demo", "includes": ["assets/fonts"]}
-        ),
+        json.dumps({"schema_version": 2, "name": "Demo", "includes": ["assets/fonts"]}),
         encoding="utf-8",
     )
 
@@ -181,9 +176,7 @@ def test_font_swap_no_fonts_without_include(tmp_path, monkeypatch):
     skin = tmp_path / "skins" / "demo"
     (skin / "assets" / "fonts").mkdir(parents=True)
     (skin / "config.json").write_text(
-        json.dumps(
-            {"schema_version": 2, "name": "Demo", "includes": ["assets/icons"]}
-        ),
+        json.dumps({"schema_version": 2, "name": "Demo", "includes": ["assets/icons"]}),
         encoding="utf-8",
     )
 

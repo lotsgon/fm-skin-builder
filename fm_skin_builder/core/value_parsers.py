@@ -17,7 +17,6 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Union, List, Tuple
-from pathlib import Path
 
 from .logger import get_logger
 
@@ -40,18 +39,20 @@ __all__ = [
 
 class CssValueType(Enum):
     """Unity StyleSheet value types."""
+
     KEYWORD = 1  # Enum/boolean keywords
-    FLOAT = 2    # Numeric values with optional units
-    STRING = 3   # String variable references
-    COLOR = 4    # Color values (handled by existing code)
-    RESOURCE = 7 # Resource references (fonts, images, etc.)
-    ENUM = 8     # Enum values
-    VARIABLE = 10 # Variable references
+    FLOAT = 2  # Numeric values with optional units
+    STRING = 3  # String variable references
+    COLOR = 4  # Color values (handled by existing code)
+    RESOURCE = 7  # Resource references (fonts, images, etc.)
+    ENUM = 8  # Enum values
+    VARIABLE = 10  # Variable references
 
 
 @dataclass
 class FloatValue:
     """Represents a float value with optional unit."""
+
     value: float
     unit: Optional[str] = None  # px, em, %, etc.
 
@@ -71,6 +72,7 @@ class FloatValue:
 @dataclass
 class KeywordValue:
     """Represents a keyword/enum value."""
+
     keyword: str
 
     def __str__(self) -> str:
@@ -80,6 +82,7 @@ class KeywordValue:
 @dataclass
 class ResourceValue:
     """Represents a resource reference (url(...))."""
+
     path: str
     resource_type: Optional[str] = None  # 'font', 'image', etc.
 
@@ -99,6 +102,7 @@ class ResourceValue:
 @dataclass
 class VariableValue:
     """Represents a CSS variable reference (var(--name))."""
+
     variable_name: str
 
     def __str__(self) -> str:
@@ -116,6 +120,7 @@ class VariableValue:
 @dataclass
 class ParsedValue:
     """Container for a parsed CSS value with type information."""
+
     value: Union[FloatValue, KeywordValue, ResourceValue, VariableValue, str]
     value_type: CssValueType
     raw: str
@@ -125,62 +130,74 @@ class ParsedValue:
 
 
 # Regex patterns for parsing
-_FLOAT_PATTERN = re.compile(
-    r'^([+-]?(?:\d+\.?\d*|\.\d+))([a-zA-Z%]*)$'
-)
-_URL_PATTERN = re.compile(
-    r'^url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)$',
-    re.IGNORECASE
-)
-_RESOURCE_PATTERN = re.compile(
-    r'^resource://([^/]+)/(.+)$',
-    re.IGNORECASE
-)
-_VAR_PATTERN = re.compile(
-    r'^var\s*\(\s*(--[\w-]+)\s*\)$',
-    re.IGNORECASE
-)
+_FLOAT_PATTERN = re.compile(r"^([+-]?(?:\d+\.?\d*|\.\d+))([a-zA-Z%]*)$")
+_URL_PATTERN = re.compile(r'^url\s*\(\s*["\']?([^"\'()]+)["\']?\s*\)$', re.IGNORECASE)
+_RESOURCE_PATTERN = re.compile(r"^resource://([^/]+)/(.+)$", re.IGNORECASE)
+_VAR_PATTERN = re.compile(r"^var\s*\(\s*(--[\w-]+)\s*\)$", re.IGNORECASE)
 
 # Known CSS/USS units
 VALID_UNITS = {
-    'px',  # Pixels
-    'em',  # Relative to font size
-    'rem', # Relative to root font size
-    '%',   # Percentage
-    'pt',  # Points
-    'vw',  # Viewport width
-    'vh',  # Viewport height
+    "px",  # Pixels
+    "em",  # Relative to font size
+    "rem",  # Relative to root font size
+    "%",  # Percentage
+    "pt",  # Points
+    "vw",  # Viewport width
+    "vh",  # Viewport height
 }
 
 # Known USS keywords for various properties
 VALID_KEYWORDS = {
     # Display/visibility
-    'none', 'flex', 'inline', 'block', 'inline-block',
-    'visible', 'hidden',
-
+    "none",
+    "flex",
+    "inline",
+    "block",
+    "inline-block",
+    "visible",
+    "hidden",
     # Text alignment
-    'left', 'right', 'center', 'justify',
-    'upper-left', 'upper-center', 'upper-right',
-    'middle-left', 'middle-center', 'middle-right',
-    'lower-left', 'lower-center', 'lower-right',
-
+    "left",
+    "right",
+    "center",
+    "justify",
+    "upper-left",
+    "upper-center",
+    "upper-right",
+    "middle-left",
+    "middle-center",
+    "middle-right",
+    "lower-left",
+    "lower-center",
+    "lower-right",
     # Font style
-    'normal', 'italic', 'bold', 'bold-and-italic',
-
+    "normal",
+    "italic",
+    "bold",
+    "bold-and-italic",
     # Overflow
-    'scroll', 'clip', 'ellipsis',
-
+    "scroll",
+    "clip",
+    "ellipsis",
     # Position
-    'relative', 'absolute', 'static',
-
+    "relative",
+    "absolute",
+    "static",
     # White space
-    'nowrap', 'pre', 'pre-wrap', 'pre-line',
-
+    "nowrap",
+    "pre",
+    "pre-wrap",
+    "pre-line",
     # Scale mode
-    'stretch-to-fill', 'scale-and-crop', 'scale-to-fit',
-
+    "stretch-to-fill",
+    "scale-and-crop",
+    "scale-to-fit",
     # Boolean-like
-    'true', 'false', 'auto', 'initial', 'inherit',
+    "true",
+    "false",
+    "auto",
+    "initial",
+    "inherit",
 }
 
 
@@ -221,7 +238,9 @@ def parse_float_value(value_str: str) -> Optional[FloatValue]:
 
     # Validate unit if present
     if unit and unit not in VALID_UNITS:
-        log.warning(f"Unknown unit '{unit}' in value '{value_str}', treating as unitless")
+        log.warning(
+            f"Unknown unit '{unit}' in value '{value_str}', treating as unitless"
+        )
         unit = None
 
     return FloatValue(value=number, unit=unit)
@@ -251,7 +270,7 @@ def parse_keyword_value(value_str: str) -> Optional[KeywordValue]:
         return KeywordValue(keyword=value_str)
 
     # Also accept Unity-specific enum values with dashes
-    if re.match(r'^[a-z][a-z0-9-]*$', value_str):
+    if re.match(r"^[a-z][a-z0-9-]*$", value_str):
         return KeywordValue(keyword=value_str)
 
     return None
@@ -318,7 +337,9 @@ def parse_variable_value(value_str: str) -> Optional[VariableValue]:
     return VariableValue(variable_name=variable_name)
 
 
-def parse_css_value(value_str: str, property_name: Optional[str] = None) -> Optional[ParsedValue]:
+def parse_css_value(
+    value_str: str, property_name: Optional[str] = None
+) -> Optional[ParsedValue]:
     """
     Parse a CSS value and determine its type.
 
@@ -343,36 +364,28 @@ def parse_css_value(value_str: str, property_name: Optional[str] = None) -> Opti
     var_val = parse_variable_value(value_str)
     if var_val is not None:
         return ParsedValue(
-            value=var_val,
-            value_type=CssValueType.VARIABLE,
-            raw=value_str
+            value=var_val, value_type=CssValueType.VARIABLE, raw=value_str
         )
 
     # Try parsing as float (most common for dimensions)
     float_val = parse_float_value(value_str)
     if float_val is not None:
         return ParsedValue(
-            value=float_val,
-            value_type=CssValueType.FLOAT,
-            raw=value_str
+            value=float_val, value_type=CssValueType.FLOAT, raw=value_str
         )
 
     # Try parsing as resource reference
     resource_val = parse_resource_value(value_str)
     if resource_val is not None:
         return ParsedValue(
-            value=resource_val,
-            value_type=CssValueType.RESOURCE,
-            raw=value_str
+            value=resource_val, value_type=CssValueType.RESOURCE, raw=value_str
         )
 
     # Try parsing as keyword
     keyword_val = parse_keyword_value(value_str)
     if keyword_val is not None:
         return ParsedValue(
-            value=keyword_val,
-            value_type=CssValueType.KEYWORD,
-            raw=value_str
+            value=keyword_val, value_type=CssValueType.KEYWORD, raw=value_str
         )
 
     # If nothing matches, return None
@@ -410,7 +423,9 @@ def parse_multi_value(value_str: str) -> List[ParsedValue]:
     return parsed_values
 
 
-def expand_shorthand_box(values: List[ParsedValue]) -> Tuple[ParsedValue, ParsedValue, ParsedValue, ParsedValue]:
+def expand_shorthand_box(
+    values: List[ParsedValue],
+) -> Tuple[ParsedValue, ParsedValue, ParsedValue, ParsedValue]:
     """
     Expand CSS box model shorthand (padding, margin) to individual sides.
 

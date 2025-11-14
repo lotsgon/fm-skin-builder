@@ -1,0 +1,23 @@
+.attribute-colour-unset {
+  color: rgb(5, 11, 20, 0);
+}
+
+.attribute-colour-low {
+  color: rgb(5, 11, 20, 0);
+}
+
+.attribute-colour-poor {
+  color: rgb(5, 11, 20, 0);
+}
+
+.attribute-colour-normal {
+  color: rgb(5, 11, 20, 0);
+}
+
+.attribute-colour-good {
+  color: rgb(5, 11, 20, 0);
+}
+
+.attribute-colour-great {
+  color: rgb(5, 11, 20, 0);
+}

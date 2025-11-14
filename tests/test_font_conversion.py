@@ -2,8 +2,6 @@
 Test font format conversion and permissive replacement.
 """
 
-import pytest
-from pathlib import Path
 from fm_skin_builder.core.font_swap_service import FontSwapService, FontSwapOptions
 
 
@@ -111,9 +109,7 @@ def test_permissive_vs_strict_behavior(tmp_path):
 
 def test_conversion_with_unknown_format(tmp_path):
     """Test that conversion fails gracefully with unknown format."""
-    service = FontSwapService(
-        FontSwapOptions(includes=["fonts"], auto_convert=True)
-    )
+    service = FontSwapService(FontSwapOptions(includes=["fonts"], auto_convert=True))
 
     test_file = tmp_path / "test.ttf"
     test_file.write_bytes(b"\x00\x01\x00\x00" + b"\x00" * 100)

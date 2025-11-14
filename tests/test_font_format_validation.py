@@ -2,8 +2,6 @@
 Test font format detection and validation.
 """
 
-import pytest
-from pathlib import Path
 from fm_skin_builder.core.font_swap_service import FontSwapService, FontSwapOptions
 
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple, Any, Set
+from typing import DefaultDict, Dict, Iterable, List, Optional, Tuple, Any, Set
 from types import SimpleNamespace
 import gc
 import json
@@ -34,16 +34,12 @@ from .css_utils import (
     normalize_css_color,
 )
 from .value_parsers import (
-    parse_css_value,
     parse_float_value,
     parse_keyword_value,
     parse_resource_value,
     parse_variable_value,
-    CssValueType,
-    VariableValue,
 )
 from .property_handlers import (
-    get_property_handler,
     PROPERTY_TYPE_MAP,
 )
 from .texture_utils import (
@@ -308,10 +304,14 @@ class CssPatcher:
         # If set, new variables go to primary_variable_stylesheet (default: FigmaStyleVariables)
         # If set, new selectors go to primary_selector_stylesheet (default: FigmaGeneratedStyles)
         self.primary_variable_stylesheet = (
-            primary_variable_stylesheet.lower() if primary_variable_stylesheet else "figmastylevariables"
+            primary_variable_stylesheet.lower()
+            if primary_variable_stylesheet
+            else "figmastylevariables"
         )
         self.primary_selector_stylesheet = (
-            primary_selector_stylesheet.lower() if primary_selector_stylesheet else "figmageneratedstyles"
+            primary_selector_stylesheet.lower()
+            if primary_selector_stylesheet
+            else "figmageneratedstyles"
         )
 
     def patch_bundle_file(
@@ -372,7 +372,10 @@ class CssPatcher:
                         parts = getattr(s, "m_Parts", [])
                         if parts:
                             selector_text = build_selector_from_parts(parts)
-                            if selector_text and name_lower not in selector_registry[selector_text]:
+                            if (
+                                selector_text
+                                and name_lower not in selector_registry[selector_text]
+                            ):
                                 selector_registry[selector_text].append(name_lower)
 
             # Extract all variables from rules
@@ -861,13 +864,13 @@ class CssPatcher:
                         prop_type = PROPERTY_TYPE_MAP.get(prop_name)
                         if prop_type:
                             # Determine which type to use based on property definition
-                            patched = False
+                            # patched = False
                             if 2 in prop_type.unity_types:  # Float
                                 prop_changed, index = _patch_float_property(
                                     data, prop, prop_name, value_str, name
                                 )
                                 if prop_changed:
-                                    patched = True
+                                    # patched = True
                                     patched_vars += 1
                                     changed = True
                             elif 7 in prop_type.unity_types:  # Resource
@@ -875,15 +878,17 @@ class CssPatcher:
                                     data, prop, prop_name, value_str, name
                                 )
                                 if prop_changed:
-                                    patched = True
+                                    # patched = True
                                     patched_vars += 1
                                     changed = True
-                            elif 1 in prop_type.unity_types or 8 in prop_type.unity_types:  # Keyword
+                            elif (
+                                1 in prop_type.unity_types or 8 in prop_type.unity_types
+                            ):  # Keyword
                                 prop_changed, index = _patch_keyword_property(
                                     data, prop, prop_name, value_str, name
                                 )
                                 if prop_changed:
-                                    patched = True
+                                    # patched = True
                                     patched_vars += 1
                                     changed = True
 
@@ -969,7 +974,12 @@ class CssPatcher:
                             new_index = len(floats) - 1
 
                             handle = next(
-                                (val for val in values if getattr(val, "m_ValueType", None) in {2, 3, 8, 10}),
+                                (
+                                    val
+                                    for val in values
+                                    if getattr(val, "m_ValueType", None)
+                                    in {2, 3, 8, 10}
+                                ),
                                 values[0],
                             )
                             setattr(handle, "m_ValueType", 2)
@@ -981,10 +991,13 @@ class CssPatcher:
                                 f"  [PATCHED - var literal float] {name}: {match_key} (new float index {new_index}) → {parsed.unity_value}"
                             )
 
-                    elif 1 in prop_type.unity_types or 8 in prop_type.unity_types:  # Keyword
+                    elif (
+                        1 in prop_type.unity_types or 8 in prop_type.unity_types
+                    ):  # Keyword
                         # Check if property already has a literal keyword (Type 1/8)
                         has_literal_keyword = any(
-                            getattr(val, "m_ValueType", None) in {1, 8} for val in values
+                            getattr(val, "m_ValueType", None) in {1, 8}
+                            for val in values
                         )
                         if has_literal_keyword:
                             continue
@@ -1000,10 +1013,17 @@ class CssPatcher:
                             new_index = len(strings) - 1
 
                             handle = next(
-                                (val for val in values if getattr(val, "m_ValueType", None) in {1, 3, 8, 10}),
+                                (
+                                    val
+                                    for val in values
+                                    if getattr(val, "m_ValueType", None)
+                                    in {1, 3, 8, 10}
+                                ),
                                 values[0],
                             )
-                            setattr(handle, "m_ValueType", 8)  # Use Type 8 (enum) for keywords
+                            setattr(
+                                handle, "m_ValueType", 8
+                            )  # Use Type 8 (enum) for keywords
                             setattr(handle, "valueIndex", new_index)
 
                             patched_vars += 1
@@ -1031,7 +1051,12 @@ class CssPatcher:
                             new_index = len(strings) - 1
 
                             handle = next(
-                                (val for val in values if getattr(val, "m_ValueType", None) in {3, 7, 8, 10}),
+                                (
+                                    val
+                                    for val in values
+                                    if getattr(val, "m_ValueType", None)
+                                    in {3, 7, 8, 10}
+                                ),
                                 values[0],
                             )
                             setattr(handle, "m_ValueType", 7)
@@ -1152,7 +1177,9 @@ class CssPatcher:
                                 continue
                         if key in selector_overrides:
                             value_str = selector_overrides[key]
-                            matched_selectors.add(key)  # Track matched selector+property
+                            matched_selectors.add(
+                                key
+                            )  # Track matched selector+property
                             log.info(
                                 f"  [DEBUG] Selector/property match: {key} in {name}, patching to {value_str}"
                             )
@@ -1172,7 +1199,12 @@ class CssPatcher:
                                             and 0 <= value_index < len(colors)
                                         ):
                                             col = colors[value_index]
-                                            if (col.r, col.g, col.b, col.a) != (r, g, b, a):
+                                            if (col.r, col.g, col.b, col.a) != (
+                                                r,
+                                                g,
+                                                b,
+                                                a,
+                                            ):
                                                 col.r, col.g, col.b, col.a = r, g, b, a
                                                 patched_vars += 1
                                                 log.info(
@@ -1191,9 +1223,13 @@ class CssPatcher:
                                                     norm_sel = key[0]
                                                     touches.setdefault(
                                                         (
-                                                            norm_sel
-                                                            if norm_sel.startswith(".")
-                                                            else norm_sel,
+                                                            (
+                                                                norm_sel
+                                                                if norm_sel.startswith(
+                                                                    "."
+                                                                )
+                                                                else norm_sel
+                                                            ),
                                                             prop_name,
                                                         ),
                                                         set(),
@@ -1227,14 +1263,18 @@ class CssPatcher:
                                         f"  [PATCHED - selector/property literal] {name}: {key} (new color index {new_index}) → {value_str}"
                                     )
                                     try:
-                                        touches = getattr(self, "_selector_touches", None)
+                                        touches = getattr(
+                                            self, "_selector_touches", None
+                                        )
                                         if touches is not None:
                                             norm_sel = key[0]
                                             touches.setdefault(
                                                 (
-                                                    norm_sel
-                                                    if norm_sel.startswith(".")
-                                                    else norm_sel,
+                                                    (
+                                                        norm_sel
+                                                        if norm_sel.startswith(".")
+                                                        else norm_sel
+                                                    ),
                                                     prop_name,
                                                 ),
                                                 set(),
@@ -1257,7 +1297,10 @@ class CssPatcher:
                                         prop_changed, _ = _patch_resource_property(
                                             data, prop, prop_name, value_str, name
                                         )
-                                    elif 1 in prop_type.unity_types or 8 in prop_type.unity_types:  # Keyword
+                                    elif (
+                                        1 in prop_type.unity_types
+                                        or 8 in prop_type.unity_types
+                                    ):  # Keyword
                                         prop_changed, _ = _patch_keyword_property(
                                             data, prop, prop_name, value_str, name
                                         )
@@ -1266,14 +1309,18 @@ class CssPatcher:
                                         patched_vars += 1
                                         changed = True
                                         try:
-                                            touches = getattr(self, "_selector_touches", None)
+                                            touches = getattr(
+                                                self, "_selector_touches", None
+                                            )
                                             if touches is not None:
                                                 norm_sel = key[0]
                                                 touches.setdefault(
                                                     (
-                                                        norm_sel
-                                                        if norm_sel.startswith(".")
-                                                        else norm_sel,
+                                                        (
+                                                            norm_sel
+                                                            if norm_sel.startswith(".")
+                                                            else norm_sel
+                                                        ),
                                                         prop_name,
                                                     ),
                                                     set(),
@@ -1311,10 +1358,16 @@ class CssPatcher:
                 # Smart placement: Only add new variables if:
                 # 1. This stylesheet has explicit targeting (has_targeted_sources), OR
                 # 2. This stylesheet is the primary variable stylesheet
-                should_add_vars = has_targeted_sources or (name_lower == self.primary_variable_stylesheet)
+                should_add_vars = has_targeted_sources or (
+                    name_lower == self.primary_variable_stylesheet
+                )
 
                 if should_add_vars:
-                    reason = "explicit targeting" if has_targeted_sources else "primary variable stylesheet"
+                    reason = (
+                        "explicit targeting"
+                        if has_targeted_sources
+                        else "primary variable stylesheet"
+                    )
                     log.info(
                         f"  [PHASE 3.1] Adding {len(truly_new_vars)} new CSS variables to {name} ({reason})"
                     )
@@ -1324,7 +1377,9 @@ class CssPatcher:
                     if new_vars_created > 0:
                         patched_vars += new_vars_created
                         changed = True
-                        log.info(f"  [ADDED] {new_vars_created} new CSS variables to {name}")
+                        log.info(
+                            f"  [ADDED] {new_vars_created} new CSS variables to {name}"
+                        )
                 else:
                     # Skip adding new variables to this stylesheet
                     log.info(
@@ -1334,7 +1389,9 @@ class CssPatcher:
                     if len(truly_new_vars) <= 5:
                         log.info(f"    Variables: {', '.join(sorted(truly_new_vars))}")
                     else:
-                        log.info(f"    Variables: {', '.join(sorted(list(truly_new_vars)[:5]))}... (and {len(truly_new_vars) - 5} more)")
+                        log.info(
+                            f"    Variables: {', '.join(sorted(list(truly_new_vars)[:5]))}... (and {len(truly_new_vars) - 5} more)"
+                        )
 
             # Log variables that exist in other files (smart update)
             if vars_in_other_files:
@@ -1343,7 +1400,6 @@ class CssPatcher:
                         f"  [PHASE 3.1] Skipping {var} for {name} "
                         f"(already exists in {', '.join(locations)}, will update there)"
                     )
-
 
         # Phase 3.2: Smart new selector placement
         # Calculate unmatched selectors (similar to unmatched_vars calculation)
@@ -1363,15 +1419,22 @@ class CssPatcher:
 
         # Only add truly new selectors (not matched AND not already in stylesheet)
         truly_new_selectors = {
-            (sel, prop) for (sel, prop) in unmatched_selectors
+            (sel, prop)
+            for (sel, prop) in unmatched_selectors
             if sel not in existing_selector_texts
         }
 
         # Remove duplicate selector entries (e.g., both ".test-class" and "test-class")
         # Keep only the version WITH the dot for class selectors
         deduplicated_selectors = set()
-        selectors_with_dots = {(sel, prop) for (sel, prop) in truly_new_selectors if sel.startswith(".")}
-        selectors_without_dots = {(sel, prop) for (sel, prop) in truly_new_selectors if not sel.startswith(".")}
+        selectors_with_dots = {
+            (sel, prop) for (sel, prop) in truly_new_selectors if sel.startswith(".")
+        }
+        selectors_without_dots = {
+            (sel, prop)
+            for (sel, prop) in truly_new_selectors
+            if not sel.startswith(".")
+        }
 
         for sel, prop in selectors_with_dots:
             deduplicated_selectors.add((sel, prop))
@@ -1404,10 +1467,16 @@ class CssPatcher:
                 # Smart placement: Only add new selectors if:
                 # 1. This stylesheet has explicit targeting (has_targeted_sources), OR
                 # 2. This stylesheet is the primary selector stylesheet
-                should_add_selectors = has_targeted_sources or (name_lower == self.primary_selector_stylesheet)
+                should_add_selectors = has_targeted_sources or (
+                    name_lower == self.primary_selector_stylesheet
+                )
 
                 if should_add_selectors:
-                    reason = "explicit targeting" if has_targeted_sources else "primary selector stylesheet"
+                    reason = (
+                        "explicit targeting"
+                        if has_targeted_sources
+                        else "primary selector stylesheet"
+                    )
                     log.info(
                         f"  [PHASE 3.2] Adding {len(filtered_new_selectors)} new selector properties to {name} ({reason})"
                     )
@@ -1417,10 +1486,14 @@ class CssPatcher:
                     if new_props_created > 0:
                         patched_vars += new_props_created
                         changed = True
-                        log.info(f"  [ADDED] {new_props_created} new selector properties to {name}")
+                        log.info(
+                            f"  [ADDED] {new_props_created} new selector properties to {name}"
+                        )
                 else:
                     # Skip adding new selectors to this stylesheet
-                    selector_list = sorted(set(sel for sel, prop in filtered_new_selectors))
+                    selector_list = sorted(
+                        set(sel for sel, prop in filtered_new_selectors)
+                    )
                     log.info(
                         f"  [PHASE 3.2] Skipping {len(filtered_new_selectors)} new selector properties for {name} "
                         f"(not targeted, primary is '{self.primary_selector_stylesheet}')"
@@ -1428,7 +1501,9 @@ class CssPatcher:
                     if len(selector_list) <= 5:
                         log.info(f"    Selectors: {', '.join(selector_list)}")
                     else:
-                        log.info(f"    Selectors: {', '.join(selector_list[:5])}... (and {len(selector_list) - 5} more)")
+                        log.info(
+                            f"    Selectors: {', '.join(selector_list[:5])}... (and {len(selector_list) - 5} more)"
+                        )
 
             # Log selectors that exist in other files (smart update)
             if selectors_in_other_files:
@@ -1483,7 +1558,7 @@ class CssPatcher:
         # Find the rule that already contains CSS variables
         # CSS variables are properties starting with "--"
         root_rule = None
-        selectors = getattr(data, "m_ComplexSelectors", [])
+        # selectors = getattr(data, "m_ComplexSelectors", [])
 
         if rules:
             # Look for a rule that already has CSS variables (properties starting with --)
@@ -1491,12 +1566,13 @@ class CssPatcher:
             for i, rule in enumerate(rules):
                 props = getattr(rule, "m_Properties", [])
                 has_variables = any(
-                    getattr(prop, "m_Name", "").startswith("--")
-                    for prop in props
+                    getattr(prop, "m_Name", "").startswith("--") for prop in props
                 )
                 if has_variables:
                     root_rule = rule
-                    log.debug(f"  [DEBUG] Found existing variables rule at index {i} in {stylesheet_name}")
+                    log.debug(
+                        f"  [DEBUG] Found existing variables rule at index {i} in {stylesheet_name}"
+                    )
                     break
 
         # If no rule with variables exists, create a NEW one
@@ -1506,6 +1582,7 @@ class CssPatcher:
             # Copy structure from existing rule if possible
             if rules:
                 import copy
+
                 template_rule = rules[0]
                 root_rule = copy.copy(template_rule)
                 # Clear properties but keep structure
@@ -1527,9 +1604,9 @@ class CssPatcher:
             rules.append(root_rule)
             new_rule_index = len(rules) - 1
 
-            log.info(f"  [CREATED] New variables rule at index {new_rule_index} in {stylesheet_name}")
-
-
+            log.info(
+                f"  [CREATED] New variables rule at index {new_rule_index} in {stylesheet_name}"
+            )
 
         properties = getattr(root_rule, "m_Properties", [])
         if not isinstance(properties, list):
@@ -1544,6 +1621,7 @@ class CssPatcher:
             # Copy structure from existing property if possible
             if properties:
                 import copy
+
                 prop = copy.copy(properties[0])
                 setattr(prop, "m_Name", var_name)
                 setattr(prop, "m_Values", [])
@@ -1591,6 +1669,7 @@ class CssPatcher:
 
             if existing_values:
                 import copy
+
                 value_obj = copy.copy(existing_values[0])
                 # Will set m_ValueType and valueIndex below
             else:
@@ -1609,7 +1688,9 @@ class CssPatcher:
 
                 setattr(value_obj, "m_ValueType", 4)
                 setattr(value_obj, "valueIndex", value_index)
-                log.info(f"  [NEW VAR - color] {stylesheet_name}: {var_name} → {value_str} (color index {value_index})")
+                log.info(
+                    f"  [NEW VAR - color] {stylesheet_name}: {var_name} → {value_str} (color index {value_index})"
+                )
 
             elif (parsed_float := parse_float_value(value_str)) is not None:
                 # Float value
@@ -1618,7 +1699,9 @@ class CssPatcher:
 
                 setattr(value_obj, "m_ValueType", 2)
                 setattr(value_obj, "valueIndex", value_index)
-                log.info(f"  [NEW VAR - float] {stylesheet_name}: {var_name} → {parsed_float.unity_value} (float index {value_index})")
+                log.info(
+                    f"  [NEW VAR - float] {stylesheet_name}: {var_name} → {parsed_float.unity_value} (float index {value_index})"
+                )
 
             elif (parsed_keyword := parse_keyword_value(value_str)) is not None:
                 # Keyword value
@@ -1627,7 +1710,9 @@ class CssPatcher:
 
                 setattr(value_obj, "m_ValueType", 8)
                 setattr(value_obj, "valueIndex", value_index)
-                log.info(f"  [NEW VAR - keyword] {stylesheet_name}: {var_name} → {parsed_keyword.keyword} (string index {value_index})")
+                log.info(
+                    f"  [NEW VAR - keyword] {stylesheet_name}: {var_name} → {parsed_keyword.keyword} (string index {value_index})"
+                )
 
             elif (parsed_resource := parse_resource_value(value_str)) is not None:
                 # Resource value
@@ -1636,7 +1721,9 @@ class CssPatcher:
 
                 setattr(value_obj, "m_ValueType", 7)
                 setattr(value_obj, "valueIndex", value_index)
-                log.info(f"  [NEW VAR - resource] {stylesheet_name}: {var_name} → {parsed_resource.unity_path} (string index {value_index})")
+                log.info(
+                    f"  [NEW VAR - resource] {stylesheet_name}: {var_name} → {parsed_resource.unity_path} (string index {value_index})"
+                )
 
             else:
                 # Fallback: store as string (Type 8)
@@ -1645,7 +1732,9 @@ class CssPatcher:
 
                 setattr(value_obj, "m_ValueType", 8)
                 setattr(value_obj, "valueIndex", value_index)
-                log.warning(f"  [NEW VAR - unknown] {stylesheet_name}: {var_name} → {value_str} (stored as string)")
+                log.warning(
+                    f"  [NEW VAR - unknown] {stylesheet_name}: {var_name} → {value_str} (stored as string)"
+                )
 
             values_list.append(value_obj)
             properties.append(prop)
@@ -1707,6 +1796,7 @@ class CssPatcher:
             # Create new rule (copy from existing if possible)
             if rules:
                 import copy
+
                 new_rule = copy.copy(rules[0])
                 setattr(new_rule, "m_Properties", [])
                 if hasattr(new_rule, "line"):
@@ -1737,6 +1827,7 @@ class CssPatcher:
 
                 if existing_prop:
                     import copy
+
                     prop = copy.copy(existing_prop)
                     setattr(prop, "m_Name", prop_name)
                     setattr(prop, "m_Values", [])
@@ -1759,6 +1850,7 @@ class CssPatcher:
 
                 if existing_value:
                     import copy
+
                     value_obj = copy.copy(existing_value)
                 else:
                     # Create minimal value object with required Unity fields
@@ -1842,7 +1934,9 @@ class CssPatcher:
                 created_count += 1
 
             # Create ComplexSelector for this rule
-            complex_selector = self._create_complex_selector(selector_text, rule_index, strings)
+            complex_selector = self._create_complex_selector(
+                selector_text, rule_index, strings
+            )
             complex_selectors.append(complex_selector)
 
             log.info(
@@ -1875,13 +1969,13 @@ class CssPatcher:
         if selector_text.startswith("#"):
             specificity = 100  # ID selector
         elif selector_text.startswith("."):
-            specificity = 10   # Class selector
+            specificity = 10  # Class selector
         elif selector_text.startswith(":"):
-            specificity = 10   # Pseudo-class selector (same as class)
+            specificity = 10  # Pseudo-class selector (same as class)
         elif selector_text == "*":
-            specificity = 0    # Universal selector
+            specificity = 0  # Universal selector
         else:
-            specificity = 1    # Element selector
+            specificity = 1  # Element selector
 
         setattr(complex_selector, "m_Specificity", specificity)
 
@@ -2211,8 +2305,7 @@ class SkinPatchPipeline:
 
         # Font swap service
         font_targets_present = any(
-            x.strip().lower() in {"fonts", "assets/fonts", "all"}
-            for x in includes_list
+            x.strip().lower() in {"fonts", "assets/fonts", "all"} for x in includes_list
         )
         font_service: Optional[FontSwapService] = None
         if font_targets_present:
@@ -2220,8 +2313,8 @@ class SkinPatchPipeline:
                 FontSwapOptions(
                     includes=includes_list,
                     dry_run=self.options.dry_run,
-                    auto_convert=True,   # Auto-convert to match original format (critical!)
-                    strict_format=False, # Allow conversion to handle mismatches
+                    auto_convert=True,  # Auto-convert to match original format (critical!)
+                    strict_format=False,  # Allow conversion to handle mismatches
                 )
             )
 

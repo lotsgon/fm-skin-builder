@@ -7,8 +7,6 @@ from typing import Dict, List, Optional, Set, Tuple, Iterable, Any
 import json
 
 from .css_utils import (
-    load_css_selector_overrides,
-    load_css_vars,
     load_css_properties,
     load_css_selector_properties,
 )
