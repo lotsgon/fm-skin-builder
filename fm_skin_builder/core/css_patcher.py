@@ -547,19 +547,22 @@ class CssPatcher:
 
         Returns:
             (vars_combined, selectors_combined, has_targeted_sources)
-            - vars_combined: All variables for this stylesheet (global + targeted)
-            - selectors_combined: All selectors for this stylesheet (global + targeted)
+            - vars_combined: Variables for this stylesheet (targeted if mapped, else global)
+            - selectors_combined: Selectors for this stylesheet (targeted if mapped, else global)
             - has_targeted_sources: True if this stylesheet has explicit targeting (asset_map or files_by_stem)
+
+        Behavior:
+            - Stylesheets with explicit targeting get ONLY their targeted content
+            - Stylesheets without explicit targeting get global content (from unmapped CSS files)
         """
-        vars_combined: Dict[str, str] = dict(self.css_data.global_vars)
-        selectors_combined: Dict[Tuple[str, str], str] = dict(
-            self.css_data.global_selectors
-        )
+        vars_combined: Dict[str, str] = {}
+        selectors_combined: Dict[Tuple[str, str], str] = {}
 
         key = stylesheet_name.lower()
         seen_sources: Set[int] = set()
         has_targeted_sources = False
 
+        # Check for explicit targeting in asset_map
         if key in self.css_data.asset_map:
             has_targeted_sources = True
             for overrides in self.css_data.asset_map[key]:
@@ -567,6 +570,7 @@ class CssPatcher:
                 vars_combined.update(overrides.vars)
                 selectors_combined.update(overrides.selectors)
 
+        # Check for explicit targeting in files_by_stem
         if key in self.css_data.files_by_stem:
             for overrides in self.css_data.files_by_stem[key]:
                 ident = id(overrides)
@@ -575,6 +579,12 @@ class CssPatcher:
                 has_targeted_sources = True
                 vars_combined.update(overrides.vars)
                 selectors_combined.update(overrides.selectors)
+
+        # Only add global content if NOT explicitly targeted
+        # This ensures mapped stylesheets only get their specific content
+        if not has_targeted_sources:
+            vars_combined.update(self.css_data.global_vars)
+            selectors_combined.update(self.css_data.global_selectors)
 
         return vars_combined, selectors_combined, has_targeted_sources
 
