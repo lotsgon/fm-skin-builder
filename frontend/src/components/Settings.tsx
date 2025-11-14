@@ -17,19 +17,20 @@ import {
   Trash2,
   Info,
   Settings as SettingsIcon,
+  Download,
+  AlertCircle,
 } from "lucide-react";
+import { useUpdater } from "../hooks/useUpdater";
 
 type SettingsProps = {
   skinPath: string;
   bundlesPath: string;
   betaUpdates: boolean;
   autoUpdate: boolean;
-  isCheckingUpdates: boolean;
   onClearSkinPath: () => void;
   onClearBundlesPath: () => void;
   onBetaUpdatesChange: (enabled: boolean) => void; // eslint-disable-line no-unused-vars
   onAutoUpdateChange: (enabled: boolean) => void; // eslint-disable-line no-unused-vars
-  onCheckForUpdates: () => void;
 };
 
 export function Settings({
@@ -37,12 +38,10 @@ export function Settings({
   bundlesPath,
   betaUpdates,
   autoUpdate,
-  isCheckingUpdates,
   onClearSkinPath,
   onClearBundlesPath,
   onBetaUpdatesChange,
   onAutoUpdateChange,
-  onCheckForUpdates,
 }: SettingsProps) {
   const [cacheSize, setCacheSize] = useState<number | null>(null);
   const [cacheDir, setCacheDir] = useState<string>("");
@@ -55,6 +54,16 @@ export function Settings({
   } | null>(null);
   const [isLoadingCache, setIsLoadingCache] = useState(false);
   const [isClearingCache, setIsClearingCache] = useState(false);
+
+  // Use the updater hook
+  const {
+    isChecking,
+    updateAvailable,
+    latestVersion,
+    currentVersion,
+    releaseNotes,
+    checkForUpdates,
+  } = useUpdater({ autoUpdate, betaUpdates });
 
   // Load cache size and paths on mount
   useEffect(() => {
@@ -300,11 +309,11 @@ export function Settings({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Info className="h-5 w-5" />
+            <Download className="h-5 w-5" />
             Updates
           </CardTitle>
           <CardDescription>
-            Configure automatic update preferences
+            Configure automatic update preferences and check for new versions
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -315,10 +324,7 @@ export function Settings({
                 Automatically check for and install updates on startup
               </p>
             </div>
-            <Switch
-              checked={autoUpdate}
-              onCheckedChange={onAutoUpdateChange}
-            />
+            <Switch checked={autoUpdate} onCheckedChange={onAutoUpdateChange} />
           </div>
 
           <div className="flex items-center justify-between border-t pt-4">
@@ -337,20 +343,44 @@ export function Settings({
 
           <div className="pt-2 border-t">
             <div className="flex items-center justify-between">
-              <div>
-                <Label>Current Version</Label>
-                <p className="text-lg font-semibold">{appVersion}</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Label>Current Version</Label>
+                  {updateAvailable && (
+                    <AlertCircle className="h-4 w-4 text-orange-500" />
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <p className="text-lg font-semibold">
+                    {currentVersion || appVersion}
+                  </p>
+                  {updateAvailable && latestVersion && (
+                    <span className="text-sm text-muted-foreground">
+                      → {latestVersion} available
+                    </span>
+                  )}
+                </div>
+                {updateAvailable && releaseNotes && (
+                  <div className="text-sm text-muted-foreground bg-muted p-2 rounded">
+                    <strong>Release Notes:</strong> {releaseNotes}
+                  </div>
+                )}
               </div>
               <Button
-                variant="outline"
+                variant={updateAvailable ? "default" : "outline"}
                 size="sm"
-                onClick={onCheckForUpdates}
-                disabled={isCheckingUpdates}
+                onClick={() => checkForUpdates(true)}
+                disabled={isChecking}
               >
-                {isCheckingUpdates ? (
+                {isChecking ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Checking...
+                  </>
+                ) : updateAvailable ? (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Update Available
                   </>
                 ) : (
                   "Check for Updates"
@@ -359,7 +389,9 @@ export function Settings({
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               {autoUpdate
-                ? "Updates will be checked automatically on startup"
+                ? `Updates will be checked automatically on startup (${
+                    betaUpdates ? "beta" : "stable"
+                  } channel)`
                 : "Enable automatic updates to receive updates automatically"}
             </p>
           </div>
