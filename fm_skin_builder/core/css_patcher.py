@@ -1481,19 +1481,33 @@ class CssPatcher:
             setattr(data, "floats", floats)
 
         # Find or create root-level rule (rule with no selector)
+        # In Unity stylesheets, the first rule (index 0) is typically the root rule for variables
         root_rule = None
-        for rule in rules:
-            # Check if rule has no selectors (root level)
-            selectors = getattr(data, "m_ComplexSelectors", [])
-            has_selector = any(
-                getattr(sel, "ruleIndex", None) == rules.index(rule)
+        selectors = getattr(data, "m_ComplexSelectors", [])
+
+        if rules:
+            # Check if first rule is the root rule (no selectors pointing to it)
+            first_rule_has_selector = any(
+                getattr(sel, "ruleIndex", -1) == 0
                 for sel in selectors
             )
-            if not has_selector:
-                root_rule = rule
-                break
+            if not first_rule_has_selector:
+                # First rule is the root rule
+                root_rule = rules[0]
+                log.debug(f"  [DEBUG] Using existing root rule at index 0 in {stylesheet_name}")
+            else:
+                # Look for any other rule without selectors
+                for i, rule in enumerate(rules):
+                    has_selector = any(
+                        getattr(sel, "ruleIndex", -1) == i
+                        for sel in selectors
+                    )
+                    if not has_selector:
+                        root_rule = rule
+                        log.debug(f"  [DEBUG] Using existing root rule at index {i} in {stylesheet_name}")
+                        break
 
-        # If no root rule exists, create one
+        # If no root rule exists, create one at the beginning
         if root_rule is None:
             # Copy structure from existing rule if possible
             if rules:
@@ -1514,8 +1528,17 @@ class CssPatcher:
                 setattr(root_rule, "line", -1)
                 setattr(root_rule, "m_Line", -1)
                 setattr(root_rule, "m_Column", 0)
-            rules.append(root_rule)
-            log.info(f"  [CREATED] New root rule in {stylesheet_name} for CSS variables")
+
+            # Insert at the beginning (index 0) so it becomes the root rule
+            rules.insert(0, root_rule)
+
+            # Update all selector ruleIndex to account for the shift
+            for sel in selectors:
+                old_index = getattr(sel, "ruleIndex", 0)
+                setattr(sel, "ruleIndex", old_index + 1)
+
+            log.info(f"  [CREATED] New root rule at index 0 in {stylesheet_name} for CSS variables")
+
 
         properties = getattr(root_rule, "m_Properties", [])
         if not isinstance(properties, list):
@@ -1543,6 +1566,29 @@ class CssPatcher:
 
             values_list = getattr(prop, "m_Values")
 
+            # CSS variables in Unity have a multi-value structure:
+            # 1. Type 10 (variable reference) pointing to the variable name in strings
+            # 2. The actual value (Type 4 for color, Type 2 for float, etc.)
+            # This allows var(--name) references to resolve correctly
+
+            # First, add Type 10 variable reference
+            # Add variable name to strings if not already there
+            var_name_index = None
+            try:
+                var_name_index = strings.index(var_name)
+            except ValueError:
+                strings.append(var_name)
+                var_name_index = len(strings) - 1
+
+            # Create Type 10 variable reference value
+            var_ref_obj = SimpleNamespace()
+            setattr(var_ref_obj, "m_ValueType", 10)
+            setattr(var_ref_obj, "valueIndex", var_name_index)
+            setattr(var_ref_obj, "m_Line", -1)
+            setattr(var_ref_obj, "m_Column", 0)
+            values_list.append(var_ref_obj)
+
+            # Now add the actual value
             # Create value object
             # Try to copy structure from existing value if available
             existing_values = []

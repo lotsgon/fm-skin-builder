@@ -573,6 +573,9 @@ def _format_uss_value(
             # Normalize variable names (ensure they start with --)
             if _re.match(r"^-[\w-]+$", value):
                 value = _re.sub(r"^-+", "--", value)
+            # Quote resource URLs for better formatting
+            elif value and (value.startswith("project://") or value.startswith("resource://")):
+                value = f'"{value}"'
             return value
         return None
 
