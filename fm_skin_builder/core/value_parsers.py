@@ -29,10 +29,12 @@ __all__ = [
     "FloatValue",
     "KeywordValue",
     "ResourceValue",
+    "VariableValue",
     "parse_css_value",
     "parse_float_value",
     "parse_keyword_value",
     "parse_resource_value",
+    "parse_variable_value",
 ]
 
 
@@ -95,9 +97,26 @@ class ResourceValue:
 
 
 @dataclass
+class VariableValue:
+    """Represents a CSS variable reference (var(--name))."""
+    variable_name: str
+
+    def __str__(self) -> str:
+        return f"var({self.variable_name})"
+
+    @property
+    def unity_variable_name(self) -> str:
+        """Get the variable name in Unity's expected format (with -- prefix)."""
+        # Ensure variable name has -- prefix
+        if not self.variable_name.startswith("--"):
+            return f"--{self.variable_name}"
+        return self.variable_name
+
+
+@dataclass
 class ParsedValue:
     """Container for a parsed CSS value with type information."""
-    value: Union[FloatValue, KeywordValue, ResourceValue, str]
+    value: Union[FloatValue, KeywordValue, ResourceValue, VariableValue, str]
     value_type: CssValueType
     raw: str
 
@@ -115,6 +134,10 @@ _URL_PATTERN = re.compile(
 )
 _RESOURCE_PATTERN = re.compile(
     r'^resource://([^/]+)/(.+)$',
+    re.IGNORECASE
+)
+_VAR_PATTERN = re.compile(
+    r'^var\s*\(\s*(--[\w-]+)\s*\)$',
     re.IGNORECASE
 )
 
@@ -268,14 +291,42 @@ def parse_resource_value(value_str: str) -> Optional[ResourceValue]:
     return ResourceValue(path=path, resource_type=resource_type)
 
 
+def parse_variable_value(value_str: str) -> Optional[VariableValue]:
+    """
+    Parse a CSS variable reference (var(--name)).
+
+    Examples:
+        - "var(--my-color)" -> VariableValue("--my-color")
+        - "var(--font-size)" -> VariableValue("--font-size")
+        - "var( --spacing )" -> VariableValue("--spacing")
+
+    Args:
+        value_str: The CSS value string to parse
+
+    Returns:
+        VariableValue if parsing succeeds, None otherwise
+    """
+    value_str = value_str.strip()
+    if not value_str:
+        return None
+
+    match = _VAR_PATTERN.match(value_str)
+    if not match:
+        return None
+
+    variable_name = match.group(1).strip()
+    return VariableValue(variable_name=variable_name)
+
+
 def parse_css_value(value_str: str, property_name: Optional[str] = None) -> Optional[ParsedValue]:
     """
     Parse a CSS value and determine its type.
 
     This function attempts to parse the value as different types in order:
-    1. Float (numeric with optional unit)
-    2. Resource reference (url(...))
-    3. Keyword/enum
+    1. Variable reference (var(--name))
+    2. Float (numeric with optional unit)
+    3. Resource reference (url(...))
+    4. Keyword/enum
 
     Args:
         value_str: The CSS value string to parse
@@ -288,7 +339,16 @@ def parse_css_value(value_str: str, property_name: Optional[str] = None) -> Opti
     if not value_str:
         return None
 
-    # Try parsing as float first (most common for dimensions)
+    # Try parsing as variable reference first (var(--name))
+    var_val = parse_variable_value(value_str)
+    if var_val is not None:
+        return ParsedValue(
+            value=var_val,
+            value_type=CssValueType.VARIABLE,
+            raw=value_str
+        )
+
+    # Try parsing as float (most common for dimensions)
     float_val = parse_float_value(value_str)
     if float_val is not None:
         return ParsedValue(

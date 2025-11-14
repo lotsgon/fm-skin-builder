@@ -38,7 +38,9 @@ from .value_parsers import (
     parse_float_value,
     parse_keyword_value,
     parse_resource_value,
+    parse_variable_value,
     CssValueType,
+    VariableValue,
 )
 from .property_handlers import (
     get_property_handler,
@@ -1365,6 +1367,23 @@ class CssPatcher:
             if sel not in existing_selector_texts
         }
 
+        # Remove duplicate selector entries (e.g., both ".test-class" and "test-class")
+        # Keep only the version WITH the dot for class selectors
+        deduplicated_selectors = set()
+        selectors_with_dots = {(sel, prop) for (sel, prop) in truly_new_selectors if sel.startswith(".")}
+        selectors_without_dots = {(sel, prop) for (sel, prop) in truly_new_selectors if not sel.startswith(".")}
+
+        for sel, prop in selectors_with_dots:
+            deduplicated_selectors.add((sel, prop))
+
+        for sel, prop in selectors_without_dots:
+            # Only add if there's no .version already
+            dot_version = f".{sel}"
+            if (dot_version, prop) not in selectors_with_dots:
+                deduplicated_selectors.add((sel, prop))
+
+        truly_new_selectors = deduplicated_selectors
+
         if truly_new_selectors:
             # Option 3: Smart Update Mode with Global Registry
             # Check if selectors exist in other stylesheets (global registry)
@@ -1722,6 +1741,19 @@ class CssPatcher:
                     setattr(value_obj, "valueIndex", value_index)
                     log.info(
                         f"  [NEW SELECTOR - color] {stylesheet_name}: {selector_text} {{ {prop_name}: {value_str}; }}"
+                    )
+
+                elif (parsed_var := parse_variable_value(value_str)) is not None:
+                    # Variable reference (var(--name))
+                    # Store the variable name in strings array and create Type 10 reference
+                    var_name = parsed_var.unity_variable_name
+                    strings.append(var_name)
+                    value_index = len(strings) - 1
+
+                    setattr(value_obj, "m_ValueType", 10)
+                    setattr(value_obj, "valueIndex", value_index)
+                    log.info(
+                        f"  [NEW SELECTOR - variable] {stylesheet_name}: {selector_text} {{ {prop_name}: {value_str}; }}"
                     )
 
                 elif (parsed_float := parse_float_value(value_str)) is not None:
