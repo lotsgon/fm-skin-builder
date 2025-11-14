@@ -23,6 +23,8 @@ from .services import (
     CssPatchService,
     TextureSwapOptions,
     TextureSwapService,
+)
+from .font_swap_service import (
     FontSwapOptions,
     FontSwapService,
 )
