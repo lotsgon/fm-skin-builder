@@ -965,6 +965,86 @@ class CssPatcher:
                                     return True
         return False
 
+    def _split_rule_for_selector(
+        self,
+        data,
+        rule_idx: int,
+        target_selector_text: str,
+        name: str,
+    ) -> int:
+        """
+        Split a shared rule so a single selector can be patched independently.
+
+        If multiple selectors share a rule, this creates a new rule with copies
+        of all properties and moves just the target selector to the new rule.
+
+        Args:
+            data: Unity stylesheet data object
+            rule_idx: Index of the rule to potentially split
+            target_selector_text: The selector we want to isolate (e.g., ".calendar-day-current")
+            name: Stylesheet name for logging
+
+        Returns:
+            The rule index to use for patching (either the new rule or the original if no split needed)
+        """
+        import copy
+
+        selectors = getattr(data, "m_ComplexSelectors", [])
+        rules = getattr(data, "m_Rules", [])
+
+        if not selectors or rule_idx >= len(rules):
+            return rule_idx
+
+        # Find all selectors pointing to this rule
+        selectors_in_rule = []
+        for sel_idx, sel in enumerate(selectors):
+            if getattr(sel, "ruleIndex", -1) == rule_idx:
+                # Get the selector text
+                for selector in getattr(sel, "m_Selectors", []):
+                    parts = getattr(selector, "m_Parts", [])
+                    sel_text = build_selector_from_parts(parts)
+                    if sel_text == target_selector_text or sel_text.lstrip(".") == target_selector_text:
+                        selectors_in_rule.append((sel_idx, sel_text))
+                        break
+
+        # If only one selector uses this rule, no split needed
+        if len(selectors_in_rule) <= 1:
+            # Check if there are other selectors with different names in this rule
+            other_selectors = []
+            for sel_idx, sel in enumerate(selectors):
+                if getattr(sel, "ruleIndex", -1) == rule_idx:
+                    for selector in getattr(sel, "m_Selectors", []):
+                        parts = getattr(selector, "m_Parts", [])
+                        sel_text = build_selector_from_parts(parts)
+                        if sel_text != target_selector_text and sel_text.lstrip(".") != target_selector_text:
+                            other_selectors.append((sel_idx, sel_text))
+                            break
+
+            if not other_selectors:
+                return rule_idx  # Only our selector uses this rule
+
+        # Multiple selectors share this rule - need to split
+        log.info(
+            f"  [RULE SPLIT] {name}: Splitting rule {rule_idx} to isolate {target_selector_text}"
+        )
+
+        # Create a deep copy of the rule
+        original_rule = rules[rule_idx]
+        new_rule = copy.deepcopy(original_rule)
+
+        # Add the new rule to the rules array
+        rules.append(new_rule)
+        new_rule_idx = len(rules) - 1
+
+        # Move only the target selector(s) to the new rule
+        for sel_idx, sel_text in selectors_in_rule:
+            setattr(selectors[sel_idx], "ruleIndex", new_rule_idx)
+            log.info(
+                f"  [RULE SPLIT] {name}: Moved {sel_text} from rule {rule_idx} to new rule {new_rule_idx}"
+            )
+
+        return new_rule_idx
+
     def _apply_patches_to_stylesheet(
         self,
         name: str,
@@ -1348,6 +1428,44 @@ class CssPatcher:
                                         f"  [PATCHED] {name}: {prop_name} (index {value_index}) → {css_match}"
                                     )
                                     changed = True
+
+        # Pre-process selector overrides: split rules where multiple selectors share a rule
+        # This prevents unintended propagation when patching one selector affects others
+        rules_to_split = {}  # Maps (selector_text, rule_idx) -> needs split
+        for rule_idx, rule in enumerate(rules):
+            selector_texts: List[str] = []
+            for sel in selectors:
+                if (
+                    hasattr(sel, "ruleIndex")
+                    and getattr(sel, "ruleIndex", -1) == rule_idx
+                ):
+                    for selector in getattr(sel, "m_Selectors", []):
+                        parts = getattr(selector, "m_Parts", [])
+                        selector_texts.append(build_selector_from_parts(parts))
+
+            # Check if any selector in this rule has overrides
+            for selector_text in selector_texts:
+                for prop in getattr(rule, "m_Properties", []):
+                    prop_name = getattr(prop, "m_Name", None)
+                    keys_to_try = [
+                        (selector_text, prop_name),
+                        (selector_text.lstrip("."), prop_name),
+                    ]
+                    for key in keys_to_try:
+                        if key in selector_overrides:
+                            # This selector has an override - mark for potential split
+                            rules_to_split[(selector_text, rule_idx)] = True
+
+        # Now actually split the rules
+        rule_index_mapping = {}  # Maps old rule_idx -> new rule_idx for selectors that got split
+        for (selector_text, old_rule_idx) in rules_to_split:
+            new_rule_idx = self._split_rule_for_selector(
+                data, old_rule_idx, selector_text, name
+            )
+            if new_rule_idx != old_rule_idx:
+                # Rule was split
+                rule_index_mapping[(selector_text, old_rule_idx)] = new_rule_idx
+                changed = True
 
         # Selector/property overrides
         for rule_idx, rule in enumerate(rules):

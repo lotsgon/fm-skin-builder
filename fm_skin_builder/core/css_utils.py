@@ -703,8 +703,27 @@ def _pick_best_value(
             vtype, idx, val = color_vals[0]
             return (val, f"type={vtype}, color[{idx}]")
 
-    # Priority order for non-color properties
-    type_priority = {11: 0, 10: 1, 3: 2, 8: 3, 4: 4, 2: 5, 1: 6, 5: 7, 7: 8}
+    # For CSS custom properties, infer the expected type from the property name
+    if prop_name.startswith('--'):
+        prop_lower = prop_name.lower()
+
+        # Numeric/dimension properties should prefer floats over variable references
+        if any(keyword in prop_lower for keyword in ['padding', 'margin', 'radius', 'spacing', 'gap',
+                                                       'width', 'height', 'size', 'thickness', 'weight',
+                                                       'offset', 'border-width']):
+            # Prefer Type 2 (float) for dimension properties
+            type_priority = {2: 0, 3: 1, 11: 2, 10: 3, 8: 4, 4: 5, 1: 6, 5: 7, 7: 8}
+        # Color properties should prefer colors or color variable references
+        elif any(keyword in prop_lower for keyword in ['color', 'colour', 'background', 'foreground',
+                                                         'tint', 'border-color']) and not any(keyword in prop_lower for keyword in ['width', 'radius', 'thickness']):
+            # Prefer Type 4 (color) and Type 10 (variable) for color properties
+            type_priority = {4: 0, 10: 1, 11: 2, 3: 3, 8: 4, 2: 5, 1: 6, 5: 7, 7: 8}
+        else:
+            # Default priority for other CSS custom properties
+            type_priority = {11: 0, 10: 1, 3: 2, 8: 3, 4: 4, 2: 5, 1: 6, 5: 7, 7: 8}
+    else:
+        # Default priority for regular properties
+        type_priority = {11: 0, 10: 1, 3: 2, 8: 3, 4: 4, 2: 5, 1: 6, 5: 7, 7: 8}
 
     sorted_values = sorted(valid_values, key=lambda x: type_priority.get(x[0], 99))
     vtype, idx, val = sorted_values[0]
