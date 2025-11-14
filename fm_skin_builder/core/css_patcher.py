@@ -178,6 +178,9 @@ def _patch_float_property(
     For shorthand properties (border-radius, padding, margin), a single value
     will be expanded to all related values (e.g., all 4 corners for border-radius).
 
+    For CSS variable definitions (--var-name), removes variable references so the
+    literal float value is shown in USS export.
+
     Returns (changed, patched_index) tuple.
     """
     parsed = parse_float_value(value_str)
@@ -190,6 +193,7 @@ def _patch_float_property(
         setattr(data, "floats", floats)
 
     values = list(getattr(prop, "m_Values", []))
+    is_css_variable = prop_name.startswith("--")
 
     # Check if this is a shorthand property that should expand to multiple values
     is_shorthand = prop_name in {"border-radius", "padding", "margin", "border-width"}
@@ -201,7 +205,7 @@ def _patch_float_property(
         if getattr(val, "m_ValueType", None) == 2
     ]
 
-    # Get all variable references (Type 3 or 10) that should be converted to floats for shorthand
+    # Get all variable references (Type 3 or 10) that should be removed for shorthand
     var_references = [
         val
         for val in values
@@ -211,6 +215,7 @@ def _patch_float_property(
     if is_shorthand and (len(float_values) > 1 or var_references):
         # Shorthand property with multiple values - update all of them
         changed = False
+        first_index = None
 
         # Update existing float values
         for val, value_index in float_values:
@@ -222,36 +227,92 @@ def _patch_float_property(
                         f"  [PATCHED - float shorthand] {name}: {prop_name} (index {value_index}): {old_value} → {float_value}"
                     )
                     changed = True
+                if first_index is None:
+                    first_index = value_index
 
-        # Convert variable references to float values
-        for val in var_references:
-            old_type = getattr(val, "m_ValueType", None)
-            old_index = getattr(val, "valueIndex", None)
+        # Remove ALL variable references and string references from the values list
+        # When user provides explicit numeric value, only keep float values
+        values_list = getattr(prop, "m_Values", [])
+        removed_any = False
+        strings = getattr(data, "strings", [])
+        # Filter out Type 3/8/10 values (variable references and strings)
+        remaining_values = []
+        for val in values_list:
+            val_type = getattr(val, "m_ValueType", None)
+            val_index = getattr(val, "valueIndex", None)
 
-            floats.append(float_value)
-            new_index = len(floats) - 1
+            # Check if this is a variable reference
+            is_var_ref = False
+            if val_type in {3, 10}:  # Variable reference types
+                is_var_ref = True
+            elif val_type == 8 and val_index is not None and 0 <= val_index < len(strings):
+                # Type 8 string that might be a variable name
+                string_val = strings[val_index]
+                if string_val and string_val.startswith('--'):
+                    is_var_ref = True
 
-            setattr(val, "m_ValueType", 2)
-            setattr(val, "valueIndex", new_index)
-            log.info(
-                f"  [PATCHED - float shorthand convert] {name}: {prop_name} (was type {old_type} index {old_index}) → {float_value} (new float index {new_index})"
-            )
+            if is_var_ref:
+                log.info(
+                    f"  [PATCHED - remove var ref] {name}: {prop_name} removed type {val_type} index {val_index}"
+                )
+                removed_any = True
+            else:
+                remaining_values.append(val)
+
+        # Replace the entire list by setting the attribute
+        if removed_any:
+            setattr(prop, "m_Values", remaining_values)
             changed = True
 
-        # Return the first index if we made changes
-        return changed, float_values[0][1] if changed and float_values else (new_index if var_references else None)
+        return changed, first_index
     elif float_values:
         # Single value property or shorthand with only one value - update the first one
         val, value_index = float_values[0]
         if value_index is not None and 0 <= value_index < len(floats):
             old_value = floats[value_index]
-            if abs(old_value - float_value) < 1e-6:  # No change
-                return False, value_index
-            floats[value_index] = float_value
-            log.info(
-                f"  [PATCHED - float] {name}: {prop_name} (index {value_index}): {old_value} → {float_value}"
-            )
-            return True, value_index
+            changed = False
+            if abs(old_value - float_value) >= 1e-6:  # Value differs
+                floats[value_index] = float_value
+                log.info(
+                    f"  [PATCHED - float] {name}: {prop_name} (index {value_index}): {old_value} → {float_value}"
+                )
+                changed = True
+
+            # For CSS variable definitions, remove ALL variable references and string references
+            # so the literal float value is shown in USS export
+            if is_css_variable:
+                values_list = getattr(prop, "m_Values", [])
+                remaining_values = []
+                removed_any = False
+                strings = getattr(data, "strings", [])
+
+                for val in values_list:
+                    val_type = getattr(val, "m_ValueType", None)
+                    val_index = getattr(val, "valueIndex", None)
+
+                    # Check if this is a variable reference
+                    is_var_ref = False
+                    if val_type in {3, 10}:  # Variable reference types
+                        is_var_ref = True
+                    elif val_type == 8 and val_index is not None and 0 <= val_index < len(strings):
+                        # Type 8 string that might be a variable name
+                        string_val = strings[val_index]
+                        if string_val and string_val.startswith('--'):
+                            is_var_ref = True
+
+                    if is_var_ref:
+                        log.info(
+                            f"  [PATCHED - remove var ref] {name}: {prop_name} removed type {val_type} index {val_index}"
+                        )
+                        removed_any = True
+                    else:
+                        remaining_values.append(val)
+
+                if removed_any:
+                    setattr(prop, "m_Values", remaining_values)
+                    changed = True
+
+            return changed, value_index if changed else None
 
     # No existing float value, create new one
     floats.append(float_value)

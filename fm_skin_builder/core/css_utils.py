@@ -204,15 +204,11 @@ def load_css_selector_properties(path: Path) -> Dict[Tuple[str, str], Any]:
     Parse selector/property pairs for all property types (not just colors).
 
     Returns a dictionary mapping (selector, property) tuples to their values.
-    """
-    # Properties that should be excluded (e.g., SVG gradient attributes)
-    EXCLUDED_PROPERTIES = {
-        "--start-colour",
-        "--end-colour",
-        "--start-color",
-        "--end-color",
-    }
 
+    Note: Unlike load_css_properties(), this does NOT exclude properties like
+    --start-colour and --end-colour, as these may be legitimately used within
+    specific selectors (e.g., for SVG gradients in specific elements).
+    """
     text = path.read_text(encoding="utf-8")
     selector_blocks = re.findall(r"(\.[\w-]+)\s*\{([^}]*)\}", text)
     selector_props: Dict[Tuple[str, str], Any] = {}
@@ -224,12 +220,6 @@ def load_css_selector_properties(path: Path) -> Dict[Tuple[str, str], Any]:
         )
         for prop, value in props:
             prop = prop.strip()
-
-            # Skip excluded properties (e.g., SVG gradient attributes)
-            if prop in EXCLUDED_PROPERTIES:
-                log.debug(f"Skipping excluded property {prop} in selector {selector}")
-                continue
-
             value = value.strip()
             if not value:
                 continue
