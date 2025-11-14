@@ -1635,29 +1635,10 @@ class CssPatcher:
 
             values_list = getattr(prop, "m_Values")
 
-            # CSS variables in Unity have a multi-value structure:
-            # 1. Type 10 (variable reference) pointing to the variable name in strings
-            # 2. The actual value (Type 4 for color, Type 2 for float, etc.)
-            # This allows var(--name) references to resolve correctly
+            # CSS variable DEFINITIONS should NOT have Type 10 reference
+            # Type 10 is only for REFERENCES like var(--name), not definitions
+            # Variable definitions just have the actual value (Type 4 for color, Type 2 for float, etc.)
 
-            # First, add Type 10 variable reference
-            # Add variable name to strings if not already there
-            var_name_index = None
-            try:
-                var_name_index = strings.index(var_name)
-            except ValueError:
-                strings.append(var_name)
-                var_name_index = len(strings) - 1
-
-            # Create Type 10 variable reference value
-            var_ref_obj = SimpleNamespace()
-            setattr(var_ref_obj, "m_ValueType", 10)
-            setattr(var_ref_obj, "valueIndex", var_name_index)
-            setattr(var_ref_obj, "m_Line", -1)
-            setattr(var_ref_obj, "m_Column", 0)
-            values_list.append(var_ref_obj)
-
-            # Now add the actual value
             # Create value object
             # Try to copy structure from existing value if available
             existing_values = []
