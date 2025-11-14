@@ -1480,34 +1480,28 @@ class CssPatcher:
         if not hasattr(data, "floats"):
             setattr(data, "floats", floats)
 
-        # Find or create root-level rule (rule with no selector)
-        # In Unity stylesheets, the first rule (index 0) is typically the root rule for variables
+        # Find the rule that already contains CSS variables
+        # CSS variables are properties starting with "--"
         root_rule = None
         selectors = getattr(data, "m_ComplexSelectors", [])
 
         if rules:
-            # Check if first rule is the root rule (no selectors pointing to it)
-            first_rule_has_selector = any(
-                getattr(sel, "ruleIndex", -1) == 0
-                for sel in selectors
-            )
-            if not first_rule_has_selector:
-                # First rule is the root rule
-                root_rule = rules[0]
-                log.debug(f"  [DEBUG] Using existing root rule at index 0 in {stylesheet_name}")
-            else:
-                # Look for any other rule without selectors
-                for i, rule in enumerate(rules):
-                    has_selector = any(
-                        getattr(sel, "ruleIndex", -1) == i
-                        for sel in selectors
-                    )
-                    if not has_selector:
-                        root_rule = rule
-                        log.debug(f"  [DEBUG] Using existing root rule at index {i} in {stylesheet_name}")
-                        break
+            # Look for a rule that already has CSS variables (properties starting with --)
+            # This is the safest approach - only add to a rule that's clearly for variables
+            for i, rule in enumerate(rules):
+                props = getattr(rule, "m_Properties", [])
+                has_variables = any(
+                    getattr(prop, "m_Name", "").startswith("--")
+                    for prop in props
+                )
+                if has_variables:
+                    root_rule = rule
+                    log.debug(f"  [DEBUG] Found existing variables rule at index {i} in {stylesheet_name}")
+                    break
 
-        # If no root rule exists, create one at the beginning
+        # If no rule with variables exists, create a NEW one
+        # DON'T insert at index 0 - this shifts all indices and can break selectors
+        # Instead, append at the end
         if root_rule is None:
             # Copy structure from existing rule if possible
             if rules:
@@ -1529,15 +1523,12 @@ class CssPatcher:
                 setattr(root_rule, "m_Line", -1)
                 setattr(root_rule, "m_Column", 0)
 
-            # Insert at the beginning (index 0) so it becomes the root rule
-            rules.insert(0, root_rule)
+            # Append at the end to avoid shifting indices
+            rules.append(root_rule)
+            new_rule_index = len(rules) - 1
 
-            # Update all selector ruleIndex to account for the shift
-            for sel in selectors:
-                old_index = getattr(sel, "ruleIndex", 0)
-                setattr(sel, "ruleIndex", old_index + 1)
+            log.info(f"  [CREATED] New variables rule at index {new_rule_index} in {stylesheet_name}")
 
-            log.info(f"  [CREATED] New root rule at index 0 in {stylesheet_name} for CSS variables")
 
 
         properties = getattr(root_rule, "m_Properties", [])

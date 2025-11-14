@@ -560,11 +560,20 @@ def _format_uss_value(
     elif value_type == 5:  # Resource path
         if 0 <= value_index < len(strings):
             path = strings[value_index]
+            # For very long paths (project:// URIs), quote them for readability
+            if path and (path.startswith("project://") or path.startswith("resource://")):
+                return f'url("{path}")'
             return f"url('{path}')"
         return None
 
-    elif value_type == 7:  # Enum (integer)
-        # Enum values are stored as integers in the index itself
+    elif value_type == 7:  # Enum/Resource (Unity stores resource paths as Type 7 sometimes)
+        # Check if this is actually a string index pointing to a resource URL
+        if 0 <= value_index < len(strings):
+            value = strings[value_index]
+            # If it's a project:// or resource:// URL, quote it
+            if value and (value.startswith("project://") or value.startswith("resource://")):
+                return f'"{value}"'
+        # Otherwise it's an integer enum value
         return str(value_index)
 
     elif value_type == 8:  # String literal
