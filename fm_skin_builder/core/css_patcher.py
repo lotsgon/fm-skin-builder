@@ -1790,6 +1790,22 @@ class CssPatcher:
         setattr(complex_selector, "ruleIndex", rule_index)
         setattr(complex_selector, "m_Selectors", [])
 
+        # Calculate specificity based on selector type
+        # Unity USS specificity: ID=100, Class=10, Element=1, Universal=0
+        specificity = 0
+        if selector_text.startswith("#"):
+            specificity = 100  # ID selector
+        elif selector_text.startswith("."):
+            specificity = 10   # Class selector
+        elif selector_text.startswith(":"):
+            specificity = 10   # Pseudo-class selector (same as class)
+        elif selector_text == "*":
+            specificity = 0    # Universal selector
+        else:
+            specificity = 1    # Element selector
+
+        setattr(complex_selector, "m_Specificity", specificity)
+
         # Create a simple selector with parts
         simple_selector = SimpleNamespace()
         setattr(simple_selector, "m_Parts", [])
