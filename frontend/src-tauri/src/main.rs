@@ -7,7 +7,10 @@ mod paths;
 mod process;
 
 use cache::{clear_cache, get_app_version, get_cache_size, get_platform_info, open_cache_dir};
-use commands::{ensure_skins_dir, get_cache_dir, get_default_skins_dir, select_folder};
+use commands::{
+    download_and_install_update, ensure_skins_dir, get_cache_dir, get_default_skins_dir,
+    select_folder,
+};
 use paths::{detect_game_installation, find_bundles_in_game_dir};
 use process::{run_python_task, stop_python_task, ProcessState};
 use tauri::Manager;
@@ -32,7 +35,8 @@ fn main() {
             clear_cache,
             open_cache_dir,
             get_app_version,
-            get_platform_info
+            get_platform_info,
+            download_and_install_update
         ])
         .setup(|app| {
             // Create skins directory on app startup
