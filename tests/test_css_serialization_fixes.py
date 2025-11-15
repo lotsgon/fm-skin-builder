@@ -19,8 +19,10 @@ class TestValueTypeInterpretation:
         """Test Type 1 (keyword) is interpreted correctly."""
         from fm_skin_builder.core.css_utils import _format_uss_value
 
+        # Type 1 uses StyleKeyword enum values, not strings array indices
+        # Enum: 0=undefined, 1=null, 2=auto, 3=none, 4=initial, 6=none
         strings = ["auto", "center", "none"]
-        result = _format_uss_value(1, 0, strings, [], [], [], "width")
+        result = _format_uss_value(1, 2, strings, [], [], [], "width")  # enum 2 = auto
         assert result == "auto"
 
     def test_type_2_float_dimension(self):
@@ -233,18 +235,25 @@ class TestKeywordPropertyHandling:
         """Test Type 1 values are NOT wrapped in var() even if they start with --."""
         from fm_skin_builder.core.css_utils import _format_uss_value
 
-        # Type 1 should return the value as-is without var() wrapping
+        # Type 1 uses StyleKeyword enum values, not strings array
+        # Enum: 0=undefined, 1=null, 2=auto, 3=none, 4=initial, 6=none
         strings = ["flex", "none", "--midnight-alpha-80"]
 
-        result = _format_uss_value(1, 0, strings, [], [], [], "display")
-        assert result == "flex"
-
-        result = _format_uss_value(1, 1, strings, [], [], [], "display")
+        result = _format_uss_value(
+            1, 3, strings, [], [], [], "display"
+        )  # enum 3 = none
         assert result == "none"
 
-        # Even if Type 1 contains a variable name, it shouldn't be wrapped
-        result = _format_uss_value(1, 2, strings, [], [], [], "display")
-        assert result == "--midnight-alpha-80"
+        result = _format_uss_value(
+            1, 6, strings, [], [], [], "display"
+        )  # enum 6 = none
+        assert result == "none"
+
+        # Type 1 returns enum keywords directly, not from strings array
+        result = _format_uss_value(
+            1, 2, strings, [], [], [], "display"
+        )  # enum 2 = auto
+        assert result == "auto"
         assert not result.startswith("var(")
 
     def test_type_7_keyword_no_var_wrapping(self):

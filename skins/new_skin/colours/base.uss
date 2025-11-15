@@ -260,31 +260,31 @@
 
   /* --global-radius-extra-small: 10px; */
 
-  --border-radius-radius-0: 0px;
+  /* --border-radius-radius-0: 0px;
   --border-radius-radius-12: 0px;
   --border-radius-radius-16: 0px;
   --border-radius-radius-2: 0px;
   --border-radius-radius-4: 0px;
-  --border-radius-radius-8: 0px;
+  --border-radius-radius-8: 0px; */
 
-  --numbers-border-radius-extra-large: 0px;
-  --numbers-border-radius-extra-small: 0px;
-  --numbers-border-radius-large: 0px;
-  --numbers-border-radius-medium: 0px;
-  --numbers-border-radius-medium-small: 0px;
-  --numbers-border-radius-null: 0px;
-  --numbers-border-radius-small: 0px;
+  /* --numbers-border-radius-extra-large: 60px;
+  --numbers-border-radius-extra-small: 60px;
+  --numbers-border-radius-large: 60px;
+  --numbers-border-radius-medium: 60px;
+  --numbers-border-radius-medium-small: 60px;
+  --numbers-border-radius-null: 60px;
+  --numbers-border-radius-small: 60px; */
 
 
-  --main-header-height: 150px;
+  /* --main-header-height: 150px;
   --main-header-height-fmc: 150px;
   --main-header-secondary-tab-height: 50px;
   --main-header-tab-height: 80px;
 
 
-  --main-card-report-height: 500px;
+  --main-card-report-height: 500px; */
 
-
+  /*
   --padding-padding-0: 4px;
   --padding-padding-12: 4px;
   --padding-padding-16: 4px;
@@ -292,10 +292,10 @@
   --padding-padding-24: 4px;
   --padding-padding-32: 4px;
   --padding-padding-4: 4px;
-  --padding-padding-8: 4px;
+  --padding-padding-8: 4px; */
 
 
-  --spacing-border-standard: 4px;
+  /* --spacing-border-standard: 4px;
   --spacing-extra-large---64: 4px;
   --spacing-extra-small---4: 4px;
   --spacing-large---24: 4px;
@@ -312,16 +312,20 @@
   --spacing-padding-small---8: 4px;
   --spacing-padding-tiles: 4px;
   --spacing-small---8: 4px;
-  --spacing-tiles: 4px;
+  --spacing-tiles: 4px; */
 
 
   --pitch-tile-default-background: #e30ee3;
 
-  /* .frames-player-attributes-full-block-size-min-rows {
-    border-width: 20px;
+  .frames-player-attributes-full-block-size-min-rows {
+    /* border-width: 20px; */
     border-color: #08e708;
-    border-radius: 8px;
-  } */
+    /* border-radius: 8px; */
+  }
+
+  .frames-player-attributes-full-block-size-max-rows {
+    border-radius: var(--spacing-padding-tiles);
+  }
 
   /* .frames-player-attributes-full-block-size-mid-player-attributes-property-3-compact {
     flex-direction: --row-direction-normal;

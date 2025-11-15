@@ -17,16 +17,71 @@ __all__ = [
     "build_selector_from_parts",
     "serialize_stylesheet_to_uss",
     "clean_for_json",
+    "is_css_variable_reference",
+    "is_color_token",
+    "tokenize_css_value",
+    "apply_value_patch_preserve",
+    "safe_parse_float",
 ]
 
 
 _HEX_SHORTHAND_PATTERN = re.compile(r"^#([0-9a-fA-F]{3,4})$")
 _HEX_FULL_PATTERN = re.compile(r"^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
 _RGB_PATTERN = re.compile(r"^rgba?\(([^)]+)\)$", re.IGNORECASE)
+_HEX_COLOR_RE = re.compile(r"^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
+_RGBA_FUNC_RE = re.compile(r"^rgba?\(")
+_FLOAT_RE = re.compile(r"^[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?")
 
 
 def _clamp(value: float, minimum: float, maximum: float) -> float:
     return max(minimum, min(maximum, value))
+
+
+def safe_parse_float(value: object, default: Optional[float] = None) -> Optional[float]:
+    """
+    Parse a numeric value from strings like "8px" or "8.0", but return `default`
+    when parsing fails or when value is empty. Do NOT coerce invalid values to 0.0.
+
+    This prevents silent conversion of invalid/missing values to 0.0, which can
+    overwrite original stylesheet values with zeros.
+
+    Args:
+        value: Value to parse (can be str, int, float, or None)
+        default: Value to return if parsing fails (default: None)
+
+    Returns:
+        Parsed float value, or default if parsing fails
+
+    Examples:
+        >>> safe_parse_float("8px")
+        8.0
+        >>> safe_parse_float("8.5")
+        8.5
+        >>> safe_parse_float("")
+        None
+        >>> safe_parse_float("invalid", 0.0)
+        0.0
+        >>> safe_parse_float(None)
+        None
+    """
+    if value is None:
+        return default
+
+    if isinstance(value, (int, float)):
+        return float(value)
+
+    s = str(value).strip()
+    if s == "":
+        return default
+
+    match = _FLOAT_RE.match(s)
+    if not match:
+        return default
+
+    try:
+        return float(match.group(0))
+    except (ValueError, AttributeError):
+        return default
 
 
 def _parse_rgb_component(token: str) -> Optional[int]:
@@ -116,6 +171,10 @@ def load_css_vars(path: Path) -> Dict[str, str]:
     """Parse a .css/.uss file for `--var: <color>;` pairs with hex/rgb/rgba support."""
 
     text = path.read_text(encoding="utf-8")
+
+    # Strip CSS comments (/* ... */) before parsing
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+
     matches = re.findall(r"--([\w-]+)\s*:\s*([^;]+);", text)
     css: Dict[str, str] = {}
     for name, value in matches:
@@ -137,6 +196,10 @@ def load_css_selector_overrides(path: Path) -> Dict[Tuple[str, str], str]:
     """Parse selector/property -> colour pairs (hex/rgb/rgba)."""
 
     text = path.read_text(encoding="utf-8")
+
+    # Strip CSS comments (/* ... */) before parsing
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+
     selector_blocks = re.findall(r"(\.[\w-]+)\s*\{([^}]*)\}", text)
     selector_overrides: Dict[Tuple[str, str], str] = {}
     for selector, block in selector_blocks:
@@ -171,6 +234,11 @@ def load_css_properties(path: Path) -> Dict[str, Any]:
     }
 
     text = path.read_text(encoding="utf-8")
+
+    # Strip CSS comments (/* ... */) before parsing to avoid matching commented-out properties
+    # This prevents accidentally applying "overrides" that are commented out
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+
     matches = re.findall(r"--([\w-]+)\s*:\s*([^;]+);", text)
     properties: Dict[str, Any] = {}
 
@@ -210,6 +278,10 @@ def load_css_selector_properties(path: Path) -> Dict[Tuple[str, str], Any]:
     specific selectors (e.g., for SVG gradients in specific elements).
     """
     text = path.read_text(encoding="utf-8")
+
+    # Strip CSS comments (/* ... */) before parsing
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.DOTALL)
+
     selector_blocks = re.findall(r"(\.[\w-]+)\s*\{([^}]*)\}", text)
     selector_props: Dict[Tuple[str, str], Any] = {}
 
@@ -271,6 +343,105 @@ def hex_to_rgba(hex_color: str) -> tuple[float, float, float, float]:
         raise ValueError(f"Failed to parse hex color {hex_color}: {e}")
 
     return r, g, b, a
+
+
+def is_css_variable_reference(s: str) -> bool:
+    """Check if a string is a CSS variable reference (starts with -- or var())."""
+    if not isinstance(s, str):
+        return False
+    s_stripped = s.strip()
+    return s_stripped.startswith("--") or s_stripped.startswith("var(")
+
+
+def is_color_token(token: str) -> bool:
+    """Check if a token is a color value (hex or rgba())."""
+    t = token.strip()
+    return bool(_HEX_COLOR_RE.match(t)) or bool(_RGBA_FUNC_RE.match(t))
+
+
+def tokenize_css_value(s: str) -> List[str]:
+    """
+    Lightweight tokenizer: split on whitespace but preserve parenthesized functions as single token.
+
+    Args:
+        s: CSS value string (e.g., "1px solid #fff" or "rgba(255, 0, 0, 0.5)")
+
+    Returns:
+        List of tokens (e.g., ["1px", "solid", "#fff"])
+    """
+    if not isinstance(s, str):
+        return []
+    s = s.strip()
+    tokens: List[str] = []
+    buf = []
+    depth = 0
+    for ch in s:
+        if ch == "(":
+            depth += 1
+            buf.append(ch)
+        elif ch == ")":
+            depth -= 1
+            buf.append(ch)
+        elif ch.isspace() and depth == 0:
+            if buf:
+                tokens.append("".join(buf))
+                buf = []
+        else:
+            buf.append(ch)
+    if buf:
+        tokens.append("".join(buf))
+    return tokens
+
+
+def apply_value_patch_preserve(original: str, replacement: str) -> str:
+    """
+    Safely apply a replacement into original property value.
+
+    Rules:
+    - If original contains CSS variables (--*) -> skip (return original)
+    - If replacement has same token count -> replace token-wise
+    - If replacement is single color and original contains color tokens -> replace only color tokens
+    - Otherwise, fallback to replacing the first token or whole value based on heuristic
+
+    Args:
+        original: Original CSS value string
+        replacement: Replacement CSS value string
+
+    Returns:
+        Patched CSS value string
+    """
+    orig_tokens = tokenize_css_value(original)
+    rep_tokens = tokenize_css_value(replacement)
+
+    # Skip variable references entirely
+    if any(is_css_variable_reference(t) for t in orig_tokens):
+        return original
+
+    # Direct replace if token counts match
+    if len(rep_tokens) == len(orig_tokens) and len(orig_tokens) > 0:
+        return " ".join(rep_tokens)
+
+    # If replacement is single color, replace color tokens in original
+    if len(rep_tokens) == 1 and is_color_token(rep_tokens[0]):
+        new = []
+        replaced = False
+        for tok in orig_tokens:
+            if is_color_token(tok):
+                new.append(rep_tokens[0])
+                replaced = True
+            else:
+                new.append(tok)
+        if replaced:
+            return " ".join(new)
+        # If no color tokens found, fallthrough to safe fallback
+
+    # Fallback heuristics:
+    # - if original is single token, replace it
+    if len(orig_tokens) <= 1:
+        return replacement
+
+    # - otherwise keep original (safer) or replace only first token - choose keeping original
+    return original
 
 
 def build_selector_from_parts(parts) -> str:

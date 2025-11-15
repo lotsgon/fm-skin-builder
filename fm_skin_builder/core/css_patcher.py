@@ -34,6 +34,8 @@ from .css_utils import (
     hex_to_rgba,
     serialize_stylesheet_to_uss,
     normalize_css_color,
+    is_color_token,
+    tokenize_css_value,
 )
 from .value_parsers import (
     parse_float_value,
@@ -164,12 +166,46 @@ def _is_color_property(prop_name: str, value: Any) -> bool:
         if normalize_css_color(value_stripped) is not None:
             return True
 
+        # Check if it's a multi-token value containing a color token
+        # (e.g., "1px solid #111111")
+        tokens = tokenize_css_value(value_stripped)
+        if any(is_color_token(tok) for tok in tokens):
+            return True
+
     # Otherwise check if the property name suggests it's a color
     inferred_type = _infer_property_type_from_name(prop_name)
     if inferred_type is not None:
         return inferred_type == 4
 
     return False
+
+
+def _extract_color_from_value(value_str: str) -> Optional[str]:
+    """
+    Extract the color token from a CSS value string.
+
+    Args:
+        value_str: CSS value string (e.g., "1px solid #111111" or "#00ff00")
+
+    Returns:
+        The color token (e.g., "#111111") or None if no color found
+    """
+    value_stripped = value_str.strip()
+
+    # If it's already a pure color, normalize and return it
+    normalized = normalize_css_color(value_stripped)
+    if normalized:
+        return normalized
+
+    # Otherwise, tokenize and find the first color token
+    tokens = tokenize_css_value(value_stripped)
+    for tok in tokens:
+        if is_color_token(tok):
+            normalized = normalize_css_color(tok)
+            if normalized:
+                return normalized
+
+    return None
 
 
 def _patch_float_property(
@@ -343,6 +379,23 @@ def _patch_float_property(
         setattr(handle, "valueIndex", new_index)
         log.info(
             f"  [PATCHED - float] {name}: {prop_name} (new index {new_index}) → {float_value}"
+        )
+        return True, new_index
+
+    # Property doesn't exist - create a new value object and add it to the property
+    if values or hasattr(prop, "m_Values"):
+        # Property exists but has no suitable values - create new value
+        # Try to get the value type from existing values, or create a simple namespace
+        val_type = type(values[0]) if values else type(SimpleNamespace())
+        new_val = (
+            val_type() if val_type is not type(SimpleNamespace()) else SimpleNamespace()
+        )
+        setattr(new_val, "m_ValueType", 2)
+        setattr(new_val, "valueIndex", new_index)
+        values.append(new_val)
+        setattr(prop, "m_Values", values)
+        log.info(
+            f"  [PATCHED - float new] {name}: {prop_name} (created new index {new_index}) → {float_value}"
         )
         return True, new_index
 
@@ -925,10 +978,17 @@ class CssPatcher:
                                     None,
                                 )
                                 if css_match:
-                                    r, g, b, a = hex_to_rgba(css_match)
-                                    col = data.colors[value_index]
-                                    if (col.r, col.g, col.b, col.a) != (r, g, b, a):
-                                        return True
+                                    # Extract color if multi-token (though css_vars should already be normalized)
+                                    color_value = (
+                                        _extract_color_from_value(css_match)
+                                        if isinstance(css_match, str)
+                                        else css_match
+                                    )
+                                    if color_value:
+                                        r, g, b, a = hex_to_rgba(color_value)
+                                        col = data.colors[value_index]
+                                        if (col.r, col.g, col.b, col.a) != (r, g, b, a):
+                                            return True
 
         # Selector/property overrides
         selectors = (
@@ -1479,15 +1539,22 @@ class CssPatcher:
                                 None,
                             )
                             if css_match:
-                                r, g, b, a = hex_to_rgba(css_match)
-                                col = colors[value_index]
-                                if (col.r, col.g, col.b, col.a) != (r, g, b, a):
-                                    col.r, col.g, col.b, col.a = r, g, b, a
-                                    patched_direct += 1
-                                    log.info(
-                                        f"  [PATCHED] {name}: {prop_name} (index {value_index}) → {css_match}"
-                                    )
-                                    changed = True
+                                # Extract color if multi-token (though css_vars should already be normalized)
+                                color_value = (
+                                    _extract_color_from_value(css_match)
+                                    if isinstance(css_match, str)
+                                    else css_match
+                                )
+                                if color_value:
+                                    r, g, b, a = hex_to_rgba(color_value)
+                                    col = colors[value_index]
+                                    if (col.r, col.g, col.b, col.a) != (r, g, b, a):
+                                        col.r, col.g, col.b, col.a = r, g, b, a
+                                        patched_direct += 1
+                                        log.info(
+                                            f"  [PATCHED] {name}: {prop_name} (index {value_index}) → {css_match}"
+                                        )
+                                        changed = True
 
         # Pre-process selector overrides: split rules where multiple selectors share a rule
         # This prevents unintended propagation when patching one selector affects others
@@ -1592,14 +1659,39 @@ class CssPatcher:
                                     strings.append(var_name)
                                 var_index = strings.index(var_name)
 
-                                # Update the first value to Type 10 (variable reference)
+                                # IMPORTANT: Clear all existing values and create a new single value
+                                # This prevents broken triplets from leaving orphaned Type 2/Type 8 values
+                                old_type = None
+                                old_index = None
                                 if values:
-                                    val = values[0]
-                                    old_type = getattr(val, "m_ValueType", None)
-                                    old_index = getattr(val, "valueIndex", None)
+                                    old_type = getattr(values[0], "m_ValueType", None)
+                                    old_index = getattr(values[0], "valueIndex", None)
+                                    # Get the type of value object we need to create
+                                    val_type = type(values[0])
+                                else:
+                                    # No existing values - need to create from scratch
+                                    # Import the StyleValueHandle type if we can find it
+                                    val_type = None
+                                    for existing_rule in rules:
+                                        for existing_prop in getattr(
+                                            existing_rule, "m_Properties", []
+                                        ):
+                                            existing_vals = getattr(
+                                                existing_prop, "m_Values", []
+                                            )
+                                            if existing_vals:
+                                                val_type = type(existing_vals[0])
+                                                break
+                                        if val_type:
+                                            break
 
-                                    setattr(val, "m_ValueType", 10)
-                                    setattr(val, "valueIndex", var_index)
+                                if val_type:
+                                    # Create a new value object
+                                    new_val = val_type()
+                                    setattr(new_val, "m_ValueType", 10)
+                                    setattr(new_val, "valueIndex", var_index)
+                                    # Replace the entire values array with just this single value
+                                    setattr(prop, "m_Values", [new_val])
 
                                     patched_vars += 1
                                     changed = True
@@ -1637,7 +1729,16 @@ class CssPatcher:
                                 # entry instead of modifying existing ones. This prevents unintended
                                 # global propagation to other selectors that may share the same color index.
                                 values = list(getattr(prop, "m_Values", []))
-                                r, g, b, a = hex_to_rgba(value_str)
+
+                                # Extract color from potentially multi-token value (e.g., "1px solid #111111")
+                                color_value = _extract_color_from_value(value_str)
+                                if not color_value:
+                                    log.warning(
+                                        f"  [WARN] Could not extract color from value '{value_str}' for {key} in {name}"
+                                    )
+                                    continue
+
+                                r, g, b, a = hex_to_rgba(color_value)
 
                                 # Find existing Type 4 value to replace
                                 replacement_handle = next(
@@ -1673,18 +1774,31 @@ class CssPatcher:
                                 colors.append(new_color)
                                 new_index = len(colors) - 1
 
-                                # Update the value to point to the new color
+                                # IMPORTANT: Clear all existing values and create a new single value
+                                # This prevents broken triplets from leaving orphaned Type 2/Type 8 values
                                 old_index = getattr(
                                     replacement_handle, "valueIndex", None
                                 )
-                                setattr(replacement_handle, "m_ValueType", 4)
-                                setattr(replacement_handle, "valueIndex", new_index)
+                                old_type = getattr(
+                                    replacement_handle, "m_ValueType", None
+                                )
+
+                                # Get the type of value object we need to create
+                                val_type = type(replacement_handle)
+
+                                # Create a new value object
+                                new_val = val_type()
+                                setattr(new_val, "m_ValueType", 4)
+                                setattr(new_val, "valueIndex", new_index)
+
+                                # Replace the entire values array with just this single value
+                                setattr(prop, "m_Values", [new_val])
 
                                 patched_vars += 1
                                 direct_property_patched_indices.add(new_index)
                                 changed = True
                                 log.info(
-                                    f"  [PATCHED - selector/property] {name}: {key} (new color index {new_index}, was {old_index}) → {value_str}"
+                                    f"  [PATCHED - selector/property] {name}: {key} (new color index {new_index}, was type {old_type} index {old_index}) → {value_str}"
                                 )
 
                                 try:
@@ -2388,8 +2502,15 @@ class CssPatcher:
                     )
 
                 elif _is_color_property(prop_name, value_str):
-                    # Color value
-                    r, g, b, a = hex_to_rgba(value_str)
+                    # Color value - extract from potentially multi-token value
+                    color_value = _extract_color_from_value(value_str)
+                    if not color_value:
+                        log.warning(
+                            f"  [WARN] Could not extract color from value '{value_str}' for new selector {selector_text}"
+                        )
+                        continue
+
+                    r, g, b, a = hex_to_rgba(color_value)
                     new_color = _build_unity_color(colors, r, g, b, a)
                     colors.append(new_color)
                     value_index = len(colors) - 1
