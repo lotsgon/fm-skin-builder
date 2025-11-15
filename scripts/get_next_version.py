@@ -12,8 +12,9 @@ Commit types that trigger version bumps:
 - Other types (docs, chore, style, test): No version bump
 
 Beta versions:
-- Format: X.Y.Z-{build-number} (e.g., 0.2.0-123)
-- Build number from GITHUB_RUN_NUMBER (in CI) or git commit count (locally)
+- Format: X.Y.Z-{build-number} (e.g., 0.3.0-1, 0.3.0-2, etc.)
+- Build number starts at 1 for first beta of a new version
+- Subsequent betas for same version increment the build number
 - Numeric-only to comply with Windows MSI requirements (< 65535)
 - "Beta" status indicated by GitHub release tags and R2 beta/ path
 """
@@ -149,9 +150,61 @@ def get_commit_sha(short: bool = True) -> str:
     return run_git_command([c for c in cmd if c])
 
 
-def get_build_number() -> str:
-    """Get build number from environment or generate from commit count."""
-    # Try to get from GitHub Actions
+def get_latest_beta_number(version: Tuple[int, int, int]) -> int:
+    """
+    Get the highest beta number for a specific version.
+
+    Args:
+        version: Version tuple (major, minor, patch)
+
+    Returns:
+        Highest beta number found, or 0 if no betas exist for this version
+    """
+    version_str = f"{version[0]}.{version[1]}.{version[2]}"
+
+    try:
+        # Get all tags matching this version with beta suffix
+        tags = run_git_command(
+            ["git", "tag", "-l", f"v{version_str}-*", "--sort=-version:refname"]
+        )
+        if not tags:
+            return 0
+
+        # Find highest beta number
+        highest = 0
+        for tag in tags.split("\n"):
+            # Match pattern: v0.3.0-123
+            match = re.match(rf"^v?{re.escape(version_str)}-(\d+)$", tag)
+            if match:
+                beta_num = int(match.group(1))
+                highest = max(highest, beta_num)
+
+        return highest
+    except Exception:
+        return 0
+
+
+def get_build_number(version: Optional[Tuple[int, int, int]] = None) -> str:
+    """
+    Get build number for beta releases.
+
+    For a new version (no existing betas), starts at 1.
+    For existing version betas, increments from highest existing beta number.
+
+    Args:
+        version: Optional version tuple to check for existing betas
+    """
+    # If version provided, check for existing beta tags
+    if version:
+        latest_beta = get_latest_beta_number(version)
+        if latest_beta > 0:
+            # Increment from existing beta
+            return str(latest_beta + 1)
+        else:
+            # First beta for this version
+            return "1"
+
+    # Fallback for old behavior (shouldn't be reached with new code)
     import os
 
     build_num = os.environ.get("GITHUB_RUN_NUMBER")
@@ -227,7 +280,8 @@ def main():
     # Add beta suffix if requested
     # Use numeric-only format for MSI compatibility (no "beta" text)
     if args.beta:
-        build_num = get_build_number()
+        # Pass version to get smart beta numbering (starts at 1 for new versions)
+        build_num = get_build_number(next_version)
         version_str = f"{version_str}-{build_num}"
 
     print(version_str)
