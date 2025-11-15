@@ -54,66 +54,95 @@ def calculate_file_hash(file_path: Path) -> str:
     return sha256_hash.hexdigest()
 
 
-def get_artifact_info(artifacts_dir: Path, version: str) -> Dict[str, Any]:
-    """Extract artifact information from build artifacts."""
+def get_artifact_info(artifacts_dir: Path, version: str, is_beta: bool = False) -> Dict[str, Any]:
+    """
+    Extract artifact information from build artifacts.
+
+    Returns a dict with platform keys containing:
+    - Tauri updater info (url, signature for .tar.gz/.zip archives)
+    - User installer info (download links for .dmg, .exe, .AppImage, .deb)
+    """
     platforms = {}
 
-    # Map file extensions to platform info
-    platform_map = {
-        ".AppImage": {"platform": "linux", "arch": "x86_64"},
-        ".deb": {"platform": "linux", "arch": "x86_64", "format": "deb"},
-        ".msi": {"platform": "windows", "arch": "x86_64"},
-        ".exe": {"platform": "windows", "arch": "x86_64", "format": "nsis"},
-    }
+    # Base URL for downloads
+    base_path = "beta" if is_beta else "releases"
+    base_url = f"https://release.fmskinbuilder.com/{base_path}/{version}"
 
     # Find all artifacts
     for root, _, files in os.walk(artifacts_dir):
         for file in files:
             file_path = Path(root) / file
+            file_size = file_path.stat().st_size
 
-            # Skip signature files and other non-installer files
-            if (
-                file.endswith(".sig")
-                or file.endswith(".blockmap")
-                or file.endswith(".yml")
-            ):
-                continue
+            # Determine platform and architecture from filename
+            platform_key = None
+            is_updater = False
+            is_installer = False
+            installer_format = None
 
-            # Check file extension
-            for ext, info in platform_map.items():
-                if file.endswith(ext):
-                    # Calculate hash
-                    file_hash = calculate_file_hash(file_path)
-                    file_size = file_path.stat().st_size
+            # macOS updater files (.app.tar.gz)
+            if file.endswith(".app.tar.gz") and not file.endswith(".sig"):
+                is_updater = True
+                if "aarch64" in file.lower() or "arm64" in file.lower():
+                    platform_key = "darwin-aarch64"
+                else:
+                    platform_key = "darwin-x86_64"
 
-                    # Determine platform key
-                    platform = info["platform"]
-                    arch = info["arch"]
-                    format_type = info.get("format", ext.lstrip("."))
+            # macOS installers (.dmg)
+            elif file.endswith(".dmg"):
+                is_installer = True
+                installer_format = "dmg"
+                if "aarch64" in file.lower() or "arm64" in file.lower():
+                    platform_key = "darwin-aarch64"
+                else:
+                    platform_key = "darwin-x86_64"
 
-                    # Handle macOS special cases
-                    if file.endswith(".dmg"):
-                        if "arm64" in file.lower() or "aarch64" in file.lower():
-                            arch = "aarch64"
-                            platform = "darwin"
-                        elif "intel" in file.lower() or "x86_64" in file.lower():
-                            arch = "x86_64"
-                            platform = "darwin"
-                        format_type = "dmg"
+            # Windows updater files (.msi.zip)
+            elif file.endswith(".msi.zip") and not file.endswith(".sig"):
+                is_updater = True
+                platform_key = "windows-x86_64"
 
-                    # Create platform entry
-                    key = f"{platform}-{arch}"
-                    if key not in platforms:
-                        platforms[key] = []
+            # Windows installers (MSI only - Tauri preferred format)
+            elif file.endswith(".msi") and not file.endswith(".msi.zip"):
+                is_installer = True
+                installer_format = "msi"
+                platform_key = "windows-x86_64"
 
-                    platforms[key].append(
-                        {
-                            "url": f"https://releases.fm-skin-builder.com/{'beta' if '-beta' in version else 'releases'}/{version}/{file}",
-                            "signature": file_hash,
-                            "format": format_type,
-                            "size": file_size,
-                        }
-                    )
+            # Linux updater files (.AppImage.tar.gz)
+            elif file.endswith(".AppImage.tar.gz") and not file.endswith(".sig"):
+                is_updater = True
+                platform_key = "linux-x86_64"
+
+            # Linux installers (.AppImage, .deb)
+            elif file.endswith(".AppImage") and not file.endswith(".tar.gz"):
+                is_installer = True
+                installer_format = "AppImage"
+                platform_key = "linux-x86_64"
+            elif file.endswith(".deb"):
+                is_installer = True
+                installer_format = "deb"
+                platform_key = "linux-x86_64"
+
+            # Initialize platform entry if needed
+            if platform_key and platform_key not in platforms:
+                platforms[platform_key] = {"installers": []}
+
+            # Add updater info (for Tauri)
+            if is_updater and platform_key:
+                sig_file = file_path.parent / f"{file}.sig"
+                if sig_file.exists():
+                    platforms[platform_key]["url"] = f"{base_url}/{file}"
+                    platforms[platform_key]["signature"] = sig_file.read_text().strip()
+
+            # Add installer info (for website downloads)
+            if is_installer and platform_key and installer_format:
+                platforms[platform_key]["installers"].append(
+                    {
+                        "url": f"{base_url}/{file}",
+                        "format": installer_format,
+                        "size": file_size,
+                    }
+                )
 
     return platforms
 
@@ -122,11 +151,9 @@ def get_current_metadata(s3, bucket: str) -> Dict[str, Any]:
     """Get current releases.json from R2, or return default structure."""
     try:
         response = s3.get_object(Bucket=bucket, Key="releases.json")
-        data = json.loads(response["Body"].read().decode("utf-8"))
-        print("✅ Found existing releases.json")
-        return data
-    except s3.exceptions.NoSuchKey:
-        print("ℹ️  releases.json not found, creating new structure")
+        return json.loads(response["Body"].read().decode("utf-8"))
+    except Exception:
+        # File doesn't exist yet, return default
         return {
             "stable": None,
             "beta": None,
@@ -161,7 +188,7 @@ def update_metadata(
     releases = get_current_metadata(s3, bucket)
 
     # Get artifact information
-    platforms = get_artifact_info(artifacts_dir, version)
+    platforms = get_artifact_info(artifacts_dir, version, is_beta)
 
     # Create release entry
     release_entry = {
@@ -179,58 +206,72 @@ def update_metadata(
 
     releases["last_updated"] = datetime.utcnow().isoformat() + "Z"
 
-    # Add to all_releases if not already present
-    if "all_releases" not in releases:
-        releases["all_releases"] = []
+    # Upload full metadata for website (with stable/beta structure)
+    print("\nUploading full metadata for website...")
+    s3.put_object(
+        Bucket=bucket,
+        Key="releases.json",
+        Body=json.dumps(metadata, indent=2),
+        ContentType="application/json",
+        CacheControl="max-age=300",  # Cache for 5 minutes
+    )
 
-    # Check if this version is already in all_releases
-    existing_versions = [r.get("version") for r in releases["all_releases"]]
-    if version not in existing_versions:
-        releases["all_releases"].append(release_entry)
-
-    # Upload releases.json
-    print("\nUploading releases.json...")
-    try:
+    # Upload Tauri-compatible latest.json (stable only)
+    if metadata["stable"]:
+        stable_metadata = {
+            "version": metadata["stable"]["version"],
+            "pub_date": metadata["stable"]["date"],
+            "platforms": metadata["stable"]["platforms"],
+            "notes": metadata["stable"]["notes"],
+        }
         s3.put_object(
             Bucket=bucket,
-            Key="releases.json",
-            Body=json.dumps(releases, indent=2),
-            ContentType="application/json",
-            CacheControl="max-age=300",  # Cache for 5 minutes
-        )
-        print("✅ releases.json uploaded successfully")
-    except Exception as e:
-        print(f"❌ Failed to upload releases.json: {e}")
-        sys.exit(1)
-
-    # Upload latest.json (stable) or latest-beta.json (beta)
-    latest_key = "latest-beta.json" if is_beta else "latest.json"
-    latest_metadata = {
-        "version": version,
-        "pub_date": release_entry["date"],
-        "platforms": platforms,
-        "notes": release_notes,
-    }
-
-    print(f"Uploading {latest_key}...")
-    try:
-        s3.put_object(
-            Bucket=bucket,
-            Key=latest_key,
-            Body=json.dumps(latest_metadata, indent=2),
+            Key="latest.json",
+            Body=json.dumps(stable_metadata, indent=2),
             ContentType="application/json",
             CacheControl="max-age=300",
         )
-        print(f"✅ {latest_key} uploaded successfully")
-    except Exception as e:
-        print(f"❌ Failed to upload {latest_key}: {e}")
-        sys.exit(1)
+        print("✅ Stable metadata uploaded as latest.json")
+    else:
+        # No stable release yet, use default structure
+        s3.put_object(
+            Bucket=bucket,
+            Key="latest.json",
+            Body=json.dumps(
+                {
+                    "version": "0.0.0",
+                    "pub_date": datetime.utcnow().isoformat() + "Z",
+                    "platforms": {},
+                    "notes": "No stable release available",
+                },
+                indent=2,
+            ),
+            ContentType="application/json",
+            CacheControl="max-age=300",
+        )
+        print("✅ Default metadata uploaded as latest.json")
+
+    # Upload beta-specific latest.json for beta users
+    if metadata["beta"]:
+        beta_metadata = {
+            "version": metadata["beta"]["version"],
+            "pub_date": metadata["beta"]["date"],
+            "platforms": metadata["beta"]["platforms"],
+            "notes": metadata["beta"]["notes"],
+        }
+        s3.put_object(
+            Bucket=bucket,
+            Key="latest-beta.json",
+            Body=json.dumps(beta_metadata, indent=2),
+            ContentType="application/json",
+            CacheControl="max-age=300",
+        )
+        print("✅ Beta metadata uploaded as latest-beta.json")
 
     print("✅ Metadata updated successfully")
     print("\nCurrent releases:")
-    stable_info = releases.get("stable")
-    if stable_info:
-        print(f"  Stable: {stable_info.get('version', 'unknown')}")
+    if metadata["stable"]:
+        print(f"  Stable: {metadata['stable']['version']}")
     else:
         print("  Stable: None")
 

@@ -1,151 +1,55 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use rfd::FileDialog;
-use serde::{Deserialize, Serialize};
-use std::{path::PathBuf, process::Command};
-use tauri::{path::BaseDirectory, AppHandle, Manager};
+mod cache;
+mod commands;
+mod events;
+mod paths;
+mod process;
 
-#[derive(Serialize)]
-struct CommandResult {
-    stdout: String,
-    stderr: String,
-    status: i32,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct TaskConfig {
-    skin_path: String,
-    bundles_path: String,
-    debug_export: bool,
-    dry_run: bool,
-}
-
-fn workspace_root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .and_then(|path| path.parent())
-        .map(|path| path.to_path_buf())
-        .unwrap_or_else(|| PathBuf::from("."))
-}
-
-fn python_command() -> PathBuf {
-    let root = workspace_root();
-    let mut unix_path = root.clone();
-    unix_path.push(".venv/bin/python3");
-
-    if unix_path.exists() {
-        return unix_path;
-    }
-
-    let mut win_path = root.clone();
-    win_path.push(".venv/Scripts/python.exe");
-    if win_path.exists() {
-        return win_path;
-    }
-
-    if cfg!(windows) {
-        PathBuf::from("python.exe")
-    } else {
-        PathBuf::from("python3")
-    }
-}
-
-fn build_cli_args(config: &TaskConfig) -> Result<Vec<String>, String> {
-    let skin = config.skin_path.trim();
-    if skin.is_empty() {
-        return Err("Skin folder is required.".to_string());
-    }
-
-    let mut args = vec!["patch".to_string(), skin.to_string()];
-
-    let bundles = config.bundles_path.trim();
-    if !bundles.is_empty() {
-        args.push("--bundle".to_string());
-        args.push(bundles.to_string());
-    }
-
-    if config.debug_export {
-        args.push("--debug-export".to_string());
-    }
-
-    if config.dry_run {
-        args.push("--dry-run".to_string());
-    }
-
-    Ok(args)
-}
-
-#[tauri::command]
-fn run_python_task(app_handle: AppHandle, config: TaskConfig) -> Result<CommandResult, String> {
-    let cli_args = build_cli_args(&config)?;
-
-    let mut command = if cfg!(debug_assertions) {
-        let mut cmd = Command::new(python_command());
-        cmd.arg("-m").arg("fm_skin_builder");
-        cmd.current_dir(workspace_root());
-        cmd.env("PYTHONPATH", "fm_skin_builder");
-        cmd
-    } else {
-        // Determine binary name with correct extension
-        // Note: resources are bundled with their directory structure intact
-        let binary_name = if cfg!(windows) {
-            "resources/backend/fm_skin_builder.exe"
-        } else {
-            "resources/backend/fm_skin_builder"
-        };
-
-        let backend_binary = app_handle
-            .path()
-            .resolve(binary_name, BaseDirectory::Resource)
-            .map_err(|error| format!("Failed to resolve backend binary path: {error}"))?;
-
-        if !backend_binary.exists() {
-            return Err(format!(
-                "Backend binary not found at: {}\nExpected binary name: {}",
-                backend_binary.display(),
-                binary_name
-            ));
-        }
-
-        Command::new(backend_binary)
-    };
-
-    command.args(&cli_args);
-
-    let output = command
-        .output()
-        .map_err(|error| format!("Failed to run backend: {error}"))?;
-
-    Ok(CommandResult {
-        stdout: String::from_utf8_lossy(&output.stdout).to_string(),
-        stderr: String::from_utf8_lossy(&output.stderr).to_string(),
-        status: output.status.code().unwrap_or(-1),
-    })
-}
-
-#[tauri::command]
-fn select_folder(dialog_title: Option<String>, initial_path: Option<String>) -> Option<String> {
-    let mut dialog = FileDialog::new();
-
-    if let Some(title) = dialog_title {
-        dialog = dialog.set_title(&title);
-    }
-
-    if let Some(path) = initial_path {
-        if !path.trim().is_empty() {
-            dialog = dialog.set_directory(path);
-        }
-    }
-
-    dialog
-        .pick_folder()
-        .map(|folder| folder.to_string_lossy().to_string())
-}
+use cache::{clear_cache, get_app_version, get_cache_size, get_platform_info, open_cache_dir};
+use commands::{
+    download_and_install_update, ensure_skins_dir, get_cache_dir, get_default_skins_dir,
+    select_folder,
+};
+use paths::{detect_game_installation, find_bundles_in_game_dir};
+use process::{run_python_task, stop_python_task, ProcessState};
+use tauri::Manager;
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![run_python_task, select_folder])
+        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(ProcessState::default())
+        .invoke_handler(tauri::generate_handler![
+            run_python_task,
+            stop_python_task,
+            select_folder,
+            get_default_skins_dir,
+            ensure_skins_dir,
+            get_cache_dir,
+            detect_game_installation,
+            find_bundles_in_game_dir,
+            get_cache_size,
+            clear_cache,
+            open_cache_dir,
+            get_app_version,
+            get_platform_info,
+            download_and_install_update
+        ])
+        .setup(|app| {
+            // Create skins directory on app startup
+            let app_handle = app.handle().clone();
+            if let Ok(document_dir) = app_handle.path().document_dir() {
+                let skins_dir = document_dir.join("FM Skin Builder");
+                if !skins_dir.exists() {
+                    let _ = std::fs::create_dir_all(&skins_dir);
+                }
+            }
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

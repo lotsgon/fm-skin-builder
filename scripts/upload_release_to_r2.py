@@ -79,15 +79,20 @@ def upload_artifacts(
 
         for file in files:
             file_path = Path(root) / file
-            # Only upload actual release files
-            if file_path.suffix in [
-                ".dmg",
-                ".app",
-                ".exe",
-                ".msi",
-                ".deb",
-                ".AppImage",
-            ] or file_path.name.endswith(".tar.gz"):
+            # Only upload actual release files (user installers + updater files)
+            if (
+                file_path.suffix
+                in [
+                    ".dmg",  # macOS installer
+                    ".exe",  # Windows NSIS installer
+                    ".msi",  # Windows MSI installer
+                    ".deb",  # Linux Debian package
+                    ".AppImage",  # Linux AppImage
+                    ".sig",  # Tauri updater signature files
+                    ".zip",  # Windows updater archive
+                ]
+                or file_path.name.endswith(".tar.gz")  # macOS/Linux updater archives
+            ):
                 artifact_files.append(file_path)
 
     if not artifact_files:
@@ -131,6 +136,10 @@ def upload_artifacts(
 
 def get_content_type(file_path: Path) -> str:
     """Get appropriate content type for file."""
+    # Handle .tar.gz specially since it has two extensions
+    if file_path.name.endswith(".tar.gz"):
+        return "application/gzip"
+
     suffix = file_path.suffix.lower()
     content_types = {
         ".dmg": "application/x-apple-diskimage",
@@ -138,8 +147,8 @@ def get_content_type(file_path: Path) -> str:
         ".msi": "application/x-msi",
         ".deb": "application/vnd.debian.binary-package",
         ".AppImage": "application/x-executable",
-        ".tar.gz": "application/gzip",
         ".zip": "application/zip",
+        ".sig": "application/octet-stream",  # Tauri signature file
     }
     return content_types.get(suffix, "application/octet-stream")
 

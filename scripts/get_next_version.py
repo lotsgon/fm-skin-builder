@@ -10,6 +10,12 @@ Commit types that trigger version bumps:
 - feat: Minor version bump (e.g., 0.1.0 -> 0.2.0)
 - fix, perf, refactor: Patch version bump (e.g., 0.1.0 -> 0.1.1)
 - Other types (docs, chore, style, test): No version bump
+
+Beta versions:
+- Format: X.Y.Z-{build-number} (e.g., 0.2.0-123)
+- Build number from GITHUB_RUN_NUMBER (in CI) or git commit count (locally)
+- Numeric-only to comply with Windows MSI requirements (< 65535)
+- "Beta" status indicated by GitHub release tags and R2 beta/ path
 """
 
 import argparse
@@ -41,10 +47,13 @@ def get_latest_tag() -> Optional[str]:
         if not tags:
             return None
 
-        # Find first tag that matches semver pattern
+        # Find first tag that matches semver pattern (with or without pre-release)
         for tag in tags.split("\n"):
+            # Match: v0.2.0 or v0.2.0-beta.123 or 0.2.0
             if re.match(r"^v?\d+\.\d+\.\d+", tag):
-                return tag.lstrip("v")
+                # Strip 'v' prefix and any pre-release suffix for version parsing
+                version = tag.lstrip("v").split("-")[0]
+                return version
 
         return None
     except Exception:
@@ -140,6 +149,26 @@ def get_commit_sha(short: bool = True) -> str:
     return run_git_command([c for c in cmd if c])
 
 
+def get_build_number() -> str:
+    """Get build number from environment or generate from commit count."""
+    # Try to get from GitHub Actions
+    import os
+
+    build_num = os.environ.get("GITHUB_RUN_NUMBER")
+    if build_num:
+        return build_num
+
+    # Fallback: count commits on current branch
+    try:
+        count = run_git_command(["git", "rev-list", "--count", "HEAD"])
+        return count
+    except Exception:
+        # Last resort: use timestamp
+        import time
+
+        return str(int(time.time()) % 65535)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Determine next version based on conventional commits"
@@ -147,7 +176,7 @@ def main():
     parser.add_argument(
         "--beta",
         action="store_true",
-        help="Generate beta version with commit SHA (e.g., 0.2.0-beta.abc123)",
+        help="Generate beta version with build number (e.g., 0.2.0-123 - numeric only for MSI compatibility)",
     )
     parser.add_argument(
         "--current",
@@ -196,9 +225,10 @@ def main():
     version_str = f"{next_version[0]}.{next_version[1]}.{next_version[2]}"
 
     # Add beta suffix if requested
+    # Use numeric-only format for MSI compatibility (no "beta" text)
     if args.beta:
-        sha = get_commit_sha(short=True)
-        version_str = f"{version_str}-beta.{sha}"
+        build_num = get_build_number()
+        version_str = f"{version_str}-{build_num}"
 
     print(version_str)
 

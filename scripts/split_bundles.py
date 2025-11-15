@@ -163,11 +163,22 @@ def list_and_split_bundles(
 
             for obj in page["Contents"]:
                 key = obj["Key"]
-                # Only include .bundle files
+                # Only include .bundle files, but exclude backup/modified files
                 if key.endswith(".bundle"):
+                    # Skip backup and modified bundles
+                    skip_patterns = [
+                        "_modified.bundle",
+                        ".bundle.bak",
+                        ".bak",
+                        "_temp.bundle",
+                        ".tmp",
+                    ]
+                    if any(key.endswith(pattern) for pattern in skip_patterns):
+                        print(f"  ⏭️  Skipping backup/modified: {key.split('/')[-1]}")
+                        continue
                     bundle_keys.append(key)
 
-        print(f"✅ Found {len(bundle_keys)} bundle files")
+        print(f"✅ Found {len(bundle_keys)} bundle files (after filtering backups)")
 
     except Exception as e:
         print(f"❌ Error listing bundles: {e}")

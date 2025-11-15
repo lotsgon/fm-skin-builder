@@ -11,11 +11,13 @@ This document answers your questions and provides a merge plan.
 We should merge this branch to `main` first, then create `beta` from `main`.
 
 **Why:**
+
 - Workflows need to exist in default branch to work
 - Beta branch will inherit the workflows when created
 - Keeps history clean
 
 **Steps:**
+
 ```bash
 # 1. Commit everything on current branch
 git add .
@@ -41,6 +43,7 @@ I just updated the workflows:
 - ✅ **Beta releases**: Artifacts attached to GitHub Release (marked as pre-release)
 
 **Benefits:**
+
 - Artifacts available in two places (R2 + GitHub)
 - Can verify R2 uploads match GitHub artifacts
 - Users can download from GitHub if R2 has issues
@@ -49,21 +52,23 @@ I just updated the workflows:
 **How it works:**
 
 **For Stable Releases (tags):**
+
 ```yaml
 - name: Create GitHub Release
   uses: softprops/action-gh-release@v1
   with:
-    files: artifacts/**/*  # ← Attaches all build artifacts
+    files: artifacts/**/* # ← Attaches all build artifacts
 ```
 
 **For Beta Releases (beta branch):**
+
 ```yaml
 - name: Create GitHub Release (Beta)
   uses: softprops/action-gh-release@v1
   with:
-    tag_name: ${{ version }}  # e.g., 0.2.0-beta.abc123
-    prerelease: true          # ← Marked as pre-release
-    files: artifacts/**/*     # ← Attaches all build artifacts
+    tag_name: ${{ version }} # e.g., 0.2.0-beta.abc123
+    prerelease: true # ← Marked as pre-release
+    files: artifacts/**/* # ← Attaches all build artifacts
 ```
 
 ### Q3: Latest release metadata for auto-updates?
@@ -73,6 +78,7 @@ I just updated the workflows:
 Created `scripts/update_latest_metadata.py` that maintains:
 
 **`latest.json` at root of R2:**
+
 ```json
 {
   "stable": {
@@ -98,6 +104,7 @@ Created `scripts/update_latest_metadata.py` that maintains:
 ```
 
 **Version-specific metadata:**
+
 ```
 /metadata/0.2.0.json
 /metadata/0.2.0-beta.abc123.json
@@ -106,20 +113,22 @@ Created `scripts/update_latest_metadata.py` that maintains:
 **Usage:**
 
 **Website downloads:**
+
 ```typescript
-const data = await fetch('https://releases.fm-skin-builder.com/latest.json');
+const data = await fetch("https://release.fmskinbuilder.com/latest.json");
 const { stable, beta } = await data.json();
 
 // Get latest stable download
-const windowsUrl = stable.platforms['windows-x86_64'][0].url;
+const windowsUrl = stable.platforms["windows-x86_64"][0].url;
 ```
 
 **Tauri auto-updater:**
+
 ```json
 {
   "tauri": {
     "updater": {
-      "endpoints": ["https://releases.fm-skin-builder.com/latest.json"]
+      "endpoints": ["https://release.fmskinbuilder.com/latest.json"]
     }
   }
 }
@@ -130,12 +139,15 @@ See [AUTO_UPDATES.md](.github/AUTO_UPDATES.md) for complete docs.
 ## What Was Changed
 
 ### New Files
+
 1. **Workflows:**
+
    - `.github/workflows/ci.yml` - Tests only (cheap)
    - `.github/workflows/auto-tag.yml` - Auto version tagging
    - `.github/workflows/build-app.yml` - Full builds (expensive, controlled)
 
 2. **Scripts:**
+
    - `scripts/get_next_version.py` - Calculate version from commits
    - `scripts/version.sh` - User-friendly version helper
    - `scripts/upload_release_to_r2.py` - Upload artifacts to R2
@@ -151,11 +163,13 @@ See [AUTO_UPDATES.md](.github/AUTO_UPDATES.md) for complete docs.
    - `.github/AUTO_UPDATES.md` - Auto-update system docs
 
 ### Modified Files
+
 - Removed: `.github/workflows/release.yml` (merged into build-app.yml)
 
 ## Complete Workflow After Merge
 
 ### 1. Daily Development
+
 ```bash
 git checkout beta
 git checkout -b feat/my-feature
@@ -168,6 +182,7 @@ git commit -m "feat: add feature"
 ```
 
 ### 2. Create Release
+
 ```bash
 # Create PR: beta → main, merge
 # → Auto-tags v0.2.0
@@ -225,6 +240,7 @@ git push -u origin beta
 ### Step 3: Set Up R2
 
 Add to GitHub Secrets:
+
 ```
 R2_ACCOUNT_ID
 R2_ACCESS_KEY
@@ -232,6 +248,7 @@ R2_SECRET_ACCESS_KEY
 ```
 
 Add to GitHub Variables:
+
 ```
 R2_RELEASES_BUCKET=your-bucket-name
 ```
@@ -291,6 +308,7 @@ After everything is set up:
 ## Questions?
 
 Check the documentation:
+
 - Quick start: [RELEASE_PROCESS.md](.github/RELEASE_PROCESS.md)
 - Branch model: [BRANCH_STRATEGY.md](.github/BRANCH_STRATEGY.md)
 - Auto-updates: [AUTO_UPDATES.md](.github/AUTO_UPDATES.md)

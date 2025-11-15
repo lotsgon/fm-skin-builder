@@ -116,17 +116,3 @@ class CatalogueExporter:
         indent = 2 if self.pretty else None
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=indent)
-
-
-def create_version_directory_name(fm_version: str, catalogue_version: int) -> str:
-    """
-    Create directory name for a catalogue version.
-
-    Args:
-        fm_version: FM version (e.g., "2026.4.0")
-        catalogue_version: Catalogue version (e.g., 2)
-
-    Returns:
-        Directory name (e.g., "2026.4.0-v2")
-    """
-    return f"{fm_version}-v{catalogue_version}"

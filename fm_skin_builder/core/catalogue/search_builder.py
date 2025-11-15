@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Dict, List, Any
 from collections import defaultdict
 
-from .models import CSSVariable, CSSClass, Sprite, Texture
+from .models import CSSVariable, CSSClass, Sprite, Texture, Font
 
 
 class SearchIndexBuilder:
@@ -20,6 +20,7 @@ class SearchIndexBuilder:
         css_classes: List[CSSClass],
         sprites: List[Sprite],
         textures: List[Texture],
+        fonts: List[Font] = None,
     ) -> Dict[str, Any]:
         """
         Build comprehensive search index.
@@ -29,16 +30,22 @@ class SearchIndexBuilder:
             css_classes: List of CSS classes
             sprites: List of sprites
             textures: List of textures
+            fonts: List of fonts (optional for backward compatibility)
 
         Returns:
             Search index dictionary
         """
+        fonts = fonts or []
+
         index = {
             "color_palette": self._build_color_palette(
                 css_variables, sprites, textures
             ),
             "tags": self._build_tag_index(
                 css_variables, css_classes, sprites, textures
+            ),
+            "changes": self._build_change_index(
+                css_variables, css_classes, sprites, textures, fonts
             ),
         }
 
@@ -144,3 +151,80 @@ class SearchIndexBuilder:
                 tag_index[tag]["textures"].append(texture.name)
 
         return dict(tag_index)
+
+    def _build_change_index(
+        self,
+        css_variables: List[CSSVariable],
+        css_classes: List[CSSClass],
+        sprites: List[Sprite],
+        textures: List[Texture],
+        fonts: List[Font],
+    ) -> Dict[str, Dict[str, List[str]]]:
+        """
+        Build change status index for filtering assets by change type.
+
+        Args:
+            css_variables: CSS variables
+            css_classes: CSS classes
+            sprites: Sprites
+            textures: Textures
+            fonts: Fonts
+
+        Returns:
+            Dictionary mapping change statuses to assets by type
+        """
+        change_index = {
+            "new": {
+                "css_variables": [],
+                "css_classes": [],
+                "sprites": [],
+                "textures": [],
+                "fonts": [],
+            },
+            "modified": {
+                "css_variables": [],
+                "css_classes": [],
+                "sprites": [],
+                "textures": [],
+                "fonts": [],
+            },
+            "unchanged": {
+                "css_variables": [],
+                "css_classes": [],
+                "sprites": [],
+                "textures": [],
+                "fonts": [],
+            },
+        }
+
+        # Index CSS variables by change status
+        for var in css_variables:
+            status = var.change_status or "unchanged"
+            if status in change_index:
+                change_index[status]["css_variables"].append(var.name)
+
+        # Index CSS classes by change status
+        for cls in css_classes:
+            status = cls.change_status or "unchanged"
+            if status in change_index:
+                change_index[status]["css_classes"].append(cls.name)
+
+        # Index sprites by change status
+        for sprite in sprites:
+            status = sprite.change_status or "unchanged"
+            if status in change_index:
+                change_index[status]["sprites"].append(sprite.name)
+
+        # Index textures by change status
+        for texture in textures:
+            status = texture.change_status or "unchanged"
+            if status in change_index:
+                change_index[status]["textures"].append(texture.name)
+
+        # Index fonts by change status
+        for font in fonts:
+            status = font.change_status or "unchanged"
+            if status in change_index:
+                change_index[status]["fonts"].append(font.name)
+
+        return change_index

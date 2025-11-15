@@ -1,6 +1,7 @@
 # Auto-Update System
 
 This document explains the auto-update metadata system used for:
+
 - Website download links (latest stable/beta)
 - Tauri auto-updater (checking for updates)
 
@@ -18,13 +19,13 @@ This file contains information about the latest stable and beta releases:
     "platforms": {
       "linux-x86_64": [
         {
-          "url": "https://releases.fm-skin-builder.com/releases/0.2.0/fm-skin-builder-linux-x86_64.AppImage",
+          "url": "https://release.fmskinbuilder.com/releases/0.2.0/fm-skin-builder-linux-x86_64.AppImage",
           "signature": "sha256_hash_here",
           "format": "AppImage",
           "size": 12345678
         },
         {
-          "url": "https://releases.fm-skin-builder.com/releases/0.2.0/fm-skin-builder-linux-x86_64.deb",
+          "url": "https://release.fmskinbuilder.com/releases/0.2.0/fm-skin-builder-linux-x86_64.deb",
           "signature": "sha256_hash_here",
           "format": "deb",
           "size": 12345678
@@ -32,7 +33,7 @@ This file contains information about the latest stable and beta releases:
       ],
       "windows-x86_64": [
         {
-          "url": "https://releases.fm-skin-builder.com/releases/0.2.0/fm-skin-builder-windows-x86_64.msi",
+          "url": "https://release.fmskinbuilder.com/releases/0.2.0/fm-skin-builder-windows-x86_64.msi",
           "signature": "sha256_hash_here",
           "format": "msi",
           "size": 12345678
@@ -40,7 +41,7 @@ This file contains information about the latest stable and beta releases:
       ],
       "darwin-aarch64": [
         {
-          "url": "https://releases.fm-skin-builder.com/releases/0.2.0/fm-skin-builder-macos-arm64.dmg",
+          "url": "https://release.fmskinbuilder.com/releases/0.2.0/fm-skin-builder-macos-arm64.dmg",
           "signature": "sha256_hash_here",
           "format": "dmg",
           "size": 12345678
@@ -48,7 +49,7 @@ This file contains information about the latest stable and beta releases:
       ],
       "darwin-x86_64": [
         {
-          "url": "https://releases.fm-skin-builder.com/releases/0.2.0/fm-skin-builder-macos-intel.dmg",
+          "url": "https://release.fmskinbuilder.com/releases/0.2.0/fm-skin-builder-macos-intel.dmg",
           "signature": "sha256_hash_here",
           "format": "dmg",
           "size": 12345678
@@ -89,7 +90,7 @@ Each release also has version-specific metadata:
 ### Fetch Latest Stable Release
 
 ```typescript
-const response = await fetch('https://releases.fm-skin-builder.com/latest.json');
+const response = await fetch("https://release.fmskinbuilder.com/latest.json");
 const data = await response.json();
 
 if (data.stable) {
@@ -97,17 +98,17 @@ if (data.stable) {
   const platforms = data.stable.platforms;
 
   // Get download URLs for each platform
-  const linuxAppImage = platforms['linux-x86_64'][0].url;
-  const windowsMsi = platforms['windows-x86_64'][0].url;
-  const macARM = platforms['darwin-aarch64'][0].url;
-  const macIntel = platforms['darwin-x86_64'][0].url;
+  const linuxAppImage = platforms["linux-x86_64"][0].url;
+  const windowsMsi = platforms["windows-x86_64"][0].url;
+  const macARM = platforms["darwin-aarch64"][0].url;
+  const macIntel = platforms["darwin-x86_64"][0].url;
 }
 ```
 
 ### Fetch Latest Beta Release
 
 ```typescript
-const response = await fetch('https://releases.fm-skin-builder.com/latest.json');
+const response = await fetch("https://release.fmskinbuilder.com/latest.json");
 const data = await response.json();
 
 if (data.beta) {
@@ -151,7 +152,9 @@ if (data.beta) {
 
 <script>
   async function loadDownloads() {
-    const response = await fetch('https://releases.fm-skin-builder.com/latest.json');
+    const response = await fetch(
+      "https://release.fmskinbuilder.com/latest.json"
+    );
     const data = await response.json();
 
     if (!data.stable) return;
@@ -159,45 +162,58 @@ if (data.beta) {
     const { version, platforms } = data.stable;
 
     // Update version
-    document.getElementById('version').textContent = `v${version}`;
+    document.getElementById("version").textContent = `v${version}`;
 
     // Update Windows
-    const windowsDownload = platforms['windows-x86_64']?.[0];
+    const windowsDownload = platforms["windows-x86_64"]?.[0];
     if (windowsDownload) {
-      document.getElementById('windows-download').href = windowsDownload.url;
-      document.getElementById('windows-checksum').textContent =
-        `SHA256: ${windowsDownload.signature.substring(0, 16)}...`;
+      document.getElementById("windows-download").href = windowsDownload.url;
+      document.getElementById(
+        "windows-checksum"
+      ).textContent = `SHA256: ${windowsDownload.signature.substring(
+        0,
+        16
+      )}...`;
     }
 
     // Update macOS ARM
-    const macArmDownload = platforms['darwin-aarch64']?.[0];
+    const macArmDownload = platforms["darwin-aarch64"]?.[0];
     if (macArmDownload) {
-      document.getElementById('mac-arm-download').href = macArmDownload.url;
-      document.getElementById('mac-arm-checksum').textContent =
-        `SHA256: ${macArmDownload.signature.substring(0, 16)}...`;
+      document.getElementById("mac-arm-download").href = macArmDownload.url;
+      document.getElementById(
+        "mac-arm-checksum"
+      ).textContent = `SHA256: ${macArmDownload.signature.substring(0, 16)}...`;
     }
 
     // Update macOS Intel
-    const macIntelDownload = platforms['darwin-x86_64']?.[0];
+    const macIntelDownload = platforms["darwin-x86_64"]?.[0];
     if (macIntelDownload) {
-      document.getElementById('mac-intel-download').href = macIntelDownload.url;
-      document.getElementById('mac-intel-checksum').textContent =
-        `SHA256: ${macIntelDownload.signature.substring(0, 16)}...`;
+      document.getElementById("mac-intel-download").href = macIntelDownload.url;
+      document.getElementById(
+        "mac-intel-checksum"
+      ).textContent = `SHA256: ${macIntelDownload.signature.substring(
+        0,
+        16
+      )}...`;
     }
 
     // Update Linux
-    const linuxAppImage = platforms['linux-x86_64']?.find(p => p.format === 'AppImage');
-    const linuxDeb = platforms['linux-x86_64']?.find(p => p.format === 'deb');
+    const linuxAppImage = platforms["linux-x86_64"]?.find(
+      (p) => p.format === "AppImage"
+    );
+    const linuxDeb = platforms["linux-x86_64"]?.find((p) => p.format === "deb");
 
     if (linuxAppImage) {
-      document.getElementById('linux-appimage-download').href = linuxAppImage.url;
+      document.getElementById("linux-appimage-download").href =
+        linuxAppImage.url;
     }
     if (linuxDeb) {
-      document.getElementById('linux-deb-download').href = linuxDeb.url;
+      document.getElementById("linux-deb-download").href = linuxDeb.url;
     }
     if (linuxAppImage) {
-      document.getElementById('linux-checksum').textContent =
-        `SHA256: ${linuxAppImage.signature.substring(0, 16)}...`;
+      document.getElementById(
+        "linux-checksum"
+      ).textContent = `SHA256: ${linuxAppImage.signature.substring(0, 16)}...`;
     }
   }
 
@@ -214,9 +230,7 @@ if (data.beta) {
   "tauri": {
     "updater": {
       "active": true,
-      "endpoints": [
-        "https://releases.fm-skin-builder.com/latest.json"
-      ],
+      "endpoints": ["https://release.fmskinbuilder.com/latest.json"],
       "dialog": true,
       "pubkey": "YOUR_PUBLIC_KEY_HERE"
     }
@@ -227,9 +241,9 @@ if (data.beta) {
 ### Check for Updates (Manual)
 
 ```typescript
-import { check } from '@tauri-apps/plugin-updater';
-import { ask, message } from '@tauri-apps/plugin-dialog';
-import { relaunch } from '@tauri-apps/plugin-process';
+import { check } from "@tauri-apps/plugin-updater";
+import { ask, message } from "@tauri-apps/plugin-dialog";
+import { relaunch } from "@tauri-apps/plugin-process";
 
 async function checkForUpdates() {
   const update = await check();
@@ -238,10 +252,10 @@ async function checkForUpdates() {
     const yes = await ask(
       `Update to ${update.version} is available!\n\nRelease notes: ${update.body}`,
       {
-        title: 'Update Available',
-        kind: 'info',
-        okLabel: 'Update',
-        cancelLabel: 'Later'
+        title: "Update Available",
+        kind: "info",
+        okLabel: "Update",
+        cancelLabel: "Later",
       }
     );
 
@@ -250,9 +264,9 @@ async function checkForUpdates() {
       await relaunch();
     }
   } else {
-    await message('You are on the latest version!', {
-      title: 'No Updates',
-      kind: 'info'
+    await message("You are on the latest version!", {
+      title: "No Updates",
+      kind: "info",
     });
   }
 }
@@ -261,7 +275,7 @@ async function checkForUpdates() {
 ### Auto-Check on Startup
 
 ```typescript
-import { check } from '@tauri-apps/plugin-updater';
+import { check } from "@tauri-apps/plugin-updater";
 
 async function checkForUpdatesOnStartup() {
   try {
@@ -271,12 +285,12 @@ async function checkForUpdatesOnStartup() {
       console.log(`Update available: ${update.version}`);
     }
   } catch (error) {
-    console.error('Update check failed:', error);
+    console.error("Update check failed:", error);
   }
 }
 
 // Call on app startup
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener("DOMContentLoaded", () => {
   checkForUpdatesOnStartup();
 });
 ```
@@ -287,10 +301,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
 ```typescript
 // Store user preference
-const channel = localStorage.getItem('update-channel') || 'stable';
+const channel = localStorage.getItem("update-channel") || "stable";
 
-async function checkForUpdates(useChannel: 'stable' | 'beta' = channel) {
-  const response = await fetch('https://releases.fm-skin-builder.com/latest.json');
+async function checkForUpdates(useChannel: "stable" | "beta" = channel) {
+  const response = await fetch("https://release.fmskinbuilder.com/latest.json");
   const data = await response.json();
 
   const releaseInfo = data[useChannel];
@@ -300,8 +314,8 @@ async function checkForUpdates(useChannel: 'stable' | 'beta' = channel) {
 }
 
 // UI for switching channels
-function switchChannel(channel: 'stable' | 'beta') {
-  localStorage.setItem('update-channel', channel);
+function switchChannel(channel: "stable" | "beta") {
+  localStorage.setItem("update-channel", channel);
   checkForUpdates(channel);
 }
 ```
@@ -309,11 +323,13 @@ function switchChannel(channel: 'stable' | 'beta') {
 ## CDN Caching
 
 The `latest.json` file has a 5-minute cache:
+
 ```
 Cache-Control: max-age=300
 ```
 
 This means:
+
 - Users won't hammer R2 on every check
 - Updates propagate within 5 minutes
 - Cloudflare CDN can cache it globally
@@ -323,11 +339,13 @@ This means:
 ### Signature Verification
 
 Each file includes a SHA256 hash:
+
 ```json
 "signature": "sha256_hash_here"
 ```
 
 Users can verify downloads:
+
 ```bash
 # Linux/macOS
 sha256sum fm-skin-builder-linux-x86_64.AppImage
@@ -366,12 +384,14 @@ For local development, serve a mock `latest.json`:
     "version": "1.0.0",
     "date": "2025-01-15T10:00:00Z",
     "platforms": {
-      "windows-x86_64": [{
-        "url": "http://localhost:3000/test.msi",
-        "signature": "test",
-        "format": "msi",
-        "size": 1000
-      }]
+      "windows-x86_64": [
+        {
+          "url": "http://localhost:3000/test.msi",
+          "signature": "test",
+          "format": "msi",
+          "size": 1000
+        }
+      ]
     }
   }
 }
@@ -380,27 +400,31 @@ For local development, serve a mock `latest.json`:
 ## Monitoring
 
 Check metadata is updating:
+
 ```bash
 # View current metadata
-curl https://releases.fm-skin-builder.com/latest.json | jq
+curl https://release.fmskinbuilder.com/latest.json | jq
 
 # Check last update time
-curl https://releases.fm-skin-builder.com/latest.json | jq .last_updated
+curl https://release.fmskinbuilder.com/latest.json | jq .last_updated
 ```
 
 ## Troubleshooting
 
 ### Metadata not updating
+
 - Check R2 credentials in GitHub Secrets
 - Check GitHub Actions logs for errors
 - Verify bucket name matches
 
 ### Old version showing
+
 - Wait 5 minutes (cache TTL)
 - Check that build completed successfully
 - Verify metadata script ran in workflow
 
 ### Downloads not working
+
 - Verify R2 bucket is publicly accessible
 - Check CORS configuration on R2
 - Verify URLs in metadata are correct

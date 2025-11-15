@@ -3,9 +3,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Tuple, Any, Set
 from types import SimpleNamespace
+import gc
 import json
 import os
 import shutil
+import sys
 import UnityPy
 
 try:
@@ -1053,7 +1055,13 @@ class SkinPatchPipeline:
         texture_replacements_total = 0
         texture_bundles_written = 0
 
-        for bundle_path in bundle_files:
+        log.info(f"\n📦 Processing {len(bundle_files)} bundle(s)...")
+
+        for bundle_index, bundle_path in enumerate(bundle_files, start=1):
+            log.info(
+                f"\n=== Processing bundle {bundle_index} of {len(bundle_files)}: {bundle_path.name} ==="
+            )
+            sys.stdout.flush()  # Ensure immediate output for real-time streaming
             report = self._process_bundle(
                 bundle_path,
                 css_service=css_service,
@@ -1081,6 +1089,17 @@ class SkinPatchPipeline:
                 texture_bundles_written += 1
 
             bundle_reports.append(report)
+
+        # Completion summary
+        log.info(f"\n✅ Completed processing {len(bundle_files)} bundle(s)")
+        log.info(f"   CSS bundles modified: {css_bundles_modified}")
+        log.info(f"   Texture replacements: {texture_replacements_total}")
+        if texture_bundles_written > 0:
+            log.info(f"   Texture bundles written: {texture_bundles_written}")
+        sys.stdout.flush()
+
+        # Final cleanup
+        gc.collect()
 
         return PipelineResult(
             bundle_reports=bundle_reports,

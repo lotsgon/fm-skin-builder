@@ -23,22 +23,20 @@ class AssetStatus(str, Enum):
 class CatalogueMetadata(BaseModel):
     """Metadata about the entire catalogue."""
 
-    catalogue_version: int = Field(
-        ..., description="Catalogue rebuild version (e.g., 2)"
-    )
     fm_version: str = Field(..., description="FM game version (e.g., '2026.4.0')")
-    schema_version: str = Field(
-        default="1.0.0", description="Catalogue data format version"
-    )
+    schema_version: str = Field(default="2.1.0", description="Catalogue data format version")
     generated_at: datetime = Field(default_factory=datetime.utcnow)
     bundles_scanned: List[str] = Field(default_factory=list)
     total_assets: Dict[str, int] = Field(
         default_factory=dict,
         description="Asset counts by type: {'sprites': 2450, 'textures': 820, ...}",
     )
-    previous_fm_version: Optional[str] = None
-    previous_catalogue_version: Optional[int] = None
-    changes_since_previous: Optional[Dict[str, int]] = None
+    previous_fm_version: Optional[str] = Field(
+        None, description="Previous FM version for changelog generation"
+    )
+    changes_since_previous: Optional[Dict[str, Any]] = Field(
+        None, description="Detailed change summary from previous version"
+    )
 
 
 class CSSValueDefinition(BaseModel):
@@ -86,25 +84,26 @@ class CSSVariable(BaseModel):
     values: List[CSSValueDefinition] = Field(default_factory=list)
 
     # Reverse engineering indices
-    string_index: Optional[int] = Field(
-        None, description="Index in strings array (type 3/8/10)"
-    )
-    color_index: Optional[int] = Field(
-        None, description="Index in colors array (type 4)"
-    )
+    string_index: Optional[int] = Field(None, description="Index in strings array (type 3/8/10)")
+    color_index: Optional[int] = Field(None, description="Index in colors array (type 4)")
 
     # Extracted colors for search
-    colors: List[str] = Field(
-        default_factory=list, description="Hex colors only: ['#1976d2']"
-    )
+    colors: List[str] = Field(default_factory=list, description="Hex colors only: ['#1976d2']")
 
     # Version tracking
     status: AssetStatus = AssetStatus.ACTIVE
     first_seen: str = Field(..., description="FM version first appeared: '2026.1.0'")
     last_seen: str = Field(..., description="FM version last seen: '2026.4.0'")
-    modified_in: Optional[str] = Field(
-        None, description="FM version modified: '2026.3.0'"
+    modified_in: Optional[str] = Field(None, description="FM version modified: '2026.3.0'")
+
+    # Change tracking (schema 2.1.0+) - vs previous stable version
+    change_status: Optional[str] = Field(
+        None, description="Change status: 'new', 'modified', 'unchanged'"
     )
+    changed_in_version: Optional[str] = Field(
+        None, description="Version where this change occurred"
+    )
+    previous_values: Optional[str] = Field(None, description="Previous values for modified assets")
 
 
 class CSSClass(BaseModel):
@@ -126,6 +125,14 @@ class CSSClass(BaseModel):
     first_seen: str
     last_seen: str
 
+    # Change tracking (schema 2.1.0+) - vs previous stable version
+    change_status: Optional[str] = Field(
+        None, description="Change status: 'new', 'modified', 'unchanged'"
+    )
+    changed_in_version: Optional[str] = Field(
+        None, description="Version where this change occurred"
+    )
+
 
 class Sprite(BaseModel):
     """Sprite/icon asset."""
@@ -139,9 +146,7 @@ class Sprite(BaseModel):
         default=False, description="True = vector sprite (custom mesh data)"
     )
     content_hash: str = Field(..., description="SHA256 for integrity")
-    thumbnail_path: str = Field(
-        ..., description="Relative path: 'thumbnails/sprites/{hash}.webp'"
-    )
+    thumbnail_path: str = Field(..., description="Relative path: 'thumbnails/sprites/{hash}.webp'")
     width: int
     height: int
 
@@ -152,18 +157,25 @@ class Sprite(BaseModel):
     )
 
     # Auto-tags
-    tags: List[str] = Field(
-        default_factory=list, description="['icon', 'player', 'sport']"
-    )
+    tags: List[str] = Field(default_factory=list, description="['icon', 'player', 'sport']")
 
-    atlas: Optional[str] = Field(
-        None, description="SpriteAtlas reference if applicable"
-    )
+    atlas: Optional[str] = Field(None, description="SpriteAtlas reference if applicable")
     bundles: List[str] = Field(default_factory=list)
 
     status: AssetStatus = AssetStatus.ACTIVE
     first_seen: str
     last_seen: str
+
+    # Change tracking (schema 2.1.0+) - vs previous stable version
+    change_status: Optional[str] = Field(
+        None, description="Change status: 'new', 'modified', 'unchanged'"
+    )
+    changed_in_version: Optional[str] = Field(
+        None, description="Version where this change occurred"
+    )
+    previous_content_hash: Optional[str] = Field(
+        None, description="Previous content hash for modified sprites"
+    )
 
 
 class Texture(BaseModel):
@@ -172,9 +184,7 @@ class Texture(BaseModel):
     name: str
     aliases: List[str] = Field(default_factory=list)
     content_hash: str
-    thumbnail_path: str = Field(
-        ..., description="Relative path: 'thumbnails/textures/{hash}.webp'"
-    )
+    thumbnail_path: str = Field(..., description="Relative path: 'thumbnails/textures/{hash}.webp'")
     type: str = Field(default="texture", description="'background', 'icon', 'texture'")
     width: int
     height: int
@@ -185,6 +195,17 @@ class Texture(BaseModel):
     status: AssetStatus = AssetStatus.ACTIVE
     first_seen: str
     last_seen: str
+
+    # Change tracking (schema 2.1.0+) - vs previous stable version
+    change_status: Optional[str] = Field(
+        None, description="Change status: 'new', 'modified', 'unchanged'"
+    )
+    changed_in_version: Optional[str] = Field(
+        None, description="Version where this change occurred"
+    )
+    previous_content_hash: Optional[str] = Field(
+        None, description="Previous content hash for modified textures"
+    )
 
 
 class Font(BaseModel):
@@ -197,3 +218,11 @@ class Font(BaseModel):
     status: AssetStatus = AssetStatus.ACTIVE
     first_seen: str
     last_seen: str
+
+    # Change tracking (schema 2.1.0+) - vs previous stable version
+    change_status: Optional[str] = Field(
+        None, description="Change status: 'new', 'modified', 'unchanged'"
+    )
+    changed_in_version: Optional[str] = Field(
+        None, description="Version where this change occurred"
+    )

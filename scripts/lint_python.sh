@@ -13,4 +13,8 @@ if [[ ! -x "$VENV_PY" ]]; then
   exit 1
 fi
 
-"$VENV_PY" -m ruff check "$ROOT_DIR/fm_skin_builder" "$ROOT_DIR/tests"
+echo "[lint-python] Running ruff check..."
+"$VENV_PY" -m ruff check .
+
+echo "[lint-python] Running ruff format..."
+"$VENV_PY" -m ruff format .

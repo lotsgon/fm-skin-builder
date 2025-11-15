@@ -220,6 +220,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for version calculation
+          fetch-tags: true  # Fetch tags for version detection
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -258,6 +261,42 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Set version for beta builds
+        if: github.ref == 'refs/heads/beta'
+        shell: bash
+        run: |
+          # Generate beta version
+          BETA_VERSION=$(python3 scripts/get_next_version.py --beta)
+          echo "Setting version to: $BETA_VERSION"
+
+          # Update package.json
+          cd frontend
+          npm version $BETA_VERSION --no-git-tag-version --allow-same-version
+
+          # Update tauri.conf.json
+          python3 -c "import json; f=open('src-tauri/tauri.conf.json','r+'); d=json.load(f); d['version']='$BETA_VERSION'; f.seek(0); f.truncate(); json.dump(d,f,indent=2); f.write('\n')"
+
+          # Update Cargo.toml
+          sed -i.bak "s/^version = \".*\"/version = \"$BETA_VERSION\"/" src-tauri/Cargo.toml && rm src-tauri/Cargo.toml.bak
+
+      - name: Set version for release builds
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          # Extract version from tag
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Setting version to: $VERSION"
+
+          # Update package.json
+          cd frontend
+          npm version $VERSION --no-git-tag-version --allow-same-version
+
+          # Update tauri.conf.json
+          python3 -c "import json; f=open('src-tauri/tauri.conf.json','r+'); d=json.load(f); d['version']='$VERSION'; f.seek(0); f.truncate(); json.dump(d,f,indent=2); f.write('\n')"
+
+          # Update Cargo.toml
+          sed -i.bak "s/^version = \".*\"/version = \"$VERSION\"/" src-tauri/Cargo.toml && rm src-tauri/Cargo.toml.bak
+
       - name: Setup Windows code signing
         if: matrix.settings.platform == 'windows-latest' && github.event_name != 'pull_request'
         shell: pwsh
@@ -293,8 +332,8 @@ jobs:
             find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.AppImage.tar.gz" -exec cp {} artifacts/ \; || true
             find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.AppImage.tar.gz.sig" -exec cp {} artifacts/ \; || true
           elif [ "${{ matrix.settings.platform }}" = "windows-latest" ]; then
-            # User installers
-            find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.exe" -exec cp {} artifacts/ \; || true
+            # User installers (exclude fm_skin_builder.exe which is the backend binary)
+            find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.exe" ! -name "fm_skin_builder.exe" -exec cp {} artifacts/ \; || true
             find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.msi" -exec cp {} artifacts/ \; || true
             # Updater files (if they exist)
             find frontend/src-tauri/target/${{ matrix.settings.target }}/release/bundle -name "*.msi.zip" -exec cp {} artifacts/ \; || true
@@ -342,7 +381,15 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          path: artifacts-temp
+
+      - name: Flatten artifacts
+        run: |
+          mkdir -p artifacts
+          # Move all files from subdirectories to artifacts/ root (exclude fm_skin_builder.exe)
+          find artifacts-temp -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.msi" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.tar.gz" -o -name "*.zip" -o -name "*.sig" \) ! -name "fm_skin_builder.exe" -exec mv {} artifacts/ \;
+          echo "Flattened artifacts:"
+          ls -lah artifacts/
 
       - name: Extract version from tag
         id: version
@@ -381,7 +428,7 @@ jobs:
           draft: false
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
           generate_release_notes: true
-          files: artifacts/**/*
+          files: artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -411,7 +458,15 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
+          path: artifacts-temp
+
+      - name: Flatten artifacts
+        run: |
+          mkdir -p artifacts
+          # Move all files from subdirectories to artifacts/ root (exclude fm_skin_builder.exe)
+          find artifacts-temp -type f \( -name "*.dmg" -o -name "*.exe" -o -name "*.msi" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.tar.gz" -o -name "*.zip" -o -name "*.sig" \) ! -name "fm_skin_builder.exe" -exec mv {} artifacts/ \;
+          echo "Flattened artifacts:"
+          ls -lah artifacts/
 
       - name: Generate beta version
         id: version
@@ -472,6 +527,6 @@ jobs:
             *Built from commit ${{ github.sha }}*
           draft: false
           prerelease: true
-          files: artifacts/**/*
+          files: artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

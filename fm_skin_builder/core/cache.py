@@ -2,6 +2,7 @@ from __future__ import annotations
 from pathlib import Path
 import hashlib
 import json
+import os
 from .logger import get_logger
 from .skin_config import SkinConfig, SkinConfigModel
 
@@ -10,12 +11,23 @@ log = get_logger(__name__)
 
 def _hash_config(config_path: Path) -> str:
     raw = config_path.read_bytes()
-    return hashlib.sha256(
-        raw + str(config_path.stat().st_mtime_ns).encode()
-    ).hexdigest()
+    return hashlib.sha256(raw + str(config_path.stat().st_mtime_ns).encode()).hexdigest()
 
 
 def cache_dir(root: Path) -> Path:
+    """
+    Get the cache directory for skin configurations.
+
+    Checks FM_CACHE_DIR environment variable first, otherwise falls back
+    to .cache/skins in the project root.
+    """
+    env_cache = os.environ.get("FM_CACHE_DIR")
+    if env_cache:
+        cache_path = Path(env_cache)
+        log.debug(f"Using cache directory from FM_CACHE_DIR: {cache_path}")
+        return cache_path
+
+    # Fallback to old behavior
     return root / ".cache" / "skins"
 
 

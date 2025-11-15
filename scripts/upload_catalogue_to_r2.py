@@ -12,16 +12,55 @@ import argparse
 import mimetypes
 import os
 import sys
+import time
 from pathlib import Path
 
 import boto3
 from botocore.client import Config
 
 
+def upload_with_cache_bust(s3, bucket_name, local_path, r2_key, extra_args):
+    """
+    Upload file to R2 with cache-busting to force internal edge cache invalidation.
+
+    R2's internal CDN can cache objects even after S3 PUT operations. To force
+    invalidation, we:
+    1. Upload an empty placeholder file
+    2. Wait 1-2 seconds for cache to notice the change
+    3. Upload the real file
+
+    This forces a hash mismatch that flushes R2's internal cache.
+
+    Args:
+        s3: boto3 S3 client
+        bucket_name: R2 bucket name
+        local_path: Local file path to upload
+        r2_key: R2 object key
+        extra_args: Extra args for upload (ContentType, CacheControl, etc.)
+    """
+    # Step 1: Upload empty placeholder
+    s3.put_object(
+        Bucket=bucket_name,
+        Key=r2_key,
+        Body=b"",  # Empty placeholder
+        ContentType=extra_args.get("ContentType", "application/octet-stream"),
+    )
+
+    # Step 2: Wait for R2's internal cache to notice the change
+    time.sleep(1.5)
+
+    # Step 3: Upload the real file
+    s3.upload_file(
+        local_path,
+        bucket_name,
+        r2_key,
+        ExtraArgs=extra_args,
+    )
+
+
 def upload_catalogue(
     catalogue_dir: Path,
     fm_version: str,
-    catalogue_version: str,
     json_only: bool = False,
     thumbnails_only: bool = False,
     hash_prefix: str = None,
@@ -32,7 +71,6 @@ def upload_catalogue(
     Args:
         catalogue_dir: Local directory containing catalogue files
         fm_version: FM version (e.g., "2025.0.0")
-        catalogue_version: Catalogue version number
         json_only: Only upload JSON files (skip thumbnails)
         thumbnails_only: Only upload thumbnails (skip JSON)
         hash_prefix: Only upload thumbnails starting with this prefix (0-9, a-f)
@@ -64,14 +102,13 @@ def upload_catalogue(
 
     print(f"Uploading catalogue to R2: {bucket_name}")
     print(f"  FM Version: {fm_version}")
-    print(f"  Catalogue Version: {catalogue_version}")
     if json_only:
         print("  Mode: JSON files only")
     elif thumbnails_only:
         print(f"  Mode: Thumbnails only (prefix: {hash_prefix or 'all'})")
 
-    # R2 prefix for this catalogue version
-    prefix = f"{fm_version}/v{catalogue_version}"
+    # R2 prefix for this catalogue version (just FM version, no -vN suffix)
+    prefix = fm_version
 
     # Upload files with filtering
     file_count = 0
@@ -131,12 +168,20 @@ def upload_catalogue(
             extra_args["CacheControl"] = "public, max-age=31536000"  # 1 year
 
         try:
-            s3.upload_file(
-                str(file_path),
-                bucket_name,
-                r2_key,
-                ExtraArgs=extra_args,
-            )
+            # Use cache-busting upload for JSON files to force R2's internal cache invalidation
+            # (R2's edge cache can serve stale objects even after S3 PUT without this)
+            if file_path.suffix == ".json":
+                upload_with_cache_bust(
+                    s3, bucket_name, str(file_path), r2_key, extra_args
+                )
+            else:
+                # Standard upload for thumbnails (immutable, no cache concerns)
+                s3.upload_file(
+                    str(file_path),
+                    bucket_name,
+                    r2_key,
+                    ExtraArgs=extra_args,
+                )
             file_count += 1
             total_size += file_path.stat().st_size
         except Exception as e:
@@ -167,11 +212,6 @@ def main():
         help="FM version (e.g., 2025.0.0)",
     )
     parser.add_argument(
-        "--catalogue-version",
-        required=True,
-        help="Catalogue version number",
-    )
-    parser.add_argument(
         "--json-only",
         action="store_true",
         help="Only upload JSON files (skip thumbnails)",
@@ -197,7 +237,6 @@ def main():
     upload_catalogue(
         args.catalogue_dir,
         args.fm_version,
-        args.catalogue_version,
         json_only=args.json_only,
         thumbnails_only=args.thumbnails_only,
         hash_prefix=args.hash_prefix,

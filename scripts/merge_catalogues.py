@@ -63,14 +63,14 @@ def merge_metadata(partial_dirs: List[Path]) -> Dict[str, Any]:
     )
 
     return {
-        "catalogue_version": first_metadata.get("catalogue_version", 1),
         "fm_version": first_metadata.get("fm_version", "unknown"),
-        "schema_version": first_metadata.get("schema_version", "1.0.0"),
+        "schema_version": first_metadata.get(
+            "schema_version", "2.1.0"
+        ),  # Updated default
         "generated_at": generated_at or first_metadata.get("generated_at"),
         "bundles_scanned": sorted(list(all_bundles)),
         "total_assets": dict(total_assets),
         "previous_fm_version": first_metadata.get("previous_fm_version"),
-        "previous_catalogue_version": first_metadata.get("previous_catalogue_version"),
         "changes_since_previous": first_metadata.get("changes_since_previous"),
     }
 

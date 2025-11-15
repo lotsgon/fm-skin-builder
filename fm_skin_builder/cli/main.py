@@ -31,9 +31,7 @@ def main() -> None:
     sub.add_parser("swap", help="Swap bundles (stub)")
 
     p = sub.add_parser("patch", help="Patch bundles using CSS/USS overrides")
-    p.add_argument(
-        "css", type=str, help="Skin folder or directory containing .css/.uss overrides"
-    )
+    p.add_argument("css", type=str, help="Skin folder or directory containing .css/.uss overrides")
     p.add_argument(
         "--out",
         type=str,
@@ -46,9 +44,7 @@ def main() -> None:
         default=None,
         help="Optional bundle file or directory (if omitted, inferred from skin config)",
     )
-    p.add_argument(
-        "--patch-direct", action="store_true", help="Also patch inlined color literals"
-    )
+    p.add_argument("--patch-direct", action="store_true", help="Also patch inlined color literals")
     p.add_argument(
         "--debug-export",
         action="store_true",
@@ -76,9 +72,7 @@ def main() -> None:
     )
 
     s = sub.add_parser("scan", help="Scan bundles and index stylesheet usage")
-    s.add_argument(
-        "--bundle", type=str, required=True, help="Bundle file or directory to scan"
-    )
+    s.add_argument("--bundle", type=str, required=True, help="Bundle file or directory to scan")
     s.add_argument(
         "--out",
         type=str,
@@ -91,12 +85,8 @@ def main() -> None:
         help="Export all stylesheet assets as .uss alongside the index",
     )
 
-    c = sub.add_parser(
-        "catalogue", help="Build comprehensive asset catalogue from FM bundles"
-    )
-    c.add_argument(
-        "--bundle", type=str, required=True, help="Bundle file or directory to scan"
-    )
+    c = sub.add_parser("catalogue", help="Build comprehensive asset catalogue from FM bundles")
+    c.add_argument("--bundle", type=str, required=True, help="Bundle file or directory to scan")
     c.add_argument(
         "--out",
         type=str,
@@ -109,16 +99,67 @@ def main() -> None:
         required=True,
         help="FM version string (e.g., '2026.4.0')",
     )
-    c.add_argument(
-        "--catalogue-version",
-        type=int,
-        default=1,
-        help="Catalogue version number (default: 1)",
-    )
     c.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
+    c.add_argument("--dry-run", action="store_true", help="Preview without writing files")
     c.add_argument(
-        "--dry-run", action="store_true", help="Preview without writing files"
+        "--previous-version",
+        type=str,
+        default=None,
+        help="Override previous version for comparison (default: auto-detect from output directory)",
     )
+    c.add_argument(
+        "--no-changelog",
+        action="store_true",
+        help="Skip changelog generation (no comparison with previous version)",
+    )
+    c.add_argument(
+        "--r2-endpoint",
+        type=str,
+        default=None,
+        help="R2 endpoint URL for downloading previous versions (e.g., 'https://account.r2.cloudflarestorage.com')",
+    )
+    c.add_argument(
+        "--r2-bucket",
+        type=str,
+        default=None,
+        help="R2 bucket name for catalogue storage",
+    )
+    c.add_argument(
+        "--r2-access-key",
+        type=str,
+        default=None,
+        help="R2 access key ID (or use R2_ACCESS_KEY env var)",
+    )
+    c.add_argument(
+        "--r2-secret-key",
+        type=str,
+        default=None,
+        help="R2 secret access key (or use R2_SECRET_KEY env var)",
+    )
+
+    # Catalogue diff command
+    d = sub.add_parser(
+        "catalogue-diff", help="Compare two catalogue versions and generate changelog"
+    )
+    d.add_argument(
+        "--old",
+        type=str,
+        required=True,
+        help="Path to old catalogue version directory",
+    )
+    d.add_argument(
+        "--new",
+        type=str,
+        required=True,
+        help="Path to new catalogue version directory",
+    )
+    d.add_argument(
+        "--out",
+        type=str,
+        default=None,
+        help="Output directory for changelog (defaults to new version directory)",
+    )
+    d.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
 
     args = parser.parse_args()
 
@@ -136,6 +177,10 @@ def main() -> None:
         cmd_scan.run(args)
     elif args.command == "catalogue":
         cmd_catalogue.run(args)
+    elif args.command == "catalogue-diff":
+        from .commands import catalogue_diff as cmd_catalogue_diff
+
+        cmd_catalogue_diff.run(args)
 
     # Mitigate rare CPython finalization crash observed with C extensions (e.g., compression libs)
     # by forcing an immediate process exit after flushing. Can be disabled by setting FM_HARD_EXIT=0.
