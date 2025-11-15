@@ -71,6 +71,10 @@ def get_artifact_info(artifacts_dir: Path, version: str) -> Dict[str, Any]:
         for file in files:
             file_path = Path(root) / file
 
+            # Skip signature files and other non-installer files
+            if file.endswith(".sig") or file.endswith(".blockmap") or file.endswith(".yml"):
+                continue
+
             # Check file extension
             for ext, info in platform_map.items():
                 if file.endswith(ext):
@@ -111,16 +115,28 @@ def get_artifact_info(artifacts_dir: Path, version: str) -> Dict[str, Any]:
 
 
 def get_current_metadata(s3, bucket: str) -> Dict[str, Any]:
-    """Get current latest.json from R2, or return default structure."""
+    """Get current releases.json from R2, or return default structure."""
     try:
-        response = s3.get_object(Bucket=bucket, Key="latest.json")
-        return json.loads(response["Body"].read().decode("utf-8"))
-    except Exception:
-        # File doesn't exist yet, return default
+        response = s3.get_object(Bucket=bucket, Key="releases.json")
+        data = json.loads(response["Body"].read().decode("utf-8"))
+        print("✅ Found existing releases.json")
+        return data
+    except s3.exceptions.NoSuchKey:
+        print("ℹ️  releases.json not found, creating new structure")
         return {
             "stable": None,
             "beta": None,
             "last_updated": None,
+            "all_releases": [],
+        }
+    except Exception as e:
+        print(f"⚠️  Error reading releases.json: {e}")
+        print("ℹ️  Using default structure")
+        return {
+            "stable": None,
+            "beta": None,
+            "last_updated": None,
+            "all_releases": [],
         }
 
 
@@ -131,14 +147,14 @@ def update_metadata(
     is_beta: bool,
     release_notes: str = "",
 ) -> None:
-    """Update latest.json in R2 with new release info."""
+    """Update latest.json and releases.json in R2 with new release info."""
     s3 = create_r2_client()
 
     print(f"Updating metadata for version: {version}")
     print(f"Type: {'Beta' if is_beta else 'Stable'}")
 
-    # Get current metadata
-    metadata = get_current_metadata(s3, bucket)
+    # Get current releases.json
+    releases = get_current_metadata(s3, bucket)
 
     # Get artifact information
     platforms = get_artifact_info(artifacts_dir, version)
@@ -151,35 +167,74 @@ def update_metadata(
         "notes": release_notes,
     }
 
-    # Update appropriate field
+    # Update appropriate field in releases
     if is_beta:
-        metadata["beta"] = release_entry
+        releases["beta"] = release_entry
     else:
-        metadata["stable"] = release_entry
+        releases["stable"] = release_entry
 
-    metadata["last_updated"] = datetime.utcnow().isoformat() + "Z"
+    releases["last_updated"] = datetime.utcnow().isoformat() + "Z"
 
-    # Upload updated metadata
-    print("\nUploading latest.json...")
-    s3.put_object(
-        Bucket=bucket,
-        Key="latest.json",
-        Body=json.dumps(metadata, indent=2),
-        ContentType="application/json",
-        CacheControl="max-age=300",  # Cache for 5 minutes
-    )
+    # Add to all_releases if not already present
+    if "all_releases" not in releases:
+        releases["all_releases"] = []
+
+    # Check if this version is already in all_releases
+    existing_versions = [r.get("version") for r in releases["all_releases"]]
+    if version not in existing_versions:
+        releases["all_releases"].append(release_entry)
+
+    # Upload releases.json
+    print("\nUploading releases.json...")
+    try:
+        s3.put_object(
+            Bucket=bucket,
+            Key="releases.json",
+            Body=json.dumps(releases, indent=2),
+            ContentType="application/json",
+            CacheControl="max-age=300",  # Cache for 5 minutes
+        )
+        print("✅ releases.json uploaded successfully")
+    except Exception as e:
+        print(f"❌ Failed to upload releases.json: {e}")
+        sys.exit(1)
+
+    # Upload latest.json (stable) or latest-beta.json (beta)
+    latest_key = "latest-beta.json" if is_beta else "latest.json"
+    latest_metadata = {
+        "version": version,
+        "pub_date": release_entry["date"],
+        "platforms": platforms,
+        "notes": release_notes,
+    }
+
+    print(f"Uploading {latest_key}...")
+    try:
+        s3.put_object(
+            Bucket=bucket,
+            Key=latest_key,
+            Body=json.dumps(latest_metadata, indent=2),
+            ContentType="application/json",
+            CacheControl="max-age=300",
+        )
+        print(f"✅ {latest_key} uploaded successfully")
+    except Exception as e:
+        print(f"❌ Failed to upload {latest_key}: {e}")
+        sys.exit(1)
 
     print("✅ Metadata updated successfully")
     print(f"\nCurrent releases:")
-    if metadata["stable"]:
-        print(f"  Stable: {metadata['stable']['version']}")
+    stable_info = releases.get("stable")
+    if stable_info:
+        print(f"  Stable: {stable_info.get('version', 'unknown')}")
     else:
-        print(f"  Stable: None")
+        print("  Stable: None")
 
-    if metadata["beta"]:
-        print(f"  Beta: {metadata['beta']['version']}")
+    beta_info = releases.get("beta")
+    if beta_info:
+        print(f"  Beta: {beta_info.get('version', 'unknown')}")
     else:
-        print(f"  Beta: None")
+        print("  Beta: None")
 
     # Also create version-specific metadata for Tauri updater
     print(f"\nCreating version-specific metadata: {version}.json")
@@ -190,20 +245,21 @@ def update_metadata(
         "notes": release_notes,
     }
 
-    s3.put_object(
-        Bucket=bucket,
-        Key=f"metadata/{version}.json",
-        Body=json.dumps(version_metadata, indent=2),
-        ContentType="application/json",
-    )
-
-    print(f"✅ Version metadata uploaded: metadata/{version}.json")
+    try:
+        s3.put_object(
+            Bucket=bucket,
+            Key=f"metadata/{version}.json",
+            Body=json.dumps(version_metadata, indent=2),
+            ContentType="application/json",
+        )
+        print(f"✅ Version metadata uploaded: metadata/{version}.json")
+    except Exception as e:
+        print(f"❌ Failed to upload metadata/{version}.json: {e}")
+        # Don't exit here as this is not critical for the main functionality
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Update latest.json metadata in R2"
-    )
+    parser = argparse.ArgumentParser(description="Update latest.json metadata in R2")
     parser.add_argument(
         "--artifacts-dir",
         required=True,
@@ -212,12 +268,8 @@ def main():
     )
     parser.add_argument("--bucket", required=True, help="R2 bucket name")
     parser.add_argument("--version", required=True, help="Version string")
-    parser.add_argument(
-        "--beta", action="store_true", help="This is a beta release"
-    )
-    parser.add_argument(
-        "--notes", default="", help="Release notes (optional)"
-    )
+    parser.add_argument("--beta", action="store_true", help="This is a beta release")
+    parser.add_argument("--notes", default="", help="Release notes (optional)")
 
     args = parser.parse_args()
 
