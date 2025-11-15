@@ -260,6 +260,39 @@
 
   --global-radius-extra-small: 10px;
 
+  .frames-player-attributes-full-block-size-min-rows {
+    border-width: 20px;
+    border-color: #08e708;
+    border-radius: 8px;
+  }
+
+  /* .frames-player-attributes-full-block-size-mid-player-attributes-property-3-compact {
+    flex-direction: --row-direction-normal;
+    align-items: 2092;
+    flex-shrink: 0;
+    width: center;
+    height: center;
+    padding: 1px --global-padding-large;
+    border-width: column;
+    border-color: --layout-ui-tiles-interaction-border-default;
+    border-radius: 1px --global-radius-regular;
+  }
+
+  .frames-player-attributes-full-block-size-min-player-attributes-property-3-compact {
+    flex-direction: --row-direction-normal;
+    align-items: 2093;
+    flex-shrink: 0;
+    width: flex-end;
+    height: center;
+    padding-top: --global-padding-large;
+    padding-right: --global-padding-large;
+    padding-bottom: --global-padding-large;
+    padding-left: --global-padding-large;
+    border-width: space-between;
+    border-color: --layout-ui-tiles-interaction-border-default;
+    border-radius: 1px --global-radius-regular;
+  } */
+
   .green {
     color: var(--my-custom-colour);
   }

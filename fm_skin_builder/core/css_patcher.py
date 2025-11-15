@@ -154,14 +154,21 @@ def _infer_property_type_from_name(prop_name: str) -> Optional[int]:
 
 def _is_color_property(prop_name: str, value: Any) -> bool:
     """Check if a property should be treated as a color."""
-    # First check if the property name suggests it's a color
+    # If the value is a CSS variable reference (starts with -- or var()), it's not a literal color
+    if isinstance(value, str):
+        value_stripped = value.strip()
+        if value_stripped.startswith("--") or value_stripped.startswith("var("):
+            return False
+
+        # Check if it's a color value (hex string)
+        if normalize_css_color(value_stripped) is not None:
+            return True
+
+    # Otherwise check if the property name suggests it's a color
     inferred_type = _infer_property_type_from_name(prop_name)
     if inferred_type is not None:
         return inferred_type == 4
 
-    # Otherwise check if it's a color value (hex string)
-    if isinstance(value, str):
-        return normalize_css_color(value) is not None
     return False
 
 
@@ -882,7 +889,10 @@ class CssPatcher:
                     break
             if not found_val:
                 continue
-            tr, tg, tb, ta = hex_to_rgba(found_val)
+            try:
+                tr, tg, tb, ta = hex_to_rgba(found_val)
+            except ValueError:
+                return False  # Skip invalid hex colors
             col = colors[color_idx]
             if (col.r, col.g, col.b, col.a) != (tr, tg, tb, ta):
                 return True
@@ -987,7 +997,6 @@ class CssPatcher:
         Returns:
             The rule index to use for patching (either the new rule or the original if no split needed)
         """
-        import copy
 
         selectors = getattr(data, "m_ComplexSelectors", [])
         rules = getattr(data, "m_Rules", [])
@@ -1543,9 +1552,19 @@ class CssPatcher:
 
                             # Check if it's a variable reference first
                             parsed_var = parse_variable_value(value_str)
-                            if parsed_var is not None:
-                                # Variable reference (var(--name))
-                                var_name = parsed_var.unity_variable_name
+                            # Also check for bare CSS variable names (starting with --)
+                            is_bare_variable = isinstance(value_str, str) and value_str.strip().startswith("--")
+
+                            if parsed_var is not None or is_bare_variable:
+                                # Variable reference (var(--name)) or bare variable name (--name)
+                                if parsed_var is not None:
+                                    var_name = parsed_var.unity_variable_name
+                                else:
+                                    # It's a bare variable name - normalize it
+                                    var_name = value_str.strip()
+                                    if not var_name.startswith("--"):
+                                        var_name = f"--{var_name}"
+
                                 values = list(getattr(prop, "m_Values", []))
 
                                 # Find or add the variable name to strings array

@@ -239,18 +239,37 @@ def load_css_selector_properties(path: Path) -> Dict[Tuple[str, str], Any]:
     return selector_props
 
 
-def hex_to_rgba(hex_str: str) -> Tuple[float, float, float, float]:
-    """Convert #RRGGBB or #RRGGBBAA to 0-1 floats."""
-
-    s = hex_str.lstrip("#")
-    if len(s) == 3:
-        s = _expand_shorthand_hex(s)
-    elif len(s) == 4:
-        s = _expand_shorthand_hex(s)
-    r = int(s[0:2], 16) / 255.0
-    g = int(s[2:4], 16) / 255.0
-    b = int(s[4:6], 16) / 255.0
-    a = int(s[6:8], 16) / 255.0 if len(s) == 8 else 1.0
+def hex_to_rgba(hex_color: str) -> tuple[float, float, float, float]:
+    """Convert hex color to RGBA tuple with validation."""
+    if not isinstance(hex_color, str):
+        raise ValueError(f"Expected string, got {type(hex_color)}")
+    
+    if hex_color.startswith('#'):
+        s = hex_color[1:]
+    else:
+        s = hex_color
+    
+    if len(s) not in (6, 8):
+        raise ValueError(f"Invalid hex length {len(s)} for {hex_color}")
+    
+    # Validate all characters are valid hex
+    if not all(c in '0123456789abcdefABCDEF' for c in s):
+        raise ValueError(f"Invalid hex characters in {hex_color}")
+    
+    try:
+        if len(s) == 6:
+            r = int(s[0:2], 16) / 255.0
+            g = int(s[2:4], 16) / 255.0
+            b = int(s[4:6], 16) / 255.0
+            a = 1.0
+        else:  # len == 8
+            r = int(s[0:2], 16) / 255.0
+            g = int(s[2:4], 16) / 255.0
+            b = int(s[4:6], 16) / 255.0
+            a = int(s[6:8], 16) / 255.0
+    except ValueError as e:
+        raise ValueError(f"Failed to parse hex color {hex_color}: {e}")
+    
     return r, g, b, a
 
 
@@ -369,6 +388,31 @@ def serialize_stylesheet_to_uss(
         for prop in getattr(rule, "m_Properties", []):
             prop_name = getattr(prop, "m_Name", "")
             values = list(getattr(prop, "m_Values", []))
+
+            # Unity's triplet encoding: [Type10=1, Type2=1.0, Type8=var_name] → var(--var_name)
+            # This is how Unity internally stores CSS variable references in binary format
+            if (len(values) == 3 and
+                getattr(values[0], "m_ValueType", None) == 10 and
+                getattr(values[0], "valueIndex", None) == 1 and
+                getattr(values[1], "m_ValueType", None) == 2 and
+                getattr(values[2], "m_ValueType", None) == 8):
+
+                # Check if Type 2 is 1.0 (the sentinel value)
+                type2_idx = getattr(values[1], "valueIndex", None)
+                if type2_idx is not None and 0 <= type2_idx < len(floats):
+                    if floats[type2_idx] == 1.0:
+                        # This is a triplet encoding for var(--variable)
+                        type8_idx = getattr(values[2], "valueIndex", None)
+                        if type8_idx is not None and 0 <= type8_idx < len(strings):
+                            var_name = strings[type8_idx]
+                            # Ensure variable name has -- prefix
+                            if not var_name.startswith("--"):
+                                var_name = f"--{var_name}"
+                            # Store as a single Type 10 value (variable reference)
+                            property_values[prop_name].append(
+                                (10, type8_idx, f"var({var_name})")
+                            )
+                            continue
 
             for val in values:
                 value_type = getattr(val, "m_ValueType", None)
@@ -600,7 +644,7 @@ def _format_uss_value(
     elif (
         value_type == 7
     ):  # Enum/Resource (Unity stores resource paths as Type 7 sometimes)
-        # Check if this is actually a string index pointing to a resource URL
+        # Check if this is actually a string index pointing to a resource URL or enum value
         if 0 <= value_index < len(strings):
             value = strings[value_index]
             # If it's a project:// or resource:// URL, quote it
@@ -608,7 +652,9 @@ def _format_uss_value(
                 value.startswith("project://") or value.startswith("resource://")
             ):
                 return f'"{value}"'
-        # Otherwise it's an integer enum value
+            # Return the string value (enum keyword like "flex-start", "center", etc.)
+            return value
+        # If index is out of bounds, treat it as an integer enum value
         return str(value_index)
 
     elif value_type == 8:  # String literal
