@@ -20,7 +20,7 @@ VAR_REFERENCE_PATTERN = re.compile(r"var\((--[\w-]+)\)")
 SPRITE_REFERENCE_PATTERN = re.compile(
     r"(?:url\(['\"]?|sprite://|resource://)([^'\")\s]+)"
 )
-NUMERIC_TOKEN_PATTERN = re.compile(r"\b\d+(?:\.\d+)?(?:px|%|em|rem)\b")
+NUMERIC_TOKEN_PATTERN = re.compile(r"\d+(?:\.\d+)?(?:px|%|em|rem)")
 
 
 class CSSResolver:

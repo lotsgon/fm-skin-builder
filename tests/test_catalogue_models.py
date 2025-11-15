@@ -88,6 +88,62 @@ def test_css_class():
     assert "button" in cls.tags
 
 
+def test_css_class_enhanced():
+    """Test CSSClass model with enhanced fields (schema 2.2.0+)."""
+    val = CSSValueDefinition(value_type=4, index=10, resolved_value="#1976d2")
+    prop = CSSProperty(name="background-color", values=[val])
+
+    cls = CSSClass(
+        name=".button-primary",
+        stylesheet="FMColours",
+        bundle="skins.bundle",
+        properties=[prop],
+        raw_properties={
+            "background-color": "var(--primary-color)",
+            "border-radius": "4px",
+        },
+        resolved_properties={
+            "background-color": "#1976d2",
+            "border-radius": "4px",
+        },
+        asset_dependencies=["FMImages_1x/button_bg"],
+        variables_used=["--primary-color"],
+        color_tokens=["#1976d2"],
+        numeric_tokens=["4px"],
+        summary={
+            "colors": ["#1976d2"],
+            "assets": ["FMImages_1x/button_bg"],
+            "variables": ["--primary-color"],
+            "layout": {"border-radius": "4px"},
+        },
+        tags=["button", "primary"],
+        first_seen="2026.1.0",
+        last_seen="2026.4.0",
+    )
+
+    # Test enhanced fields
+    assert cls.raw_properties is not None
+    assert cls.raw_properties["background-color"] == "var(--primary-color)"
+
+    assert cls.resolved_properties is not None
+    assert cls.resolved_properties["background-color"] == "#1976d2"
+
+    assert len(cls.asset_dependencies) == 1
+    assert "FMImages_1x/button_bg" in cls.asset_dependencies
+
+    assert len(cls.color_tokens) == 1
+    assert "#1976d2" in cls.color_tokens
+
+    assert len(cls.numeric_tokens) == 1
+    assert "4px" in cls.numeric_tokens
+
+    assert cls.summary is not None
+    assert "colors" in cls.summary
+    assert "assets" in cls.summary
+    assert "variables" in cls.summary
+    assert "layout" in cls.summary
+
+
 def test_sprite():
     """Test Sprite model."""
     sprite = Sprite(
@@ -160,7 +216,7 @@ def test_catalogue_metadata():
     )
 
     assert metadata.fm_version == "2026.4.0"
-    assert metadata.schema_version == "2.1.0"
+    assert metadata.schema_version == "2.2.0"  # Updated to 2.2.0
     assert len(metadata.bundles_scanned) == 2
     assert metadata.total_assets["sprites"] == 100
 

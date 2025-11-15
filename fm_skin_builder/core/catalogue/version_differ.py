@@ -906,13 +906,14 @@ class VersionDiffer:
             Dictionary with detailed property changes
         """
         # Get raw and resolved properties
-        old_raw = old_cls.get("raw_properties", {})
-        new_raw = new_cls.get("raw_properties", {})
-        old_resolved = old_cls.get("resolved_properties", {})
-        new_resolved = new_cls.get("resolved_properties", {})
+        # Note: Use .get() without default to get None if key doesn't exist
+        old_raw = old_cls.get("raw_properties")
+        new_raw = new_cls.get("raw_properties")
+        old_resolved = old_cls.get("resolved_properties")
+        new_resolved = new_cls.get("resolved_properties")
 
         # If enhanced properties not available, fall back to basic comparison
-        if not old_raw and not new_raw:
+        if old_raw is None and new_raw is None:
             old_props = self._format_css_properties(old_cls.get("properties", []))
             new_props = self._format_css_properties(new_cls.get("properties", []))
             return {
