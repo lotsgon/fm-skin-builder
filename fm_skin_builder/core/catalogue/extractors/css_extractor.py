@@ -12,7 +12,7 @@ import re
 
 from .base import BaseAssetExtractor
 from ..models import CSSVariable, CSSClass, CSSProperty, CSSValueDefinition
-from ...css_utils import build_selector_from_parts, convert_uss_values_to_text
+from ...css_utils import build_selector_from_parts, format_property_value
 from ..css_resolver import CSSResolver, resolve_css_class_properties
 
 
@@ -162,11 +162,10 @@ class CSSExtractor(BaseAssetExtractor):
         dimensions: List[Any],
     ) -> List[CSSValueDefinition]:
         """
-        Extract value definitions from a property (deprecated - kept for compatibility).
+        Extract value definitions from a property.
 
-        This method is deprecated in favor of using convert_uss_values_to_text directly.
-        It still provides individual value definitions for backward compatibility with
-        the CSSValueDefinition model.
+        NOTE: This provides raw individual value objects for backward compatibility.
+        For actual CSS/USS text values, use format_property_value() instead.
 
         Args:
             prop: Property object
@@ -176,10 +175,8 @@ class CSSExtractor(BaseAssetExtractor):
             dimensions: Dimensions array
 
         Returns:
-            List of CSSValueDefinition objects
+            List of CSSValueDefinition objects (raw Unity data, not final USS text)
         """
-        from ...css_utils import format_uss_value
-
         value_defs = []
         prop_name = getattr(prop, "m_Name", "")
 
@@ -190,33 +187,35 @@ class CSSExtractor(BaseAssetExtractor):
             if value_type is None or value_index is None:
                 continue
 
-            # Use the USS formatting logic to get the actual CSS/USS value
-            resolved_value = format_uss_value(
-                value_type,
-                value_index,
-                strings,
-                colors,
-                floats,
-                dimensions,
-                prop_name,
-            )
-
-            # For backward compatibility, still extract raw color data
+            # Store basic info about the value
+            # Don't try to format it here - format_property_value() handles that correctly
+            resolved_value = ""
             raw_value = None
-            if value_type == 4:  # Color
+
+            # Type 3: Dimension
+            # Type 8: String
+            # Type 10: Variable/keyword
+            if value_type in (3, 8, 10):
+                if isinstance(value_index, int) and 0 <= value_index < len(strings):
+                    resolved_value = str(strings[value_index])
+
+            # Type 4: Color
+            elif value_type == 4:
                 if isinstance(value_index, int) and 0 <= value_index < len(colors):
                     color_obj = colors[value_index]
-                    raw_value = {
-                        "r": getattr(color_obj, "r", 0.0),
-                        "g": getattr(color_obj, "g", 0.0),
-                        "b": getattr(color_obj, "b", 0.0),
-                        "a": getattr(color_obj, "a", 1.0),
-                    }
+                    r = getattr(color_obj, "r", 0.0)
+                    g = getattr(color_obj, "g", 0.0)
+                    b = getattr(color_obj, "b", 0.0)
+                    a = getattr(color_obj, "a", 1.0)
+
+                    # Convert to hex
+                    resolved_value = self._rgba_to_hex(r, g, b, a)
+                    raw_value = {"r": r, "g": g, "b": b, "a": a}
 
             value_def = CSSValueDefinition(
                 value_type=value_type,
                 index=value_index,
-                resolved_value=resolved_value or f"<unknown-type-{value_type}>",
+                resolved_value=resolved_value or f"<type-{value_type}>",
                 raw_value=raw_value,
             )
             value_defs.append(value_def)
@@ -289,11 +288,10 @@ class CSSExtractor(BaseAssetExtractor):
             # Get individual value definitions (for backward compatibility)
             value_defs = self._extract_values(prop, strings, colors, floats, dimensions)
 
-            # Get the actual CSS/USS text value for this property
-            prop_values = getattr(prop, "m_Values", [])
-            css_text_value = convert_uss_values_to_text(
-                prop_values,
-                prop_name,
+            # Get the actual CSS/USS text value using the SAME logic as patch workflow
+            # This reuses format_property_value() which extracts logic from serialize_stylesheet_to_uss()
+            css_text_value = format_property_value(
+                prop,
                 strings,
                 colors,
                 floats,
@@ -307,7 +305,6 @@ class CSSExtractor(BaseAssetExtractor):
             # Track variable references from the CSS text
             if "var(--" in css_text_value:
                 # Extract variable names from var() references
-                import re
                 var_matches = re.findall(r"var\((--[\w-]+)\)", css_text_value)
                 variables_used.update(var_matches)
 
@@ -316,7 +313,6 @@ class CSSExtractor(BaseAssetExtractor):
                 if val.value_type == 10:  # Variable reference
                     if val.resolved_value.startswith("var("):
                         # Extract variable name from var(--name)
-                        import re
                         match = re.search(r"var\((--[\w-]+)\)", val.resolved_value)
                         if match:
                             variables_used.add(match.group(1))
@@ -398,7 +394,7 @@ class CSSExtractor(BaseAssetExtractor):
             try:
                 # Resolve properties and extract comprehensive data
                 (
-                    raw_properties,
+                    old_raw_properties,
                     resolved_properties,
                     variables_used,
                     color_tokens,
@@ -407,17 +403,22 @@ class CSSExtractor(BaseAssetExtractor):
                 ) = resolve_css_class_properties(css_class, var_registry)
 
                 # Update class with enhanced data
-                css_class.raw_properties = raw_properties
+                # IMPORTANT: Don't overwrite raw_properties! It was already set correctly
+                # using format_property_value() which reuses the USS serialization logic.
+                # The resolve_css_class_properties() function builds raw_properties from
+                # individual CSSValueDefinition objects which have placeholder values.
+                # css_class.raw_properties is already correct, so keep it!
+
                 css_class.resolved_properties = resolved_properties
                 css_class.variables_used = variables_used
                 css_class.color_tokens = color_tokens
                 css_class.numeric_tokens = numeric_tokens
                 css_class.asset_dependencies = asset_dependencies
 
-                # Build property summary
+                # Build property summary using the correct raw_properties from the class
                 resolver = CSSResolver(var_registry)
                 css_class.summary = resolver.build_property_summary(
-                    raw_properties, resolved_properties
+                    css_class.raw_properties, resolved_properties
                 )
 
             except Exception as e:

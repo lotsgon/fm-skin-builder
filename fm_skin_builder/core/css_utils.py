@@ -22,8 +22,7 @@ __all__ = [
     "tokenize_css_value",
     "apply_value_patch_preserve",
     "safe_parse_float",
-    "format_uss_value",
-    "convert_uss_values_to_text",
+    "format_property_value",
 ]
 
 
@@ -1144,68 +1143,68 @@ def _is_invalid_value(
     return False
 
 
-def format_uss_value(
-    value_type: int,
-    value_index: int,
-    strings: List[str],
-    colors: List[Any],
-    floats: List[float],
-    dimensions: List[Any],
-    prop_name: str = "",
-) -> Optional[str]:
-    """
-    Public wrapper for _format_uss_value to convert Unity USS value to CSS/USS text.
-
-    Args:
-        value_type: Unity value type (1-11)
-        value_index: Index into appropriate array
-        strings: Stylesheet strings array
-        colors: Stylesheet colors array
-        floats: Stylesheet floats array
-        dimensions: Stylesheet dimensions array
-        prop_name: Property name for context
-
-    Returns:
-        Formatted CSS/USS value string, or None if invalid
-    """
-    return _format_uss_value(
-        value_type, value_index, strings, colors, floats, dimensions, prop_name
-    )
-
-
-def convert_uss_values_to_text(
-    values: List[Any],
-    prop_name: str,
+def format_property_value(
+    prop: Any,
     strings: List[str],
     colors: List[Any],
     floats: List[float],
     dimensions: List[Any],
 ) -> str:
     """
-    Convert a list of Unity USS values to a single CSS/USS value string.
+    Format a Unity USS property to CSS/USS value text.
+
+    This function extracts and reuses the core logic from serialize_stylesheet_to_uss()
+    to ensure consistent USS formatting across the codebase.
 
     Handles:
     - Triplet pattern for var() references: [Type10=1, Type2=1.0, Type8=var_name] → var(--var_name)
-    - Multi-value properties: [Type2, Type2, Type2, Type2] → "0px 5px 0px 5px"
-    - Single values: [Type4] → "#FF0000"
+    - Multi-value shorthand properties: border-color, margin, padding, etc.
+    - Single-value properties with priority-based value selection
+    - All 11 Unity USS value types
 
     Args:
-        values: List of Unity USS value objects with m_ValueType and valueIndex
-        prop_name: CSS property name for context
+        prop: Unity property object with m_Name and m_Values
         strings: Stylesheet strings array
         colors: Stylesheet colors array
         floats: Stylesheet floats array
         dimensions: Stylesheet dimensions array
 
     Returns:
-        Formatted CSS/USS value string (e.g., "var(--my-color)", "10px solid #FF0000")
+        Formatted CSS/USS value string (e.g., "var(--my-color)", "10px", "none")
     """
-    formatted_values = []
-    i = 0
+    from collections import defaultdict
+    from typing import List as TList, Tuple as TTuple
 
+    prop_name = getattr(prop, "m_Name", "")
+    values = list(getattr(prop, "m_Values", []))
+
+    # Properties that expect color values
+    color_properties = {
+        "color",
+        "background-color",
+        "border-color",
+        "border-left-color",
+        "border-right-color",
+        "border-top-color",
+        "border-bottom-color",
+        "-unity-background-image-tint-color",
+    }
+
+    # Multi-value shorthand properties (space-separated)
+    multi_value_shorthands = {
+        "margin": 4,
+        "padding": 4,
+        "border-width": 4,
+        "border-radius": 4,
+        "border-color": 4,
+    }
+
+    # Process values using the SAME logic as serialize_stylesheet_to_uss()
+    # This is extracted directly from that function (lines 566-620)
+    processed_values = []
+    i = 0
     while i < len(values):
         # Check if we have a triplet pattern starting at position i
-        # Triplet: [Type10=1, Type2=1.0, Type8=var_name] → var(--var_name)
         if (
             i + 2 < len(values)
             and getattr(values[i], "m_ValueType", None) == 10
@@ -1228,7 +1227,7 @@ def convert_uss_values_to_text(
                     if not var_name.startswith("--"):
                         var_name = f"--{var_name}"
                     # Add the var() reference
-                    formatted_values.append(f"var({var_name})")
+                    processed_values.append((10, type8_idx, f"var({var_name})"))
                     # Skip the next 2 values (we consumed the triplet)
                     i += 3
                     continue
@@ -1238,6 +1237,7 @@ def convert_uss_values_to_text(
         value_index = getattr(values[i], "valueIndex", None)
 
         if value_type is not None and value_index is not None:
+            # Format the value based on its type
             formatted_value = _format_uss_value(
                 value_type,
                 value_index,
@@ -1249,12 +1249,20 @@ def convert_uss_values_to_text(
             )
 
             if formatted_value:
-                formatted_values.append(formatted_value)
+                processed_values.append((value_type, value_index, formatted_value))
 
         i += 1
 
-    # Join all formatted values with spaces
-    return " ".join(formatted_values) if formatted_values else ""
+    # Pick the best value(s) using the SAME logic as serialize_stylesheet_to_uss()
+    # This is extracted directly from that function (lines 637-640)
+    if len(processed_values) == 0:
+        return ""
+
+    final_value, _ = _pick_best_value(
+        prop_name, processed_values, multi_value_shorthands, color_properties
+    )
+
+    return final_value
 
 
 def clean_for_json(obj, seen=None, max_depth: int = 10):
