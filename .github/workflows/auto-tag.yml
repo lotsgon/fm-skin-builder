@@ -3,10 +3,11 @@ name: Auto-Tag Release
 # When code is merged to main, automatically create a release tag
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: write
+  actions: write # Needed to trigger workflows
 
 jobs:
   auto-tag:
@@ -16,12 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Need full history for version calculation
+          fetch-depth: 0 # Need full history for version calculation
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Calculate next version
         id: version
@@ -60,7 +61,20 @@ jobs:
           git push origin "v$VERSION"
 
           echo "✅ Created and pushed tag v$VERSION"
-          echo "🚀 Release build will start automatically"
+
+      - name: Trigger build workflow
+        if: steps.version.outputs.skip == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Trigger the build-app workflow with the version
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows/build-app.yml/dispatches \
+            -d "{\"ref\":\"refs/tags/v$VERSION\", \"inputs\":{\"version\":\"$VERSION\"}}"
+
+          echo "🚀 Build workflow triggered for v$VERSION"
 
       - name: Summary
         if: steps.version.outputs.skip == 'false'

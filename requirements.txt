@@ -13,3 +13,4 @@ numpy>=1.24.0
 colormath>=3.0.0
 texture2ddecoder>=1.0.0
 boto3>=1.34.0
+fonttools>=4.47.0

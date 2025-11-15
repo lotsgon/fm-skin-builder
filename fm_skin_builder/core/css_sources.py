@@ -3,10 +3,13 @@ from __future__ import annotations
 import re
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple, Iterable
+from typing import Dict, List, Optional, Set, Tuple, Iterable, Any
 import json
 
-from .css_utils import load_css_selector_overrides, load_css_vars
+from .css_utils import (
+    load_css_properties,
+    load_css_selector_properties,
+)
 from .logger import get_logger
 
 log = get_logger(__name__)
@@ -21,19 +24,29 @@ __all__ = [
 
 @dataclass(frozen=True)
 class CssFileOverrides:
-    """Stores variables and selector overrides parsed from a single CSS/USS file."""
+    """Stores variables and selector overrides parsed from a single CSS/USS file.
 
-    vars: Dict[str, str]
-    selectors: Dict[Tuple[str, str], str]
+    Values can be:
+    - Hex color strings: "#FF0000", "#00FF00AA"
+    - Float values with units: "12px", "1.5em", "100%"
+    - Keywords/enums: "bold", "visible", "center"
+    - Resource URLs: "url('resource://fonts/MyFont')"
+    """
+
+    vars: Dict[str, Any]
+    selectors: Dict[Tuple[str, str], Any]
     source: Optional[Path] = None
 
 
 @dataclass
 class CollectedCss:
-    """Aggregated CSS data including optional per-stylesheet scoping information."""
+    """Aggregated CSS data including optional per-stylesheet scoping information.
 
-    global_vars: Dict[str, str] = field(default_factory=dict)
-    global_selectors: Dict[Tuple[str, str], str] = field(default_factory=dict)
+    Values stored in vars and selectors can be any CSS property type (colors, floats, keywords, resources).
+    """
+
+    global_vars: Dict[str, Any] = field(default_factory=dict)
+    global_selectors: Dict[Tuple[str, str], Any] = field(default_factory=dict)
     asset_map: Dict[str, List[CssFileOverrides]] = field(default_factory=dict)
     files_by_stem: Dict[str, List[CssFileOverrides]] = field(default_factory=dict)
 
@@ -41,8 +54,8 @@ class CollectedCss:
     def from_overrides(
         cls,
         *,
-        global_vars: Optional[Dict[str, str]] = None,
-        global_selectors: Optional[Dict[Tuple[str, str], str]] = None,
+        global_vars: Optional[Dict[str, Any]] = None,
+        global_selectors: Optional[Dict[Tuple[str, str], Any]] = None,
         asset_map: Optional[Dict[str, Iterable[CssFileOverrides]]] = None,
         files_by_stem: Optional[Dict[str, Iterable[CssFileOverrides]]] = None,
     ) -> "CollectedCss":
@@ -172,8 +185,9 @@ def collect_css_from_dir(css_dir: Path) -> CollectedCss:
 
     for css_file in files:
         try:
-            file_vars = load_css_vars(css_file)
-            file_selectors = load_css_selector_overrides(css_file)
+            # Use new functions that support all property types (colors, floats, keywords, resources)
+            file_vars = load_css_properties(css_file)
+            file_selectors = load_css_selector_properties(css_file)
         except Exception as exc:
             log.warning("Failed to parse %s: %s", css_file, exc)
             continue

@@ -1,0 +1,23 @@
+.attribute-colour-unset {
+  color: #81848D;
+}
+
+.attribute-colour-low {
+  color: #F4591E;
+}
+
+.attribute-colour-poor {
+  color: #F5A207;
+}
+
+.attribute-colour-normal {
+  color: #F7F311;
+}
+
+.attribute-colour-good {
+  color: #C2E028;
+}
+
+.attribute-colour-great {
+  color: #65E53A;
+}
