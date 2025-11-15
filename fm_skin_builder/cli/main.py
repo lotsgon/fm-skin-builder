@@ -148,6 +148,13 @@ def main() -> None:
         default=None,
         help="R2 secret access key (or use R2_SECRET_KEY env var)",
     )
+    c.add_argument(
+        "--exclude-bundle",
+        type=str,
+        action="append",
+        default=None,
+        help="Exclude bundles matching pattern (can be specified multiple times, e.g., --exclude-bundle newgen --exclude-bundle regen)",
+    )
 
     # Catalogue diff command
     d = sub.add_parser(

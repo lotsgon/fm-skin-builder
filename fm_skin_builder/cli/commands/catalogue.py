@@ -47,6 +47,9 @@ def run(args: Namespace) -> None:
     # No changelog flag
     skip_changelog = getattr(args, "no_changelog", False)
 
+    # Exclusion patterns
+    exclude_patterns = getattr(args, "exclude_bundle", None) or []
+
     # R2 configuration
     r2_config = {}
     if hasattr(args, "r2_endpoint") and args.r2_endpoint:
@@ -86,6 +89,7 @@ def run(args: Namespace) -> None:
             previous_version=previous_version,
             skip_changelog=skip_changelog,
             r2_config=r2_config if r2_config else None,
+            exclude_patterns=exclude_patterns,
         )
 
         if dry_run:

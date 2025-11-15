@@ -53,6 +53,7 @@ class CatalogueBuilder:
         previous_version: Optional[str] = None,
         skip_changelog: bool = False,
         r2_config: Optional[Dict[str, str]] = None,
+        exclude_patterns: Optional[List[str]] = None,
     ):
         """
         Initialize catalogue builder.
@@ -66,6 +67,7 @@ class CatalogueBuilder:
             previous_version: Override previous version for comparison (default: auto-detect)
             skip_changelog: Skip changelog generation
             r2_config: R2 configuration dict with keys: endpoint, bucket, access_key, secret_key, base_path
+            exclude_patterns: Additional bundle name patterns to exclude (e.g., ["newgen", "regen"])
         """
         self.fm_version = fm_version
         self.base_output_dir = output_dir
@@ -73,6 +75,7 @@ class CatalogueBuilder:
         self.previous_version_override = previous_version
         self.skip_changelog = skip_changelog
         self.r2_config = r2_config or {}
+        self.exclude_patterns = exclude_patterns or []
 
         # Create version-specific output directory (just FM version, no -vN suffix)
         self.output_dir = output_dir / fm_version
@@ -182,9 +185,13 @@ class CatalogueBuilder:
         - Files ending with _modified.bundle
         - Files ending with .bak
         - Files ending with .bundle.bak
+        - Files ending with _temp.bundle
+        - Files ending with .tmp
+        - Files containing any user-provided exclusion patterns
         """
         bundles = []
-        excluded_patterns = [
+        # Default exclusion patterns (exact suffix matches)
+        default_excluded = [
             "_modified.bundle",
             ".bak",
             ".bundle.bak",
@@ -192,22 +199,56 @@ class CatalogueBuilder:
             ".tmp",
         ]
 
+        # Combine default and user-provided patterns
+        all_excluded_patterns = default_excluded + self.exclude_patterns
+
+        # Log active exclusion patterns
+        if self.exclude_patterns:
+            log.info(f"  Active exclusion patterns: {', '.join(self.exclude_patterns)}")
+
         for path in paths:
             if path.is_dir():
                 for bundle in sorted(path.glob("**/*.bundle")):
+                    bundle_str = str(bundle)
+                    bundle_name = bundle.name.lower()
+
                     # Check if bundle should be excluded
-                    if any(
-                        str(bundle).endswith(pattern) for pattern in excluded_patterns
-                    ):
+                    should_exclude = False
+
+                    # Check default patterns (exact suffix match)
+                    if any(bundle_str.endswith(pattern) for pattern in default_excluded):
                         log.debug(f"  Skipping excluded bundle: {bundle.name}")
-                        continue
-                    bundles.append(bundle)
+                        should_exclude = True
+
+                    # Check user-provided patterns (substring match, case-insensitive)
+                    elif any(pattern.lower() in bundle_name for pattern in self.exclude_patterns):
+                        excluded_by = next(p for p in self.exclude_patterns if p.lower() in bundle_name)
+                        log.info(f"  Skipping bundle (excluded by pattern '{excluded_by}'): {bundle.name}")
+                        should_exclude = True
+
+                    if not should_exclude:
+                        bundles.append(bundle)
+
             elif path.suffix == ".bundle":
+                bundle_str = str(path)
+                bundle_name = path.name.lower()
+
                 # Check if this specific bundle should be excluded
-                if any(str(path).endswith(pattern) for pattern in excluded_patterns):
+                should_exclude = False
+
+                # Check default patterns
+                if any(bundle_str.endswith(pattern) for pattern in default_excluded):
                     log.warning(f"  Skipping excluded bundle: {path.name}")
-                    continue
-                bundles.append(path)
+                    should_exclude = True
+
+                # Check user-provided patterns
+                elif any(pattern.lower() in bundle_name for pattern in self.exclude_patterns):
+                    excluded_by = next(p for p in self.exclude_patterns if p.lower() in bundle_name)
+                    log.warning(f"  Skipping bundle (excluded by pattern '{excluded_by}'): {path.name}")
+                    should_exclude = True
+
+                if not should_exclude:
+                    bundles.append(path)
 
         return bundles
 

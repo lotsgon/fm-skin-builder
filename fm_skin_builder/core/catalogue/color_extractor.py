@@ -9,6 +9,7 @@ from typing import List
 import numpy as np
 from PIL import Image
 from io import BytesIO
+import warnings
 
 try:
     from sklearn.cluster import KMeans
@@ -50,7 +51,11 @@ def extract_dominant_colors(image_data: bytes, num_colors: int = 5) -> List[str]
         kmeans = KMeans(
             n_clusters=min(num_colors, len(pixels)), random_state=42, n_init=10
         )
-        kmeans.fit(pixels)
+
+        # Suppress convergence warnings for images with few unique colors
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=Warning, message=".*Number of distinct clusters.*")
+            kmeans.fit(pixels)
 
         # Get cluster centers (dominant colors)
         colors = kmeans.cluster_centers_.astype(int)
