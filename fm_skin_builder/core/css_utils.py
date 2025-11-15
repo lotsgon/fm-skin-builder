@@ -602,14 +602,34 @@ def _format_uss_value(
     """
     import re as _re
 
-    if value_type == 1:  # Keyword
-        # Type 1 uses string index for keyword values
+    if value_type == 1:  # Keyword (StyleKeyword enum)
+        # Type 1 represents Unity's StyleKeyword enum values
+        # These are CSS keywords that are NOT stored in the strings array
+        # (e.g., "none", "auto", "initial", etc.)
+
+        # Unity StyleKeyword enum mapping (based on Unity UIElements)
+        # Source: https://docs.unity3d.com/ScriptReference/UIElements.StyleKeyword.html
+        style_keyword_map = {
+            0: "undefined",
+            1: "null",
+            2: "auto",
+            3: "none",
+            4: "initial",
+            # Additional values may exist - extend as needed
+            6: "none",  # Empirically observed in bundle data for display property
+        }
+
+        keyword = style_keyword_map.get(value_index)
+        if keyword:
+            return keyword
+
+        # Fallback: Try strings array for backwards compatibility
         if 0 <= value_index < len(strings):
             value = strings[value_index]
-            # Type 1 should only contain actual keyword values (flex, none, visible, etc.)
-            # Variable names should be Type 10, not Type 1
-            # Return the keyword as-is without wrapping
-            return value
+            # Only return if it's a valid keyword (not a variable name)
+            if value and not value.startswith("--"):
+                return value
+
         return None
 
     elif value_type == 2:  # Float/Dimension
