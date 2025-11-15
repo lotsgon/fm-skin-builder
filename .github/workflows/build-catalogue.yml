@@ -148,10 +148,21 @@ jobs:
       - name: Build partial catalogue
         run: |
           echo "Building catalogue for Group ${{ matrix.group }}..."
+
+          # Build exclusion arguments from space-separated patterns
+          EXCLUDE_ARGS=""
+          if [ -n "${{ github.event.inputs.exclude_bundles }}" ]; then
+            for pattern in ${{ github.event.inputs.exclude_bundles }}; do
+              EXCLUDE_ARGS="$EXCLUDE_ARGS --exclude-bundle $pattern"
+            done
+            echo "Exclusion patterns: ${{ github.event.inputs.exclude_bundles }}"
+          fi
+
           python -m fm_skin_builder.cli.main catalogue \
             --bundle bundles \
             --fm-version "${{ github.event.inputs.fm_version }}" \
-            --out catalogue_group_${{ matrix.group }}
+            --out catalogue_group_${{ matrix.group }} \
+            $EXCLUDE_ARGS
 
       - name: Upload partial catalogue
         uses: actions/upload-artifact@v4
