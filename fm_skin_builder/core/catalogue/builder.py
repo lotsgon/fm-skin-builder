@@ -186,7 +186,9 @@ class CatalogueBuilder:
             if path.is_dir():
                 for bundle in sorted(path.glob("**/*.bundle")):
                     # Check if bundle should be excluded
-                    if any(str(bundle).endswith(pattern) for pattern in excluded_patterns):
+                    if any(
+                        str(bundle).endswith(pattern) for pattern in excluded_patterns
+                    ):
                         log.debug(f"  Skipping excluded bundle: {bundle.name}")
                         continue
                     bundles.append(bundle)
@@ -219,27 +221,39 @@ class CatalogueBuilder:
 
                 # Extract sprites (returns raw data, not models yet)
                 try:
-                    sprite_data_list = self.sprite_extractor.extract_from_bundle(bundle_path)
+                    sprite_data_list = self.sprite_extractor.extract_from_bundle(
+                        bundle_path
+                    )
                     if not hasattr(self, "_sprite_data"):
                         self._sprite_data = []
                     self._sprite_data.extend(sprite_data_list)
                 except Exception as e:
-                    log.warning(f"  Error extracting sprites from {bundle_path.name}: {e}")
+                    log.warning(
+                        f"  Error extracting sprites from {bundle_path.name}: {e}"
+                    )
 
                 # Extract textures (returns raw data)
                 try:
-                    texture_data_list = self.texture_extractor.extract_from_bundle(bundle_path)
+                    texture_data_list = self.texture_extractor.extract_from_bundle(
+                        bundle_path
+                    )
                     if not hasattr(self, "_texture_data"):
                         self._texture_data = []
                     self._texture_data.extend(texture_data_list)
                 except Exception as e:
-                    log.warning(f"  Error extracting textures from {bundle_path.name}: {e}")
+                    log.warning(
+                        f"  Error extracting textures from {bundle_path.name}: {e}"
+                    )
 
                 # Extract fonts
                 try:
-                    self.fonts.extend(self.font_extractor.extract_from_bundle(bundle_path))
+                    self.fonts.extend(
+                        self.font_extractor.extract_from_bundle(bundle_path)
+                    )
                 except Exception as e:
-                    log.warning(f"  Error extracting fonts from {bundle_path.name}: {e}")
+                    log.warning(
+                        f"  Error extracting fonts from {bundle_path.name}: {e}"
+                    )
 
             except Exception as e:
                 log.error(f"  Critical error scanning {bundle_path.name}: {e}")
@@ -270,7 +284,9 @@ class CatalogueBuilder:
                         else:
                             sprites_processed += 1
                 except Exception as e:
-                    log.warning(f"  Error processing sprite {sprite_data.get('name')}: {e}")
+                    log.warning(
+                        f"  Error processing sprite {sprite_data.get('name')}: {e}"
+                    )
 
         # Process textures
         if hasattr(self, "_texture_data"):
@@ -284,7 +300,9 @@ class CatalogueBuilder:
                         else:
                             textures_processed += 1
                 except Exception as e:
-                    log.warning(f"  Error processing texture {texture_data.get('name')}: {e}")
+                    log.warning(
+                        f"  Error processing texture {texture_data.get('name')}: {e}"
+                    )
 
         log.info(
             f"  Sprites: {sprites_processed} processed, {sprites_skipped} deduplicated (skipped)"
@@ -293,7 +311,9 @@ class CatalogueBuilder:
             f"  Textures: {textures_processed} processed, {textures_skipped} deduplicated (skipped)"
         )
 
-    def _process_sprite_image(self, sprite_data: Dict[str, Any]) -> tuple[Optional[Sprite], bool]:
+    def _process_sprite_image(
+        self, sprite_data: Dict[str, Any]
+    ) -> tuple[Optional[Sprite], bool]:
         """
         Process sprite image data to create Sprite model.
 
@@ -348,7 +368,9 @@ class CatalogueBuilder:
         # Not cached - process image (expensive operation)
         thumbnail_filename = f"{content_hash}.webp"
         thumbnail_path = self.output_dir / "thumbnails" / "sprites" / thumbnail_filename
-        original_size = self.image_processor.create_thumbnail(image_data, thumbnail_path)
+        original_size = self.image_processor.create_thumbnail(
+            image_data, thumbnail_path
+        )
 
         # Extract dominant colors
         dominant_colors = extract_dominant_colors(image_data, num_colors=5)
@@ -419,8 +441,12 @@ class CatalogueBuilder:
 
         # Not cached - process image (expensive operation)
         thumbnail_filename = f"{content_hash}.webp"
-        thumbnail_path = self.output_dir / "thumbnails" / "textures" / thumbnail_filename
-        original_size = self.image_processor.create_thumbnail(image_data, thumbnail_path)
+        thumbnail_path = (
+            self.output_dir / "thumbnails" / "textures" / thumbnail_filename
+        )
+        original_size = self.image_processor.create_thumbnail(
+            image_data, thumbnail_path
+        )
 
         # Extract dominant colors
         dominant_colors = extract_dominant_colors(image_data, num_colors=5)
@@ -485,7 +511,9 @@ class CatalogueBuilder:
                 deduplicated_textures.append(texture)
 
         self.textures = deduplicated_textures
-        log.info(f"  Deduplicated {len(texture_names)} textures to {len(self.textures)}")
+        log.info(
+            f"  Deduplicated {len(texture_names)} textures to {len(self.textures)}"
+        )
 
     def _create_metadata(self) -> CatalogueMetadata:
         """Create catalogue metadata."""
@@ -505,8 +533,12 @@ class CatalogueBuilder:
 
         # Add changelog metadata if available
         if self._changelog_metadata:
-            metadata.previous_fm_version = self._changelog_metadata.get("previous_fm_version")
-            metadata.changes_since_previous = self._changelog_metadata.get("changes_since_previous")
+            metadata.previous_fm_version = self._changelog_metadata.get(
+                "previous_fm_version"
+            )
+            metadata.changes_since_previous = self._changelog_metadata.get(
+                "changes_since_previous"
+            )
 
         return metadata
 
@@ -560,7 +592,9 @@ class CatalogueBuilder:
         if not self.base_output_dir.exists():
             return None
 
-        current_version, is_current_beta = self._parse_version_with_beta(self.fm_version)
+        current_version, is_current_beta = self._parse_version_with_beta(
+            self.fm_version
+        )
         if not current_version:
             # Fallback to simple string comparison
             return self._find_previous_version_fallback()
@@ -598,7 +632,9 @@ class CatalogueBuilder:
         Returns:
             Path to matching beta directory, or None if not found
         """
-        current_version, is_current_beta = self._parse_version_with_beta(self.fm_version)
+        current_version, is_current_beta = self._parse_version_with_beta(
+            self.fm_version
+        )
 
         if is_current_beta or not current_version:
             # Current is beta or unparseable
@@ -626,7 +662,9 @@ class CatalogueBuilder:
             return None
 
         version_dirs = [
-            d for d in self.base_output_dir.iterdir() if d.is_dir() and d.name != self.fm_version
+            d
+            for d in self.base_output_dir.iterdir()
+            if d.is_dir() and d.name != self.fm_version
         ]
 
         if not version_dirs:
@@ -658,7 +696,9 @@ class CatalogueBuilder:
             base_path = self.r2_config.get("base_path", "")
 
             # Determine which versions we might need
-            current_version, is_current_beta = self._parse_version_with_beta(self.fm_version)
+            current_version, is_current_beta = self._parse_version_with_beta(
+                self.fm_version
+            )
 
             # List local versions
             local_versions = [
@@ -688,9 +728,14 @@ class CatalogueBuilder:
             # Download needed versions
             for version in versions_to_check:
                 version_dir = self.base_output_dir / version
-                if not version_dir.exists() or not (version_dir / "metadata.json").exists():
+                if (
+                    not version_dir.exists()
+                    or not (version_dir / "metadata.json").exists()
+                ):
                     log.info(f"  Attempting to download version {version} from R2...")
-                    if downloader.download_version(version, self.base_output_dir, base_path):
+                    if downloader.download_version(
+                        version, self.base_output_dir, base_path
+                    ):
                         log.info(f"  ✅ Successfully downloaded {version} from R2")
                     else:
                         log.warning(f"  ⚠️  Could not download {version} from R2")
@@ -710,7 +755,9 @@ class CatalogueBuilder:
                 'primary_type': 'stable-to-stable' or 'stable-to-beta'
                 'secondary_type': 'beta-to-stable' or None
         """
-        current_version, is_current_beta = self._parse_version_with_beta(self.fm_version)
+        current_version, is_current_beta = self._parse_version_with_beta(
+            self.fm_version
+        )
 
         result = {
             "primary": None,
@@ -723,12 +770,16 @@ class CatalogueBuilder:
         if self.previous_version_override:
             override_path = self.base_output_dir / self.previous_version_override
             if override_path.exists() and (override_path / "metadata.json").exists():
-                log.info(f"  Using override previous version: {self.previous_version_override}")
+                log.info(
+                    f"  Using override previous version: {self.previous_version_override}"
+                )
                 result["primary"] = override_path
                 result["primary_type"] = "manual-override"
                 return result
             else:
-                log.warning(f"  Override version not found: {self.previous_version_override}")
+                log.warning(
+                    f"  Override version not found: {self.previous_version_override}"
+                )
                 log.warning("  Falling back to auto-detection")
 
         # Find previous stable version
@@ -967,13 +1018,19 @@ class CatalogueBuilder:
         total_new += sum(1 for t in self.textures if t.change_status == "new")
         total_new += sum(1 for f in self.fonts if f.change_status == "new")
 
-        total_modified = sum(1 for v in self.css_variables if v.change_status == "modified")
-        total_modified += sum(1 for c in self.css_classes if c.change_status == "modified")
+        total_modified = sum(
+            1 for v in self.css_variables if v.change_status == "modified"
+        )
+        total_modified += sum(
+            1 for c in self.css_classes if c.change_status == "modified"
+        )
         total_modified += sum(1 for s in self.sprites if s.change_status == "modified")
         total_modified += sum(1 for t in self.textures if t.change_status == "modified")
         total_modified += sum(1 for f in self.fonts if f.change_status == "modified")
 
-        log.info(f"  ✅ Applied change tracking: {total_new} new, {total_modified} modified")
+        log.info(
+            f"  ✅ Applied change tracking: {total_new} new, {total_modified} modified"
+        )
 
     def _extract_beta_changes(self, changelog: Dict[str, Any]) -> Dict[str, Any]:
         """

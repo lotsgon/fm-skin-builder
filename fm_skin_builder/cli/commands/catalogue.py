@@ -61,8 +61,12 @@ def run(args: Namespace) -> None:
             r2_config = {}
 
     # Get icon paths
-    icon_white = Path(__file__).parent.parent.parent.parent / "icons" / "SVG" / "White.svg"
-    icon_black = Path(__file__).parent.parent.parent.parent / "icons" / "SVG" / "Black.svg"
+    icon_white = (
+        Path(__file__).parent.parent.parent.parent / "icons" / "SVG" / "White.svg"
+    )
+    icon_black = (
+        Path(__file__).parent.parent.parent.parent / "icons" / "SVG" / "Black.svg"
+    )
 
     if not icon_white.exists():
         log.warning(f"White icon not found: {icon_white}")

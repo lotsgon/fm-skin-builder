@@ -11,7 +11,9 @@ log = get_logger(__name__)
 
 def _hash_config(config_path: Path) -> str:
     raw = config_path.read_bytes()
-    return hashlib.sha256(raw + str(config_path.stat().st_mtime_ns).encode()).hexdigest()
+    return hashlib.sha256(
+        raw + str(config_path.stat().st_mtime_ns).encode()
+    ).hexdigest()
 
 
 def cache_dir(root: Path) -> Path:

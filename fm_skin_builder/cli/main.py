@@ -31,7 +31,9 @@ def main() -> None:
     sub.add_parser("swap", help="Swap bundles (stub)")
 
     p = sub.add_parser("patch", help="Patch bundles using CSS/USS overrides")
-    p.add_argument("css", type=str, help="Skin folder or directory containing .css/.uss overrides")
+    p.add_argument(
+        "css", type=str, help="Skin folder or directory containing .css/.uss overrides"
+    )
     p.add_argument(
         "--out",
         type=str,
@@ -44,7 +46,9 @@ def main() -> None:
         default=None,
         help="Optional bundle file or directory (if omitted, inferred from skin config)",
     )
-    p.add_argument("--patch-direct", action="store_true", help="Also patch inlined color literals")
+    p.add_argument(
+        "--patch-direct", action="store_true", help="Also patch inlined color literals"
+    )
     p.add_argument(
         "--debug-export",
         action="store_true",
@@ -72,7 +76,9 @@ def main() -> None:
     )
 
     s = sub.add_parser("scan", help="Scan bundles and index stylesheet usage")
-    s.add_argument("--bundle", type=str, required=True, help="Bundle file or directory to scan")
+    s.add_argument(
+        "--bundle", type=str, required=True, help="Bundle file or directory to scan"
+    )
     s.add_argument(
         "--out",
         type=str,
@@ -85,8 +91,12 @@ def main() -> None:
         help="Export all stylesheet assets as .uss alongside the index",
     )
 
-    c = sub.add_parser("catalogue", help="Build comprehensive asset catalogue from FM bundles")
-    c.add_argument("--bundle", type=str, required=True, help="Bundle file or directory to scan")
+    c = sub.add_parser(
+        "catalogue", help="Build comprehensive asset catalogue from FM bundles"
+    )
+    c.add_argument(
+        "--bundle", type=str, required=True, help="Bundle file or directory to scan"
+    )
     c.add_argument(
         "--out",
         type=str,
@@ -100,7 +110,9 @@ def main() -> None:
         help="FM version string (e.g., '2026.4.0')",
     )
     c.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
-    c.add_argument("--dry-run", action="store_true", help="Preview without writing files")
+    c.add_argument(
+        "--dry-run", action="store_true", help="Preview without writing files"
+    )
     c.add_argument(
         "--previous-version",
         type=str,
