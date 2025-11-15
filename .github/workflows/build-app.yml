@@ -5,7 +5,12 @@ on:
   push:
     branches: [beta] # Beta builds for testing
     tags: ["v*"] # Release builds
-  workflow_dispatch:
+  workflow_dispatch: # Allow manual and programmatic triggers
+    inputs:
+      version:
+        description: "Version to build"
+        required: false
+        type: string
 
 env:
   PYTHON_VERSION: "3.10"
@@ -222,8 +227,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for version calculation
-          fetch-tags: true  # Fetch tags for version detection
+          fetch-depth: 0 # Fetch all history for version calculation
+          fetch-tags: true # Fetch tags for version detection
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
