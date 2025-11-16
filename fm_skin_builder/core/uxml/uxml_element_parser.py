@@ -14,16 +14,22 @@ class UXMLElementBinary:
     m_ParentId: int
     m_RuleIndex: int
 
-    # Unknown fields (20 bytes) - preserved as-is
-    unknown_bytes: bytes  # bytes 16-35
+    # UI behavior fields (20 bytes at offset +16-35)
+    m_PickingMode: int            # Offset +16: UI picking mode (0 = Position)
+    m_SkipClone: int              # Offset +20: Skip clone flag (0 = false)
+    m_XmlNamespace: int           # Offset +24: Namespace reference (always -1)
+    unknown_field_1: int          # Offset +28: Unknown (always 0)
+    unknown_field_2: int          # Offset +32: Unknown (always 0)
 
     # Variable string arrays
     m_Classes: List[str]
     m_StylesheetPaths: List[str]
 
-    # Unknown fields after paths (16 bytes) - preserved as-is
-    # Observed values: [0, -2, -1, 0] (4 int32s)
-    unknown_after_paths: bytes
+    # Serialization fields (16 bytes after m_StylesheetPaths)
+    unknown_field_3: int          # Always 0
+    m_SerializedData: int         # Reference ID for binding data (rid value)
+    unknown_field_4: int          # Varies: -1 or 0
+    unknown_field_5: int          # Always 0
 
     # Element type and name
     m_Type: str
@@ -35,7 +41,7 @@ class UXMLElementBinary:
     def __len__(self) -> int:
         """Calculate total size of this element in bytes."""
         size = 16  # Fixed integer fields
-        size += len(self.unknown_bytes)  # Unknown section (20 bytes)
+        size += 20  # UI behavior fields (5 int32s)
         size += 4  # m_Classes array size
 
         # Add size of each class string (4-byte aligned)
@@ -60,7 +66,7 @@ class UXMLElementBinary:
             if remainder != 0:
                 size += 4 - remainder
 
-        size += len(self.unknown_after_paths)  # Unknown fields (12 bytes)
+        size += 16  # Serialization fields (4 int32s)
 
         # m_Type string (4-byte aligned)
         size += 4  # String length field
@@ -93,8 +99,12 @@ class UXMLElementBinary:
         else:
             data.extend(struct.pack('<i', self.m_RuleIndex))
 
-        # Unknown bytes section
-        data.extend(self.unknown_bytes)
+        # UI behavior fields (20 bytes)
+        data.extend(struct.pack('<i', self.m_PickingMode))
+        data.extend(struct.pack('<i', self.m_SkipClone))
+        data.extend(struct.pack('<i', self.m_XmlNamespace))
+        data.extend(struct.pack('<i', self.unknown_field_1))
+        data.extend(struct.pack('<i', self.unknown_field_2))
 
         # m_Classes array
         data.extend(struct.pack('<i', len(self.m_Classes)))
@@ -118,8 +128,11 @@ class UXMLElementBinary:
             while len(data) % 4 != 0:
                 data.append(0)
 
-        # Unknown fields after paths
-        data.extend(self.unknown_after_paths)
+        # Serialization fields (16 bytes)
+        data.extend(struct.pack('<i', self.unknown_field_3))
+        data.extend(struct.pack('<i', self.m_SerializedData))
+        data.extend(struct.pack('<i', self.unknown_field_4))
+        data.extend(struct.pack('<i', self.unknown_field_5))
 
         # m_Type string
         type_bytes = self.m_Type.encode('utf-8')
@@ -166,8 +179,12 @@ def parse_element_at_offset(raw_data: bytes, offset: int, debug: bool = False) -
         if m_rule == 0xFFFFFFFF:
             m_rule = -1
 
-        # Read unknown section (bytes 16-35, total 20 bytes)
-        unknown_bytes = raw_data[offset + 16:offset + 36]
+        # Read UI behavior fields (bytes 16-35, total 20 bytes = 5 int32s)
+        m_picking_mode = struct.unpack_from('<i', raw_data, offset + 16)[0]
+        m_skip_clone = struct.unpack_from('<i', raw_data, offset + 20)[0]
+        m_xml_namespace = struct.unpack_from('<i', raw_data, offset + 24)[0]
+        unknown_field_1 = struct.unpack_from('<i', raw_data, offset + 28)[0]
+        unknown_field_2 = struct.unpack_from('<i', raw_data, offset + 32)[0]
 
         # m_Classes array starts at offset +36
         pos = offset + 36
@@ -251,19 +268,20 @@ def parse_element_at_offset(raw_data: bytes, offset: int, debug: bool = False) -
         if paths is None:
             return None
 
-        # Read unknown fields after paths (16 bytes = 4 int32s)
-        # Observed values: [0, -2, -1, 0]
+        # Read serialization fields (16 bytes = 4 int32s)
         if pos + 16 > len(raw_data):
             if debug:
-                print(f"DEBUG: Not enough data to read unknown_after_paths at {pos}")
+                print(f"DEBUG: Not enough data to read serialization fields at {pos}")
             return None
 
-        unknown_after_paths = raw_data[pos:pos + 16]
+        unknown_field_3 = struct.unpack_from('<i', raw_data, pos)[0]
+        m_serialized_data = struct.unpack_from('<i', raw_data, pos + 4)[0]
+        unknown_field_4 = struct.unpack_from('<i', raw_data, pos + 8)[0]
+        unknown_field_5 = struct.unpack_from('<i', raw_data, pos + 12)[0]
         pos += 16
 
         if debug:
-            vals = struct.unpack('<iiii', unknown_after_paths)
-            print(f"  unknown_after_paths: {vals} at pos {pos-16}")
+            print(f"  serialization fields: ({unknown_field_3}, {m_serialized_data}, {unknown_field_4}, {unknown_field_5}) at pos {pos-16}")
 
         # Read m_Type string (4-byte aligned)
         if pos + 4 > len(raw_data):
@@ -349,10 +367,17 @@ def parse_element_at_offset(raw_data: bytes, offset: int, debug: bool = False) -
             m_OrderInDocument=m_order,
             m_ParentId=m_parent,
             m_RuleIndex=m_rule,
-            unknown_bytes=unknown_bytes,
+            m_PickingMode=m_picking_mode,
+            m_SkipClone=m_skip_clone,
+            m_XmlNamespace=m_xml_namespace,
+            unknown_field_1=unknown_field_1,
+            unknown_field_2=unknown_field_2,
             m_Classes=classes,
             m_StylesheetPaths=paths,
-            unknown_after_paths=unknown_after_paths,
+            unknown_field_3=unknown_field_3,
+            m_SerializedData=m_serialized_data,
+            unknown_field_4=unknown_field_4,
+            unknown_field_5=unknown_field_5,
             m_Type=m_type,
             m_Name=m_name,
             offset=offset
