@@ -4,7 +4,25 @@ Ready-to-use scripts for exporting and importing UXML files.
 
 ---
 
-## Quick Start
+## ⭐ Recommended: Use CLI Commands
+
+**The easiest way to use UXML export/import is via the CLI:**
+
+```bash
+# Export
+python -m fm_skin_builder export-uxml --bundle ui.unity3d --out exported_uxml
+
+# Import
+python -m fm_skin_builder import-uxml --bundle ui.unity3d --uxml edited_uxml --out patched.unity3d
+```
+
+**See [CLI_UXML_USAGE.md](../CLI_UXML_USAGE.md) for complete CLI documentation.**
+
+---
+
+## Alternative: Standalone Scripts
+
+If you prefer standalone scripts, you can use these examples:
 
 ### 1. Export UXML from a Bundle
 
