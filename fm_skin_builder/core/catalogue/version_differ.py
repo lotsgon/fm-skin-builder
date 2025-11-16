@@ -156,30 +156,120 @@ class VersionDiffer:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
 
+    def _colors_are_similar(
+        self, old_colors: List[str], new_colors: List[str], tolerance: int = 2
+    ) -> bool:
+        """
+        Check if two color lists are similar within a tolerance.
+
+        This filters out false positives from minor color variations due to:
+        - Image processing/quantization artifacts
+        - Different color palette extraction runs
+        - Floating point rounding errors
+
+        Args:
+            old_colors: List of hex colors from old version
+            new_colors: List of hex colors from new version
+            tolerance: Maximum RGB value difference to consider colors identical (default: 2)
+
+        Returns:
+            True if all colors are within tolerance, False otherwise
+        """
+        # Different number of colors = definitely different
+        if len(old_colors) != len(new_colors):
+            return False
+
+        # Empty lists are considered similar
+        if len(old_colors) == 0:
+            return True
+
+        # Compare each color pair
+        for old_hex, new_hex in zip(old_colors, new_colors):
+            # Parse hex to RGB
+            try:
+                old_hex = old_hex.lstrip("#")
+                new_hex = new_hex.lstrip("#")
+
+                old_r = int(old_hex[0:2], 16)
+                old_g = int(old_hex[2:4], 16)
+                old_b = int(old_hex[4:6], 16)
+
+                new_r = int(new_hex[0:2], 16)
+                new_g = int(new_hex[2:4], 16)
+                new_b = int(new_hex[4:6], 16)
+
+                # Check if any channel differs by more than tolerance
+                if (
+                    abs(old_r - new_r) > tolerance
+                    or abs(old_g - new_g) > tolerance
+                    or abs(old_b - new_b) > tolerance
+                ):
+                    return False
+
+            except (ValueError, IndexError):
+                # Invalid hex format - consider different
+                return False
+
+        # All colors within tolerance
+        return True
+
     def _is_asset_ref_only_change(self, old_val: str, new_val: str) -> bool:
         """
-        Check if a property change is only due to unstable asset reference indices.
+        Check if a property change is only due to unstable asset reference indices
+        or format migration from placeholder to resolved format.
 
         Unity USS stores asset references as <asset-ref:INDEX> where INDEX can change
         between builds even if the actual asset stays the same.
+
+        Additionally, when old catalogues were built before asset resolution was
+        implemented, they have placeholders while new catalogues have resolved names.
+        This detects and filters out such format migration changes.
 
         Args:
             old_val: Old property value
             new_val: New property value
 
         Returns:
-            True if both values are asset-ref placeholders (potentially false positive)
+            True if this is a false positive (both placeholders OR mixed placeholder/resolved)
         """
         import re
 
         # Pattern to match <asset-ref:NNN> where NNN is a number
         asset_ref_pattern = r'^<asset-ref:\d+>$'
+        # Pattern to match resource("AssetName")
+        resource_pattern = r'^resource\(["\']([^"\']+)["\']\)$'
 
         # Check if both are asset-ref placeholders
-        old_is_ref = bool(re.match(asset_ref_pattern, old_val.strip()))
-        new_is_ref = bool(re.match(asset_ref_pattern, new_val.strip()))
+        old_is_placeholder = bool(re.match(asset_ref_pattern, old_val.strip()))
+        new_is_placeholder = bool(re.match(asset_ref_pattern, new_val.strip()))
 
-        return old_is_ref and new_is_ref
+        # Check if either is a resolved resource() reference
+        old_is_resolved = bool(re.match(resource_pattern, old_val.strip()))
+        new_is_resolved = bool(re.match(resource_pattern, new_val.strip()))
+
+        # Case 1: Both are placeholders with different indices - false positive
+        if old_is_placeholder and new_is_placeholder:
+            return True
+
+        # Case 2: Mixed format (old=placeholder, new=resolved) - format migration
+        # This happens when comparing catalogues built before/after asset resolution was implemented
+        if old_is_placeholder and new_is_resolved:
+            log.info(
+                f"Skipping format migration: {old_val} -> {new_val} "
+                "(old catalogue built before asset resolution)"
+            )
+            return True
+
+        # Case 3: Mixed format reversed (old=resolved, new=placeholder) - shouldn't happen but handle it
+        if old_is_resolved and new_is_placeholder:
+            log.warning(
+                f"Unexpected format regression: {old_val} -> {new_val} "
+                "(new catalogue has placeholder but old had resolved name)"
+            )
+            return True
+
+        # Not a false positive - this is a real change
+        return False
 
     def compare(self) -> Dict[str, Any]:
         """
@@ -431,11 +521,31 @@ class VersionDiffer:
             new_hash = new_sprite.get("content_hash", "")
 
             if old_hash and new_hash and old_hash != new_hash:
+                # Content hash changed - but check if it's just minor color variations
+                old_colors = old_sprite.get("dominant_colors", [])
+                new_colors = new_sprite.get("dominant_colors", [])
+
+                # If dimensions are the same AND colors are very similar (within tolerance),
+                # this is likely just quantization/extraction artifacts - skip it
+                old_dims = (old_sprite.get("width"), old_sprite.get("height"))
+                new_dims = (new_sprite.get("width"), new_sprite.get("height"))
+
+                if old_dims == new_dims and self._colors_are_similar(
+                    old_colors, new_colors, tolerance=2
+                ):
+                    # Colors are within tolerance - skip this as a false positive
+                    log.debug(
+                        f"Skipping sprite {name} - colors within tolerance "
+                        f"(hash changed but likely due to minor quantization artifacts)"
+                    )
+                    continue
+
+                # Significant change - report it
                 details = {
                     "old_dimensions": f"{old_sprite.get('width')}x{old_sprite.get('height')}",
                     "new_dimensions": f"{new_sprite.get('width')}x{new_sprite.get('height')}",
-                    "old_colors": old_sprite.get("dominant_colors", []),
-                    "new_colors": new_sprite.get("dominant_colors", []),
+                    "old_colors": old_colors,
+                    "new_colors": new_colors,
                     "content_changed": True,
                 }
                 self.changes.append(
@@ -515,11 +625,31 @@ class VersionDiffer:
             new_hash = new_texture.get("content_hash", "")
 
             if old_hash and new_hash and old_hash != new_hash:
+                # Content hash changed - but check if it's just minor color variations
+                old_colors = old_texture.get("dominant_colors", [])
+                new_colors = new_texture.get("dominant_colors", [])
+
+                # If dimensions are the same AND colors are very similar (within tolerance),
+                # this is likely just quantization/extraction artifacts - skip it
+                old_dims = (old_texture.get("width"), old_texture.get("height"))
+                new_dims = (new_texture.get("width"), new_texture.get("height"))
+
+                if old_dims == new_dims and self._colors_are_similar(
+                    old_colors, new_colors, tolerance=2
+                ):
+                    # Colors are within tolerance - skip this as a false positive
+                    log.debug(
+                        f"Skipping texture {name} - colors within tolerance "
+                        f"(hash changed but likely due to minor quantization artifacts)"
+                    )
+                    continue
+
+                # Significant change - report it
                 details = {
                     "old_dimensions": f"{old_texture.get('width')}x{old_texture.get('height')}",
                     "new_dimensions": f"{new_texture.get('width')}x{new_texture.get('height')}",
-                    "old_colors": old_texture.get("dominant_colors", []),
-                    "new_colors": new_texture.get("dominant_colors", []),
+                    "old_colors": old_colors,
+                    "new_colors": new_colors,
                     "content_changed": True,
                 }
                 self.changes.append(
