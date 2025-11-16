@@ -1,0 +1,88 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class justify-content-center panel-fade">
+    <ui:VisualElement class="modal-sheet-background flex-grow-class align-items-center justify-content-center">
+      <ui:SIStyleSetter>
+        <ui:VisualElement class="panel-load-game-style-bar">
+          <ui:VisualElement class="flex-grow-class align-self-stretch-class margin-bottom-global-gap-extra-large ios-margin-bottom-0">
+            <ui:VisualElement class="row-direction-normal margin-bottom-12 justify-content-space-between align-self-stretch-class align-items-centre ios-margin-bottom-0 ios-load-header">
+              <ui:SIText class="global-text-primary fm-universe-xlarge-30px ios-fm-universe-title" text-binding="app.ProgressBarString"/>
+              <ui:SIText class="global-text-primary fm-universe-xlarge-30px ios-fm-universe-title" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+            <ui:SIProgressBar class="data_display-graphs-progress_bar-bar-progress-4-4-size-default margin-bottom-global-gap-regular margin-top-global-gap-regular">
+              <ui:VisualElement class="flex-grow-class"/>
+            </ui:SIProgressBar>
+          </ui:VisualElement>
+          <ui:BindingRemapper class="align-self-stretch-class" binding-mappings="savegamesummary=app.SaveGameSummary">
+            <ui:SIVisible class="align-self-stretch-class margin-bottom-global-gap-regular" data-binding="app.SaveGameSummary.HumansNeedingCharacterSettings">
+              <ui:TemplateContainer class="margin-bottom-16 margin-top-16" template="layout-divider-solid-horizontal"/>
+              <ui:SIText text-binding="[VisualFunction]"/>
+            </ui:SIVisible>
+            <ui:SIScrollView class="align-self-stretch-class">
+              <ui:SIVisible class="align-self-stretch-class" data-binding="[VisualFunction]">
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:TemplateContainer class="margin-bottom-16 margin-top-16" template="layout-divider-solid-horizontal"/>
+                  <ui:SIText class="margin-bottom-16 global-text-primary fm-universe-large-22px padding-top-global-padding-extra-large margin-top-global-gap-large ios-fm-universe-subtitle ios-margin-bottom-0 ios-margin-top-0 ios-padding-top-0" text-binding="[VisualFunction]"/>
+                  <ui:VisualElement class="base-template-grow row-direction-normal">
+                    <ui:VisualElement class="base-template-grow align-self-stretch-class width-50-percent padding-top-global-padding-regular">
+                      <ui:VisualElement class="margin-bottom-16 margin-bottom-global-gap-extra-large">
+                        <ui:VisualElement class="row-direction-normal width-100-percent">
+                          <ui:SIText class="heading-small-16px margin-bottom-12 colours-brand-foundation-horizon margin-bottom-global-gap-small" text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal align-items-center">
+                          <ui:VisualElement class="margin-right-global-gap-large icon-background-circle">
+                            <ui:VisualElement class="ui-concepts-fm-logo_large"/>
+                          </ui:VisualElement>
+                          <ui:VisualElement class="base-template-grow">
+                            <ui:VisualElement class="row-direction-normal width-100-percent">
+                              <ui:SIText class="heading-small-16px margin-bottom-4 content-no-wrap content-ellipsis global-text-primary" text-binding="[VisualFunction]"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="row-direction-normal width-100-percent">
+                              <ui:SIText class="body-small-12px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:VisualElement>
+                          <ui:VisualElement class="row-direction-normal width-100-percent">
+                            <ui:SIText class="heading-small-16px margin-bottom-12 colours-brand-foundation-horizon margin-bottom-global-gap-small" text-binding="[VisualFunction]"/>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIText class="heading-small-16px margin-bottom-4 global-text-primary" text-binding="[VisualFunction]"/>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIText class="body-small-12px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                          </ui:VisualElement>
+                        </ui:VisualElement>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:TemplateContainer class="margin-left-16 margin-right-16" template="layout-divider-solid-vertical"/>
+                    <ui:VisualElement class="align-self-stretch-class flex-grow-class width-50-percent padding-top-global-padding-regular padding-left-global-padding-extra-large">
+                      <ui:VisualElement class="row-direction-normal width-100-percent">
+                        <ui:SIText class="heading-small-16px margin-bottom-12 colours-brand-foundation-horizon margin-bottom-global-gap-small" text-binding="[VisualFunction]"/>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="align-self-stretch-class">
+                        <ui:VisualElement class="row-direction-normal base-template-grow margin-bottom-12 align-items-center">
+                          <ui:TemplateContainer class="margin-right-global-gap-large" template="SaveSummaryTeamIcon"/>
+                          <ui:VisualElement class="base-template-grow">
+                            <ui:VisualElement class="row-direction-normal width-100-percent">
+                              <ui:SIText class="heading-small-16px margin-bottom-4 content-no-wrap content-ellipsis global-text-primary" text-binding="[VisualFunction]"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="row-direction-normal width-100-percent">
+                              <ui:SIText class="body-small-12px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:StreamedObjectList data-binding="[VisualFunction]"/>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:SIVisible>
+              </ui:SIVisible>
+            </ui:SIScrollView>
+          </ui:BindingRemapper>
+        </ui:VisualElement>
+      </ui:SIStyleSetter>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

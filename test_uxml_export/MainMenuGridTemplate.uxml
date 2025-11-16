@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:VisualElement>
+      <ui:BindableSwitchElement data-binding="[VisualFunction]">
+        <ui:ScalableBindableGridLayoutElement/>
+        <ui:ScalableBindableGridLayoutElement/>
+      </ui:BindableSwitchElement>
+    </ui:VisualElement>
+  </ui:BindingExpect>
+</ui:UXML>

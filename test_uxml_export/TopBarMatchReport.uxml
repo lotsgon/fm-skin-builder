@@ -1,0 +1,33 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="base-template-grow">
+    <ui:VisualElement class="base-template-grow row-direction-normal">
+      <ui:TemplateContainer class="prematch-header-comp" template="CompIcon"/>
+      <ui:VisualElement class="prematch-header-date ios-prematch-header-date">
+        <ui:BindableSwitchElement data-binding="match.MatchStatePeriod">
+          <ui:SIText class="heading-large-22px primary-text-colour ios-fm-universe-title" text-binding="[VisualFunction]"/>
+          <ui:SIText class="heading-large-22px ios-font-size-reduction-16px primary-text-colour" text-binding="[VisualFunction]"/>
+          <ui:SIText class="heading-large-22px primary-text-colour" text-binding="[VisualFunction]"/>
+          <ui:SIText class="heading-large-22px primary-text-colour" text-binding="[VisualFunction]"/>
+          <ui:SIText class="heading-large-22px primary-text-colour" text-binding="[VisualFunction]"/>
+          <ui:SIText class="heading-large-22px ios-font-size-reduction-16px primary-text-colour" text-binding="[VisualFunction]"/>
+          <ui:SIText text-binding="[VisualFunction]"/>
+          <ui:SIText text-binding="[VisualFunction]"/>
+          <ui:SIText text-binding="[VisualFunction]"/>
+          <ui:SIText text-binding="[VisualFunction]"/>
+          <ui:SIText text-binding="[VisualFunction]"/>
+        </ui:BindableSwitchElement>
+        <ui:BindingVariables>
+          <ui:SIText class="body-regular-14px-bold secondary-text-colour ios-font-size-reduction-12px margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+        </ui:BindingVariables>
+      </ui:VisualElement>
+      <ui:VisualElement>
+        <ui:VisualElement class="row-direction-normal">
+          <ui:SIText class="heading-large-22px primary-text-colour ios-fm-universe-subtitle flex-grow-class" text-binding="match.HomeTeam.Name"/>
+          <ui:SIText class="heading-large-22px primary-text-colour margin-right-global-gap-regular margin-left-global-gap-regular ios-fm-universe-subtitle" text-binding="match.MatchScore"/>
+          <ui:SIText class="heading-large-22px primary-text-colour ios-fm-universe-subtitle flex-grow-class" text-binding="match.AwayTeam.Name"/>
+        </ui:VisualElement>
+        <ui:SIText class="body-regular-14px-regular ios-font-size-reduction-12px secondary-text-colour" text-binding="match.Competition.Name"/>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingExpect>
+</ui:UXML>

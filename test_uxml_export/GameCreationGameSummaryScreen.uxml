@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow align-self-stretch-class">
+    <ui:SIDelayEvent/>
+    <ui:BindableSwitchElement class="base-template-grow" data-binding="app.GridBreakpointIsSmall">
+      <ui:TemplateContainer class="base-template-grow" template="GameCreationGameSummaryBlock"/>
+      <ui:TemplateContainer class="base-template-grow" template="GameCreationGameSummaryCompactBlock"/>
+    </ui:BindableSwitchElement>
+    <ui:BindableSwitchElement data-binding="[VisualFunction]">
+      <ui:VisualElement class="components-persona-bg game-setup-game-summary-buttons">
+        <ui:VisualElement class="row-direction-normal biography-navigation-buttons flex-grow-class">
+          <ui:TemplateContainer class="align-self-start" template="button-secondary-leading-icon-label"/>
+          <ui:VisualElement class="flex-grow-class"/>
+          <ui:SIEnabled data-binding="[VisualFunction]">
+            <ui:TemplateContainer class="align-self-end" template="button-primary-trailing-icon-label"/>
+          </ui:SIEnabled>
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement class="absolute-position-fill-bottom-container advanced-start-bottom-panel-phone-color flex-grow-class">
+        <ui:SISafeAreaElement class="margin-top-16 margin-bottom-16">
+          <ui:VisualElement class="row-direction-normal biography-navigation-buttons flex-grow-class">
+            <ui:VisualElement>
+              <ui:SIButton class="buttons-button-secondary-default no-margin">
+                <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+                <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+              </ui:SIButton>
+            </ui:VisualElement>
+            <ui:SIEnabled data-binding="[VisualFunction]">
+              <ui:VisualElement>
+                <ui:SIButton class="buttons-button-primary-default">
+                  <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                  <ui:VisualElement class="ui-concepts-chevron-right_small margin-right-global-gap-none margin-left-global-gap-regular"/>
+                </ui:SIButton>
+              </ui:VisualElement>
+            </ui:SIEnabled>
+          </ui:VisualElement>
+        </ui:SISafeAreaElement>
+      </ui:VisualElement>
+    </ui:BindableSwitchElement>
+  </ui:BindingRoot>
+</ui:UXML>

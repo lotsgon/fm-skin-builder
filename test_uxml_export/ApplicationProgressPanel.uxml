@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class justify-content-center">
+    <ui:VisualElement class="modal-sheet-background flex-grow-class align-items-center justify-content-center panel-fade">
+      <ui:SIStyleSetter>
+        <ui:VisualElement class="panel-load-game-style-bar">
+          <ui:VisualElement class="flex-grow-class align-self-stretch-class margin-bottom-global-gap-extra-large">
+            <ui:VisualElement class="row-direction-normal margin-bottom-12 justify-content-space-between align-self-stretch-class align-items-centre">
+              <ui:SIText class="global-text-primary fm-universe-xlarge-30px ios-application-progress" text-binding="app.ProgressBarString"/>
+              <ui:SIText class="global-text-primary fm-universe-xlarge-30px ios-application-progress" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+            <ui:SIProgressBar class="data_display-graphs-progress_bar-bar-progress-4-4-size-default margin-bottom-global-gap-regular margin-top-global-gap-regular">
+              <ui:VisualElement class="flex-grow-class"/>
+            </ui:SIProgressBar>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:SIStyleSetter>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

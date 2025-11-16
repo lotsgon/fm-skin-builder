@@ -1,0 +1,35 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement>
+      <ui:SITile class="sicard">
+        <ui:SIImage/>
+        <ui:VisualElement>
+          <ui:VisualElement>
+            <ui:VisualElement class="row-direction-normal margin-right-global-gap-large margin-left-global-gap-large">
+              <ui:SIAspectRatioFitter>
+                <ui:SIButton class="sibutton margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none"/>
+              </ui:SIAspectRatioFitter>
+              <ui:SIText class="sitile__title white" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:TabGroup>
+            <ui:ButtonGroup class="row-direction-normal">
+              <ui:SIButton class="sipreferencestab"/>
+              <ui:SIButton class="sipreferencestab"/>
+              <ui:SIButton class="sipreferencestab"/>
+              <ui:SIButton class="sipreferencestab"/>
+            </ui:ButtonGroup>
+            <ui:SwitchElement>
+              <ui:DebugPropertiesElement/>
+              <ui:DebugPropertiesElement/>
+              <ui:VisualElement>
+                <ui:StreamedTable data-binding="Nation.DebugNationYouthRatingTable"/>
+              </ui:VisualElement>
+              <ui:DebugPropertiesElement/>
+            </ui:SwitchElement>
+          </ui:TabGroup>
+        </ui:VisualElement>
+      </ui:SITile>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

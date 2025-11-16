@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow stages-card">
+    <ui:BindingRemapper class="flex-grow-class" binding-mappings="boolean=const.True;speakto=Tactic.OppositionInstructionsSpeakTo;responsibilitylinkdata=fmconstants.ResponsibilitiesTacticsLink">
+      <ui:BindingSetter>
+        <ui:TemplateContainer class="base-template-grow" template="FigmaBaseToolTabbedTemplate"/>
+        <ui:SIVisible data-binding="[VisualFunction]">
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:VisualElement class="tool-container">
+              <ui:TemplateContainer class="figma-base-tool-template-inner-frame flex-grow-class" template="MatchCommentaryBarWithButtons"/>
+            </ui:VisualElement>
+          </ui:SIVisible>
+        </ui:SIVisible>
+      </ui:BindingSetter>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

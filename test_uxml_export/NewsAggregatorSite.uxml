@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper class="base-template-grow" binding-mappings="team=Human.Team;competition=Human.HumanNewsAggregatorRelevantCompetition;nation=Team.Nation;continent=Nation.Continent;secondrelevantcomp=Human.HumanNewsAggregatorSecondRelevantCompetition">
+      <ui:BindingVariables>
+        <ui:BindingSetter class="base-template-grow">
+          <ui:BindableSwitchElement class="base-template-grow" data-binding="config.ShowPhonePanels">
+            <ui:TemplateContainer class="base-template-grow" template="FigmaBaseToolTabbedHeaderTemplate">
+              <ui:MultiGridLayoutElement/>
+            </ui:TemplateContainer>
+            <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTabbedTemplate"/>
+          </ui:BindableSwitchElement>
+          <ui:SIVisible data-binding="const.IsFinal">
+            <ui:SIDropdown/>
+          </ui:SIVisible>
+        </ui:BindingSetter>
+      </ui:BindingVariables>
+    </ui:BindingRemapper>
+    <ui:EventTrigger/>
+  </ui:BindingRoot>
+</ui:UXML>

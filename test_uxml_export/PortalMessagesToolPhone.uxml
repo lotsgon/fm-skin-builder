@@ -1,0 +1,55 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:BindingRemapper binding-mappings="team=human.team;newsitemuniqueid=newsitem.UniqueId;npcaction=newsitem.speakto.Actions.PrimaryNpcWithActions;npc=npcaction.NPC;speakto=newsitem.speakto">
+      <ui:BindingVariables>
+        <ui:BindingSetter>
+          <ui:SISafeAreaElement class="figma-base-report-template-inner-frame ios-card-styling">
+            <ui:VisualElement class="row-direction-normal margin-right-global-gap-regular margin-left-global-gap-regular row-direction-normal">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:BindingRemapper binding-mappings="newsitem=prevnewsitem">
+                  <ui:TemplateContainer template="speakto-messages-navigator-button_prev"/>
+                </ui:BindingRemapper>
+                <ui:BindingRemapper binding-mappings="newsitem=nextnewsitem">
+                  <ui:TemplateContainer template="speakto-messages-navigator-button_next"/>
+                </ui:BindingRemapper>
+              </ui:VisualElement>
+              <ui:TemplateContainer class="margin-left-global-gap-regular" template="speakto-modal-navigation-button"/>
+            </ui:VisualElement>
+            <ui:SIScrollView>
+              <ui:TemplateContainer template="PortalMessagesContentBlock"/>
+            </ui:SIScrollView>
+            <ui:VisualElement>
+              <ui:BindingExpect>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:BindingSetter>
+                    <ui:SIGradient class="notificationmessagesstatus-gradient">
+                      <ui:SIStyleSetter>
+                        <ui:SIGradient>
+                          <ui:SISafeAreaElement class="padding-right-global-padding-large padding-left-global-padding-large padding-bottom-global-padding-large row-direction-normal">
+                            <ui:VisualElement class="padding-right-global-padding-regular padding-left-global-padding-regular row-direction-normal">
+                              <ui:SIVisible data-binding="[VisualFunction]">
+                                <ui:SIImage class="margin-right-global-gap-small" data-binding="[VisualFunction]"/>
+                              </ui:SIVisible>
+                              <ui:SIVisible class="row-direction-normal" data-binding="newsitem.NewsHasResponded">
+                                <ui:SIText class="fm-universe-small-16px" text-binding="newsitem.LatestResponseString"/>
+                              </ui:SIVisible>
+                              <ui:SIVisible data-binding="npcaction.actions.HasActions">
+                                <ui:SIScrollView class="margin-left-global-gap-regular">
+                                  <ui:WrappedObjectList class="portal-messages-actions-list"/>
+                                </ui:SIScrollView>
+                              </ui:SIVisible>
+                            </ui:VisualElement>
+                          </ui:SISafeAreaElement>
+                        </ui:SIGradient>
+                      </ui:SIStyleSetter>
+                    </ui:SIGradient>
+                  </ui:BindingSetter>
+                </ui:SIVisible>
+              </ui:BindingExpect>
+            </ui:VisualElement>
+          </ui:SISafeAreaElement>
+        </ui:BindingSetter>
+      </ui:BindingVariables>
+    </ui:BindingRemapper>
+  </ui:BindingExpect>
+</ui:UXML>

@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:TemplateContainer template="BaseFloatingBlocksTemplate">
+      <ui:SIScrollView>
+        <ui:VisualElement class="notifications--notifications-modal-dialog-default-default">
+          <ui:VisualElement class="row-direction-normal">
+            <ui:SIText class="heading-large-22px margin-right-global-gap-regular" text-binding="app.SaveGameSummary.GameSummaryGameName"/>
+            <ui:VisualElement>
+              <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+              <ui:SIText class="body-regular-14px-bold" text-binding="app.SaveGameSummary.GameSummaryFileSize"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:VisualElement>
+            <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+            <ui:SIText class="body-regular-14px-bold" text-binding="app.SaveGameSummary.GameSummaryGameType"/>
+          </ui:VisualElement>
+          <ui:VisualElement>
+            <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+            <ui:SIText class="body-regular-14px-bold" text-binding="app.SaveGameSummary.GameSummaryDate"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:StreamedTable data-binding="app.SaveGameSummary.GameSummaryNations"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:StreamedTable data-binding="app.SaveGameSummary.GameSummaryManagers"/>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:SIScrollView>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

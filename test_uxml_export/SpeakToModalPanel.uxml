@@ -1,0 +1,41 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="human=game.GameCurrentManager;selectednpcwithactions=SpeakTo.Actions.PrimaryNpcWithActions;currentnewsitem=newsitem">
+      <ui:VisualElement class="speak-to-modal-background"/>
+      <ui:SISafeAreaElement class="speak-to-modal-navigation-buttons-container">
+        <ui:TemplateContainer class="margin-left-global-gap-regular" template="speakto-modal-navigation-button"/>
+        <ui:TemplateContainer class="margin-left-global-gap-regular" template="speakto-modal-navigation-button"/>
+      </ui:SISafeAreaElement>
+      <ui:VisualElement>
+        <ui:BindingExpect class="ios-interactions-modal-sheet">
+          <ui:VisualElement class="ios-interactions-modal-sheet">
+            <ui:SISafeAreaElement>
+              <ui:BindingVariables>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:StreamedObjectList data-binding="SpeakTo.Actions.NpcActionsList"/>
+                </ui:SIVisible>
+                <ui:BindingRemapper binding-mappings="npcaction=selectednpcwithactions">
+                  <ui:SIScrollView>
+                    <ui:TemplateContainer template="SpeakToSenderMessageButtons"/>
+                    <ui:SIVisible data-binding="[VisualFunction]">
+                      <ui:BindingVariables>
+                        <ui:VisualElement>
+                          <ui:TemplateContainer template="speakto-button-additional-actions-selector"/>
+                        </ui:VisualElement>
+                        <ui:SIVisible data-binding="additionalactionsexpanded">
+                          <ui:VisualElement class="interaction-hub-action-area-default-optional-response">
+                            <ui:StreamedObjectList data-binding="SpeakTo.AdditionalActions"/>
+                          </ui:VisualElement>
+                        </ui:SIVisible>
+                      </ui:BindingVariables>
+                    </ui:SIVisible>
+                  </ui:SIScrollView>
+                </ui:BindingRemapper>
+              </ui:BindingVariables>
+            </ui:SISafeAreaElement>
+          </ui:VisualElement>
+        </ui:BindingExpect>
+      </ui:VisualElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

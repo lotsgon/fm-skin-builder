@@ -1,0 +1,33 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="human=game.GameCurrentManager;club=game.GameCurrentManager.Club;team=game.GameCurrentManagerClubTeam;budget=game.GameCurrentManager.Club.BudgetAdjustment">
+      <ui:VisualElement class="notifications--notifications-modal-large-default-default padding-right-global-padding-extra-large padding-left-global-padding-extra-large">
+        <ui:VisualElement class="notifications-modal-dialog-background padding-right-global-padding-regular padding-left-global-padding-regular">
+          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+          <ui:SIVisible data-binding="budget.BudgetAdjustmentBoardString">
+            <ui:SIText class="body-regular-14px-regular sitext recruitment-budget-adjustment-body-text" text-binding="budget.BudgetAdjustmentBoardString"/>
+          </ui:SIVisible>
+          <ui:TemplateContainer class="margin-right-global-gap-small margin-left-global-gap-small" template="data_display-range_slider-budgets-default"/>
+          <ui:SIVisible data-binding="budget.BudgetAdjustmentCurrentSpendString">
+            <ui:SIText class="body-regular-14px-regular sitext recruitment-budget-adjustment-body-text" text-binding="budget.BudgetAdjustmentCurrentSpendString"/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="budget.BudgetAdjustmentFFpString">
+            <ui:SIText class="sitextmedium body-regular-14px-regular recruitment-budget-adjustment-body-text" text-binding="budget.BudgetAdjustmentFFpString"/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="budget.BudgetAdjustmentScoutingBudgetString">
+            <ui:SIText class="sitextmedium body-regular-14px-regular recruitment-budget-adjustment-body-text" text-binding="budget.BudgetAdjustmentScoutingBudgetString"/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="budget.BudgetAdjustmentAgentFeesString">
+            <ui:SIText class="sitextmedium body-regular-14px-regular recruitment-budget-adjustment-body-text" text-binding="budget.BudgetAdjustmentAgentFeesString"/>
+          </ui:SIVisible>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-label"/>
+            <ui:SIEnabled data-binding="budget.BudgetAdjustmentCanEditBudgets">
+              <ui:TemplateContainer template="button-primary-leading-icon-label"/>
+            </ui:SIEnabled>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

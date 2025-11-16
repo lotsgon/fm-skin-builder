@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="bookmark-edit-panel">
+    <ui:BindingSetter class="padding-left-global-padding-regular padding-right-global-padding-regular padding-bottom-global-padding-extra-large padding-top-global-padding-extra-large">
+      <ui:SIText class="body-regular-14px-bold margin-bottom-global-gap-regular margin-left-global-gap-large" text-binding="[VisualFunction]"/>
+      <ui:VisualElement class="row-direction-normal">
+        <ui:StreamedObjectList data-binding="[VisualFunction]"/>
+        <ui:TemplateContainer class="margin-left-global-gap-regular margin-right-global-gap-regular" template="layout-divider-solid-vertical"/>
+        <ui:SIEnabled data-binding="[VisualFunction]">
+          <ui:StreamedObjectList data-binding="gameworldsubtabsandbookmarks.CurrentUnselectedBookmarksList"/>
+        </ui:SIEnabled>
+      </ui:VisualElement>
+    </ui:BindingSetter>
+  </ui:BindingExpect>
+</ui:UXML>

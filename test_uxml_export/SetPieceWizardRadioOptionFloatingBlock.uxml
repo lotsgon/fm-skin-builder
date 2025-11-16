@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:TemplateContainer template="BaseFloatingBlocksTemplate">
+      <ui:VisualElement class="notifications--notifications-modal-dialog-default-default padding-right-global-padding-extra-large padding-left-global-padding-extra-large">
+        <ui:VisualElement>
+          <ui:SIImage data-binding="[VisualFunction]"/>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:SIText class="global-text-primary body-regular-14px-bold" text-binding="[VisualFunction]"/>
+                  <ui:SIVisible data-binding="Item.IsStaffPreference">
+                    <ui:VisualElement>
+                      <ui:VisualElement class="data_display-string-accent-default-fractional-eg-26-30">
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:VisualElement class="ui-concepts-thumbs-up_small margin-right-global-gap-extra-small"/>
+                          <ui:SIText class="body-small-12px-regular global-text-primary" text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:SIVisible>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:SIText class="global-text-primary body-small-12px-regular" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

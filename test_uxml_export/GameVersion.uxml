@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:SIVisible class="row-direction-normal" data-binding="const.ShowVersion">
+      <ui:VisualElement class="row-direction-normal">
+        <ui:VisualElement>
+          <ui:SIText class="sitext" text-binding="data.GameVersion"/>
+        </ui:VisualElement>
+        <ui:BuildInfoElement class="sitext margin-right-global-gap-none margin-left-global-gap-large padding-right-global-padding-none padding-left-global-padding-none"/>
+      </ui:VisualElement>
+    </ui:SIVisible>
+  </ui:BindingRoot>
+</ui:UXML>

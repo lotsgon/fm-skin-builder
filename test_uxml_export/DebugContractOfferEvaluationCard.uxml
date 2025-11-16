@@ -1,0 +1,55 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement>
+      <ui:SITile class="sicard">
+        <ui:SIImage/>
+        <ui:VisualElement>
+          <ui:VisualElement>
+            <ui:VisualElement class="row-direction-normal margin-right-global-gap-large margin-left-global-gap-large">
+              <ui:SIAspectRatioFitter>
+                <ui:SIButton class="sibutton margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none"/>
+              </ui:SIAspectRatioFitter>
+              <ui:SIText class="sitile__title white" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement class="margin-right-global-gap-huge">
+                <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+              <ui:SIVisible class="margin-right-global-gap-huge" data-binding="evaluation.Person.Agent">
+                <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+              </ui:SIVisible>
+              <ui:VisualElement class="margin-right-global-gap-huge">
+                <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+            <ui:StreamedTable data-binding="evaluation.OfferComponents"/>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement class="margin-right-global-gap-huge">
+                <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+              <ui:VisualElement class="margin-right-global-gap-huge">
+                <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+              <ui:VisualElement class="margin-right-global-gap-huge">
+                <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:SITile>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

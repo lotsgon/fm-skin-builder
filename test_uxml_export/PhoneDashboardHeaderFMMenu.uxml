@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:SISafeAreaElement>
+      <ui:BindingVariables class="align-items-stretch">
+        <ui:VisualElement class="flex-grow-class align-self-center-class ios-layout-dashboard-header-fmmenu">
+          <ui:VisualElement class="row-direction-normal flex-grow-class">
+            <ui:VisualElement>
+              <ui:SIButton class="buttons-button-base-default flex-grow-class ios-fm-menu-buttons">
+                <ui:SIImage class="margin-right-global-gap-regular align-self-center-class" data-binding="[VisualFunction]"/>
+                <ui:SIText class="button-regular buttons-global-primary-text sitext-hover-cursor content-no-wrap global-text-secondary" text-binding="[VisualFunction]"/>
+              </ui:SIButton>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:SIButton class="buttons-controls-pc-default--active-true ios-fm-menu-buttons">
+            <ui:VisualElement class="ui-concepts-globe_medium"/>
+          </ui:SIButton>
+          <ui:SIButton class="buttons-controls-pc-default--active-true margin-left-global-gap-large ios-fm-menu-buttons no-margin">
+            <ui:VisualElement class="game-concepts-fmpedia_medium colours-brand-foundation-horizon"/>
+          </ui:SIButton>
+        </ui:VisualElement>
+      </ui:BindingVariables>
+    </ui:SISafeAreaElement>
+  </ui:BindingRoot>
+</ui:UXML>

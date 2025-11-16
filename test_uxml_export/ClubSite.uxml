@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables>
+      <ui:TemplateContainer class="base-template-grow" template="FigmaBaseSiteMultiGridTemplate">
+        <ui:SIVisible data-binding="const.IsFinal">
+          <ui:SIScrollView>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIButton/>
+              <ui:SIButton/>
+            </ui:VisualElement>
+          </ui:SIScrollView>
+        </ui:SIVisible>
+      </ui:TemplateContainer>
+    </ui:BindingVariables>
+    <ui:TemplateContainer class="quick-action-buttons-template-layout quick-action-with-action" template="QuickActionMenuButtons"/>
+  </ui:BindingRoot>
+</ui:UXML>

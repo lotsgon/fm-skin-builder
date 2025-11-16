@@ -1,0 +1,653 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="human=game.GameCurrentManager;judge=Team.AssistantManagerOrBestCoach;squadplanner=Team.Manager.SquadPlanner;ishometeam=const.True">
+      <ui:VisualElement>
+        <ui:SITile class="sicard">
+          <ui:SIImage/>
+          <ui:VisualElement>
+            <ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal margin-right-global-gap-large margin-left-global-gap-large">
+                <ui:SIAspectRatioFitter>
+                  <ui:SIButton class="sibutton margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none"/>
+                </ui:SIAspectRatioFitter>
+                <ui:SIText class="sitile__title white" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:TabGroup>
+              <ui:ButtonGroup class="row-direction-normal">
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:VisualElement>
+                  <ui:SIButton class="sipreferencestab"/>
+                </ui:VisualElement>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+                <ui:SIButton class="sipreferencestab"/>
+              </ui:ButtonGroup>
+              <ui:SwitchElement>
+                <ui:DebugPropertiesElement/>
+                <ui:VisualElement>
+                  <ui:SIScrollView class="sitext">
+                    <ui:SIText class="sitext" text-binding="Club.DebugManagerBackingStatus"/>
+                  </ui:SIScrollView>
+                  <ui:SIText class="sitext padding-right-global-padding-none padding-left-global-padding-small" text-binding="[VisualFunction]"/>
+                  <ui:StreamedTable data-binding="Club.DebugManagerBackingTeamLeaders"/>
+                  <ui:SIText class="sitext padding-right-global-padding-none" text-binding="[VisualFunction]"/>
+                  <ui:StreamedTable class="margin-right-global-gap-none margin-left-global-gap-none" data-binding="Club.DebugManagerBackingHighlyInfluentialPlayers"/>
+                  <ui:SIText class="sitext padding-right-global-padding-none" text-binding="[VisualFunction]"/>
+                  <ui:StreamedTable data-binding="Club.DebugManagerBackingInfluentialPlayers"/>
+                  <ui:SIText class="sitext padding-right-global-padding-none" text-binding="[VisualFunction]"/>
+                  <ui:StreamedTable data-binding="Club.DebugManagerBackingSquadPlayers"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:StreamedObjectList data-binding="Club.MainTeam.DebugTeamLeaders"/>
+                </ui:VisualElement>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:VisualElement>
+                  <ui:StreamedObjectList data-binding="Club.DebugStaffNumbersList"/>
+                  <ui:SIText class="white" text-binding="[VisualFunction]"/>
+                  <ui:DebugPropertiesElement/>
+                </ui:VisualElement>
+                <ui:SIScrollView>
+                  <ui:BindingVariables>
+                    <ui:DebugBindingElement/>
+                    <ui:SIText class="margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" text-binding="[VisualFunction]"/>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="white sitile_text" text-binding="[VisualFunction]"/>
+                      <ui:SIDropdown class="white"/>
+                    </ui:VisualElement>
+                    <ui:DebugBindingElement/>
+                  </ui:BindingVariables>
+                </ui:SIScrollView>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:VisualElement>
+                  <ui:TabGroup>
+                    <ui:ButtonGroup class="row-direction-normal">
+                      <ui:SIButton class="sipreferencestab"/>
+                      <ui:SIButton class="sipreferencestab"/>
+                    </ui:ButtonGroup>
+                    <ui:SwitchElement>
+                      <ui:DebugPropertiesElement/>
+                      <ui:VisualElement>
+                        <ui:BindingVariables>
+                          <ui:SIDropdown/>
+                          <ui:VisualElement>
+                            <ui:VisualElement class="margin-right-global-gap-none margin-left-global-gap-none">
+                              <ui:SIText/>
+                              <ui:StreamedTable data-binding="club.debugpotentialaffiliates.DebugPotentialAffiliatesFeeders"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="margin-right-global-gap-none margin-left-global-gap-none">
+                              <ui:SIText/>
+                              <ui:StreamedTable data-binding="club.DebugPotentialAffiliates.DebugPotentialAffiliatesParents"/>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                        </ui:BindingVariables>
+                      </ui:VisualElement>
+                    </ui:SwitchElement>
+                  </ui:TabGroup>
+                </ui:VisualElement>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:VisualElement>
+                  <ui:StreamedTable data-binding="Club.DebugSquadDepth"/>
+                </ui:VisualElement>
+                <ui:DebugPropertiesElement/>
+                <ui:StreamedTable data-binding="Club.DebugFinanceIncome"/>
+                <ui:StreamedTable data-binding="Club.DebugFinanceExpenditure"/>
+                <ui:SIScrollView>
+                  <ui:BindingVariables>
+                    <ui:SIText class="sitile__title white" text-binding="[VisualFunction]"/>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="white sitile_text" text-binding="[VisualFunction]"/>
+                      <ui:SIDropdown class="white"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="white sitile_text" text-binding="[VisualFunction]"/>
+                      <ui:SIDropdown class="white"/>
+                    </ui:VisualElement>
+                    <ui:StreamedObjectList data-binding="Team.DebugTeamTargets"/>
+                  </ui:BindingVariables>
+                </ui:SIScrollView>
+                <ui:StreamedTable data-binding="Club.DebugFinanceTotals"/>
+                <ui:DebugPropertiesElement/>
+                <ui:VisualElement>
+                  <ui:TabGroup>
+                    <ui:ButtonGroup class="row-direction-normal">
+                      <ui:SIButton class="sipreferencestab"/>
+                      <ui:SIButton class="sipreferencestab"/>
+                    </ui:ButtonGroup>
+                    <ui:SwitchElement>
+                      <ui:DebugPropertiesElement/>
+                      <ui:VisualElement>
+                        <ui:TabGroup>
+                          <ui:ButtonGroup class="row-direction-normal">
+                            <ui:SIButton class="sipreferencestab"/>
+                            <ui:SIButton class="sipreferencestab"/>
+                          </ui:ButtonGroup>
+                          <ui:SwitchElement>
+                            <ui:VisualElement>
+                              <ui:StreamedTable data-binding="club.DebugClubVisionBoardObjectives"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement>
+                              <ui:StreamedTable data-binding="club.DebugClubVisionSupporterObjectives"/>
+                            </ui:VisualElement>
+                          </ui:SwitchElement>
+                        </ui:TabGroup>
+                      </ui:VisualElement>
+                    </ui:SwitchElement>
+                  </ui:TabGroup>
+                </ui:VisualElement>
+                <ui:SIScrollView>
+                  <ui:BindingVariables>
+                    <ui:SIText class="sitile__title white" text-binding="[VisualFunction]"/>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="white sitile_text" text-binding="[VisualFunction]"/>
+                      <ui:SIDropdown class="white"/>
+                    </ui:VisualElement>
+                    <ui:StreamedTable data-binding="Team.DebugPlayTimeClubChoice"/>
+                  </ui:BindingVariables>
+                </ui:SIScrollView>
+                <ui:SIScrollView>
+                  <ui:SIText text-binding="[VisualFunction]"/>
+                  <ui:StreamedTable data-binding="Club.DebugGeneratedPlayerPartnershipsTable"/>
+                  <ui:SIText text-binding="[VisualFunction]"/>
+                  <ui:StreamedTable data-binding="Club.DebugStatsPlayerPartnershipsTable"/>
+                  <ui:SIText text-binding="[VisualFunction]"/>
+                  <ui:StreamedTable data-binding="Club.DebugStoredPlayerPartnershipsTable"/>
+                </ui:SIScrollView>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:SIScrollView>
+                  <ui:BindingVariables>
+                    <ui:SIText class="sitile__title white" text-binding="[VisualFunction]"/>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="white sitile_text" text-binding="[VisualFunction]"/>
+                      <ui:SIDropdown class="white"/>
+                    </ui:VisualElement>
+                    <ui:SIText class="white sisubtitle" text-binding="[VisualFunction]"/>
+                    <ui:StreamedTable data-binding="Club.ExperienceMatrixPositionView.ExperienceMatrixDevelopmentPlayers"/>
+                    <ui:SIText class="white sisubtitle" text-binding="[VisualFunction]"/>
+                    <ui:StreamedTable data-binding="Club.ExperienceMatrixPositionView.ExperienceMatrixEmergingPlayers"/>
+                    <ui:SIText class="white sisubtitle" text-binding="[VisualFunction]"/>
+                    <ui:StreamedTable data-binding="Club.ExperienceMatrixPositionView.ExperienceMatrixPeakPlayers"/>
+                    <ui:SIText class="white sisubtitle" text-binding="[VisualFunction]"/>
+                    <ui:StreamedTable data-binding="Club.ExperienceMatrixPositionView.ExperienceMatrixExperiencedPlayers"/>
+                  </ui:BindingVariables>
+                </ui:SIScrollView>
+                <ui:SIScrollView>
+                  <ui:DebugPropertiesElement/>
+                  <ui:BindingVariables>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="white sitile_text" text-binding="[VisualFunction]"/>
+                      <ui:SIDropdown class="white"/>
+                      <ui:Label/>
+                      <ui:SIDropdown class="white"/>
+                    </ui:VisualElement>
+                    <ui:StreamedTable data-binding="Club.BestXI"/>
+                  </ui:BindingVariables>
+                </ui:SIScrollView>
+                <ui:SIScrollView>
+                  <ui:SIEnabled data-binding="SquadPlanner.Available">
+                    <ui:BindingVariables>
+                      <ui:DebugPropertiesElement/>
+                      <ui:SIButton/>
+                      <ui:SIButton/>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIDropdown class="white">
+                          <ui:Label class="white"/>
+                        </ui:SIDropdown>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:Label class="white"/>
+                        <ui:SIDropdown class="white">
+                          <ui:Label class="white"/>
+                        </ui:SIDropdown>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:Label class="white"/>
+                        <ui:SIDropdown class="white"/>
+                      </ui:VisualElement>
+                    </ui:BindingVariables>
+                  </ui:SIEnabled>
+                </ui:SIScrollView>
+                <ui:SIScrollView>
+                  <ui:BindingVariables>
+                    <ui:BindingRemapper binding-mappings="scout=selectedscoutdropdown.PropertyValue">
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:Label class="sitile_text white"/>
+                        <ui:SIDropdown class="white"/>
+                      </ui:VisualElement>
+                      <ui:DebugPropertiesElement/>
+                      <ui:DebugPropertiesElement/>
+                    </ui:BindingRemapper>
+                  </ui:BindingVariables>
+                </ui:SIScrollView>
+                <ui:VisualElement>
+                  <ui:DebugPropertiesElement/>
+                </ui:VisualElement>
+                <ui:SIScrollView>
+                  <ui:BindingVariables>
+                    <ui:BindingRemapper binding-mappings="sca=Team.Manager.ScoutingCentreActions">
+                      <ui:DebugPropertiesElement/>
+                      <ui:VisualElement>
+                        <ui:SIButton/>
+                        <ui:SIButton/>
+                      </ui:VisualElement>
+                      <ui:StreamedObjectList data-binding="sca.DeliveryOptions"/>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIText/>
+                        <ui:SIDropdown/>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIText/>
+                        <ui:TemplateContainer template="inputs-switch-checkbox-label"/>
+                        <ui:SIEnabled class="row-direction-normal" data-binding="sca.AgentOfferOptionShowAll">
+                          <ui:TemplateContainer template="inputs-switch-checkbox-label"/>
+                          <ui:TemplateContainer template="inputs-switch-checkbox-label"/>
+                          <ui:TemplateContainer template="inputs-switch-checkbox-label"/>
+                          <ui:TemplateContainer template="inputs-switch-checkbox-label"/>
+                          <ui:TemplateContainer template="inputs-switch-checkbox-label"/>
+                        </ui:SIEnabled>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIText/>
+                        <ui:SIDropdown/>
+                        <ui:SIDropdown/>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIText/>
+                        <ui:SIDropdown/>
+                        <ui:SIDropdown/>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:TemplateContainer template="inputs-switch-checkbox-label"/>
+                        <ui:TemplateContainer template="inputs-switch-checkbox-label"/>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIText/>
+                        <ui:SIDropdown/>
+                        <ui:SIDropdown/>
+                        <ui:SIDropdown/>
+                      </ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:VisualElement>
+                          <ui:SIText/>
+                          <ui:StreamedObjectList data-binding="sca.HighlyRecommendedPlayersDeliveryOptions"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement>
+                          <ui:SIText/>
+                          <ui:StreamedObjectList data-binding="sca.RequestedReportsDeliveryOptions"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement>
+                          <ui:SIText/>
+                          <ui:StreamedObjectList data-binding="sca.AgentOffersDeliveryOptions"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement>
+                          <ui:SIText/>
+                          <ui:StreamedObjectList data-binding="sca.AdviceCardsDeliveryOptions"/>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                    </ui:BindingRemapper>
+                  </ui:BindingVariables>
+                </ui:SIScrollView>
+                <ui:SIScrollView>
+                  <ui:DebugPropertiesElement/>
+                </ui:SIScrollView>
+                <ui:VisualElement>
+                  <ui:BindingVariables>
+                    <ui:SIAutoScrollView>
+                      <ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIDropdown class="margin-left-global-gap-regular padding-left-global-padding-none"/>
+                          <ui:SIText text-binding="Team.TeamTraining.TrainingMatchFocus.MatchFocusFirstSetPiece.MatchFocusSessionDescription"/>
+                          <ui:SIVisible data-binding="Team.TeamTraining.TrainingMatchFocus.MatchFocusFirstSetPiece.MatchFocusSessionIsSuggested">
+                            <ui:Label/>
+                          </ui:SIVisible>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIDropdown class="margin-left-global-gap-regular padding-left-global-padding-none"/>
+                          <ui:SIText text-binding="Team.TeamTraining.TrainingMatchFocus.MatchFocusSecondSetPiece.MatchFocusSessionDescription"/>
+                          <ui:SIVisible data-binding="Team.TeamTraining.TrainingMatchFocus.MatchFocusSecondSetPiece.MatchFocusSessionIsSuggested">
+                            <ui:Label/>
+                          </ui:SIVisible>
+                        </ui:VisualElement>
+                        <ui:SIRadioGroup selection-binding="team.teamtraining.trainingmatchfocus.matchfocusinpossessiontype"/>
+                        <ui:SIRadioGroup selection-binding="team.teamtraining.trainingmatchfocus.matchfocusoutofpossessiontype"/>
+                      </ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:DebugPropertiesElement/>
+                      </ui:VisualElement>
+                    </ui:SIAutoScrollView>
+                  </ui:BindingVariables>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:Label class="sitext"/>
+                    <ui:SIButton/>
+                    <ui:SIButton/>
+                  </ui:VisualElement>
+                  <ui:StreamedTable data-binding="Team.TeamTraining.CoachAssignments.Assignments"/>
+                  <ui:BindingRemapper binding-mappings="coachrating=Team.TeamTraining.CoachAssignments.LeadCoachRating;workload=Team.TeamTraining.CoachAssignments.CoachWorkload">
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="sitext" text-binding="Workload.AttackingTacticalCategory"/>
+                      <ui:SIText class="sitext" text-binding="Workload.AttackingTechnicalCategory"/>
+                      <ui:SIText class="sitext" text-binding="Workload.DefendingTacticalCategory"/>
+                      <ui:SIText class="sitext" text-binding="Workload.DefendingTechnicalCategory"/>
+                      <ui:SIText class="sitext" text-binding="Workload.PossessionTacticalCategory"/>
+                      <ui:SIText class="sitext" text-binding="Workload.PossessionTechnicalCategory"/>
+                      <ui:SIText class="sitext" text-binding="Workload.GoalkeepingCategory"/>
+                      <ui:SIText class="sitext" text-binding="Workload.FitnessCategory"/>
+                      <ui:SIText class="sitext" text-binding="Workload.SetPiecesCategory"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="sitext" text-binding="coachrating.AttackingTacticalCategory.MinValue"/>
+                      <ui:SIText class="sitext" text-binding="coachrating.AttackingTechnicalCategory.MinValue"/>
+                      <ui:SIText class="sitext" text-binding="coachrating.DefendingTacticalCategory.MinValue"/>
+                      <ui:SIText class="sitext" text-binding="coachrating.DefendingTechnicalCategory.MinValue"/>
+                      <ui:SIText class="sitext" text-binding="coachrating.PossessionTacticalCategory.MinValue"/>
+                      <ui:SIText class="sitext" text-binding="coachrating.PossessionTechnicalCategory.MinValue"/>
+                      <ui:SIText class="sitext" text-binding="coachrating.GoalkeepingCategory.MinValue"/>
+                      <ui:SIText class="sitext" text-binding="coachrating.FitnessCategory.MinValue"/>
+                      <ui:SIText class="sitext" text-binding="coachrating.SetPiecesCategory.MinValue"/>
+                    </ui:VisualElement>
+                  </ui:BindingRemapper>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:BindingVariables>
+                    <ui:BindingRemapper binding-mappings="selectedDate=Team.ArrangeFriendly.Date;friendly=Team.ArrangeFriendly">
+                      <ui:TemplateContainer template="DateSelectorWidget"/>
+                      <ui:SIDropdown class="margin-left-global-gap-regular padding-left-global-padding-none"/>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:VisualElement>
+                          <ui:SIStyleSetter>
+                            <ui:SIButton>
+                              <ui:VisualElement class="ui-concepts-tick_small "/>
+                              <ui:Label class="sitext"/>
+                              <ui:VisualElement class="ui-concepts-add-to-list_small"/>
+                            </ui:SIButton>
+                          </ui:SIStyleSetter>
+                        </ui:VisualElement>
+                        <ui:VisualElement>
+                          <ui:SIStyleSetter>
+                            <ui:SIButton>
+                              <ui:SIImage/>
+                              <ui:Label class="sitext"/>
+                              <ui:VisualElement class="ui-concepts-chevron-down_small"/>
+                            </ui:SIButton>
+                          </ui:SIStyleSetter>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                      <ui:SIDropdown class="margin-left-global-gap-regular padding-left-global-padding-none"/>
+                      <ui:SIEnabled data-binding="friendly.TestimonialAvailable">
+                        <ui:SIDropdown class="margin-left-global-gap-regular padding-left-global-padding-none"/>
+                      </ui:SIEnabled>
+                      <ui:DebugPropertiesElement/>
+                      <ui:SIButton/>
+                      <ui:SIButton/>
+                    </ui:BindingRemapper>
+                  </ui:BindingVariables>
+                </ui:VisualElement>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:DebugPropertiesElement/>
+                <ui:BindingRemapper binding-mappings="settings=club.TeamSettingsEditSession.OfferToClubs">
+                  <ui:SIScrollView>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIDropdown/>
+                      <ui:SIText/>
+                    </ui:VisualElement>
+                    <ui:TemplateContainer template="layout-divider-solid-horizontal"/>
+                    <ui:SICheckBox class="white" selection-binding="settings.TransferListPlayer"/>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIDropdown/>
+                      <ui:SIText/>
+                    </ui:VisualElement>
+                    <ui:SIVisible data-binding="settings.CanShowUseFirstTeamSettings">
+                      <ui:SICheckBox class="white" selection-binding="settings.UseFirstTeamSettings"/>
+                    </ui:SIVisible>
+                    <ui:SIEnabled data-binding="settings.CanEditLoanSettings">
+                      <ui:SICheckBox class="white" selection-binding="settings.DontSpecifyDefaultLoanPlayingFee"/>
+                      <ui:SICheckBox class="white" selection-binding="settings.DontSpecifyDefaultLoanUnusedFee"/>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIDropdown/>
+                        <ui:SIText/>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIDropdown/>
+                        <ui:SIText/>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIDropdown/>
+                        <ui:SIText/>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIDropdown/>
+                        <ui:SIText/>
+                      </ui:VisualElement>
+                      <ui:SIEnabled class="row-direction-normal" data-binding="settings.CanSelectDivision">
+                        <ui:SIDropdown/>
+                        <ui:SIText/>
+                      </ui:SIEnabled>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIDropdown/>
+                        <ui:SIText/>
+                      </ui:VisualElement>
+                      <ui:TemplateContainer template="layout-divider-solid-horizontal"/>
+                      <ui:SIEnabled data-binding="settings.CanChangeAllowToPlayInCupMatches">
+                        <ui:SICheckBox class="white" selection-binding="settings.AllowToPlayInCupMatches"/>
+                      </ui:SIEnabled>
+                      <ui:SIEnabled data-binding="settings.CanChangeAllowToPlayAgainstOwnTeam">
+                        <ui:SICheckBox class="white" selection-binding="settings.AllowToPlayAgainstOwnTeam"/>
+                      </ui:SIEnabled>
+                      <ui:SIEnabled data-binding="settings.CanChangeAllowToPlayAgainstBTeam">
+                        <ui:SICheckBox class="white" selection-binding="settings.AllowToPlayAgainstBTeam"/>
+                      </ui:SIEnabled>
+                      <ui:SIEnabled data-binding="settings.CanChangeAllowToPlayForReserves">
+                        <ui:SICheckBox class="white" selection-binding="settings.AllowToPlayForReserves"/>
+                      </ui:SIEnabled>
+                      <ui:SIEnabled data-binding="settings.CanChangeAllowRecallFromLoan">
+                        <ui:SICheckBox class="white" selection-binding="settings.AllowRecallFromLoan"/>
+                      </ui:SIEnabled>
+                      <ui:SICheckBox class="white" selection-binding="settings.ListForLoan"/>
+                    </ui:SIEnabled>
+                    <ui:DebugBindingElement/>
+                  </ui:SIScrollView>
+                </ui:BindingRemapper>
+                <ui:BindingRemapper binding-mappings="teamsettings=human.club.TeamSettingsEditSession;settings=teamsettings.AdviceAndReports">
+                  <ui:TabGroup>
+                    <ui:ButtonGroup class="row-direction-normal">
+                      <ui:SIButton class="sipreferencestab"/>
+                      <ui:SIButton class="sipreferencestab"/>
+                      <ui:SIButton class="sipreferencestab"/>
+                      <ui:SIButton class="sipreferencestab"/>
+                      <ui:SIButton class="sipreferencestab"/>
+                    </ui:ButtonGroup>
+                    <ui:SwitchElement>
+                      <ui:SIScrollView>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIDropdown/>
+                          <ui:SIText/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIDropdown/>
+                          <ui:SIText/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIDropdown/>
+                          <ui:SIText/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIDropdown/>
+                          <ui:SIText/>
+                        </ui:VisualElement>
+                        <ui:SIText/>
+                        <ui:StreamedObjectList data-binding="settings.TransfersAndContractsAdviceList"/>
+                        <ui:SIText/>
+                        <ui:StreamedObjectList data-binding="settings.PlayerReportsAdviceList"/>
+                        <ui:SIText/>
+                        <ui:StreamedObjectList data-binding="settings.MiscellaneousAdviceList"/>
+                      </ui:SIScrollView>
+                      <ui:VisualElement>
+                        <ui:SIText/>
+                        <ui:SIText/>
+                        <ui:StreamedObjectList data-binding="settings.RecruitmentAdvice.List"/>
+                      </ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:SIText/>
+                        <ui:SIText/>
+                        <ui:StreamedObjectList data-binding="settings.DevelopmentAdvice.List"/>
+                      </ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:SIText/>
+                        <ui:SIText/>
+                        <ui:StreamedObjectList data-binding="settings.CoachingAdvice.List"/>
+                      </ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:SIText/>
+                        <ui:SIText/>
+                        <ui:StreamedObjectList data-binding="settings.StaffingAdvice.List"/>
+                      </ui:VisualElement>
+                    </ui:SwitchElement>
+                  </ui:TabGroup>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:SIEnabled data-binding="teamsettings.CanUndo">
+                      <ui:TemplateContainer template="button-base-leading-icon-label"/>
+                    </ui:SIEnabled>
+                    <ui:SIEnabled data-binding="teamsettings.CanRedo">
+                      <ui:TemplateContainer template="button-base-leading-icon-label"/>
+                    </ui:SIEnabled>
+                    <ui:SIEnabled data-binding="teamsettings.CanRevert">
+                      <ui:TemplateContainer template="button-base-leading-icon-label"/>
+                    </ui:SIEnabled>
+                    <ui:SIEnabled data-binding="teamsettings.CanRedo">
+                      <ui:TemplateContainer template="button-primary-leading-icon-label"/>
+                    </ui:SIEnabled>
+                  </ui:VisualElement>
+                </ui:BindingRemapper>
+                <ui:DebugPropertiesElement/>
+                <ui:VisualElement>
+                  <ui:StreamedObjectList data-binding="team.DebugPlayerAwards"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:BindingVariables>
+                    <ui:StreamedObjectList data-binding="Team.Rotations"/>
+                  </ui:BindingVariables>
+                </ui:VisualElement>
+              </ui:SwitchElement>
+            </ui:TabGroup>
+          </ui:VisualElement>
+        </ui:SITile>
+      </ui:VisualElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

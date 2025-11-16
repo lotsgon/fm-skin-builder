@@ -1,0 +1,29 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BaseCardTemplateImpl>
+    <ui:BindingVariables>
+      <ui:SIStyleSetter>
+        <ui:VisualElement class="row-direction-normal">
+          <ui:BindingVariables>
+            <ui:VisualElement>
+              <ui:VisualElement class="layout-popup-default-default">
+                <ui:VisualElement class="figma-base-popup-template-inner-frame ios-card-styling">
+                  <ui:VisualElement>
+                    <ui:SIVisible data-binding="isfullscreencard">
+                      <ui:SIVisible data-binding="config.ShowPhonePanels">
+                        <ui:TemplateContainer template="reports-header-navigation-default-type-card-header"/>
+                      </ui:SIVisible>
+                      <ui:SIVisible data-binding="config.ShowPhonePanels">
+                        <ui:TemplateContainer template="CardTitleBar-Phone"/>
+                      </ui:SIVisible>
+                    </ui:SIVisible>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="popup-content"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:BindingVariables>
+        </ui:VisualElement>
+      </ui:SIStyleSetter>
+    </ui:BindingVariables>
+  </ui:BaseCardTemplateImpl>
+</ui:UXML>

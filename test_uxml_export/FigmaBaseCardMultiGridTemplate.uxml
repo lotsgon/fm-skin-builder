@@ -1,0 +1,41 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BaseCardTemplateImpl>
+    <ui:BindingVariables>
+      <ui:SIStyleSetter>
+        <ui:VisualElement>
+          <ui:TemplateContainer template="SpeakToContainer"/>
+          <ui:BindingVariables>
+            <ui:VisualElement>
+              <ui:VisualElement class="layout-card-default-default">
+                <ui:VisualElement class="figma-base-card-template-inner-frame ios-card-styling">
+                  <ui:VisualElement class="width-100-percent height-100-percent layout-tile-interaction_border ios-card-border-remover"/>
+                  <ui:VisualElement>
+                    <ui:SIVisible data-binding="isfullscreencard">
+                      <ui:SIVisible data-binding="config.ShowPhonePanels">
+                        <ui:TemplateContainer template="reports-header-navigation-default-type-card-header"/>
+                      </ui:SIVisible>
+                      <ui:SIVisible data-binding="config.ShowPhonePanels">
+                        <ui:TemplateContainer template="CardTitleBar-Phone"/>
+                      </ui:SIVisible>
+                    </ui:SIVisible>
+                    <ui:SIVisible data-binding="isfullscreencard">
+                      <ui:SIVisible data-binding="config.ShowPhonePanels">
+                        <ui:TemplateContainer template="reports-header-navigation-default-type-full-screen-card-header"/>
+                      </ui:SIVisible>
+                      <ui:SIVisible data-binding="config.ShowPhonePanels">
+                        <ui:TemplateContainer template="CardTitleBar-Phone"/>
+                      </ui:SIVisible>
+                    </ui:SIVisible>
+                  </ui:VisualElement>
+                  <ui:SISafeAreaElement class="ios-margin-top-16">
+                    <ui:MultiGridLayoutElement class="fm-tool-grid-negative-margin-top"/>
+                  </ui:SISafeAreaElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:BindingVariables>
+        </ui:VisualElement>
+      </ui:SIStyleSetter>
+    </ui:BindingVariables>
+  </ui:BaseCardTemplateImpl>
+</ui:UXML>

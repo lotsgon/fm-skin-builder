@@ -1,0 +1,192 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:VisualElement class="sicard-container panel-fade base-template-grow">
+      <ui:BindingVariables>
+        <ui:BindingRemapper binding-mappings="status=player.SetTransferStatusEditSession">
+          <ui:VisualElement class="notifications--notifications-modal-large-default-default padding-left-global-padding-extra-extra-large padding-right-global-padding-extra-extra-large">
+            <ui:VisualElement>
+              <ui:SIScrollView>
+                <ui:VisualElement class="column-direction-normal flex-no-shrink-class">
+                  <ui:SIText class="fm-universe-large-22px" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="column-direction-normal">
+                  <ui:SIGradient>
+                    <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                      <ui:VisualElement>
+                        <ui:SIVisible data-binding="[VisualFunction]">
+                          <ui:VisualElement class="interaction-type-advice row-direction-normal">
+                            <ui:VisualElement class="ui-concepts-speech-bubble_small margin-right-global-gap-small"/>
+                            <ui:SIText class="body-small-12px-regular global-text-primary" text-binding="[VisualFunction]"/>
+                          </ui:VisualElement>
+                        </ui:SIVisible>
+                      </ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:SIVisible data-binding="[VisualFunction]">
+                          <ui:VisualElement class="interaction-type-advice row-direction-normal">
+                            <ui:VisualElement class="ui-concepts-speech-bubble_small margin-right-global-gap-small"/>
+                            <ui:SIText class="body-small-12px-regular global-text-primary" text-binding="[VisualFunction]"/>
+                          </ui:VisualElement>
+                        </ui:SIVisible>
+                      </ui:VisualElement>
+                    </ui:BindableSwitchElement>
+                    <ui:VisualElement class="column-direction-normal padding-right-global-padding-regular padding-left-global-padding-regular">
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:BindingRemapper binding-mappings="person=status.Agent">
+                          <ui:VisualElement class="row-direction-normal">
+                            <ui:TemplateContainer class="thumbnails-alt-person-picture-property-1-44px margin-right-global-gap-regular" template="thumbnails-alt-person-picture"/>
+                            <ui:VisualElement class="column-direction-normal">
+                              <ui:SIText class="heading-xsmall-14px" text-binding="person.name"/>
+                              <ui:SIText class="body-small-12px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                        </ui:BindingRemapper>
+                      </ui:SIVisible>
+                      <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                        <ui:VisualElement>
+                          <ui:SIVisible data-binding="[VisualFunction]">
+                            <ui:SIText class="body-regular-14px-regular" text-binding="status.SetTransferStatusAgentTransferStatusString"/>
+                          </ui:SIVisible>
+                          <ui:SIVisible data-binding="[VisualFunction]">
+                            <ui:VisualElement class="column-direction-normal padding-right-global-padding-none padding-left-global-padding-none">
+                              <ui:SIText class="body-regular-14px-regular global-text-primary" text-binding="status.SetTransferStatusAgentTransferStatusString"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="column-direction-normal padding-right-global-padding-none padding-left-global-padding-none">
+                              <ui:SIVisible data-binding="status.SetTransferStatusAgentTransferStatusButtonString">
+                                <ui:SIButton class=" row-direction-normal margin-right-global-gap-none margin-left-global-gap-none">
+                                  <ui:VisualElement class="ui-concepts-speech-bubble_small margin-right-global-gap-regular"/>
+                                  <ui:SIText class="button-regular global-text-primary" text-binding="status.SetTransferStatusAgentTransferStatusButtonString"/>
+                                </ui:SIButton>
+                              </ui:SIVisible>
+                            </ui:VisualElement>
+                          </ui:SIVisible>
+                          <ui:SIVisible data-binding="[VisualFunction]">
+                            <ui:VisualElement class="row-direction-normal">
+                              <ui:VisualElement>
+                                <ui:SIImage class="leading-tail speech-tail-new-message-colour"/>
+                              </ui:VisualElement>
+                              <ui:VisualElement class="row-direction-normal">
+                                <ui:VisualElement class="speech-background-type-npc-message speech-bubble-new-message-colour">
+                                  <ui:SIText class="body-regular-14px-regular global-text-primary" text-binding="status.SetTransferStatusAgentTransferStatusString"/>
+                                </ui:VisualElement>
+                              </ui:VisualElement>
+                            </ui:VisualElement>
+                          </ui:SIVisible>
+                        </ui:VisualElement>
+                        <ui:VisualElement>
+                          <ui:SIVisible data-binding="[VisualFunction]">
+                            <ui:SIText class="body-regular-14px-regular" text-binding="status.SetTransferStatusAgentLoanStatusString"/>
+                          </ui:SIVisible>
+                          <ui:SIVisible data-binding="[VisualFunction]">
+                            <ui:VisualElement class="column-direction-normal padding-right-global-padding-none padding-left-global-padding-none">
+                              <ui:SIText class="body-regular-14px-regular global-text-primary" text-binding="status.SetTransferStatusAgentLoanStatusString"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="column-direction-normal padding-right-global-padding-none padding-left-global-padding-none">
+                              <ui:SIVisible data-binding="status.SetTransferStatusAgentLoanStatusButtonString">
+                                <ui:SIButton class=" row-direction-normal margin-right-global-gap-none margin-left-global-gap-none">
+                                  <ui:VisualElement class="ui-concepts-speech-bubble_small margin-right-global-gap-regular"/>
+                                  <ui:SIText class="button-regular global-text-primary" text-binding="status.SetTransferStatusAgentLoanStatusButtonString"/>
+                                </ui:SIButton>
+                              </ui:SIVisible>
+                            </ui:VisualElement>
+                          </ui:SIVisible>
+                          <ui:SIVisible data-binding="[VisualFunction]">
+                            <ui:VisualElement class="row-direction-normal">
+                              <ui:VisualElement>
+                                <ui:SIImage class="leading-tail speech-tail-new-message-colour"/>
+                              </ui:VisualElement>
+                              <ui:VisualElement class="row-direction-normal">
+                                <ui:VisualElement class="speech-background-type-npc-message speech-bubble-new-message-colour">
+                                  <ui:SIText class="body-regular-14px-regular global-text-primary" text-binding="status.SetTransferStatusAgentLoanStatusString"/>
+                                </ui:VisualElement>
+                              </ui:VisualElement>
+                            </ui:VisualElement>
+                          </ui:SIVisible>
+                        </ui:VisualElement>
+                      </ui:BindableSwitchElement>
+                    </ui:VisualElement>
+                  </ui:SIGradient>
+                </ui:VisualElement>
+                <ui:TabGroup class="largetabs margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none">
+                  <ui:ButtonGroup class="margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" current-selected-id-binding="selectedtab" selection-binding="selectedtab">
+                    <ui:SIButton class="buttons-segmented-button-row-inactive-regular-placement-leading margin-right-global-gap-none margin-left-global-gap-none"/>
+                    <ui:SIButton class="navigation-tab-default-default--active-false buttons-segmented-button-row-inactive-regular-placement-trailing margin-right-global-gap-none margin-left-global-gap-none"/>
+                  </ui:ButtonGroup>
+                  <ui:SwitchElement>
+                    <ui:VisualElement>
+                      <ui:VisualElement class="column-direction-normal">
+                        <ui:SIText class="body-regular-14px-bold" text-binding="[VisualFunction]"/>
+                        <ui:TemplateContainer template="dropdown-base-regular-row-template-trailing-icon"/>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="column-direction-normal">
+                        <ui:SIText class="body-regular-14px-bold" text-binding="[VisualFunction]"/>
+                        <ui:VisualElement class="inputs-combobox-controls-default-type-integer-active-false-validation-default margin-right-global-gap-none">
+                          <ui:FMCombobox text-binding="status.SetTransferStatusAskingPriceListProps.foreignvalue.DisplayValue"/>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:VisualElement class="column-direction-normal">
+                        <ui:SIText class="body-regular-14px-bold" text-binding="[VisualFunction]"/>
+                        <ui:TemplateContainer template="dropdown-base-regular-row-template-trailing-icon"/>
+                      </ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:VisualElement class="column-direction-normal">
+                            <ui:SIText class="body-regular-14px-bold" text-binding="[VisualFunction]"/>
+                            <ui:VisualElement class="inputs-combobox-controls-default-type-integer-active-false-validation-default margin-right-global-gap-none">
+                              <ui:FMCombobox text-binding="status.SetTransferStatusPlayingMonthlyFeeListProps.foreignvalue.DisplayValue"/>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                          <ui:VisualElement class="column-direction-normal">
+                            <ui:SIText class="body-regular-14px-bold" text-binding="[VisualFunction]"/>
+                            <ui:VisualElement class="inputs-combobox-controls-default-type-integer-active-false-validation-default margin-right-global-gap-none">
+                              <ui:FMCombobox text-binding="status.SetTransferStatusUnusedMonthlyFeeListProps.foreignvalue.displayvalue"/>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:VisualElement class="column-direction-normal">
+                            <ui:SIText class="body-regular-14px-bold" text-binding="[VisualFunction]"/>
+                            <ui:TemplateContainer template="dropdown-base-regular-row-template-trailing-icon"/>
+                          </ui:VisualElement>
+                          <ui:VisualElement class="column-direction-normal">
+                            <ui:SIText class="body-regular-14px-bold" text-binding="[VisualFunction]"/>
+                            <ui:TemplateContainer template="dropdown-base-regular-row-template-trailing-icon"/>
+                          </ui:VisualElement>
+                        </ui:VisualElement>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                  </ui:SwitchElement>
+                </ui:TabGroup>
+              </ui:SIScrollView>
+              <ui:VisualElement class="row-direction-normal flex-no-shrink-class">
+                <ui:VisualElement class="margin-right-global-gap-regular">
+                  <ui:SIButton class="buttons-button-secondary-default margin-right-global-gap-none margin-left-global-gap-none">
+                    <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                  </ui:SIButton>
+                </ui:VisualElement>
+                <ui:SIEnabled class="margin-right-global-gap-regular" data-binding="player.SetTransferStatusEditSession.CanUndo">
+                  <ui:SIButton class="buttons-button-primary-default">
+                    <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                  </ui:SIButton>
+                </ui:SIEnabled>
+                <ui:SIEnabled class="margin-right-global-gap-regular" data-binding="player.SetTransferStatusEditSession.CanRedo">
+                  <ui:SIButton class="buttons-button-primary-default">
+                    <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                  </ui:SIButton>
+                </ui:SIEnabled>
+                <ui:VisualElement>
+                  <ui:SIButton class="buttons-button-primary-default">
+                    <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+                    <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                  </ui:SIButton>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:BindingRemapper>
+      </ui:BindingVariables>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:SIVisible class="row-direction-normal" data-binding="[VisualFunction]">
+      <ui:VisualElement class="row-direction-normal">
+        <ui:VisualElement>
+          <ui:SIText class="sitext" text-binding="app.WatermarkString"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement>
+        <ui:BindingSetter>
+          <ui:SIButton class="buttons-button-tertiary-default">
+            <ui:VisualElement class="row-direction-normal margin-right-global-gap-small">
+              <ui:SIText class="body-small-12px-regular content-ellipsis content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+          </ui:SIButton>
+        </ui:BindingSetter>
+      </ui:VisualElement>
+    </ui:SIVisible>
+  </ui:BindingRoot>
+</ui:UXML>

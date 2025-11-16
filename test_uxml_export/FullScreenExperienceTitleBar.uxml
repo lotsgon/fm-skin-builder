@@ -1,0 +1,77 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:BindingRemapper binding-mappings="speakto=conversation.SpeakTo">
+      <ui:VisualElement class="fullscreen-experience-header row-direction-normal">
+        <ui:BindingVariables class="row-direction-normal margin-right-global-gap-large margin-left-global-gap-large">
+          <ui:VisualElement class="row-direction-normal">
+            <ui:TemplateContainer class="main-navigation-button" template="buttons-controls-back-default"/>
+            <ui:TemplateContainer class="main-navigation-button margin-left-global-gap-small" template="buttons-controls-forward-default"/>
+          </ui:VisualElement>
+          <ui:SIStyleSetter class="margin-right-global-gap-regular margin-left-global-gap-regular">
+            <ui:SIEnabled data-binding="[VisualFunction]">
+              <ui:TemplateContainer class="padding-right-global-padding-none padding-left-global-padding-none" template="ClubIcon"/>
+            </ui:SIEnabled>
+          </ui:SIStyleSetter>
+          <ui:BindableSwitchElement data-binding="[VisualFunction]">
+            <ui:VisualElement>
+              <ui:SIText class="fm-universe-20px" text-binding="conversation.ConversationTopicDescriptionString"/>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                <ui:TemplateContainer class="margin-left-global-gap-regular margin-right-global-gap-regular" template="layout-divider-solid-vertical"/>
+                <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="conversation.ConversationInteracteesDescriptionString"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:SIText class="fm-universe-20px" text-binding="[VisualFunction]"/>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                <ui:TemplateContainer class="margin-left-global-gap-regular margin-right-global-gap-regular" template="layout-divider-solid-vertical"/>
+                <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular global-text-secondary margin-left-global-gap-extra-small" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:BindableSwitchElement>
+          <ui:VisualElement>
+            <ui:BindableSwitchElement data-binding="[VisualFunction]">
+              <ui:SIVisible data-binding="conversation.ConversationShowRoomAtmosphere">
+                <ui:BindingRemapper binding-mappings="binding=conversation.ConversationRoomAtmosphere">
+                  <ui:TemplateContainer template="BodyLanguageCell"/>
+                </ui:BindingRemapper>
+              </ui:SIVisible>
+              <ui:BindingRemapper binding-mappings="binding=pressconference.ConversationRoomAtmosphere">
+                <ui:TemplateContainer template="BodyLanguageCell"/>
+              </ui:BindingRemapper>
+            </ui:BindableSwitchElement>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:VisualElement>
+              <ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIButton class="continue-button continue-button-home-ribbon continue-button---default">
+                    <ui:VisualElement/>
+                    <ui:Sliding class="row-direction-normal">
+                      <ui:SIGradient/>
+                      <ui:SIGradient/>
+                    </ui:Sliding>
+                    <ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:VisualElement>
+                          <ui:SIText class="fm-universe-small-14px" text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:SIVisible data-binding="[VisualFunction]">
+                      <ui:Rotator>
+                        <ui:SIImage data-binding="[VisualFunction]"/>
+                      </ui:Rotator>
+                    </ui:SIVisible>
+                  </ui:SIButton>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:BindingVariables>
+      </ui:VisualElement>
+    </ui:BindingRemapper>
+  </ui:BindingExpect>
+</ui:UXML>

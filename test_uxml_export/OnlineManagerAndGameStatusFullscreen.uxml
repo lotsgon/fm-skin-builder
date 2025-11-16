@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingRemapper>
+      <ui:BindingVariables>
+        <ui:VisualElement>
+          <ui:BaseCardTemplateImpl>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:BindingVariables>
+                <ui:VisualElement>
+                  <ui:VisualElement class="layout-report-default-default">
+                    <ui:VisualElement class="figma-base-tool-fullscreen-template-inner-frame">
+                      <ui:TemplateContainer template="dashboard-focus-header-default"/>
+                      <ui:VisualElement class="padding-right-global-padding-huge padding-left-global-padding-huge">
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:VisualElement class="ui-concepts-more-info_small margin-right-global-gap-regular"/>
+                          <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                        <ui:SISafeAreaElement>
+                          <ui:TabbedGridLayoutElement/>
+                          <ui:TemplateContainer template="button-base-label"/>
+                        </ui:SISafeAreaElement>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:BindingVariables>
+              <ui:SIVisible data-binding="config.HideSpeakToOnPhone">
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:BindingRemapper binding-mappings="speakto=SpeakTo;human=game.GameCurrentManager">
+                    <ui:SIVisible data-binding="SpeakTo.Actions.IsValid">
+                      <ui:VisualElement class="margin-left-global-gap-extra-large">
+                        <ui:TemplateContainer template="SpeakToSidePanel"/>
+                      </ui:VisualElement>
+                    </ui:SIVisible>
+                  </ui:BindingRemapper>
+                </ui:SIVisible>
+              </ui:SIVisible>
+            </ui:VisualElement>
+          </ui:BaseCardTemplateImpl>
+        </ui:VisualElement>
+      </ui:BindingVariables>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

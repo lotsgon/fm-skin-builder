@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="margin-right-global-gap-small margin-left-global-gap-small padding-right-global-padding-small padding-left-global-padding-small">
+    <ui:SIText text-binding="rule.Name"/>
+    <ui:StreamedObjectList data-binding="rule.Items"/>
+  </ui:BindingExpect>
+</ui:UXML>

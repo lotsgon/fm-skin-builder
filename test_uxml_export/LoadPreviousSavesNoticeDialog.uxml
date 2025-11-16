@@ -1,0 +1,50 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="sipopup-container">
+    <ui:VisualElement class="notifications--notifications-modal-dialog-default-default">
+      <ui:VisualElement class="column-direction-normal">
+        <ui:VisualElement class="column-direction-normal">
+          <ui:VisualElement class="column-direction-normal">
+            <ui:SIText class="heading-small-16px" text-binding="[VisualFunction]"/>
+            <ui:VisualElement class="column-direction-normal">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement class="ui-concepts-upload-delayed_medium margin-right-global-gap-regular"/>
+                <ui:VisualElement class="column-direction-normal">
+                  <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement class="game-concepts-time-passing_medium margin-right-global-gap-regular"/>
+                <ui:VisualElement class="column-direction-normal">
+                  <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement class="ui-concepts-warning_medium margin-right-global-gap-regular"/>
+                <ui:VisualElement class="column-direction-normal">
+                  <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement class="game-concepts-trophy_medium margin-right-global-gap-regular"/>
+                <ui:VisualElement class="column-direction-normal">
+                  <ui:SIText class="heading-xsmall-14px" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:TemplateContainer template="button-primary-label"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="margin-right-global-gap-huge margin-left-global-gap-huge">
+          <ui:TemplateContainer class="layout-layout-divider-solid-horizontal" template="layout-divider-solid-horizontal"/>
+          <ui:VisualElement>
+            <ui:SIText class="content-no-wrap content-ellipsis body-small-12px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

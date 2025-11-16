@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="holiday=game.GameCurrentManager.GoOnHoliday">
+      <ui:TemplateContainer template="BaseFloatingBlocksTemplate">
+        <ui:SIScrollView>
+          <ui:TemplateContainer class="notifications-modal-dialog-background margin-right-global-gap-extra-large margin-left-global-gap-extra-large" template="GoOnHolidayWidget"/>
+        </ui:SIScrollView>
+      </ui:TemplateContainer>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

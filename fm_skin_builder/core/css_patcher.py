@@ -28,6 +28,7 @@ from .font_swap_service import (
     FontSwapOptions,
     FontSwapService,
 )
+from .uxml.uxml_importer import UXMLImporter
 from .css_utils import (
     build_selector_from_parts,
     clean_for_json,
@@ -2816,6 +2817,8 @@ class PipelineResult:
         texture_bundles_written: Number of bundles written with texture changes.
         font_replacements_total: Total count of font replacements across all bundles.
         font_bundles_written: Number of bundles written with font changes.
+        uxml_replacements_total: Total count of UXML replacements across all bundles.
+        uxml_bundles_written: Number of bundles written with UXML changes.
         bundles_requested: Total number of bundles requested for processing.
         summary_lines: Human-readable summary lines for CLI output.
     """
@@ -2826,6 +2829,8 @@ class PipelineResult:
     texture_bundles_written: int
     font_replacements_total: int
     font_bundles_written: int
+    uxml_replacements_total: int
+    uxml_bundles_written: int
     bundles_requested: int
     summary_lines: List[str] = field(default_factory=list)
 
@@ -2838,18 +2843,27 @@ class PipelineResult:
             texture_bundles_written=0,
             font_replacements_total=0,
             font_bundles_written=0,
+            uxml_replacements_total=0,
+            uxml_bundles_written=0,
             bundles_requested=0,
             summary_lines=[],
         )
 
 
 class SkinPatchPipeline:
-    """Coordinates CSS + texture patching for a skin directory."""
+    """Coordinates CSS + texture + font + UXML patching for a skin directory."""
 
-    def __init__(self, css_dir: Path, out_dir: Path, options: PipelineOptions) -> None:
+    def __init__(
+        self,
+        css_dir: Path,
+        out_dir: Path,
+        options: PipelineOptions,
+        uxml_dir: Optional[Path] = None,
+    ) -> None:
         self.css_dir = css_dir
         self.out_dir = out_dir
         self.options = options
+        self.uxml_dir = uxml_dir
 
     def run(self, bundle: Optional[Path] = None) -> PipelineResult:
         css_data = collect_css_from_dir(self.css_dir)
@@ -2961,6 +2975,8 @@ class SkinPatchPipeline:
         texture_bundles_written = 0
         font_replacements_total = 0
         font_bundles_written = 0
+        uxml_replacements_total = 0
+        uxml_bundles_written = 0
 
         log.info(f"\n📦 Processing {len(bundle_files)} bundle(s)...")
 
@@ -3000,6 +3016,10 @@ class SkinPatchPipeline:
             if not self.options.dry_run and report.font_replacements > 0:
                 font_bundles_written += 1
 
+            uxml_replacements_total += report.uxml_replacements
+            if not self.options.dry_run and report.uxml_replacements > 0:
+                uxml_bundles_written += 1
+
             bundle_reports.append(report)
 
         # Completion summary
@@ -3020,6 +3040,8 @@ class SkinPatchPipeline:
             texture_bundles_written=texture_bundles_written,
             font_replacements_total=font_replacements_total,
             font_bundles_written=font_bundles_written,
+            uxml_replacements_total=uxml_replacements_total,
+            uxml_bundles_written=uxml_bundles_written,
             bundles_requested=bundles_requested,
             summary_lines=summary_lines,
         )
@@ -3144,6 +3166,15 @@ class SkinPatchPipeline:
                 except Exception as exc:
                     log.warning(f"[WARN] Font swap skipped due to error: {exc}")
 
+            # UXML replacement
+            if self.uxml_dir and self.uxml_dir.exists():
+                try:
+                    uxml_count = self._apply_uxml_patches(bundle_ctx, report)
+                    if uxml_count > 0:
+                        log.info(f"[UXML] Applied {uxml_count} UXML patch(es)")
+                except Exception as exc:
+                    log.warning(f"[WARN] UXML patching skipped due to error: {exc}")
+
             saved_path = bundle_ctx.save_modified(
                 self.out_dir, dry_run=self.options.dry_run
             )
@@ -3151,6 +3182,110 @@ class SkinPatchPipeline:
                 report.mark_saved(saved_path)
 
         return report
+
+    def _apply_uxml_patches(
+        self, bundle_ctx: BundleContext, report: PatchReport
+    ) -> int:
+        """
+        Apply UXML patches from self.uxml_dir to the bundle.
+
+        Returns:
+            Number of VTA assets successfully patched.
+        """
+        if not self.uxml_dir or not self.uxml_dir.exists():
+            return 0
+
+        # Find UXML files
+        uxml_files = list(self.uxml_dir.glob("*.uxml"))
+        if not uxml_files:
+            log.debug(f"[UXML] No .uxml files found in {self.uxml_dir}")
+            return 0
+
+        # Build lookup of available UXML files
+        uxml_lookup = {f.stem: f for f in uxml_files}
+
+        importer = UXMLImporter()
+        modified_count = 0
+
+        # Find and update VisualTreeAssets
+        for obj in bundle_ctx.env.objects:
+            if obj.type.name == "MonoBehaviour":
+                try:
+                    data = obj.read()
+
+                    # Check if this is a VisualTreeAsset by looking for VTA-specific fields
+                    # (m_ClassName may not be set in Unity 2021+)
+                    is_vta = (
+                        hasattr(data, "m_VisualElementAssets")
+                        or hasattr(data, "m_TemplateAssets")
+                        or hasattr(data, "m_UxmlObjectEntries")
+                    )
+
+                    if is_vta:
+                        asset_name = getattr(data, "m_Name", f"VTA_{obj.path_id}")
+                        if not asset_name:
+                            asset_name = f"VTA_{obj.path_id}"
+
+                        # Check if we have a UXML file for this asset
+                        uxml_file = uxml_lookup.get(asset_name)
+
+                        if uxml_file:
+                            if self.options.dry_run:
+                                log.info(f"  [UXML DRY-RUN] Would import: {asset_name}")
+                                modified_count += 1
+                            else:
+                                log.debug(f"  [UXML] Importing: {asset_name}")
+
+                                try:
+                                    # Import UXML
+                                    doc = importer.import_uxml(uxml_file)
+
+                                    # Convert to VTA structure
+                                    vta_structure = importer.build_visual_tree_asset(doc)
+
+                                    # Update VTA elements by copying structure from original
+                                    # and only modifying the fields we care about
+                                    if "m_VisualElementAssets" in vta_structure:
+                                        new_elements = vta_structure["m_VisualElementAssets"]
+
+                                        # Copy default values from first original element if available
+                                        if hasattr(data, "m_VisualElementAssets") and data.m_VisualElementAssets:
+                                            template_elem = data.m_VisualElementAssets[0]
+
+                                            # Update each new element with default fields from template
+                                            for elem in new_elements:
+                                                # Add missing fields with default values from template
+                                                for field in ['m_XmlNamespace', 'm_NamespaceDefinitions',
+                                                             'm_PickingMode', 'm_RuleIndex', 'm_SerializedData',
+                                                             'm_SkipClone', 'm_StylesheetPaths', 'm_Stylesheets']:
+                                                    if not hasattr(elem, field) and hasattr(template_elem, field):
+                                                        setattr(elem, field, getattr(template_elem, field))
+
+                                        data.m_VisualElementAssets = new_elements
+
+                                    if "m_TemplateAssets" in vta_structure:
+                                        data.m_TemplateAssets = vta_structure["m_TemplateAssets"]
+                                    if "m_InlineSheet" in vta_structure:
+                                        data.m_InlineSheet = vta_structure["m_InlineSheet"]
+
+                                    # Save changes
+                                    obj.save_typetree(data)
+                                    modified_count += 1
+                                    bundle_ctx.mark_dirty()
+
+                                except Exception as e:
+                                    import traceback
+                                    log.error(f"    [UXML] Failed to import {asset_name}: {e}")
+                                    # Log full traceback to help debug
+                                    for line in traceback.format_exc().splitlines():
+                                        log.error(f"      {line}")
+
+                except Exception as e:
+                    log.debug(f"  [UXML] Failed to process object {obj.path_id}: {e}")
+                    continue
+
+        report.uxml_replacements = modified_count
+        return modified_count
 
 
 def run_patch(
@@ -3163,6 +3298,7 @@ def run_patch(
     dry_run: bool = False,
     use_scan_cache: bool = True,
     refresh_scan_cache: bool = False,
+    uxml_dir: Optional[Path] = None,
 ) -> PipelineResult:
     """High-level entry to patch bundles based on CSS in css_dir."""
 
@@ -3174,5 +3310,5 @@ def run_patch(
         use_scan_cache=use_scan_cache,
         refresh_scan_cache=refresh_scan_cache,
     )
-    pipeline = SkinPatchPipeline(css_dir, out_dir, options)
+    pipeline = SkinPatchPipeline(css_dir, out_dir, options, uxml_dir=uxml_dir)
     return pipeline.run(bundle=bundle)

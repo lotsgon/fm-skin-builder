@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTemplate">
+      <ui:SIVisible data-binding="config.ShowFmMenuFooterButtons">
+        <ui:VisualElement class="row-direction-normal margin-right-global-gap-extra-large margin-left-global-gap-extra-large">
+          <ui:VisualElement class="row-direction-normal">
+            <ui:TemplateContainer template="OpenURLEventButton"/>
+            <ui:TemplateContainer template="OpenURLEventButton"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-label"/>
+            <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-base-label"/>
+            <ui:SIVisible data-binding="config.ShowQuitGameButton">
+              <ui:TemplateContainer template="button-base-label"/>
+            </ui:SIVisible>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:SIVisible>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

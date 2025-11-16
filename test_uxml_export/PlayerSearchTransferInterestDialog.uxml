@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class">
+    <ui:BindingRemapper binding-mappings="LocalSelection=personsearch.PlayerInterestLevelSelection">
+      <ui:VisualElement class="sicard-container panel-fade flex-grow-class">
+        <ui:VisualElement class="card-notifications-modal-dialog-quit-without-saving">
+          <ui:VisualElement>
+            <ui:VisualElement class="padding-top-global-padding-regular padding-bottom-global-padding-large notifications-modal-dialog-default-default">
+              <ui:VisualElement>
+                <ui:SIText class="body-regular-14px-bold content-no-wrap margin-top-global-gap-large margin-bottom-global-gap-large" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular margin-bottom-global-gap-large flex-grow-class" text-binding="[VisualFunction]"/>
+                <ui:VisualElement>
+                  <ui:SIRadioGroup class="si-radio-group-override vertical-radio-group margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" selection-binding="LocalSelection"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement class="padding-bottom-global-padding-regular">
+                  <ui:VisualElement>
+                    <ui:VisualElement class="notifications-modal-dialog-actions-default-type-confirm row-direction-inverted">
+                      <ui:SIVisible data-binding="const.True">
+                        <ui:TemplateContainer template="button-primary-label"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

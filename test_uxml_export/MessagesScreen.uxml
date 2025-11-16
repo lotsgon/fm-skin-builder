@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:SISafeAreaElement>
+      <ui:BindingRemapper binding-mappings="team=human.Team">
+        <ui:BindingSetter>
+          <ui:VisualElement class="siblock-border">
+            <ui:VisualElement>
+              <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                <ui:VisualElement class="padding-top-global-padding-huge padding-bottom-global-padding-huge">
+                  <ui:VisualElement class="ui-concepts-speech-bubble_large"/>
+                  <ui:SIText class="global-text-primary heading-small-16px" text-binding="[VisualFunction]"/>
+                </ui:VisualElement>
+                <ui:MessagesStreamedObjectList class="messages---processing item-remove-background" data-binding="messageslist"/>
+              </ui:BindableSwitchElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:BindingSetter>
+      </ui:BindingRemapper>
+    </ui:SISafeAreaElement>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement class="sipopup-container">
+      <ui:VisualElement class="notifications-modal-large-default-default">
+        <ui:VisualElement class="column-direction-normal">
+          <ui:SIImage class="end-of-demo-background"/>
+          <ui:SIText class="fm-universe-xlarge-30px player-interest-purple" text-binding="[VisualFunction]"/>
+          <ui:VisualElement class="margin-bottom-global-gap-large">
+            <ui:SIText text-binding="[VisualFunction]"/>
+            <ui:SIText text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:VisualElement>
+              <ui:SIButton class="buttons-button-primary-default">
+                <ui:SIText class="button-regular buttons-global-primary-text margin-right-global-gap-regular sitext-hover-cursor content-no-wrap content-ellipsis" text-binding="app.DemoEndStoreString"/>
+              </ui:SIButton>
+            </ui:VisualElement>
+            <ui:TemplateContainer class="margin-left-global-gap-small margin-right-global-gap-small" template="button-base-label"/>
+            <ui:TemplateContainer template="button-base-label"/>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="row-direction-normal margin-right-global-gap-extra-large">
+    <ui:BindingRemapper binding-mappings="year=selectedyear_dvp.PropertyValue">
+      <ui:VisualElement class="row-direction-normal">
+        <ui:VisualElement class="row-direction-normal margin-right-global-gap-extra-large">
+          <ui:SIText class="body-regular-14px-regular margin-right-global-gap-regular global-text-secondary" text-binding="[VisualFunction]"/>
+          <ui:VisualElement class="ui-concepts-calendar_small margin-right-global-gap-regular"/>
+          <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+        </ui:VisualElement>
+        <ui:TemplateContainer class="margin-right-global-gap-extra-large" template="layout-divider-solid-vertical"/>
+        <ui:VisualElement class="row-direction-normal">
+          <ui:SIText class="body-regular-14px-regular margin-right-global-gap-regular global-text-secondary" text-binding="[VisualFunction]"/>
+          <ui:VisualElement class="ui-concepts-calendar_small margin-right-global-gap-regular"/>
+          <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingRemapper>
+  </ui:BindingExpect>
+</ui:UXML>

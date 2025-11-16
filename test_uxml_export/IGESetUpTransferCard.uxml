@@ -1,0 +1,42 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardPopupTemplate">
+      <ui:SIVisible data-binding="isloan">
+        <ui:BindableIntEditBox/>
+        <ui:BindingRemapper binding-mappings="selectedDate=person.IGEMovePerson.Date">
+          <ui:TemplateContainer template="DateSelectorWidget"/>
+        </ui:BindingRemapper>
+        <ui:SICheckBox selection-binding="person.IGEMovePerson.ArrangeFriendly"/>
+        <ui:BindableIntEditBox/>
+        <ui:BindableIntEditBox/>
+        <ui:BindableIntEditBox/>
+        <ui:BindableIntEditBox/>
+        <ui:SIButton/>
+      </ui:SIVisible>
+      <ui:SIVisible data-binding="isloan">
+        <ui:SIScrollView>
+          <ui:BindingRemapper binding-mappings="selectedDate=person.IGEMovePerson.EndDate">
+            <ui:TemplateContainer template="DateSelectorWidget"/>
+          </ui:BindingRemapper>
+          <ui:SICheckBox selection-binding="person.IGEMovePerson.CanBeRecalled"/>
+          <ui:SICheckBox selection-binding="person.IGEMovePerson.CanPlayCupMatches"/>
+          <ui:SICheckBox selection-binding="person.IGEMovePerson.CanPlayAgainstParentClub"/>
+          <ui:SICheckBox selection-binding="person.IGEMovePerson.CanPlayAgainstParentClubBTeam"/>
+          <ui:SICheckBox selection-binding="person.IGEMovePerson.CanPlayForParentClub"/>
+          <ui:SICheckBox selection-binding="person.IGEMovePerson.CanPlayForParentClubReserveTeam"/>
+          <ui:SICheckBox selection-binding="person.IGEMovePerson.CanPlayForParentClubCupMatches"/>
+          <ui:BindableIntEditBox/>
+          <ui:BindableIntEditBox/>
+          <ui:BindableIntEditBox/>
+          <ui:BindableIntEditBox/>
+          <ui:BindableIntEditBox/>
+          <ui:BindableIntEditBox/>
+          <ui:SIDropdown/>
+          <ui:SIDropdown/>
+          <ui:SICheckBox selection-binding="person.IGEMovePerson.LoanCannotBeTerminated"/>
+          <ui:SIButton/>
+        </ui:SIScrollView>
+      </ui:SIVisible>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

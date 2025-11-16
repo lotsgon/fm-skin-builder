@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement class="row-direction-normal">
+    <ui:VisualElement class="row-direction-normal flex-grow-class">
+      <ui:SIText class="body-small-12px-bold global-text-primary margin-right-global-gap-regular global-text-secondary" text-binding="[VisualFunction]"/>
+      <ui:VisualElement class="row-direction-normal">
+        <ui:VisualElement class="row-direction-normal margin-right-global-gap-extra-large">
+          <ui:SIRadialGauge class="sisegemntedradialgauge margin-right-global-gap-small"/>
+          <ui:SIText class="body-small-12px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+        </ui:VisualElement>
+        <ui:SIText class="body-small-12px-bold global-text-primary" text-binding="[VisualFunction]"/>
+        <ui:VisualElement class="row-direction-normal margin-left-global-gap-extra-large">
+          <ui:SIRadialGauge class="sisegemntedradialgauge margin-right-global-gap-small"/>
+          <ui:SIText class="body-small-12px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</ui:UXML>

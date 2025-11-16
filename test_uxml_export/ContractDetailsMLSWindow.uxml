@@ -1,0 +1,76 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class">
+    <ui:BindingRemapper class="flex-grow-class" binding-mappings="club=player.Club;playersalary=player.SalaryCapAdjustment;team=player.Team">
+      <ui:VisualElement class="notifications--notifications-modal-large-default-default global-padding-extra-large">
+        <ui:VisualElement class="notifications-modal-dialog-background padding-right-global-padding-regular padding-left-global-padding-regular flex-grow-class padding-top-global-padding-regular padding-bottom-global-padding-regular">
+          <ui:SIText class="sitext heading-regular-18px" text-binding="[VisualFunction]"/>
+          <ui:VisualElement class="flex-grow-class align-self-stretch-class">
+            <ui:VisualElement class="row-direction-normal flex-grow-class">
+              <ui:VisualElement class="flex-grow-class">
+                <ui:SIText class="body-small-12px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-small-12px-bold" text-binding="playersalary.SalaryCapAdjustmentEditedPlayerSalaryCapValue"/>
+              </ui:VisualElement>
+              <ui:VisualElement class="flex-grow-class">
+                <ui:SIText class="body-small-12px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-small-12px-bold" text-binding="playersalary.SalaryCapAdjustmentEditedGAMValue"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="flex-grow-class">
+              <ui:VisualElement>
+                <ui:BindingVariables>
+                  <ui:VisualElement class="data-display-data_display-range_slider-budgets-default">
+                    <ui:SIEnabled data-binding="playersalary.SalaryCapAdjustmentCanEditCapImpact">
+                      <ui:VisualElement class="sitextmedium row-direction-normal flex-grow-class">
+                        <ui:SIEnabled data-binding="const.True">
+                          <ui:SIButton class="buttons-controls-pc-default--active-true">
+                            <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+                          </ui:SIButton>
+                        </ui:SIEnabled>
+                        <ui:VisualElement class="flex-grow-class">
+                          <ui:VisualElement class="data-display-data_display-range_slider-default-default">
+                            <ui:SISlider class="indicator data_display-range_slider-track-default-increments-none"/>
+                          </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:SIEnabled data-binding="const.True">
+                          <ui:SIButton class="buttons-controls-pc-default--active-true">
+                            <ui:VisualElement class="ui-concepts-chevron-right_small"/>
+                          </ui:SIButton>
+                        </ui:SIEnabled>
+                      </ui:VisualElement>
+                    </ui:SIEnabled>
+                  </ui:VisualElement>
+                </ui:BindingVariables>
+              </ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal flex-grow-class">
+                <ui:SIText class="body-small-12px-regular margin-right-global-gap-small global-text-secondary" text-binding="playersalary.MinimumSalaryCapImpactString"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal flex-grow-class margin-top-global-gap-regular margin-bottom-global-gap-regular">
+                <ui:VisualElement class="margin-right-global-gap-extra-large">
+                  <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="body-regular-14px-regular" text-binding="team.club.CurrentSalaryCapString"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="margin-right-global-gap-extra-large">
+                  <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="body-regular-14px-regular" text-binding="Team.Club.CurrentSalaryCapString"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="body-regular-14px-regular" text-binding="Team.Club.RemainingSalaryCapSpaceString"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:SIText class="body-small-12px-regular global-text-secondary" text-binding="playersalary.SalaryCapAdjustmentConfirmationString"/>
+            <ui:VisualElement class="row-direction-normal margin-top-global-gap-regular">
+              <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-label"/>
+              <ui:SIEnabled data-binding="playersalary.SalaryCapAdjustmentCanEditCapImpact">
+                <ui:TemplateContainer template="button-primary-leading-icon-label"/>
+              </ui:SIEnabled>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

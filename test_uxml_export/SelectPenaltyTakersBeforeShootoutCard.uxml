@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingVariables>
+      <ui:BindingRemapper binding-mappings="team=match.MatchHumanTeam;tactic=match.Tactic;setpiece=tactic.SetPiece">
+        <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTemplate"/>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

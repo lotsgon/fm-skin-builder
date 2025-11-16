@@ -1,0 +1,23 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement class="sicard padding-right-global-padding-large padding-left-global-padding-large">
+      <ui:VisualElement class="card-header">
+        <ui:SIAspectRatioFitter>
+          <ui:SIButton class="sibutton close-button"/>
+        </ui:SIAspectRatioFitter>
+        <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+      </ui:VisualElement>
+      <ui:SIVisible data-binding="game.Search.SearchIsFinished">
+        <ui:TemplateContainer template="LoadingAnimation"/>
+      </ui:SIVisible>
+      <ui:SIVisible data-binding="game.Search.SearchIsFinished">
+        <ui:SIRadioGroup class="horizontal-radio-group" selection-binding="type"/>
+        <ui:VisualElement class="row-direction-normal margin-right-global-gap-extra-small margin-left-global-gap-extra-small padding-right-global-padding-extra-small padding-left-global-padding-extra-small">
+          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+        </ui:VisualElement>
+        <ui:StreamedObjectList data-binding="game.Search.Results"/>
+      </ui:SIVisible>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

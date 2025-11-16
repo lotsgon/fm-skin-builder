@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class">
+    <ui:VisualElement class="main-header-height"/>
+    <ui:BaseCardTemplateImpl class="flex-grow-class align-self-stretch-class">
+      <ui:BindingRemapper class="global-search-quick-results-panel" binding-mappings="stringtype=game.Search.Name;person=human;team=human.Team;messages=human.HumanPortalFilteredMessages;player=human.Team.Club.KeyPlayer;continent=human.Team.Club.DisplayNation.Continent;isplayerrecruitment=const.True;club=human.Team.Club;comp=human.Team.Division;nation=human.Team.Nation;teamcontainer=human.Team.TeamContainer;results=game.Search.Results;people=game.Search.PersonList;clubs=game.Search.Clubs;nations=game.Search.Nations;competitions=game.Search.Competitions;awards=game.Search.AwardList;stadiums=game.Search.Stadiums;continents=game.search.Continents">
+        <ui:BindingSetter class="flex-grow-class">
+          <ui:VisualElement class="row-direction-normal flex-no-shrink-class margin-bottom-global-gap-large">
+            <ui:SIVisible data-binding="config.ShowPhonePanels">
+              <ui:TemplateContainer class="margin-right-16" template="buttons-controls-close-default"/>
+            </ui:SIVisible>
+            <ui:SearchBox class="global-search-edit-box flex-grow-class">
+              <ui:SIVisible class="row-direction-normal align-items-center global-search-buttons-panel" data-binding="[VisualFunction]">
+                <ui:TemplateContainer class="global-search-card-close-button margin-right-global-gap-small" template="buttons-controls-close-default"/>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:TemplateContainer template="button-primary-label"/>
+                </ui:SIVisible>
+              </ui:SIVisible>
+            </ui:SearchBox>
+          </ui:VisualElement>
+          <ui:ContextShortcutsElement class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small flex-grow-class"/>
+          <ui:TemplateContainer template="GlobalSearchQuickResultsPanel"/>
+        </ui:BindingSetter>
+      </ui:BindingRemapper>
+    </ui:BaseCardTemplateImpl>
+  </ui:BindingRoot>
+</ui:UXML>

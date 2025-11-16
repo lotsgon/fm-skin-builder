@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables>
+      <ui:BindingRemapper binding-mappings="team=human.team">
+        <ui:BindingSetter>
+          <ui:SIVisible data-binding="app.LastSave">
+            <ui:EventTrigger/>
+          </ui:SIVisible>
+          <ui:SISafeAreaElement>
+            <ui:VisualElement class="base-layer-content">
+              <ui:MultiGridLayoutElement class="dashboard-grid-layout"/>
+            </ui:VisualElement>
+            <ui:SIVisible data-binding="Human.HumanCurrentPivotalMoment">
+              <ui:EventTrigger/>
+            </ui:SIVisible>
+          </ui:SISafeAreaElement>
+        </ui:BindingSetter>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

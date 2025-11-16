@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:BindingVariables>
+      <ui:SISafeAreaElement class="ios-header-container">
+        <ui:VisualElement class="ios-navigation-cards-and-interaction-header-property-1-basic si-card-title-bar">
+          <ui:VisualElement class="si-card-title-bar row-direction-normal margin-left-global-gap-regular margin-right-global-gap-regular">
+            <ui:SIEnabled class="row-direction-normal" data-binding="const.True">
+              <ui:TemplateContainer class="margin-right-global-gap-regular ios-close-button" template="buttons-controls-close-default"/>
+              <ui:TemplateContainer class="ios-back-button" template="buttons-controls-back-default"/>
+            </ui:SIEnabled>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIVisible class="justify-content-center" data-binding="[VisualFunction]">
+                <ui:BindableSwitchElement data-binding="newsitem">
+                  <ui:TemplateContainer template="buttons-ios-interactions"/>
+                  <ui:TemplateContainer template="buttons-ios-interactions"/>
+                </ui:BindableSwitchElement>
+              </ui:SIVisible>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:SISafeAreaElement>
+    </ui:BindingVariables>
+  </ui:BindingExpect>
+</ui:UXML>

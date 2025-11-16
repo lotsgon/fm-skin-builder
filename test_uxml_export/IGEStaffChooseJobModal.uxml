@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:VisualElement class="card-notifications-modal-dialog-quit-without-saving">
+      <ui:VisualElement class="notifications--notifications-modal-dialog-default-default">
+        <ui:VisualElement>
+          <ui:VisualElement>
+            <ui:SIText class="heading-small-16px text-middle-center" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="notifications--notifications-modal-dialog-dropdown-menu-default">
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIDropdown class="buttons-dropdown-icon-base-default">
+                <ui:VisualElement class="ui-concepts-tick_small"/>
+                <ui:SIText class="button-regular content-no-wrap content-ellipsis margin-right-global-gap-regular"/>
+                <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                <ui:VisualElement class="ui-concepts-add-to-list_small"/>
+                <ui:VisualElement class="ui-concepts-chevron-down_small"/>
+              </ui:SIDropdown>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:VisualElement class="notifications-modal-dialog-actions-default-type-confirm row-direction-inverted">
+            <ui:TemplateContainer class="margin-right-global-gap-regular" template="buttons-button-secondary-default"/>
+            <ui:TemplateContainer class="margin-right-global-gap-regular" template="buttons-button-primary-default"/>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

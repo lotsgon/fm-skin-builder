@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:SIVisible data-binding="config.ShowPrerenderedEnvironmentBackground">
+      <ui:SIRenderTextureImage class="siimage padding-right-global-padding-none padding-left-global-padding-none"/>
+    </ui:SIVisible>
+    <ui:SIVisible data-binding="config.ShowPrerenderedEnvironmentBackground">
+      <ui:SIRenderTextureImage class="siimage padding-right-global-padding-none padding-left-global-padding-none"/>
+    </ui:SIVisible>
+    <ui:SIRenderTextureImage class="siimage padding-right-global-padding-none padding-left-global-padding-none"/>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,59 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:SIVisible data-binding="[VisualFunction]">
+      <ui:VisualElement class="si-card-title-bar-header margin-top-global-gap-small margin-bottom-global-gap-small">
+        <ui:VisualElement class="row-direction-normal">
+          <ui:BindableSwitchElement class="row-direction-normal" data-binding="const.false">
+            <ui:StreamedObjectList data-binding="[VisualFunction]"/>
+            <ui:SIText class="align-self-center-class body-small-12px-regular"/>
+          </ui:BindableSwitchElement>
+        </ui:VisualElement>
+        <ui:SIVisible class="align-self-stretch-class" data-binding="const.False">
+          <ui:SIButton class="body-small-12px-regular content-ellipsis content-no-wrap content-ellipsis data_display-cell-standard-regular--type-standard no-margin margin-left-global-gap-large margin-right-global-gap-large height-auto flex-grow-class">
+            <ui:VisualElement class="ui-concepts-more-info_small"/>
+            <ui:SIText class="body-regular-14px-regular margin-left-global-gap-small"/>
+          </ui:SIButton>
+        </ui:SIVisible>
+        <ui:SIVisible data-binding="[VisualFunction]">
+          <ui:DynamicItem class="margin-right-global-gap-regular"/>
+        </ui:SIVisible>
+        <ui:DynamicItem class="game-creation-dynamic-step-flex-grow row-direction-normal"/>
+        <ui:BindingVariables class="align-self-stretch-class">
+          <ui:SIVisible class="flex-grow-class" data-binding="shownewscell">
+            <ui:VisualElement class="flex-grow-class">
+              <ui:SIButton class="data_display-cell-standard-regular--type-standard no-padding no-margin height-auto flex-grow-class">
+                <ui:VisualElement class="ui-concepts-placeholder-size-small"/>
+                <ui:SIText class="body-regular-14px-regular content-no-wrap content-left-align content-ellipsis global-text-primary margin-left-global-gap-small margin-right-global-gap-small sitext-hover-cursor" text-binding="[VisualFunction]"/>
+              </ui:SIButton>
+            </ui:VisualElement>
+          </ui:SIVisible>
+        </ui:BindingVariables>
+        <ui:BindingVariables class="margin-right-global-gap-large margin-left-global-gap-large align-self-stretch-class">
+          <ui:SIVisible class="flex-grow-class" data-binding="showResponsibilitiesCell">
+            <ui:SIButton class="data_display-cell-standard-regular--type-standard no-margin height-auto flex-grow-class">
+              <ui:VisualElement class="game-concepts-responsibilites_small"/>
+              <ui:SIVisible data-binding="const.False">
+                <ui:SIText class="body-regular-14px-regular content-no-wrap content-left-align content-ellipsis margin-left-global-gap-small sitext-hover-cursor global-text-primary" text-binding="[VisualFunction]"/>
+              </ui:SIVisible>
+            </ui:SIButton>
+          </ui:SIVisible>
+        </ui:BindingVariables>
+        <ui:SIVisible data-binding="[VisualFunction]">
+          <ui:TemplateContainer class="margin-right-global-gap-regular" template="IGETitleBarButton"/>
+        </ui:SIVisible>
+        <ui:SIVisible class="margin-right-global-gap-small" data-binding="panelhistory.CanGoBackOnCardLayer">
+          <ui:SIAspectRatioFitter>
+            <ui:SIButton class="buttons-controls-pc-default--active-true">
+              <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+            </ui:SIButton>
+          </ui:SIAspectRatioFitter>
+        </ui:SIVisible>
+        <ui:SIVisible data-binding="const.True">
+          <ui:SIEnabled class="flex-grow-class" data-binding="const.True">
+            <ui:TemplateContainer class="flex-grow-class header-close-button" template="buttons-controls-close-default"/>
+          </ui:SIEnabled>
+        </ui:SIVisible>
+      </ui:VisualElement>
+    </ui:SIVisible>
+  </ui:BindingExpect>
+</ui:UXML>

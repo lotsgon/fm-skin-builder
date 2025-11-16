@@ -1,0 +1,118 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables>
+      <ui:TemplateContainer template="ModalSheetTemplate">
+        <ui:SIScrollView>
+          <ui:VisualElement>
+            <ui:VisualElement class="margin-right-global-gap-none margin-left-global-gap-none">
+              <ui:VisualElement>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:VisualElement class="margin-right-global-gap-huge">
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="body-regular-14px-regular global-text-primary" text-binding="SetupGame.SelectedNation.Name"/>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="margin-right-global-gap-huge">
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="body-regular-14px-regular global-text-primary" text-binding="[VisualFunction]"/>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="margin-right-global-gap-huge">
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIStepper class="data_display-graphs-stepper-step_bar football_importance_stepper"/>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:VisualElement class="ui-concepts-more-info_large margin-right-global-gap-regular"/>
+                  <ui:SIText class="body-regular-14px-regular global-text-primary" text-binding="SetupGame.SelectedNation.FootballImpactDescription"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:ButtonGroup class="row-direction-normal align-self-center-class flex-grow-class" current-selected-id-binding="gender">
+              <ui:VisualElement>
+                <ui:SIButton class="ios-navigation-tab-property-1-default">
+                  <ui:SIImage/>
+                  <ui:SIText class="body-small-12px-regular buttons-text-default" text-binding="[VisualFunction]"/>
+                </ui:SIButton>
+              </ui:VisualElement>
+              <ui:BindingVariables>
+                <ui:SIEnabled data-binding="[VisualFunction]">
+                  <ui:VisualElement>
+                    <ui:SIButton class="ios-navigation-tab-property-1-default">
+                      <ui:SIImage/>
+                      <ui:SIText class="body-small-12px-regular buttons-text-default" text-binding="[VisualFunction]"/>
+                    </ui:SIButton>
+                  </ui:VisualElement>
+                </ui:SIEnabled>
+              </ui:BindingVariables>
+            </ui:ButtonGroup>
+            <ui:TabGroup>
+              <ui:ButtonGroup class="row-direction-normal flex-grow-class align-self-center-class">
+                <ui:SIButton>
+                  <ui:SIText class="body-small-12px-regular buttons-text-default" text-binding="[VisualFunction]"/>
+                </ui:SIButton>
+                <ui:SIButton>
+                  <ui:SIText class="body-small-12px-regular buttons-text-default" text-binding="[VisualFunction]"/>
+                </ui:SIButton>
+                <ui:SIButton>
+                  <ui:SIText class="body-small-12px-regular buttons-text-default" text-binding="[VisualFunction]"/>
+                </ui:SIButton>
+              </ui:ButtonGroup>
+              <ui:SwitchElement>
+                <ui:VisualElement>
+                  <ui:VisualElement>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIText class="body-small-12px-bold global-text-secondary margin-right-global-gap-regular" text-binding="[VisualFunction]"/>
+                        <ui:BindingVariables>
+                          <ui:VisualElement class="row-direction-normal">
+                            <ui:VisualElement class="row-direction-normal margin-right-global-gap-extra-large">
+                              <ui:SIRadialGauge class="sisegemntedradialgauge"/>
+                              <ui:SIText class="body-small-12px-regular global-text-secondary margin-left-global-gap-small" text-binding="[VisualFunction]"/>
+                            </ui:VisualElement>
+                            <ui:SIText class="body-small-12px-bold global-text-secondary margin-right-global-gap-extra-large"/>
+                            <ui:VisualElement class="row-direction-normal">
+                              <ui:SIRadialGauge class="sisegemntedradialgauge"/>
+                              <ui:SIText class="body-small-12px-regular global-text-secondary margin-left-global-gap-small" text-binding="[VisualFunction]"/>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                        </ui:BindingVariables>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:StreamedObjectList data-binding="SetupGame.SelectedNation.PlayableLeagues"/>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:VisualElement class="margin-right-global-gap-regular"/>
+                    <ui:SIText class="heading-small-16px global-text-primary" text-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                  <ui:StreamedObjectList data-binding="SetupGame.SelectedNation.Competitions"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:VisualElement class="margin-right-global-gap-regular"/>
+                    <ui:SIText class="heading-small-16px global-text-primary" text-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                  <ui:BindingVariables>
+                    <ui:StreamedObjectList data-binding="[VisualFunction]"/>
+                  </ui:BindingVariables>
+                </ui:VisualElement>
+              </ui:SwitchElement>
+            </ui:TabGroup>
+          </ui:VisualElement>
+        </ui:SIScrollView>
+      </ui:TemplateContainer>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

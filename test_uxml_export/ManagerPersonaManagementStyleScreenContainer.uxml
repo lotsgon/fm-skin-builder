@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindableSwitchElement class="flex-grow-class" data-binding="[VisualFunction]">
+      <ui:VisualElement/>
+      <ui:VisualElement class="flex-grow-class">
+        <ui:TemplateContainer class="flex-grow-class" template="ManagerPersonaManagementStyleScreen_MinRes"/>
+      </ui:VisualElement>
+      <ui:VisualElement class="flex-grow-class">
+        <ui:TemplateContainer class="flex-grow-class" template="ManagerPersonaManagementStyleScreen"/>
+      </ui:VisualElement>
+      <ui:VisualElement class="flex-grow-class">
+        <ui:TemplateContainer class="flex-grow-class" template="ManagerPersonaManagementStyleScreen"/>
+      </ui:VisualElement>
+      <ui:VisualElement class="flex-grow-class"/>
+      <ui:VisualElement class="flex-grow-class"/>
+    </ui:BindableSwitchElement>
+  </ui:BindingRoot>
+</ui:UXML>

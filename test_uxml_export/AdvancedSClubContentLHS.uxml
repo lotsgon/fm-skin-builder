@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement class="lt-add-new-manager-choose-club-confirmation base-template-grow">
+    <ui:VisualElement class="row-direction-normal margin-bottom-8">
+      <ui:SIButton class="no-margin buttons-button-base-default">
+        <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-right-global-gap-regular" text-binding="[VisualFunction]"/>
+        <ui:VisualElement class="game-concepts-random"/>
+      </ui:SIButton>
+    </ui:VisualElement>
+    <ui:VisualElement class="margin-bottom-8">
+      <ui:VisualElement>
+        <ui:SIDropdown class=" flex-grow-class buttons-dropdown-base-regular">
+          <ui:VisualElement class="row-direction-normal flex-grow-class">
+            <ui:TemplateContainer template="CompIconAndTextNoBorderCell"/>
+            <ui:VisualElement class="ui-concepts-chevron-down_small"/>
+          </ui:VisualElement>
+        </ui:SIDropdown>
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement class="row-direction-normal base-template-grow">
+      <ui:SIScrollView class="flex-grow-class">
+        <ui:StreamedTable data-binding="comp.ManageableTeamList"/>
+      </ui:SIScrollView>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</ui:UXML>

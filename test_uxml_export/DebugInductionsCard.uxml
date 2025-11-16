@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="human=game.GameCurrentManager;newsitem=Human.HumanPortalMessage;speakto=newsitem.Induction.SpeakTo">
+      <ui:VisualElement>
+        <ui:SIAspectRatioFitter class="row-direction-normal">
+          <ui:TemplateContainer template="SpeakToSidePanel"/>
+          <ui:VisualElement>
+            <ui:VisualElement class="row-direction-normal margin-right-global-gap-large margin-left-global-gap-large">
+              <ui:SIAspectRatioFitter>
+                <ui:SIButton class="sibutton margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none"/>
+              </ui:SIAspectRatioFitter>
+              <ui:SIText class="sitile__title white"/>
+            </ui:VisualElement>
+            <ui:DebugBindingElement/>
+          </ui:VisualElement>
+        </ui:SIAspectRatioFitter>
+      </ui:VisualElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,37 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="margin-right-global-gap-small margin-left-global-gap-extra-small">
+    <ui:BindingVariables>
+      <ui:VisualElement class="layout-card-and-interaction-default-default-columns-6">
+        <ui:VisualElement>
+          <ui:TemplateContainer template="reports-header-navigation-default-type-menu-header"/>
+          <ui:VisualElement>
+            <ui:VisualElement class="card-states-card-states-preferences">
+              <ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIScrollView>
+                    <ui:TemplateContainer template="OnlinePreferencesSettingsFrame"/>
+                  </ui:SIScrollView>
+                </ui:VisualElement>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:SIButton class="buttons-button-base-default">
+                    <ui:VisualElement class="ui-concepts-more-info_small"/>
+                    <ui:SIText class="button-regular content-no-wrap content-ellipsis margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+                    <ui:VisualElement class="ui-concepts-add-to-list_small"/>
+                    <ui:VisualElement class="ui-concepts-chevron-down_small"/>
+                  </ui:SIButton>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:TemplateContainer template="button-secondary-label"/>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-label"/>
+                      <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-primary-label"/>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

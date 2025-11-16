@@ -1,0 +1,27 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="margin-right-global-gap-small margin-left-global-gap-extra-small">
+    <ui:BindingVariables>
+      <ui:VisualElement class="layout-card-and-interaction-default-default-columns-6">
+        <ui:VisualElement>
+          <ui:TemplateContainer template="reports-header-navigation-default-type-menu-header"/>
+          <ui:VisualElement>
+            <ui:VisualElement class="card-states-card-states-preferences">
+              <ui:VisualElement>
+                <ui:TemplateContainer template="ShortcutsPreferencesBlock"/>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:TemplateContainer template="button-secondary-label"/>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-label"/>
+                      <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-primary-label"/>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,125 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="components-persona-bg base-template-grow">
+    <ui:BindingVariables class="row-direction-normal flex-grow-class">
+      <ui:VisualElement class="flex-grow-class">
+        <ui:VisualElement class="ios-generic-background flex-grow-class"/>
+        <ui:BindableSwitchElement class="flex-grow-class" data-binding="[VisualFunction]">
+          <ui:VisualElement class="flex-grow-class"/>
+          <ui:VisualElement class="flex-grow-class">
+            <ui:TemplateContainer class="flex-grow-class manager-selection-padding-32" template="GameCreationManagerSelectionBlock"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="flex-grow-class">
+            <ui:TemplateContainer class="flex-grow-class manager-selection-padding-48" template="GameCreationManagerSelectionBlock"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="flex-grow-class">
+            <ui:TemplateContainer class="flex-grow-class manager-selection-padding-48" template="GameCreationManagerSelectionBlock"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="flex-grow-class"/>
+          <ui:VisualElement class="flex-grow-class">
+            <ui:SISafeAreaElement class="flex-grow-class">
+              <ui:TemplateContainer template="GameCreationManagerSelectionCompactBlock"/>
+            </ui:SISafeAreaElement>
+          </ui:VisualElement>
+        </ui:BindableSwitchElement>
+        <ui:VisualElement class="flex-no-shrink-class">
+          <ui:BindingRemapper binding-mappings="TotalSelections=const.Zero;Selected=const.Zero;MandatoryFields=const.False">
+            <ui:BindableSwitchElement data-binding="config.ShowPhonePanels">
+              <ui:VisualElement>
+                <ui:VisualElement class="biography-navigation-buttons row-direction-normal">
+                  <ui:VisualElement>
+                    <ui:SIVisible data-binding="onlyEdit">
+                      <ui:BindableSwitchElement data-binding="isQuickStart">
+                        <ui:TemplateContainer template="button-secondary-leading-icon-label"/>
+                        <ui:TemplateContainer template="button-secondary-leading-icon-label"/>
+                      </ui:BindableSwitchElement>
+                    </ui:SIVisible>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:TemplateContainer template="GamePreferencesButton"/>
+                    <ui:SIVisible data-binding="app.GameStarted">
+                      <ui:TemplateContainer class="margin-right-8" template="button-secondary-leading-icon-label"/>
+                    </ui:SIVisible>
+                    <ui:BindableSwitchElement data-binding="app.GameStarted">
+                      <ui:VisualElement>
+                        <ui:SIVisible data-binding="[VisualFunction]">
+                          <ui:BindableSwitchElement data-binding="onlyEdit">
+                            <ui:BindableSwitchElement data-binding="updateCharacterSettings">
+                              <ui:TemplateContainer template="button-primary-trailing-icon-label"/>
+                              <ui:BindableSwitchElement data-binding="editsession">
+                                <ui:TemplateContainer template="button-primary-trailing-icon-label"/>
+                                <ui:TemplateContainer template="button-primary-trailing-icon-label"/>
+                              </ui:BindableSwitchElement>
+                            </ui:BindableSwitchElement>
+                            <ui:VisualElement class="row-direction-normal">
+                              <ui:TemplateContainer template="button-primary-trailing-icon-label"/>
+                            </ui:VisualElement>
+                          </ui:BindableSwitchElement>
+                        </ui:SIVisible>
+                      </ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:SIVisible data-binding="[VisualFunction]">
+                          <ui:VisualElement class="row-direction-normal justify-content-end">
+                            <ui:TemplateContainer template="button-primary-trailing-icon-label"/>
+                          </ui:VisualElement>
+                        </ui:SIVisible>
+                      </ui:VisualElement>
+                    </ui:BindableSwitchElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:SISafeAreaElement class="row-direction-normal manager-creation-bottom-bar-phone">
+                <ui:VisualElement class="flex-grow-class">
+                  <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                    <ui:VisualElement>
+                      <ui:VisualElement class="biography-navigation-buttons row-direction-normal">
+                        <ui:VisualElement>
+                          <ui:TemplateContainer template="button-secondary-trailing-icon-label"/>
+                        </ui:VisualElement>
+                        <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                          <ui:VisualElement class="row-direction-normal">
+                            <ui:SIVisible class="margin-right-global-gap-regular" data-binding="[VisualFunction]">
+                              <ui:VisualElement>
+                                <ui:SIButton class="buttons-button-secondary-default no-margin">
+                                  <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                                </ui:SIButton>
+                              </ui:VisualElement>
+                            </ui:SIVisible>
+                            <ui:BindableSwitchElement data-binding="editsession">
+                              <ui:SIButton class="buttons-button-primary-default">
+                                <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                                <ui:VisualElement class="ui-concepts-chevron-right_small margin-left-8"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="buttons-button-primary-default">
+                                <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                                <ui:VisualElement class="ui-concepts-chevron-right_small margin-left-8"/>
+                              </ui:SIButton>
+                            </ui:BindableSwitchElement>
+                          </ui:VisualElement>
+                          <ui:SIVisible data-binding="[VisualFunction]">
+                            <ui:VisualElement>
+                              <ui:TemplateContainer template="button-primary-trailing-icon-label"/>
+                            </ui:VisualElement>
+                          </ui:SIVisible>
+                        </ui:BindableSwitchElement>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:BindableSwitchElement data-binding="app.GameStarted">
+                      <ui:VisualElement class="align-self-start row-direction-normal align-self-stretch-class justify-content-space-between">
+                        <ui:TemplateContainer template="button-secondary-leading-icon-label"/>
+                        <ui:TemplateContainer template="button-primary-trailing-icon-label"/>
+                      </ui:VisualElement>
+                      <ui:BindableSwitchElement data-binding="game.GameAddManager">
+                        <ui:TemplateContainer template="ManagerCreationNavButtons"/>
+                        <ui:TemplateContainer template="ManagerCreationNavButtons"/>
+                      </ui:BindableSwitchElement>
+                    </ui:BindableSwitchElement>
+                  </ui:BindableSwitchElement>
+                </ui:VisualElement>
+              </ui:SISafeAreaElement>
+            </ui:BindableSwitchElement>
+          </ui:BindingRemapper>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

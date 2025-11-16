@@ -1,0 +1,44 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BaseCardTemplateImpl>
+      <ui:VisualElement>
+        <ui:VisualElement class="layout-card-default-default">
+          <ui:VisualElement class="figma-base-card-template-inner-frame">
+            <ui:SISafeAreaElement>
+              <ui:SIGradient class="border-radius-global-border border-color-global-border-color border-width-global-border-regular">
+                <ui:VisualElement>
+                  <ui:BindableSwitchElement data-binding="config.ShowPhonePanels">
+                    <ui:VisualElement class="row-direction-normal margin-right-global-gap-regular margin-left-global-gap-regular">
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIEnabled data-binding="fmpedia.HasBackHistory">
+                          <ui:VisualElement>
+                            <ui:SIButton class="buttons-controls-pc-default--active-true">
+                              <ui:VisualElement class="ui-concepts-size-small ui-concepts-chevron-left_small"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                        </ui:SIEnabled>
+                        <ui:SIEnabled data-binding="fmpedia.HasForwardHistory">
+                          <ui:VisualElement>
+                            <ui:SIButton class="buttons-controls-pc-default--active-true">
+                              <ui:VisualElement class="ui-concepts-size-small ui-concepts-chevron-right_small"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                        </ui:SIEnabled>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal"/>
+                      <ui:TemplateContainer class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small" template="buttons-controls-close-default"/>
+                    </ui:VisualElement>
+                    <ui:TemplateContainer template="FMpediaCardHeader-phone"/>
+                  </ui:BindableSwitchElement>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:ScalableBindableGridLayoutElement/>
+                </ui:VisualElement>
+              </ui:SIGradient>
+            </ui:SISafeAreaElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BaseCardTemplateImpl>
+  </ui:BindingRoot>
+</ui:UXML>

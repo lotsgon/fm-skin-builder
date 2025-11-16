@@ -1,0 +1,174 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="main-navigation-overview-container">
+    <ui:BindingVariables class="base-template-grow">
+      <ui:BindingSetter class="base-template-grow row-direction-normal main-header-height">
+        <ui:VisualElement class="navigation-header-gradient">
+          <ui:SIVisible data-binding="human.team.IsClub">
+            <ui:SIStyleSetter>
+              <ui:SIGradient/>
+            </ui:SIStyleSetter>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="human.team.IsClub">
+            <ui:SIStyleSetter>
+              <ui:SIGradient/>
+            </ui:SIStyleSetter>
+          </ui:SIVisible>
+        </ui:VisualElement>
+        <ui:VisualElement class="title-bar-logo-area">
+          <ui:BindingRemapper class="row-direction-normal" binding-mappings="person=human">
+            <ui:BindableSwitchElement data-binding="[VisualFunction]">
+              <ui:VisualElement class="base-template-grow">
+                <ui:SIVisible data-binding="human.team.IsClub">
+                  <ui:VisualElement class="clubcolours-border"/>
+                  <ui:SIStyleSetter class="navigation-core-clubname-kit">
+                    <ui:SIImage class="fm-club-primary-color"/>
+                    <ui:SIImage class="fm-club-secondary-color"/>
+                  </ui:SIStyleSetter>
+                </ui:SIVisible>
+                <ui:SIVisible data-binding="human.team.IsClub">
+                  <ui:VisualElement class="clubcolours-border"/>
+                  <ui:SIStyleSetter class="navigation-core-clubname-kit">
+                    <ui:SIImage class="fm-club-primary-color"/>
+                    <ui:SIImage class="fm-club-secondary-color"/>
+                  </ui:SIStyleSetter>
+                </ui:SIVisible>
+              </ui:VisualElement>
+              <ui:VisualElement/>
+            </ui:BindableSwitchElement>
+            <ui:BindingExpect class="row-direction-normal margin-right-global-gap-regular margin-left-global-gap-regular">
+              <ui:TemplateContainer class="main-navigation-button margin-right-global-gap-small" template="buttons-controls-back-default"/>
+              <ui:TemplateContainer class="main-navigation-button" template="buttons-controls-forward-default"/>
+            </ui:BindingExpect>
+            <ui:BindingSetter class="padding-left-global-padding-regular padding-right-global-padding-regular">
+              <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                <ui:VisualElement class="base-template-grow">
+                  <ui:SIVisible data-binding="human.team.IsClub">
+                    <ui:BindingRemapper binding-mappings="nation=human.team.Nation">
+                      <ui:SIStyleSetter>
+                        <ui:TemplateContainer template="NationIcon"/>
+                      </ui:SIStyleSetter>
+                    </ui:BindingRemapper>
+                  </ui:SIVisible>
+                  <ui:SIVisible data-binding="human.team.IsClub">
+                    <ui:BindingRemapper binding-mappings="club=human.team.Club">
+                      <ui:SIStyleSetter>
+                        <ui:TemplateContainer template="ClubIcon"/>
+                      </ui:SIStyleSetter>
+                    </ui:BindingRemapper>
+                  </ui:SIVisible>
+                </ui:VisualElement>
+                <ui:VisualElement class="base-template-grow">
+                  <ui:SIStyleSetter>
+                    <ui:TemplateContainer template="thumbnails-alt-person-picture"/>
+                  </ui:SIStyleSetter>
+                </ui:VisualElement>
+              </ui:BindableSwitchElement>
+              <ui:SIVisible data-binding="human.HasBothClubAndNationJobs">
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:SIButton class="primary-text-colour margin-right-global-gap-small margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none"/>
+                  <ui:SIButton class="primary-text-colour margin-right-global-gap-none margin-left-global-gap-small padding-right-global-padding-none padding-left-global-padding-none"/>
+                </ui:VisualElement>
+              </ui:SIVisible>
+            </ui:BindingSetter>
+            <ui:BindingRemapper binding-mappings="team=human.Team">
+              <ui:ContextShortcutsElement class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small"/>
+            </ui:BindingRemapper>
+          </ui:BindingRemapper>
+        </ui:VisualElement>
+        <ui:SIVisible>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:SIVisible data-binding="[VisualFunction]">
+              <ui:TemplateContainer class="margin-right-global-gap-extra-extra-large" template="dashboard-hud-location-default"/>
+            </ui:SIVisible>
+            <ui:SIVisible data-binding="[VisualFunction]">
+              <ui:TemplateContainer template="dashboard-hud-location-default"/>
+            </ui:SIVisible>
+            <ui:TemplateContainer class="fmc-hidden" template="layout-divider-solid-vertical"/>
+          </ui:VisualElement>
+        </ui:SIVisible>
+        <ui:BindingVariables class="flex-grow-class padding-right-global-padding-extra-large">
+          <ui:VisualElement class="row-direction-normal padding-right-global-padding-regular base-template-grow">
+            <ui:TutorialAnchorElement class="tutorial-anchor-offset-default-y">
+              <ui:TemplateContainer class="flex-grow-class" template="MenuBar"/>
+            </ui:TutorialAnchorElement>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement class="row-direction-normal align-items-center navigation-global-diagetic-container">
+                <ui:TutorialAnchorElement class="tutorial-anchor-offset-default-y">
+                  <ui:TemplateContainer class="navigation-global-diagetic-button leading-button-var" template="dashboard-hud-search-button"/>
+                </ui:TutorialAnchorElement>
+                <ui:TemplateContainer class="navigation-global-diagetic-vertical-line" template="layout-divider-solid-vertical"/>
+                <ui:SIVisible data-binding="const.IsFinal">
+                  <ui:SIButton class="navigation-global-diagetic-button">
+                    <ui:VisualElement class="ui-concepts-placeholder_small"/>
+                  </ui:SIButton>
+                </ui:SIVisible>
+                <ui:TutorialAnchorElement class="tutorial-anchor-offset-default-y">
+                  <ui:TemplateContainer class="row-direction-normal navigation-global-diagetic-button" template="dashboard-hud-fmpedia-button">
+                    <ui:TemplateContainer template="StandardTextTooltip"/>
+                  </ui:TemplateContainer>
+                </ui:TutorialAnchorElement>
+                <ui:SIDropdown class="tifo-dropdown-noborder navigation-global-diagetic-button">
+                  <ui:VisualElement class="ui-concepts-world-small"/>
+                  <ui:TemplateContainer template="StandardTextTooltip"/>
+                </ui:SIDropdown>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:BindingSetter>
+                    <ui:BindingRemapper binding-mappings="editorpanel=selectededitorcard;binding=selectededitdata">
+                      <ui:TemplateContainer class="navigation-global-diagetic-button" template="dashboard-hud-edit-button">
+                        <ui:TemplateContainer template="StandardTextTooltip"/>
+                      </ui:TemplateContainer>
+                    </ui:BindingRemapper>
+                  </ui:BindingSetter>
+                </ui:SIVisible>
+                <ui:TemplateContainer class="navigation-global-diagetic-vertical-line" template="layout-divider-solid-vertical"/>
+                <ui:TemplateContainer class="row-direction-normal navigation-global-diagetic-button trailing-button-var" template="dashboard-hud-fm-button">
+                  <ui:TemplateContainer template="StandardTextTooltip"/>
+                </ui:TemplateContainer>
+              </ui:VisualElement>
+              <ui:SIVisible class="row-direction-normal align-items-center" data-binding="config.ShowLargeMainHeaderClubBadge">
+                <ui:TemplateContainer class="margin-right-global-gap-regular row-direction-normal" template="layout-divider-solid-vertical"/>
+              </ui:SIVisible>
+              <ui:SIVisible class="row-direction-normal" data-binding="[VisualFunction]">
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:SIVisible data-binding="config.UseLowResolutionManagerSwitcher">
+                    <ui:TemplateContainer template="dashboard-hud-manager-dropdown-low-res"/>
+                  </ui:SIVisible>
+                  <ui:SIVisible data-binding="config.UseLowResolutionManagerSwitcher">
+                    <ui:TemplateContainer class="row-direction-normal" template="dashboard-hud-manager-dropdown"/>
+                  </ui:SIVisible>
+                </ui:VisualElement>
+              </ui:SIVisible>
+              <ui:TutorialAnchorElement>
+                <ui:TemplateContainer class="margin-right-global-gap-regular" template="CurrentDayWidget"/>
+              </ui:TutorialAnchorElement>
+              <ui:TutorialAnchorElement class="tutorial-anchor-offset-default-y">
+                <ui:TemplateContainer template="dashboard-hud-continue_button-default"/>
+              </ui:TutorialAnchorElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal padding-right-global-padding-regular main-nav-secondary-bar margin-top-global-gap-small">
+            <ui:ContextShortcutsElement>
+              <ui:NavigationFocusser>
+                <ui:StreamedObjectList class="main-nav-secondary-bar" data-binding="[VisualFunction]"/>
+              </ui:NavigationFocusser>
+            </ui:ContextShortcutsElement>
+            <ui:TemplateContainer class="main-nav-more-button" template="SecondaryTabsMoreButton"/>
+            <ui:VisualElement class="row-direction-normal flex-grow-class">
+              <ui:SIText class="body-regular-14px-regular secondary-text-colour margin-right-global-gap-regular" text-binding="[VisualFunction]"/>
+              <ui:SIFloatingPopupWidget class="ui-concepts-chevron-down_small margin-right-global-gap-regular popupwidget-hover"/>
+              <ui:ContextShortcutsElement>
+                <ui:NavigationFocusser>
+                  <ui:BindingSetter>
+                    <ui:SIStyleSetter>
+                      <ui:StreamedObjectList data-binding="[VisualFunction]"/>
+                    </ui:SIStyleSetter>
+                  </ui:BindingSetter>
+                </ui:NavigationFocusser>
+              </ui:ContextShortcutsElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:BindingVariables>
+      </ui:BindingSetter>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

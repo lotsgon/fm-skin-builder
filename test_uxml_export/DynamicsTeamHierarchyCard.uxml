@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindableSwitchElement data-binding="config.ShowPhonePanels">
+      <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTemplate"/>
+      <ui:TemplateContainer class="base-template-grow" template="FigmaFullscreenBlockTemplate">
+        <ui:TemplateContainer template="DynamicsTeamHierarchyCardCompactBlock"/>
+      </ui:TemplateContainer>
+    </ui:BindableSwitchElement>
+  </ui:BindingRoot>
+</ui:UXML>

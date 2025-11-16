@@ -1,0 +1,132 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:SIVisible data-binding="[VisualFunction]">
+    <ui:VisualElement class="margin-bottom-global-gap-extra-large">
+      <ui:SIText class="heading-large-22px margin-bottom-global-gap-regular margin-bottom-8 global-text-primary" text-binding="[VisualFunction]"/>
+      <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+    </ui:VisualElement>
+    <ui:VisualElement class="row-direction-normal">
+      <ui:BindingRemapper binding-mappings="gender=genderS">
+        <ui:SIDropdown>
+          <ui:VisualElement class="row-direction-normal padding-right-global-padding-large padding-left-global-padding-large">
+            <ui:SIVisible data-binding="[VisualFunction]">
+              <ui:SIText class="button-regular global-text-primary" text-binding="[VisualFunction]"/>
+            </ui:SIVisible>
+            <ui:SIVisible data-binding="[VisualFunction]">
+              <ui:BindingRemapper binding-mappings="item=SetupGame.SelectedComp">
+                <ui:TemplateContainer template="LeagueSelectionButtonMinResTemplate"/>
+              </ui:BindingRemapper>
+            </ui:SIVisible>
+            <ui:VisualElement class="ui-concepts-chevron-down_small margin-left-global-gap-regular"/>
+          </ui:VisualElement>
+        </ui:SIDropdown>
+      </ui:BindingRemapper>
+    </ui:VisualElement>
+    <ui:VisualElement class="margin-bottom-global-gap-extra-large game-creation-body-min-res">
+      <ui:SIGradient/>
+      <ui:VisualElement class="padding-right-global-padding-large padding-left-global-padding-large">
+        <ui:SIVisible data-binding="[VisualFunction]">
+          <ui:SIText class="button-regular global-text-primary" text-binding="[VisualFunction]"/>
+          <ui:VisualElement class="data_display-cell-standard-regular--type-standard">
+            <ui:VisualElement class="ui-concepts-more-info_small margin-right-global-gap-small"/>
+            <ui:SIText class="body-regular-14px-regular content-no-wrap content-left-align content-ellipsis margin-right-global-gap-small" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+        </ui:SIVisible>
+        <ui:SIVisible data-binding="[VisualFunction]">
+          <ui:BindingRemapper binding-mappings="competition=SetupGame.SelectedComp;gender=genderS;dbsummarycompetition=SetupGame.SelectedComp;reputation=setupgame.selectedcomp.ReputationScope;rating=setupgame.SelectedManager.Reputation">
+            <ui:SIGradient>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement>
+                  <ui:BindingRemapper class="row-direction-normal" binding-mappings="comp=setupgame.SelectedComp">
+                    <ui:TemplateContainer class="margin-right-global-gap-large" template="CompIcon"/>
+                    <ui:VisualElement>
+                      <ui:SIText class="global-text-primary heading-small-16px" text-binding="comp.Name"/>
+                    </ui:VisualElement>
+                  </ui:BindingRemapper>
+                </ui:VisualElement>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:VisualElement class="margin-right-32">
+                    <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+                    <ui:TemplateContainer template="LeagueReputationCell"/>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="margin-right-global-gap-extra-large">
+                    <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+                    <ui:TemplateContainer template="ManagerCreationReputationCell"/>
+                  </ui:VisualElement>
+                  <ui:TemplateContainer class="margin-right-global-gap-extra-large margin-left-global-gap-extra-large" template="layout-divider-solid-vertical"/>
+                  <ui:VisualElement class="data_display-cell-standard-regular--type-standard margin-left-global-gap-extra-large">
+                    <ui:VisualElement class="ui-concepts-more-info_small margin-right-global-gap-small"/>
+                    <ui:SIText class="body-regular-14px-regular content-no-wrap content-left-align content-ellipsis margin-right-global-gap-small" text-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:SIGradient>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement>
+                <ui:VisualElement class="margin-bottom-global-gap-extra-large">
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:VisualElement class="game-concepts-club-badge_small margin-right-global-gap-regular"/>
+                    <ui:SIText class="heading-small-16px" text-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                  <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                </ui:VisualElement>
+                <ui:SIScrollView>
+                  <ui:GridSelector class="no_margin no_padding non-selectable-list non-alternating-list"/>
+                  <ui:TemplateContainer template="layout-divider-solid-horizontal"/>
+                  <ui:VisualElement>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIImage class="margin-right-global-gap-regular" data-binding="[VisualFunction]"/>
+                      <ui:SIText class="global-text-primary heading-small-16px" text-binding="SetupGame.SelectedComp.Name"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:VisualElement>
+                        <ui:VisualElement class="margin-bottom-global-gap-extra-large">
+                          <ui:VisualElement class="row-direction-normal">
+                            <ui:VisualElement class="game-concepts-trophy_small margin-right-global-gap-regular"/>
+                            <ui:SIText class="heading-xsmall-14px global-text-primary" text-binding="[VisualFunction]"/>
+                          </ui:VisualElement>
+                          <ui:StreamedObjectList data-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement>
+                          <ui:BindingVariables>
+                            <ui:VisualElement class="row-direction-normal margin-bottom-global-gap-regular">
+                              <ui:VisualElement class="ui-concepts-person_small margin-right-global-gap-regular"/>
+                              <ui:SIText class="heading-xsmall-14px global-text-primary" text-binding="[VisualFunction]"/>
+                            </ui:VisualElement>
+                            <ui:StreamedObjectList data-binding="[VisualFunction]"/>
+                          </ui:BindingVariables>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                      <ui:TemplateContainer class="margin-right-global-gap-extra-large margin-left-global-gap-extra-large" template="layout-divider-solid-vertical"/>
+                      <ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal margin-bottom-global-gap-regular">
+                          <ui:VisualElement class="game-concepts-trophy_small margin-right-global-gap-regular"/>
+                          <ui:SIText class="heading-xsmall-14px global-text-primary" text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                        <ui:StreamedTable data-binding="[VisualFunction]"/>
+                      </ui:VisualElement>
+                      <ui:TemplateContainer class="margin-right-global-gap-extra-large margin-left-global-gap-extra-large" template="layout-divider-solid-vertical"/>
+                      <ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal margin-bottom-global-gap-regular">
+                          <ui:VisualElement class="game-concepts-rivalry_small margin-right-global-gap-regular"/>
+                          <ui:SIText class="heading-xsmall-14px global-text-primary" text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                        <ui:StreamedObjectList data-binding="[VisualFunction]"/>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:SIScrollView>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:BindingRemapper>
+        </ui:SIVisible>
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement>
+      <ui:VisualElement class="row-direction-normal">
+        <ui:SIButton class="buttons-button-secondary-default">
+          <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+        </ui:SIButton>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:SIVisible>
+</ui:UXML>

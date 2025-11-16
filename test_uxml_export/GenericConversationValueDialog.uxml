@@ -1,0 +1,29 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement class="card-notifications-modal-dialog-quit-without-saving">
+      <ui:VisualElement>
+        <ui:VisualElement class="notifications--notifications-modal-dialog-default-default">
+          <ui:VisualElement class="column-direction-normal">
+            <ui:VisualElement class="column-direction-normal">
+              <ui:SIText class="heading-small-16px" text-binding="ConversationEditSession.ConversationValueSelectionDataMainString"/>
+              <ui:SIText class="body-regular-14px-regular" text-binding="ConversationEditSession.ConversationValueSelectionDataDescriptionString"/>
+            </ui:VisualElement>
+            <ui:BindableSwitchElement class="margin-bottom-global-gap-regular" data-binding="ConversationEditSession.ConversationValueSelectionDataUsesCashValue">
+              <ui:BindingRemapper binding-mappings="binding=ConversationEditSession.ConversationValueSelectionDataPossibleValues">
+                <ui:TemplateContainer template="NumericDropdownWithStepButtons"/>
+              </ui:BindingRemapper>
+              <ui:BindingRemapper binding-mappings="cashselection=ConversationEditSession.ConversationValueSelectionDataPossibleValues;value=ConversationEditSession.ConversationValueSelectionDataCurrentValue;component=ConversationEditSession">
+                <ui:TemplateContainer template="CashSelection"/>
+              </ui:BindingRemapper>
+            </ui:BindableSwitchElement>
+            <ui:VisualElement>
+              <ui:VisualElement class="notifications-modal-dialog-actions-default-type-confirm row-direction-inverted">
+                <ui:TemplateContainer template="button-primary-label"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

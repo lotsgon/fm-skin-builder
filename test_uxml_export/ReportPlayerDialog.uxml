@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables>
+      <ui:VisualElement class="notifications-modal-dialog-online-default">
+        <ui:VisualElement>
+          <ui:VisualElement>
+            <ui:SIText class="heading-small-16px" text-binding="[VisualFunction]"/>
+            <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="margin-right-global-gap-extra-large margin-left-global-gap-extra-large">
+            <ui:TemplateContainer template="layout-divider-solid-horizontal"/>
+            <ui:SIDropdown/>
+            <ui:TemplateContainer template="layout-divider-solid-horizontal"/>
+          </ui:VisualElement>
+          <ui:TemplateContainer class="notifications-modal-dialog-actions-default-type-confirm-orientation-horizontal" template="notifications-modal-dialog-actions-default"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingRemapper class="base-template-grow" binding-mappings="teamsettings=teamcontainer.TeamSettingsEditSession;responsibilitylinkdata=fmconstants.ResponsibilitiesStaffLink">
+      <ui:BindableSwitchElement class="flex-grow-class" data-binding="config.UseCutDownStaffResponsibilities">
+        <ui:TemplateContainer class="flex-grow-class" template="FigmaBaseToolTabbedTemplate"/>
+        <ui:VisualElement class="flex-grow-class">
+          <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTemplate"/>
+          <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+        </ui:VisualElement>
+      </ui:BindableSwitchElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,266 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="components-persona-bg base-template-grow">
+    <ui:BindingSetter class="flex-grow-class">
+      <ui:BindingSetter class="flex-grow-class">
+        <ui:BindingRemapper class="flex-grow-class" binding-mappings="club=cachedteam.Club">
+          <ui:BindableSwitchElement class="flex-grow-class" data-binding="[VisualFunction]">
+            <ui:VisualElement class="components-persona-bg flex-grow-class padding-right-global-padding-huge padding-left-global-padding-huge align-self-stretch-class">
+              <ui:SISafeAreaElement class="flex-grow-class">
+                <ui:VisualElement class="row-direction-normal flex-grow-class">
+                  <ui:VisualElement class="margin-right-16 base-template-grow align-self-stretch-class">
+                    <ui:VisualElement class="column-direction-normal align-self-stretch-class">
+                      <ui:SIText class="heading-large-22px" text-binding="[VisualFunction]"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row-direction-normal base-template-grow align-self-stretch-class">
+                      <ui:TabGroup class="base-template-grow">
+                        <ui:ButtonGroup class="margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" current-selected-id-binding="selectedtab">
+                          <ui:SIButton/>
+                          <ui:SIVisible data-binding="config.AllowInternationalManagement">
+                            <ui:SIButton class="buttongroup__button"/>
+                          </ui:SIVisible>
+                          <ui:SIVisible data-binding="config.AllowInternationalManagement">
+                            <ui:SIButton class="buttongroup__button"/>
+                          </ui:SIVisible>
+                          <ui:SICheckBox class="inputs-switch-checkbox-default-switch-false--icon-none manager-style-grid-item-checkbox" selection-binding="isunemployed">
+                            <ui:VisualElement class="margin-left-global-gap-regular"/>
+                            <ui:VisualElement class="row-direction-normal">
+                              <ui:VisualElement class="row-direction-normal align-items-center">
+                                <ui:VisualElement class="sicheckbox inputs-switch-checkbox-default-switch-false--icon-none margin-right-global-gap-regular">
+                                  <ui:VisualElement class="unity-toggle__input">
+                                    <ui:VisualElement class="unity-toggle__checkmark"/>
+                                  </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="row-direction-normal">
+                                  <ui:VisualElement>
+                                    <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                                  </ui:VisualElement>
+                                </ui:VisualElement>
+                              </ui:VisualElement>
+                            </ui:VisualElement>
+                          </ui:SICheckBox>
+                        </ui:ButtonGroup>
+                        <ui:SIEnabled class="row-direction-normal base-template-grow" data-binding="isunemployed">
+                          <ui:SwitchElement>
+                            <ui:VisualElement class="base-template-grow">
+                              <ui:SIEnabled data-binding="isunemployed">
+                                <ui:TemplateContainer template="AdvancedSClubContentLHS"/>
+                              </ui:SIEnabled>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="flex-grow-class">
+                              <ui:TemplateContainer template="AdvancedSNationContent"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="flex-grow-class">
+                              <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                                <ui:TemplateContainer template="AdvancedSClubContentLHS"/>
+                                <ui:TemplateContainer template="AdvancedSNationContent"/>
+                              </ui:BindableSwitchElement>
+                            </ui:VisualElement>
+                          </ui:SwitchElement>
+                        </ui:SIEnabled>
+                      </ui:TabGroup>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                  <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                    <ui:TemplateContainer class="flex-grow-class" template="AdvancedSClubContentRHS"/>
+                    <ui:VisualElement class="flex-grow-class">
+                      <ui:BindableSwitchElement data-binding="team">
+                        <ui:TemplateContainer template="GameCreationAdvancedSetupNationInfoBlock"/>
+                        <ui:VisualElement/>
+                      </ui:BindableSwitchElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                        <ui:TemplateContainer template="AdvancedSClubContentRHS"/>
+                        <ui:TemplateContainer template="AdvancedSNationSelectionContentRH"/>
+                      </ui:BindableSwitchElement>
+                    </ui:VisualElement>
+                  </ui:BindableSwitchElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-extra-large padding-left-global-padding-extra-large">
+                  <ui:VisualElement class="biography-navigation-buttons row-direction-normal">
+                    <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                      <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                        <ui:VisualElement>
+                          <ui:SIButton class="buttons-button-secondary-default no-margin">
+                            <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+                            <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+                          </ui:SIButton>
+                        </ui:VisualElement>
+                        <ui:VisualElement>
+                          <ui:SIButton class="buttons-button-secondary-default no-margin">
+                            <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+                            <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+                          </ui:SIButton>
+                        </ui:VisualElement>
+                      </ui:BindableSwitchElement>
+                      <ui:VisualElement>
+                        <ui:SIButton class="buttons-button-secondary-default no-margin">
+                          <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+                          <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+                        </ui:SIButton>
+                      </ui:VisualElement>
+                    </ui:BindableSwitchElement>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:TemplateContainer template="GamePreferencesButton"/>
+                      <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                        <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                          <ui:SIEnabled data-binding="cachedteam.CanManageTeam">
+                            <ui:SIButton class="buttons-button-primary-default">
+                              <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                              <ui:VisualElement class="ui-concepts-chevron-right_small margin-right-global-gap-none margin-left-global-gap-regular"/>
+                            </ui:SIButton>
+                          </ui:SIEnabled>
+                          <ui:SIEnabled data-binding="cachedteam.CanManageTeam">
+                            <ui:SIButton class="buttons-button-primary-default">
+                              <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                              <ui:VisualElement class="ui-concepts-chevron-right_small margin-right-global-gap-none margin-left-global-gap-regular"/>
+                            </ui:SIButton>
+                          </ui:SIEnabled>
+                          <ui:SIEnabled data-binding="cachedteam.CanManageTeam">
+                            <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                              <ui:SIButton class="buttons-button-primary-default">
+                                <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                                <ui:VisualElement class="ui-concepts-chevron-right_small margin-right-global-gap-none margin-left-global-gap-regular"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="buttons-button-primary-default">
+                                <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                                <ui:VisualElement class="ui-concepts-chevron-right_small margin-right-global-gap-none margin-left-global-gap-regular"/>
+                              </ui:SIButton>
+                            </ui:BindableSwitchElement>
+                          </ui:SIEnabled>
+                        </ui:BindableSwitchElement>
+                        <ui:VisualElement>
+                          <ui:SIButton class="buttons-button-primary-default">
+                            <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                            <ui:VisualElement class="ui-concepts-chevron-right_small margin-right-global-gap-none margin-left-global-gap-regular"/>
+                          </ui:SIButton>
+                        </ui:VisualElement>
+                      </ui:BindableSwitchElement>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:SISafeAreaElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="flex-grow-class manager-creator-bg">
+              <ui:SIScrollView>
+                <ui:VisualElement class="ios-generic-background flex-grow-class"/>
+                <ui:SISafeAreaElement class="flex-grow-class">
+                  <ui:VisualElement class="margin-right-16 base-template-grow align-self-stretch-class margin-left-global-gap-extra-large">
+                    <ui:VisualElement class="align-self-stretch-class row-direction-normal">
+                      <ui:SIText class="heading-large-22px ios-fm-universe-title" text-binding="[VisualFunction]"/>
+                      <ui:TemplateContainer template="GamePreferencesButton_Phone"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row-direction-normal base-template-grow align-self-stretch-class">
+                      <ui:TabGroup class="base-template-grow">
+                        <ui:ButtonGroup class="margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" current-selected-id-binding="selectedtab">
+                          <ui:SIEnabled data-binding="isunemployed">
+                            <ui:SIButton/>
+                            <ui:SIVisible class="row-direction-normal" data-binding="config.AllowInternationalManagement">
+                              <ui:SIButton/>
+                              <ui:SIButton class="buttongroup__button"/>
+                            </ui:SIVisible>
+                          </ui:SIEnabled>
+                          <ui:VisualElement class="row-direction-normal align-items-center margin-left-global-gap-extra-large">
+                            <ui:SICheckBox class="inputs-switch-checkbox-default-switch-false--icon-none manager-style-grid-item-checkbox" selection-binding="isunemployed">
+                              <ui:VisualElement class="row-direction-normal">
+                                <ui:VisualElement class="row-direction-normal align-items-center">
+                                  <ui:VisualElement class="sicheckbox inputs-switch-checkbox-default-switch-false--icon-none margin-right-global-gap-regular">
+                                    <ui:VisualElement class="unity-toggle__input">
+                                      <ui:VisualElement class="unity-toggle__checkmark"/>
+                                    </ui:VisualElement>
+                                  </ui:VisualElement>
+                                  <ui:VisualElement class="row-direction-normal">
+                                    <ui:VisualElement>
+                                      <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                                    </ui:VisualElement>
+                                  </ui:VisualElement>
+                                </ui:VisualElement>
+                              </ui:VisualElement>
+                            </ui:SICheckBox>
+                          </ui:VisualElement>
+                        </ui:ButtonGroup>
+                        <ui:SwitchElement>
+                          <ui:VisualElement class="base-template-grow">
+                            <ui:SIEnabled data-binding="isunemployed">
+                              <ui:VisualElement class="lt-add-new-manager-choose-club-confirmation base-template-grow">
+                                <ui:VisualElement class="margin-bottom-8 align-self-stretch-class">
+                                  <ui:VisualElement class="align-self-stretch-class">
+                                    <ui:SIDropdown class="si-dropdown-no-border flex-grow-class">
+                                      <ui:VisualElement class="row-direction-normal flex-grow-class align-self-center-class">
+                                        <ui:TemplateContainer template="CompIconAndTextNoBorderCell"/>
+                                        <ui:VisualElement class="ui-concepts-chevron-down_small align-self-center-class"/>
+                                      </ui:VisualElement>
+                                    </ui:SIDropdown>
+                                    <ui:TemplateContainer template="layout-divider-solid-horizontal"/>
+                                  </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="row-direction-normal base-template-grow flex-grow-class align-self-stretch-class align-items-start">
+                                  <ui:SIScrollView class="flex-grow-class align-self-stretch-class">
+                                    <ui:StreamedTable data-binding="comp.ManageableTeamList"/>
+                                  </ui:SIScrollView>
+                                </ui:VisualElement>
+                              </ui:VisualElement>
+                            </ui:SIEnabled>
+                          </ui:VisualElement>
+                          <ui:SIVisible class="flex-grow-class" data-binding="config.AllowInternationalManagement">
+                            <ui:VisualElement class="flex-grow-class"/>
+                            <ui:VisualElement class="flex-grow-class"/>
+                          </ui:SIVisible>
+                        </ui:SwitchElement>
+                      </ui:TabGroup>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:SISafeAreaElement>
+              </ui:SIScrollView>
+              <ui:VisualElement>
+                <ui:SIVisible class="absolute-position-fill-bottom-container" data-binding="[VisualFunction]">
+                  <ui:VisualElement class="base-template-grow advanced-start-bottom-panel-phone-color">
+                    <ui:SISafeAreaElement>
+                      <ui:VisualElement class="row-direction-normal base-template-grow">
+                        <ui:VisualElement class="row-direction-normal base-template-grow margin-left-16 margin-top-16 margin-bottom-16">
+                          <ui:SIButton class="buttons-button-base-default margin-right-8 buttons-button-secondary-default">
+                            <ui:SIImage class="margin-right-8" data-binding="[VisualFunction]"/>
+                            <ui:SIText class="button-regular content-no-wrap content-ellipsis margin-right-8" text-binding="[VisualFunction]"/>
+                          </ui:SIButton>
+                          <ui:VisualElement class="margin-right-8">
+                            <ui:SIEnabled data-binding="isunemployed">
+                              <ui:SIButton class="buttons-button-base-default">
+                                <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                                <ui:SIImage class="margin-left-8" data-binding="[VisualFunction]"/>
+                              </ui:SIButton>
+                            </ui:SIEnabled>
+                          </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:SIVisible data-binding="const.true">
+                          <ui:VisualElement class="margin-right-16 margin-top-16 margin-bottom-16">
+                            <ui:SIEnabled data-binding="cachedteam.CanManageTeam">
+                              <ui:SIButton class="buttons-button-primary-default">
+                                <ui:SIText class="button-regular content-ellipsis content-no-wrap global-text-primary margin-right-8" text-binding="[VisualFunction]"/>
+                                <ui:SIImage class="margin-left-8" data-binding="[VisualFunction]"/>
+                              </ui:SIButton>
+                            </ui:SIEnabled>
+                          </ui:VisualElement>
+                        </ui:SIVisible>
+                      </ui:VisualElement>
+                    </ui:SISafeAreaElement>
+                  </ui:VisualElement>
+                </ui:SIVisible>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:BindableSwitchElement>
+        </ui:BindingRemapper>
+        <ui:SIVisible data-binding="isconfirmedteams">
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:EventTrigger/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:EventTrigger/>
+          </ui:SIVisible>
+        </ui:SIVisible>
+        <ui:SIVisible data-binding="[VisualFunction]">
+          <ui:EventTrigger/>
+        </ui:SIVisible>
+      </ui:BindingSetter>
+    </ui:BindingSetter>
+  </ui:BindingRoot>
+</ui:UXML>

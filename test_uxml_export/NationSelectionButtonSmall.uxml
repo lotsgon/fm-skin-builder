@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="manager-creation-thumbnail ios-landscape-nation-button">
+    <ui:VisualElement>
+      <ui:VisualElement>
+        <ui:NavigatableVisualElement class="manager-preset-button-navigatable-element">
+          <ui:SIGradient class="club-radio-button-bg">
+            <ui:SIButton class="manager-preset-button">
+              <ui:VisualElement class="row-direction-normal base-template-grow align-self-stretch-class justify-content-space-between margin-bottom-global-gap-regular">
+                <ui:VisualElement class="row-direction-normal align-self-center-class">
+                  <ui:Toggle class="radio-toggle active-toggle"/>
+                  <ui:VisualElement class="passive-toggle passive-toggle-outline"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:TemplateContainer class="margin-bottom-global-gap-regular" template="SummaryNationIcon"/>
+              <ui:SIText class="heading-xsmall-14px global-text-primary flex-grow-class" text-binding="item.Name"/>
+            </ui:SIButton>
+          </ui:SIGradient>
+        </ui:NavigatableVisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

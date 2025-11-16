@@ -1,0 +1,46 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingVariables>
+      <ui:BindingRemapper class="base-template-grow midnight-background-colour" binding-mappings="human=game.GameCurrentManager;boolean=game.GameCurrentManager.IsAtTeam;tactic=Team.Tactic;speakto=Tactic.SpeakTo;id=ribbon-id;fixture=team.NextFixture;comp=fixture.Competition;home_team=fixture.HomeTeam;away_team=fixture.AwayTeam;opponent_team=fixture.TeamOpponent">
+        <ui:VisualElement class="ios-generic-background flex-grow-class"/>
+        <ui:SIVisible data-binding="Tactic">
+          <ui:EventTrigger/>
+        </ui:SIVisible>
+        <ui:SISafeAreaElement>
+          <ui:VisualElement class="flex-grow-class">
+            <ui:VisualElement class="row-direction-normal team-selection-header ios-team-selection-header">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIVisible class="justify-content-center-class" data-binding="config.UseSimplifiedTacticsLayouts">
+                  <ui:TemplateContainer template="buttons-controls-close-default"/>
+                </ui:SIVisible>
+                <ui:TemplateContainer class="margin-left-global-gap-extra-large" template="TopBarMatchFlow"/>
+              </ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:SIEnabled data-binding="fixture.InstantResultEnabled">
+                    <ui:TemplateContainer template="button-base-leading-icon-label"/>
+                  </ui:SIEnabled>
+                </ui:SIVisible>
+                <ui:SIVisible class="si-visible-flex-autosize-horizontal" data-binding="config.ShowPhonePanels">
+                  <ui:TemplateContainer class="row-direction-normal margin-right-global-gap-regular" template="dashboard-hud-fm-button"/>
+                  <ui:TemplateContainer class="row-direction-normal" template="dashboard-hud-continue_button-default"/>
+                </ui:SIVisible>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="flex-grow-class">
+              <ui:SIVisible data-binding="config.ShowPhonePanels">
+                <ui:TemplateContainer class="flex-grow-class" template="RevampTacticalPlanner"/>
+              </ui:SIVisible>
+              <ui:SIVisible data-binding="config.ShowPhonePanels">
+                <ui:VisualElement class="customcontent">
+                  <ui:ScalableBindableGridLayoutElement class="dashboard-grid-layout"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="flex-grow-class"/>
+              </ui:SIVisible>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:SISafeAreaElement>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

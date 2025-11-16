@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables class="components-persona-bg row-direction-normal">
+      <ui:BindingRemapper binding-mappings="selected-value=gamemode">
+        <ui:SISafeAreaElement>
+          <ui:ScalableBindableGridLayoutElement/>
+        </ui:SISafeAreaElement>
+        <ui:VisualElement>
+          <ui:SISafeAreaElement class="row-direction-normal"/>
+          <ui:BindableSwitchElement data-binding="app.GameStarted">
+            <ui:TemplateContainer class="padding-right-global-padding-extra-large padding-left-global-padding-extra-large" template="ManagerCreationNavButtons"/>
+            <ui:TemplateContainer class="padding-right-global-padding-extra-large padding-left-global-padding-extra-large" template="ManagerCreationNavButtons"/>
+          </ui:BindableSwitchElement>
+        </ui:VisualElement>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

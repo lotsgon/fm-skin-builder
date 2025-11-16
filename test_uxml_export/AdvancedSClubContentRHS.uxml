@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindableSwitchElement class="flex-grow-class" data-binding="[VisualFunction]">
+    <ui:BindableSwitchElement class="flex-grow-class" data-binding="[VisualFunction]">
+      <ui:SIGradient class="flex-grow-class">
+        <ui:SIText class="body-regular-14px-regular global-text-primary flex-grow-class" text-binding="[VisualFunction]"/>
+      </ui:SIGradient>
+      <ui:BindableSwitchElement class="flex-grow-class" data-binding="app.GridBreakpointIsSmall">
+        <ui:SIEnabled data-binding="isunemployed">
+          <ui:TemplateContainer template="GameCreationAdvancedSetupTeamInfoBlock"/>
+        </ui:SIEnabled>
+        <ui:SIEnabled data-binding="isunemployed">
+          <ui:TemplateContainer template="GameCreationAdvancedSetupTeamInfoCompactBlock"/>
+        </ui:SIEnabled>
+      </ui:BindableSwitchElement>
+    </ui:BindableSwitchElement>
+    <ui:SIGradient class="flex-grow-class">
+      <ui:SIText class="body-regular-14px-regular global-text-primary flex-grow-class" text-binding="[VisualFunction]"/>
+    </ui:SIGradient>
+  </ui:BindableSwitchElement>
+</ui:UXML>

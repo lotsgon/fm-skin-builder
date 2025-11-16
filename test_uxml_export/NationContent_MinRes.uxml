@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement>
+    <ui:SIGradient class="frames-clauses-wage-contribution row-direction-normal">
+      <ui:VisualElement class="row-direction-normal margin-right-global-gap-extra-large">
+        <ui:BindingRemapper class="margin-right-global-gap-large" binding-mappings="nation=setupgame.SelectedNation">
+          <ui:SIImage class="margin-right-global-gap-regular" data-binding="[VisualFunction]"/>
+        </ui:BindingRemapper>
+        <ui:SIText class="body-regular-14px-regular" text-binding="SetupGame.SelectedContinent.FootballImpactDescription"/>
+      </ui:VisualElement>
+      <ui:VisualElement class="margin-right-global-gap-extra-large">
+        <ui:VisualElement class="row-direction-normal">
+          <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="row-direction-normal">
+          <ui:SIText class="body-regular-14px-regular content-no-wrap" text-binding="[VisualFunction]"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement class="margin-right-global-gap-extra-large">
+        <ui:VisualElement class="row-direction-normal">
+          <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+        </ui:VisualElement>
+        <ui:VisualElement>
+          <ui:SIStepper class="data_display-graphs-stepper-step_bar"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:SIGradient>
+    <ui:VisualElement class="row-direction-normal">
+      <ui:VisualElement class="game-concepts-club-badge_small margin-right-global-gap-regular"/>
+      <ui:SIText class="global-text-primary heading-small-16px" text-binding="[VisualFunction]"/>
+    </ui:VisualElement>
+    <ui:VisualElement class="padding-right-global-padding-none padding-left-global-padding-regular">
+      <ui:BindingRemapper binding-mappings="DBSummaryCompetition=setupgame.SelectedComp;continent=setupgame.SelectedContinent;name=const.EmptyString">
+        <ui:SIScrollView class="manager-creation-screen-scroll">
+          <ui:GridSelector class="horizontal-list-shrink non-selectable-list grid-without-scroll"/>
+        </ui:SIScrollView>
+      </ui:BindingRemapper>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</ui:UXML>

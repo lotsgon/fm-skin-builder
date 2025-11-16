@@ -24,6 +24,7 @@ class PatchReport:
     saved_path: Optional[Path] = None
     texture_replacements: int = 0
     font_replacements: int = 0
+    uxml_replacements: int = 0
 
     @property
     def has_changes(self) -> bool:
@@ -33,6 +34,7 @@ class PatchReport:
             or self.direct_patched
             or self.texture_replacements
             or self.font_replacements
+            or self.uxml_replacements
         )
 
     def mark_saved(self, path: Path) -> None:

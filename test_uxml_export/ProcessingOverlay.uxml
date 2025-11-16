@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:SIVisible data-binding="game.GameProcessing">
+      <ui:VisualElement class="rectangle-925">
+        <ui:SIVisible data-binding="game.GameCurrentManager.IsOnHoliday">
+          <ui:EventTrigger>
+            <ui:NavigationFocusser class="align-items-start">
+              <ui:TemplateContainer template="button-primary-label"/>
+            </ui:NavigationFocusser>
+          </ui:EventTrigger>
+        </ui:SIVisible>
+      </ui:VisualElement>
+    </ui:SIVisible>
+    <ui:SIVisible data-binding="[VisualFunction]">
+      <ui:VisualElement class="rectangle-925"/>
+    </ui:SIVisible>
+  </ui:BindingRoot>
+</ui:UXML>

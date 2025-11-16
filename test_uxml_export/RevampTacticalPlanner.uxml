@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="flex-grow-class">
+    <ui:BindableSwitchElement class="flex-grow-class" data-binding="config.UseSimplifiedTacticsLayouts">
+      <ui:VisualElement class="base-template-grow">
+        <ui:TemplateContainer class="base-template-grow" template="FigmaBaseToolTemplate"/>
+      </ui:VisualElement>
+      <ui:VisualElement class="base-template-grow">
+        <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTabbedTemplate"/>
+        <ui:BindingVariables>
+          <ui:BindingRemapper binding-mappings="ShowReducedOptions=config.ShowSaveLoadTacticsOptionsOnly">
+            <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+          </ui:BindingRemapper>
+        </ui:BindingVariables>
+      </ui:VisualElement>
+    </ui:BindableSwitchElement>
+  </ui:BindingExpect>
+</ui:UXML>

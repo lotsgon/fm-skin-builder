@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables class="base-template-grow">
+      <ui:BindingRemapper binding-mappings="human=game.GameCurrentManager;speakto=selected_player.SquadListSpeakTo">
+        <ui:TemplateContainer template="FigmaBaseReportTemplate"/>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

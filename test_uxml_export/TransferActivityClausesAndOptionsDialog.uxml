@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:TemplateContainer class="base-template-grow" template="BaseFloatingBlocksTemplate">
+      <ui:VisualElement class="notifications--notifications-modal-dialog-default-default base-template-grow">
+        <ui:VisualElement class="align-self-stretch-class margin-left-16 margin-right-16 margin-top-16 margin-bottom-16">
+          <ui:SIText class="margin-bottom-global-gap-small primary-text-colour heading-xsmall-14px" text-binding="[VisualFunction]"/>
+          <ui:TemplateContainer class="margin-top-8 margin-bottom-8" template="layout-divider-solid-horizontal"/>
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:SIText class="primary-text-colour body-small-12px-bold margin-bottom-4 margin-top-8" text-binding="[VisualFunction]"/>
+            <ui:StreamedObjectList data-binding="transferoffer.TransferFeesTooltipList"/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:SIText class="primary-text-colour body-small-12px-bold margin-bottom-4 marginm-top-8" text-binding="[VisualFunction]"/>
+            <ui:StreamedObjectList data-binding="transferoffer.TransferClausesTooltipList"/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:SIText class="primary-text-colour body-small-12px-bold margin-bottom-4 margin-top-8" text-binding="[VisualFunction]"/>
+            <ui:StreamedObjectList data-binding="TransferOffer.LoanClausesTooltipList"/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:SIText class="primary-text-colour body-small-12px-bold margin-bottom-4 margin-top-8" text-binding="[VisualFunction]"/>
+            <ui:StreamedObjectList data-binding="transferoffer.LoanOptionsTooltipList"/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:SIText class="primary-text-colour body-small-12px-bold margin-bottom-4 margin-top-8" text-binding="[VisualFunction]"/>
+            <ui:StreamedObjectList data-binding="transferoffer.LoanToBuyFeesTooltipList"/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:SIText class="primary-text-colour body-small-12px-bold margin-bottom-4 margin-top-8" text-binding="[VisualFunction]"/>
+            <ui:StreamedObjectList data-binding="transferoffer.LoanFutureFeesTooltipList"/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:SIText class="primary-text-colour body-small-12px-bold margin-top-8 margin-bottom-4" text-binding="[VisualFunction]"/>
+            <ui:StreamedObjectList data-binding="transferoffer.LoanFutureClausesTooltipList"/>
+          </ui:SIVisible>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

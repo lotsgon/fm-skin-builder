@@ -1,0 +1,58 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow align-self-stretch-class">
+    <ui:VisualElement class="base-template-grow components-persona-bg align-self-stretch-class">
+      <ui:VisualElement class="ios-generic-background flex-grow-class"/>
+      <ui:SISafeAreaElement class="base-template-grow align-self-stretch-class">
+        <ui:VisualElement class="row-direction-normal margin-left-32 margin-right-32 margin-top-32">
+          <ui:VisualElement class="flex-grow-class">
+            <ui:SIText class="heading-large-22px ios-fm-universe-title" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+          <ui:SIVisible data-binding="config.IsManagerCreationForFMC">
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement>
+                <ui:SIText class="heading-xsmall-14px global-text-secondary margin-right-global-gap-regular flex-grow-class" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+              <ui:BindableSwitchElement data-binding="config.ShowDatabaseVersionSelectCard">
+                <ui:TemplateContainer template="buttons-dropdown-icon-base-default-single-icon"/>
+                <ui:TemplateContainer template="buttons-button-base-default"/>
+              </ui:BindableSwitchElement>
+            </ui:VisualElement>
+          </ui:SIVisible>
+        </ui:VisualElement>
+        <ui:ScalableBindableGridLayoutElement class="base-template-grow"/>
+      </ui:SISafeAreaElement>
+      <ui:BindingVariables>
+        <ui:SIVisible class="absolute-position-fill-bottom-container" data-binding="[VisualFunction]">
+          <ui:VisualElement class="base-template-grow advanced-start-bottom-panel-phone-color">
+            <ui:SISafeAreaElement>
+              <ui:VisualElement class="row-direction-normal base-template-grow">
+                <ui:VisualElement class="row-direction-normal base-template-grow margin-left-16 margin-top-16 margin-bottom-16">
+                  <ui:SIButton class="buttons-button-base-default margin-right-8 buttons-button-secondary-default">
+                    <ui:SIImage class="margin-right-8" data-binding="[VisualFunction]"/>
+                    <ui:SIText class="button-regular content-no-wrap content-ellipsis margin-right-8" text-binding="[VisualFunction]"/>
+                  </ui:SIButton>
+                  <ui:VisualElement class="margin-right-8">
+                    <ui:SIButton class="buttons-button-base-default">
+                      <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                      <ui:SIImage class="margin-left-8" data-binding="[VisualFunction]"/>
+                    </ui:SIButton>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:SIVisible data-binding="const.true">
+                  <ui:VisualElement class="margin-right-16 margin-top-16 margin-bottom-16">
+                    <ui:SIEnabled data-binding="[VisualFunction]">
+                      <ui:SIButton class="buttons-button-primary-default">
+                        <ui:SIText class="button-regular content-ellipsis content-no-wrap global-text-primary margin-right-8" text-binding="[VisualFunction]"/>
+                        <ui:SIImage class="margin-left-8" data-binding="[VisualFunction]"/>
+                      </ui:SIButton>
+                    </ui:SIEnabled>
+                  </ui:VisualElement>
+                </ui:SIVisible>
+              </ui:VisualElement>
+            </ui:SISafeAreaElement>
+          </ui:VisualElement>
+        </ui:SIVisible>
+      </ui:BindingVariables>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

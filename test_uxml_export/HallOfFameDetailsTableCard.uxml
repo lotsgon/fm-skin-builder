@@ -1,0 +1,34 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingRemapper binding-mappings="index=selectedrankrow.Position;entry=game.HallOfFameEntry">
+      <ui:TemplateContainer class="base-template-grow" template="FullScreenExpandedTableCardTemplate">
+        <ui:VisualElement class="row-direction-normal">
+          <ui:VisualElement>
+            <ui:SIText class="body-small-12px-regular secondary-text-colour" text-binding="[VisualFunction]"/>
+            <ui:BindableSwitchElement data-binding="entry.Name">
+              <ui:BindingRemapper class="row-direction-normal" binding-mappings="nation=selectedrankrow.Nation">
+                <ui:TemplateContainer class="margin-right-global-gap-regular" template="NationFlag_Medium"/>
+                <ui:SIText class="body-regular-14px-bold primary-text-colour" text-binding="entry.Name"/>
+              </ui:BindingRemapper>
+              <ui:SIText class="primary-text-colour" text-binding="[VisualFunction]"/>
+            </ui:BindableSwitchElement>
+          </ui:VisualElement>
+          <ui:VisualElement>
+            <ui:SIText class="body-small-12px-regular secondary-text-colour" text-binding="[VisualFunction]"/>
+            <ui:BindableSwitchElement data-binding="entry.DateOfBirth">
+              <ui:SIText class="body-regular-14px-bold primary-text-colour" text-binding="entry.DateOfBirth"/>
+              <ui:SIText class="primary-text-colour" text-binding="[VisualFunction]"/>
+            </ui:BindableSwitchElement>
+          </ui:VisualElement>
+          <ui:VisualElement>
+            <ui:SIText class="body-small-12px-regular secondary-text-colour" text-binding="[VisualFunction]"/>
+            <ui:BindableSwitchElement data-binding="entry.TeamName">
+              <ui:SIText class="body-regular-14px-bold primary-text-colour" text-binding="entry.TeamName"/>
+              <ui:SIText class="primary-text-colour" text-binding="[VisualFunction]"/>
+            </ui:BindableSwitchElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:TemplateContainer>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

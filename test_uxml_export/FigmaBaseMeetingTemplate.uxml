@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement class="simeeting-container">
+    <ui:VisualElement class="row-direction-normal">
+      <ui:BindingVariables>
+        <ui:VisualElement class="speakto-panel-right-aligned">
+          <ui:TemplateContainer template="MeetingSpeakToContainer"/>
+          <ui:BindingVariables>
+            <ui:VisualElement>
+              <ui:VisualElement class="layout-card-default-default">
+                <ui:SIStyleSetter>
+                  <ui:DynamicItem class="flex-grow-class"/>
+                  <ui:ScalableBindableGridLayoutElement/>
+                </ui:SIStyleSetter>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:BindingVariables>
+        </ui:VisualElement>
+      </ui:BindingVariables>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</ui:UXML>

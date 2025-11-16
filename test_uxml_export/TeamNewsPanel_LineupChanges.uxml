@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:SIVisible data-binding="match.TeamOpponent">
+      <ui:BindingRemapper binding-mappings="team=match.TeamOpponent">
+        <ui:VisualElement>
+          <ui:SIVisible data-binding="[VisualFunction]">
+            <ui:VisualElement class="row-direction-normal margin-bottom-global-gap-small">
+              <ui:VisualElement class="game-concepts-squad-info_medium"/>
+              <ui:SIText class="global-text-primary heading-small-16px margin-right-global-gap-none margin-left-global-gap-small" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+            <ui:SIText class="body-regular-14px-regular global-text-secondary margin-bottom-global-gap-small" text-binding="[VisualFunction]"/>
+            <ui:VisualElement class="margin-bottom-global-gap-regular">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement class="game-concepts-sub-on_medium"/>
+                <ui:SIText class="heading-xsmall-14px global-text-primary overflow-text margin-right-global-gap-none margin-left-global-gap-small" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+              <ui:StreamedObjectList class="width-100-percent" data-binding="match.OppositionStartingLineUpChangesPlayersIn"/>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement class="game-concepts-sub-off_medium"/>
+                <ui:SIText class="heading-xsmall-14px global-text-primary overflow-text margin-right-global-gap-none margin-left-global-gap-small" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+              <ui:StreamedObjectList class="width-100-percent" data-binding="match.OppositionStartingLineUpChangesPlayersOut"/>
+            </ui:VisualElement>
+          </ui:SIVisible>
+        </ui:VisualElement>
+      </ui:BindingRemapper>
+    </ui:SIVisible>
+  </ui:BindingExpect>
+</ui:UXML>

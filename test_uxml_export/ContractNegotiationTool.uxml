@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="team=Human.Team;Person=player">
+      <ui:TemplateContainer template="ContractNegotiationCardTemplate"/>
+      <ui:SIVisible data-binding="player.RequiresPreContractPromisesNegotiations">
+        <ui:BindingRemapper binding-mappings="speakto=Player.PreContractPromisesEditSession.SpeakTo">
+          <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+        </ui:BindingRemapper>
+      </ui:SIVisible>
+      <ui:SIVisible data-binding="player.RequiresPreContractPromisesNegotiations">
+        <ui:BindingRemapper class="height-100-percent speakto-panel-left-aligned" binding-mappings="speakto=Player.ContractEditSession.SpeakTo">
+          <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+        </ui:BindingRemapper>
+      </ui:SIVisible>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

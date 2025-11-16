@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="flex-grow-class">
+    <ui:BindingVariables class="base-template-grow justify-content-space-between">
+      <ui:BindingSetter>
+        <ui:VisualElement class="base-template-grow row-direction-normal justify-content-space-between margin-bottom-16 club-selection-options">
+          <ui:VisualElement>
+            <ui:SIDropdown class="buttons-dropdown-base-regular">
+              <ui:SIText class="button-regular buttons-global-primary-text sitext-hover-cursor button-text-ellipsis margin-right-global-gap-regular overflow-text" text-binding="selectedNation.name"/>
+              <ui:SIText class="body-regular-14px-regular global-text-secondary margin-right-global-gap-regular" text-binding="[VisualFunction]"/>
+              <ui:SIImage class="ui-concepts-chevron-down_small" data-binding="[VisualFunction]"/>
+            </ui:SIDropdown>
+          </ui:VisualElement>
+          <ui:SIVisible class="justify-content-center-class" data-binding="config.ShowPhonePanels">
+            <ui:TemplateContainer template="LeagueKey"/>
+          </ui:SIVisible>
+        </ui:VisualElement>
+        <ui:SIScrollView class="base-template-grow">
+          <ui:SIRadioGroup class="base-template-grow game-creation-quick-setup-radio-group no-margin no-padding" selection-binding="selectedComp"/>
+        </ui:SIScrollView>
+      </ui:BindingSetter>
+      <ui:SIVisible data-binding="config.ShowPhonePanels">
+        <ui:TemplateContainer template="LeagueKey"/>
+      </ui:SIVisible>
+    </ui:BindingVariables>
+  </ui:BindingExpect>
+</ui:UXML>

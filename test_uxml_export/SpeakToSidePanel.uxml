@@ -1,0 +1,52 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="height-100-percent">
+    <ui:BindingRemapper class="height-100-percent" binding-mappings="human=game.GameCurrentManager">
+      <ui:ContextShortcutsElement class="height-100-percent">
+        <ui:SIButton class="shortcut-fake-button height-100-percent">
+          <ui:NavigationFocusser class="height-100-percent">
+            <ui:VisualElement class="interaction-_interaction-hub-base-default">
+              <ui:ContextShortcutsElement class="height-100-percent margin-right-global-gap-large margin-left-global-gap-large">
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:BindingRemapper class="height-100-percent" binding-mappings="npcaction=SpeakTo.Actions.PrimaryNpcWithActions">
+                    <ui:TemplateContainer class="height-100-percent" template="SpeakToSenderMessageButtons"/>
+                  </ui:BindingRemapper>
+                </ui:SIVisible>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:StreamedObjectList data-binding="SpeakTo.Actions.NpcActionsList"/>
+                </ui:SIVisible>
+                <ui:SIVisible data-binding="speakto.IsInductionSpeakTo">
+                  <ui:SIVisible data-binding="const.False">
+                    <ui:TemplateContainer template="SpeakToResponsibilities"/>
+                  </ui:SIVisible>
+                  <ui:SIVisible data-binding="const.False">
+                    <ui:TemplateContainer template="SpeakToFMPedia"/>
+                  </ui:SIVisible>
+                  <ui:VisualElement>
+                    <ui:BindingRemapper binding-mappings="minvalue=const.Zero;maxvalue=speakto.MaxInductionStepIndex;progress=speakto.CurrentInductionStepIndex">
+                      <ui:TemplateContainer template="ProgressBarStepCell"/>
+                    </ui:BindingRemapper>
+                  </ui:VisualElement>
+                </ui:SIVisible>
+              </ui:ContextShortcutsElement>
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:BindingVariables>
+                  <ui:VisualElement>
+                    <ui:TemplateContainer template="speakto-button-additional-actions-selector"/>
+                  </ui:VisualElement>
+                  <ui:SIVisible data-binding="additionalactionsexpanded">
+                    <ui:NavigationFocusser>
+                      <ui:VisualElement class="interaction-hub-action-area-default-optional-response">
+                        <ui:StreamedObjectList data-binding="SpeakTo.AdditionalActions"/>
+                      </ui:VisualElement>
+                    </ui:NavigationFocusser>
+                    <ui:EventTrigger/>
+                  </ui:SIVisible>
+                </ui:BindingVariables>
+              </ui:SIVisible>
+            </ui:VisualElement>
+          </ui:NavigationFocusser>
+        </ui:SIButton>
+      </ui:ContextShortcutsElement>
+    </ui:BindingRemapper>
+  </ui:BindingExpect>
+</ui:UXML>

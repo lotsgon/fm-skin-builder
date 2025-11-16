@@ -1,0 +1,98 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:EventTrigger>
+      <ui:BindingRemapper binding-mappings="databasetabletype=editorfield.DatabaseTableType;team=human">
+        <ui:VisualElement class="sipopup-container">
+          <ui:VisualElement class="card-notifications-modal-dialog-quit-without-saving">
+            <ui:BindingVariables>
+              <ui:VisualElement class="notifications--notifications-modal-large-default-ige padding-right-global-padding-extra-large padding-left-global-padding-extra-large">
+                <ui:VisualElement class="padding-left-global-padding-regular padding-right-global-padding-regular">
+                  <ui:VisualElement>
+                    <ui:SIText class="heading-small-16px text-middle-center" text-binding="search.DatabaseTableTypeString"/>
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:SIText class="text-middle-center" text-binding="[VisualFunction]"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:SIText class="text-middle-center" text-binding="[VisualFunction]"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:SIText class="text-middle-center" text-binding="[VisualFunction]"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:SIText class="text-middle-center" text-binding="[VisualFunction]"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:SIText class="text-middle-center" text-binding="[VisualFunction]"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                  <ui:TemplateContainer class="padding-left-global-padding-small padding-right-global-padding-small" template="layout-divider-solid-horizontal"/>
+                  <ui:SearchBox class="global-search-edit-box padding-right-global-padding-none">
+                    <ui:SIVisible class="margin-left-global-gap-huge" data-binding="[VisualFunction]">
+                      <ui:VisualElement>
+                        <ui:SIButton class="buttons-controls-pc-default--active-true margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none">
+                          <ui:VisualElement class="ui-concepts-cross_small"/>
+                        </ui:SIButton>
+                      </ui:VisualElement>
+                    </ui:SIVisible>
+                  </ui:SearchBox>
+                  <ui:VisualElement class="padding-left-global-padding-large padding-right-global-padding-large">
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:StreamedTable data-binding="search.PersonList"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:StreamedTable data-binding="search.Nations"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:StreamedTable data-binding="search.Languages"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:StreamedTable data-binding="search.Competitions"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:StreamedTable data-binding="search.Clubs"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                  <ui:TemplateContainer class="padding-right-global-padding-small padding-left-global-padding-small" template="layout-divider-solid-horizontal"/>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:SIStyleSetter>
+                          <ui:VisualElement class="notifications--notifications-toast-action_buttons-default">
+                            <ui:TemplateContainer class="margin-right-global-gap-regular" template="buttons-button-secondary-default"/>
+                            <ui:SIEnabled data-binding="editorfield.DatabaseRecordSearchIsValid">
+                              <ui:TemplateContainer template="buttons-button-primary-default"/>
+                            </ui:SIEnabled>
+                          </ui:VisualElement>
+                        </ui:SIStyleSetter>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:BindingRemapper>
+    </ui:EventTrigger>
+  </ui:BindingRoot>
+</ui:UXML>

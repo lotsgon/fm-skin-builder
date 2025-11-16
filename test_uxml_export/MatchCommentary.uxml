@@ -1,0 +1,41 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="match-bottom-area">
+    <ui:BindingVariables>
+      <ui:BindingRemapper binding-mappings="isHomeTeam=match.IsHomeTeamHuman">
+        <ui:BindingSetter>
+          <ui:VisualElement>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIVisible data-binding="match.MatchLowerThirdPopupVisibility">
+                <ui:BindableSwitchElement data-binding="shouldUseBottomVAR">
+                  <ui:SIVisible data-binding="[VisualFunction]">
+                    <ui:DynamicItem/>
+                  </ui:SIVisible>
+                  <ui:DynamicItem/>
+                </ui:BindableSwitchElement>
+              </ui:SIVisible>
+            </ui:VisualElement>
+            <ui:TemplateContainer template="MatchCommentaryBar"/>
+            <ui:SIVisible data-binding="[VisualFunction]">
+              <ui:SIEnabled data-binding="canmodifytactics">
+                <ui:TemplateContainer template="SquadOverview"/>
+              </ui:SIEnabled>
+              <ui:SIVisible class="height-100-percent" data-binding="canmodifytactics">
+                <ui:VisualElement class="row-direction-normal match_disabled_not_live_background">
+                  <ui:VisualElement class="row-direction-normal match_disabled_not_live padding-right-global-padding-regular padding-left-global-padding-regular">
+                    <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                      <ui:SIText class="content-no-wrap content-ellipsis body-small-14px-regular margin-right-global-gap-extra-small" text-binding="[VisualFunction]"/>
+                      <ui:SIText class="content-no-wrap content-ellipsis body-small-14px-regular margin-right-global-gap-extra-small" text-binding="[VisualFunction]"/>
+                    </ui:BindableSwitchElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:SIVisible>
+            </ui:SIVisible>
+            <ui:SIVisible data-binding="[VisualFunction]">
+              <ui:TemplateContainer template="PastMatchesTimeline"/>
+            </ui:SIVisible>
+          </ui:VisualElement>
+        </ui:BindingSetter>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingExpect>
+</ui:UXML>

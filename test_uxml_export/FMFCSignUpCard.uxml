@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement class="fmfc-background">
+      <ui:VisualElement>
+        <ui:VisualElement class="si-card-title-bar si-card-title-bar-header">
+          <ui:TemplateContainer class="fmfc-close-button-background-colour" template="buttons-controls-close-default"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:TemplateContainer class="padding-right-global-padding-extra-large padding-left-global-padding-extra-large" template="FMFCSignUp"/>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

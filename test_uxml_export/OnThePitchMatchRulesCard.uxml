@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:TemplateContainer template="BaseCardTemplate">
+      <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small">
+        <ui:VisualElement class="customcontent">
+          <ui:DebugPropertiesElement/>
+          <ui:StreamedObjectList/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

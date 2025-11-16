@@ -1,0 +1,23 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class">
+    <ui:VisualElement class="column-direction-normal flex-grow-class border-radius-global-border">
+      <ui:TemplateContainer template="reports-header-navigation-default-type-menu-header"/>
+      <ui:VisualElement class="global-padding-extra-large flex-grow-class">
+        <ui:TemplateContainer class="margin-bottom-global-gap-extra-large" template="search-criteria"/>
+        <ui:VisualElement class="border-color-layout-modules-block-border-colour">
+          <ui:SIText class="global-text-secondary margin-bottom-global-gap-regular" text-binding="[VisualFunction]"/>
+          <ui:StreamedTable class="flex-grow-class" data-binding="multiplayer.RequestLobbyList"/>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:VisualElement class="row-direction-always-normal">
+              <ui:TemplateContainer template="button-base-leading-icon-label"/>
+              <ui:TemplateContainer class="margin-left-global-gap-regular" template="button-base-leading-icon-label"/>
+            </ui:VisualElement>
+            <ui:SIEnabled data-binding="SelectedLobby">
+              <ui:TemplateContainer template="button-primary-trailing-icon-label"/>
+            </ui:SIEnabled>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

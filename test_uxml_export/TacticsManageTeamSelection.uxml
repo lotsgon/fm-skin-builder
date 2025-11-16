@@ -1,0 +1,33 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class">
+    <ui:BaseCardTemplateImpl class="flex-grow-class">
+      <ui:BindingVariables>
+        <ui:VisualElement>
+          <ui:VisualElement class="notifications--notifications-modal-dialog-default-default">
+            <ui:VisualElement class="padding-left-global-padding-extra-large">
+              <ui:SIText class="heading-small-16px global-text-primary" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="flex-grow-class">
+              <ui:TemplateContainer class="layout-divider-solid-horizontal" template="layout-divider-solid-horizontal"/>
+              <ui:VisualElement class="flex-grow-class">
+                <ui:StreamedObjectList class="flex-grow-class" data-binding="tactic.TeamSelections"/>
+              </ui:VisualElement>
+              <ui:TemplateContainer class="layout-divider-solid-horizontal" template="layout-divider-solid-horizontal"/>
+              <ui:VisualElement>
+                <ui:VisualElement class="notifications-modal-dialog-actions-default-type-confirm row-direction-inverted">
+                  <ui:VisualElement class="row-direction-normal flex-grow-class">
+                    <ui:TemplateContainer template="button-primary-label"/>
+                  </ui:VisualElement>
+                  <ui:SIEnabled class="row-direction-normal" data-binding="[VisualFunction]">
+                    <ui:TemplateContainer class="margin-right-8" template="button-secondary-leading-icon-label"/>
+                    <ui:TemplateContainer template="button-secondary-leading-icon-label"/>
+                  </ui:SIEnabled>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:BindingVariables>
+    </ui:BaseCardTemplateImpl>
+  </ui:BindingRoot>
+</ui:UXML>

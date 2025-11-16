@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:EventTrigger/>
+    <ui:BindingRemapper binding-mappings="human=game.GameCurrentManager;team=Human.Team">
+      <ui:BindingVariables>
+        <ui:SISafeAreaElement>
+          <ui:VisualElement class="base-layer-content">
+            <ui:MultiGridLayoutElement/>
+          </ui:VisualElement>
+        </ui:SISafeAreaElement>
+      </ui:BindingVariables>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

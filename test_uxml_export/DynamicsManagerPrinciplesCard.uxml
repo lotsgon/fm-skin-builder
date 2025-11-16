@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="selectedprinciples=managerprinciples;selected=totalselected">
+      <ui:TemplateContainer template="BaseCardTemplate"/>
+      <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+      <ui:SIVisible data-binding="[VisualFunction]">
+        <ui:EventTrigger/>
+      </ui:SIVisible>
+      <ui:SIVisible data-binding="[VisualFunction]">
+        <ui:EventTrigger/>
+      </ui:SIVisible>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:TemplateContainer template="BaseFloatingBlocksTemplate">
+      <ui:VisualElement class="notifications-modal-dialog-background">
+        <ui:StreamedObjectList class="non-alternating-list margin-right-global-gap-extra-large margin-left-global-gap-extra-large" data-binding="Filter.Rules"/>
+      </ui:VisualElement>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

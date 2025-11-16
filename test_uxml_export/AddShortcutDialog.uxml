@@ -1,0 +1,38 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement class="card-notifications-modal-dialog-quit-without-saving">
+      <ui:BindingVariables>
+        <ui:FMInputRebinder>
+          <ui:VisualElement>
+            <ui:VisualElement class="notifications-modal-large-default-default">
+              <ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:SIText class="heading-small-16px" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="body-regular-14px-regular" text-binding="selectedInput.InputActionName"/>
+                </ui:VisualElement>
+                <ui:SIVisible data-binding="RebindingInProgress">
+                  <ui:TemplateContainer class="padding-right-global-padding-huge padding-left-global-padding-huge" template="data_display-cell-standard-regular"/>
+                </ui:SIVisible>
+                <ui:SIVisible data-binding="RebindingInProgress">
+                  <ui:TemplateContainer class="padding-right-global-padding-huge padding-left-global-padding-huge" template="data_display-cell-standard-regular"/>
+                </ui:SIVisible>
+                <ui:VisualElement class="padding-right-global-padding-huge padding-left-global-padding-huge">
+                  <ui:SIText class="body-regular-14px-regular"/>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:VisualElement class="notifications-modal-dialog-actions-default-type-confirm row-direction-inverted">
+                    <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-label"/>
+                    <ui:SIEnabled class="margin-right-global-gap-regular" data-binding="RebindingInProgress">
+                      <ui:TemplateContainer template="button-primary-label"/>
+                    </ui:SIEnabled>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:FMInputRebinder>
+      </ui:BindingVariables>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

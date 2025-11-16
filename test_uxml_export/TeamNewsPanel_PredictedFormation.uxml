@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:BindingRemapper binding-mappings="team=match.MatchHumanTeam;OppositionTeam=match.TeamOpponent">
+      <ui:BindingRemapper binding-mappings="ishometeam=const.True;team=OppositionTeam">
+        <ui:BindingRemapper binding-mappings="kittype=match.KitShirtStyle;kit=Team.Kit">
+          <ui:VisualElement>
+            <ui:SIVisible data-binding="match.PreMatchFormationChangeFeedback">
+              <ui:VisualElement class="row-direction-normal margin-bottom-global-gap-small">
+                <ui:VisualElement class="margin-right-global-gap-small game-concepts-formation_medium"/>
+                <ui:SIText class="sitext global-text-primary heading-xsmall-14px overflow-text" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+              <ui:SIText class="sitext margin-bottom-global-gap-regular global-text-secondary body-regular-14px-regular" text-binding="match.PreMatchFormationChangeFeedback"/>
+              <ui:TemplateContainer template="TacticsTile_2x2"/>
+            </ui:SIVisible>
+          </ui:VisualElement>
+        </ui:BindingRemapper>
+      </ui:BindingRemapper>
+    </ui:BindingRemapper>
+  </ui:BindingExpect>
+</ui:UXML>

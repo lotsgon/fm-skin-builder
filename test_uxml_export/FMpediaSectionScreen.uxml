@@ -1,0 +1,56 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BaseCardTemplateImpl>
+      <ui:VisualElement>
+        <ui:VisualElement class="layout-card-default-default">
+          <ui:VisualElement class="figma-base-card-template-inner-frame">
+            <ui:SISafeAreaElement>
+              <ui:SIGradient class="border-radius-global-border border-width-global-border-regular border-color-global-border-color">
+                <ui:VisualElement>
+                  <ui:SIVisible data-binding="config.ShowPhonePanels">
+                    <ui:TemplateContainer template="FMpediaCardHeader-phone"/>
+                  </ui:SIVisible>
+                  <ui:SIVisible data-binding="config.ShowPhonePanels">
+                    <ui:VisualElement class="row-direction-normal margin-right-global-gap-regular margin-left-global-gap-regular">
+                      <ui:BindingVariables>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:TemplateContainer class="margin-right-global-gap-small" template="buttons-controls-close-default"/>
+                          <ui:VisualElement class="margin-right-global-gap-small">
+                            <ui:SIButton class="buttons-controls-pc-default--active-true">
+                              <ui:VisualElement class="ui-concepts-size-small ui-concepts-home_small"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:SIEnabled class="margin-right-global-gap-small" data-binding="fmpedia.HasBackHistory">
+                            <ui:VisualElement>
+                              <ui:SIButton class="buttons-controls-pc-default--active-true">
+                                <ui:VisualElement class="ui-concepts-size-small ui-concepts-chevron-left_small"/>
+                              </ui:SIButton>
+                            </ui:VisualElement>
+                          </ui:SIEnabled>
+                          <ui:SIEnabled class="margin-right-global-gap-small" data-binding="fmpedia.HasForwardHistory">
+                            <ui:VisualElement>
+                              <ui:SIButton class="buttons-controls-pc-default--active-true">
+                                <ui:VisualElement class="ui-concepts-size-small ui-concepts-chevron-right_small"/>
+                              </ui:SIButton>
+                            </ui:VisualElement>
+                          </ui:SIEnabled>
+                          <ui:SIVisible class="margin-right-global-gap-small" data-binding="fmpedia.HasBackHistory">
+                            <ui:TemplateContainer template="dropdown-base-regular-trailing-icon-label"/>
+                          </ui:SIVisible>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal"/>
+                      </ui:BindingVariables>
+                    </ui:VisualElement>
+                  </ui:SIVisible>
+                </ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:ScalableBindableGridLayoutElement/>
+                </ui:VisualElement>
+              </ui:SIGradient>
+            </ui:SISafeAreaElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BaseCardTemplateImpl>
+  </ui:BindingRoot>
+</ui:UXML>

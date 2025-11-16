@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingVariables>
+      <ui:SIStyleSetter>
+        <ui:BindingRemapper binding-mappings="human=game.GameCurrentManager;conversation=person.ConversationEditSession;speakto=conversation.SpeakTo;club=human.PrimaryClubTeam.Club">
+          <ui:TemplateContainer template="FullScreenExperienceTitleBar"/>
+          <ui:TemplateContainer class="flex-grow-class" template="FigmaBaseMeetingTemplate"/>
+        </ui:BindingRemapper>
+      </ui:SIStyleSetter>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

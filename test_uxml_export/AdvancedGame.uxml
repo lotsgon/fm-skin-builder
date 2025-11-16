@@ -1,0 +1,50 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement class="setup_game_dialog">
+      <ui:VisualElement class="row-direction-normal">
+        <ui:VisualElement>
+          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:VisualElement>
+              <ui:StreamedObjectList data-binding="SetupGame.SelectableNations"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:VisualElement>
+            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            <ui:VisualElement>
+              <ui:StreamedObjectList data-binding="SetupGame.SelectedNations"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="setup_game_info">
+          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+          <ui:SIText class="sitextsmall" text-binding="SetupGame.SelectedDatabase.Name"/>
+          <ui:SIText class="sitextsmall" text-binding="SetupGame.SelectedDatabase.Description"/>
+          <ui:SIText class="sitextsmall" text-binding="SetupGame.SelectedDatabase.Version"/>
+          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+          <ui:SIText class="sitextsmall" text-binding="SetupGame.EstimatedPlayerCount"/>
+          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+          <ui:SIText class="sitextsmall" text-binding="SetupGame.GameSpeed"/>
+          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+          <ui:SIVisible data-binding="SetupGame.SelectedClub">
+            <ui:SIText class="sitextsmall" text-binding="SetupGame.SelectedClub.Name"/>
+          </ui:SIVisible>
+          <ui:SIVisible data-binding="SetupGame.SelectedNationalTeam">
+            <ui:SIText class="sitextsmall" text-binding="SetupGame.SelectedNationalTeam.Name"/>
+          </ui:SIVisible>
+          <ui:SIText class="sitile__title sitext" text-binding="[VisualFunction]"/>
+          <ui:BindingRemapper binding-mappings="futuretransfermode=SetupGame.FutureTransferMode">
+            <ui:SIText class="sitextsmall" text-binding="SetupGame.FutureTransferModeString"/>
+          </ui:BindingRemapper>
+          <ui:SIText class="sitile__title sitext" text-binding="[VisualFunction]"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:VisualElement class="row-direction-normal">
+        <ui:SIButton class="selectable sibutton sitext"/>
+        <ui:SIVisible data-binding="[VisualFunction]">
+          <ui:SIButton class="selectable sibutton sitext"/>
+        </ui:SIVisible>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

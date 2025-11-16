@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class">
+    <ui:BindableSwitchElement class="menu-tile-background" data-binding="[VisualFunction]">
+      <ui:SIImage class="menu-tile-background" data-binding="[VisualFunction]"/>
+      <ui:VisualElement class="menu-tile-background components-persona-bg"/>
+    </ui:BindableSwitchElement>
+    <ui:BindableSwitchElement class="flex-grow-class" data-binding="[VisualFunction]">
+      <ui:BindingRemapper class="flex-grow-class" binding-mappings="team=editsession.SelectedClub;club=team.Club;nation=club.DisplayNation;reputationScope=club.ReputationScope;title=editsession.SetupGameSummaryTitle;summary=editsession.SetupGameSummaryString;comp=team.Division;manager=editsession.SelectedManager;managerlistcharactersettings=editsession.HumanCharacterSettings;mediatext=club.MediaPredictionText">
+        <ui:TemplateContainer class="flex-grow-class" template="GameCreationLoadingScreenBlock"/>
+      </ui:BindingRemapper>
+      <ui:BindableSwitchElement class="flex-grow-class" data-binding="loadingcomplete">
+        <ui:BindingRemapper class="flex-grow-class" binding-mappings="club=setupgame.SelectedClub;nation=setupgame.nation;reputationScope=setupgame.club.ReputationScope;title=setupgame.SetupGameSummaryTitle;summary=setupgame.SetupGameSummaryString;comp=setupgame.SelectedComp;manager=setupgame.SelectedManager;managerlistcharactersettings=setupgame.HumanCharacterSettings;mediatext=setupgame.club.MediaPredictionText">
+          <ui:TemplateContainer class="flex-grow-class" template="GameCreationLoadingScreenBlock"/>
+        </ui:BindingRemapper>
+        <ui:BindingRemapper class="flex-grow-class" binding-mappings="club=setupgame.Club;nation=setupgame.club.DisplayNation;reputationScope=setupgame.club.ReputationScope;title=setupgame.SetupGameSummaryTitle;summary=setupgame.SetupGameSummaryString;comp=const.NullRef;manager=const.NullRef;managerlistcharactersettings=setupgame.HumanCharacterSettings;mediatext=setupgame.club.MediaPredictionText">
+          <ui:TemplateContainer class="flex-grow-class" template="GameCreationLoadingScreenBlock"/>
+        </ui:BindingRemapper>
+      </ui:BindableSwitchElement>
+    </ui:BindableSwitchElement>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,47 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="ios-landscape-main-menu-landscape-main-menu-start ios-main-menu-background">
+    <ui:VisualElement class="padding-right-global-padding-small padding-left-global-padding-small flex-grow-class">
+      <ui:VisualElement class="mainmenu-headerbar row-direction-normal">
+        <ui:VisualElement class="row-direction-normal margin-right-16">
+          <ui:VisualElement/>
+          <ui:SIText class="body-regular-14px-regular secondary-text-colour margin-left-global-gap-regular" text-binding="app.CurrentVersion"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="row-direction-normal align-self-end align-items-end">
+          <ui:TemplateContainer template="button-secondary-label"/>
+          <ui:VisualElement class="margin-left-global-gap-regular">
+            <ui:TemplateContainer template="button-secondary-trailing-icon-label"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal margin-left-global-gap-regular">
+            <ui:VisualElement>
+              <ui:BindingVariables>
+                <ui:TemplateContainer template="dropdown-base-regular-trailing-icon-label"/>
+              </ui:BindingVariables>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+      <ui:SIVisible data-binding="app.LastSave">
+        <ui:VisualElement>
+          <ui:ScalableBindableGridLayoutElement/>
+        </ui:VisualElement>
+      </ui:SIVisible>
+      <ui:SIVisible data-binding="app.LastSave">
+        <ui:VisualElement>
+          <ui:ScalableBindableGridLayoutElement/>
+        </ui:VisualElement>
+      </ui:SIVisible>
+    </ui:VisualElement>
+    <ui:SIVisible data-binding="const.IsDebug">
+      <ui:VisualElement class="row-direction-inverted">
+        <ui:SIButton class="selectable"/>
+        <ui:SIButton class="selectable"/>
+        <ui:SIButton class="selectable"/>
+      </ui:VisualElement>
+    </ui:SIVisible>
+    <ui:SISafeAreaElement class="absolute-position-fill-container">
+      <ui:SIVisible class="flex-grow-class" data-binding="navigation.ShowControllerIcons">
+        <ui:SIImage class="align-self-end" data-binding="[VisualFunction]"/>
+      </ui:SIVisible>
+    </ui:SISafeAreaElement>
+  </ui:BindingRoot>
+</ui:UXML>

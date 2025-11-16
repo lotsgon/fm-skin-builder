@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="manager-creation-thumbnail">
+    <ui:VisualElement>
+      <ui:VisualElement>
+        <ui:NavigatableVisualElement class="manager-preset-button-navigatable-element">
+          <ui:SIGradient class="club-radio-button-bg">
+            <ui:SIButton class="manager-preset-button">
+              <ui:VisualElement class="row-direction-normal base-template-grow margin-bottom-8 align-self-stretch-class justify-content-space-between">
+                <ui:VisualElement class="row-direction-normal align-self-center-class">
+                  <ui:Toggle class="radio-toggle active-toggle"/>
+                  <ui:VisualElement class="passive-toggle passive-toggle-outline"/>
+                </ui:VisualElement>
+                <ui:BindingRemapper binding-mappings="club=item">
+                  <ui:TemplateContainer template="SummaryClubIcon"/>
+                </ui:BindingRemapper>
+              </ui:VisualElement>
+              <ui:SIText class="heading-xsmall-14px global-text-primary align-self-start content-ellipsis" text-binding="item.Name"/>
+              <ui:SIText class="global-text-secondary align-self-start" text-binding="[VisualFunction]"/>
+              <ui:SIText class="global-text-primary align-self-start" text-binding="item.PredictedLeagueFinish"/>
+            </ui:SIButton>
+          </ui:SIGradient>
+        </ui:NavigatableVisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

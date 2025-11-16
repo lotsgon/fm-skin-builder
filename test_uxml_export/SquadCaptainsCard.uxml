@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingSetter>
+      <ui:BindableSwitchElement data-binding="config.ShowPhonePanels">
+        <ui:TemplateContainer template="FigmaBaseCardTemplate">
+          <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+        </ui:TemplateContainer>
+        <ui:TemplateContainer class="base-template-grow" template="FigmaFullscreenBlockTemplate">
+          <ui:TemplateContainer class="base-template-grow ios-data-display-full-screen-expanded-table-template" template="SquadCaptainsBlock"/>
+        </ui:TemplateContainer>
+      </ui:BindableSwitchElement>
+    </ui:BindingSetter>
+  </ui:BindingRoot>
+</ui:UXML>

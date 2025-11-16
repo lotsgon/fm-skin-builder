@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="editsession=Team.SquadNumbersEditSession">
+      <ui:TemplateContainer class="base-template-grow" template="FigmaBaseToolTemplate"/>
+      <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

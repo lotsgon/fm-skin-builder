@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement class="row-direction-normal margin-right-global-gap-regular margin-left-global-gap-regular padding-right-global-padding-none padding-left-global-padding-none">
+      <ui:VisualElement>
+        <ui:VisualElement class="row-direction-normal">
+          <ui:SIText class="sitext" text-binding="session.MatchFocusSessionName"/>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:SIVisible data-binding="session.MatchFocusSessionIsSuggested">
+              <ui:Label/>
+            </ui:SIVisible>
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="row-direction-normal">
+          <ui:SIText class="sitext" text-binding="session.MatchFocusSessionDescription"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

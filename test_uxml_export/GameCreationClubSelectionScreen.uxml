@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:EventTrigger/>
+    <ui:VisualElement class="components-persona-bg padding-right-global-padding-none padding-left-global-padding-none">
+      <ui:SISafeAreaElement>
+        <ui:ScalableBindableGridLayoutElement/>
+      </ui:SISafeAreaElement>
+      <ui:SIVisible data-binding="config.ShowPhonePanels">
+        <ui:VisualElement class="padding-right-global-padding-extra-large padding-left-global-padding-extra-large">
+          <ui:SISafeAreaElement class="row-direction-normal">
+            <ui:VisualElement>
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:TemplateContainer template="button-secondary-trailing-icon-label"/>
+              </ui:SIVisible>
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:TemplateContainer template="button-secondary-trailing-icon-label"/>
+              </ui:SIVisible>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:TemplateContainer template="button-primary-trailing-icon-label"/>
+              </ui:SIVisible>
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:TemplateContainer template="button-primary-label"/>
+              </ui:SIVisible>
+            </ui:VisualElement>
+          </ui:SISafeAreaElement>
+        </ui:VisualElement>
+      </ui:SIVisible>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

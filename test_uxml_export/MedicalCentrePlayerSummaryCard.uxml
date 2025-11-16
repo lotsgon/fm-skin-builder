@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables>
+      <ui:SIVisible data-binding="config.ShowPhonePanels">
+        <ui:TemplateContainer template="FullScreenExpandedTableCardTemplate"/>
+      </ui:SIVisible>
+      <ui:SIVisible class="base-template-grow" data-binding="config.ShowPhonePanels">
+        <ui:TemplateContainer template="FigmaBaseCardTemplate"/>
+      </ui:SIVisible>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

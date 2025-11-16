@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="ios-interactions-modal-sheet">
+    <ui:VisualElement class="modal-sheet-background"/>
+    <ui:VisualElement class="ios-interactions-modal-sheet">
+      <ui:VisualElement class="grabber padding-right-global-padding-none padding-left-global-padding-none"/>
+      <ui:SISafeAreaElement/>
+    </ui:VisualElement>
+  </ui:BindingExpect>
+</ui:UXML>

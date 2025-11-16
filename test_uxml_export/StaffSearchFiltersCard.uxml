@@ -1,0 +1,55 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingRemapper class="base-template-grow" binding-mappings="filter=game.GameCurrentManager.HumanPersonSearch.PersonFilter">
+      <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTabbedTemplate"/>
+      <ui:VisualElement class="quick-action-buttons-template-layout">
+        <ui:BindingExpect>
+          <ui:SIVisible class="padding-left-global-padding-extra-large" data-binding="config.ShowQuickActionButtons">
+            <ui:BindingVariables>
+              <ui:BindingVariables>
+                <ui:SIScrollAnimation>
+                  <ui:SISafeAreaElement>
+                    <ui:SIButton class="shortcut-fake-button">
+                      <ui:ContextShortcutsElement class="row-direction-normal">
+                        <ui:SIVisible data-binding="[VisualFunction]">
+                          <ui:SIEnabled data-binding="const.True">
+                            <ui:BindingVariables>
+                              <ui:TemplateContainer template="QuickActionDropdownButton"/>
+                            </ui:BindingVariables>
+                          </ui:SIEnabled>
+                        </ui:SIVisible>
+                        <ui:SIVisible data-binding="[VisualFunction]">
+                          <ui:SIEnabled data-binding="const.True">
+                            <ui:SIButton class="is_active buttons-quick-action-primary quick-actions-separator">
+                              <ui:SIImage class="margin-right-global-gap-regular" data-binding="[VisualFunction]"/>
+                              <ui:VisualElement class="margin-right-global-gap-regular">
+                                <ui:SIText class="body-small-12px-regular white" text-binding="[VisualFunction]"/>
+                              </ui:VisualElement>
+                            </ui:SIButton>
+                          </ui:SIEnabled>
+                        </ui:SIVisible>
+                        <ui:SIVisible data-binding="[VisualFunction]">
+                          <ui:VisualElement class="row-direction-normal">
+                            <ui:StreamedObjectList data-binding="[VisualFunction]"/>
+                            <ui:SIVisible data-binding="use-speak-to-overflow">
+                              <ui:SIVisible data-binding="[VisualFunction]">
+                                <ui:TemplateContainer template="dropdown-base-regular-trailing-icon"/>
+                              </ui:SIVisible>
+                            </ui:SIVisible>
+                          </ui:VisualElement>
+                        </ui:SIVisible>
+                        <ui:SIVisible data-binding="use-static-actions-overflow">
+                          <ui:TemplateContainer template="dropdown-base-regular-trailing-icon"/>
+                        </ui:SIVisible>
+                      </ui:ContextShortcutsElement>
+                    </ui:SIButton>
+                  </ui:SISafeAreaElement>
+                </ui:SIScrollAnimation>
+              </ui:BindingVariables>
+            </ui:BindingVariables>
+          </ui:SIVisible>
+        </ui:BindingExpect>
+      </ui:VisualElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

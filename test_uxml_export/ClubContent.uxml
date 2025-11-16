@@ -1,0 +1,62 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="flex-grow-class">
+    <ui:VisualElement class="flex-grow-class">
+      <ui:SIGradient class="row-direction-normal border-choose-club-or-nation justify-content-space-around">
+        <ui:VisualElement class="row-direction-normal base-template-grow">
+          <ui:BindingRemapper class="justify-content-center margin-right-12" binding-mappings="comp=selectedComp">
+            <ui:SIImage class="quick-actions-overflow-button" data-binding="[VisualFunction]"/>
+          </ui:BindingRemapper>
+          <ui:SIText class="heading-small-16px" text-binding="selectedComp.Name"/>
+        </ui:VisualElement>
+        <ui:VisualElement class="row-direction-normal flex-shrink-class flex-no-grow-class">
+          <ui:VisualElement>
+            <ui:SIText class="body-small-12px-bold global-text-secondary margin-bottom-global-gap-small" text-binding="[VisualFunction]"/>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIImage class="nation-flag-small-16px margin-right-global-gap-regular align-self-center-class" data-binding="[VisualFunction]"/>
+              <ui:SIText class="content-no-wrap content-ellipsis global-text-primary body-regular-14px-regular" text-binding="selectedNation.Name"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:TemplateContainer class="margin-left-global-gap-extra-large margin-right-global-gap-extra-large" template="layout-divider-solid-vertical"/>
+          <ui:VisualElement class="margin-right-global-gap-extra-large margin-left-global-gap-extra-large">
+            <ui:VisualElement class="row-direction-normal margin-bottom-4 margin-bottom-global-gap-small">
+              <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:BindingRemapper binding-mappings="reputation=selectedComp.ReputationScope">
+                <ui:TemplateContainer template="LeagueReputationCell"/>
+              </ui:BindingRemapper>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:TemplateContainer class="margin-right-global-gap-extra-large margin-left-global-gap-extra-large" template="layout-divider-solid-vertical"/>
+          <ui:VisualElement class="row-direction-normal align-self-center-class">
+            <ui:VisualElement class="game-concepts-club-badge_small margin-right-global-gap-small"/>
+            <ui:SIText class="body-regular-14px-regular content-no-wrap content-left-align content-ellipsis margin-right-global-gap-small global-text-primary" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:SIGradient>
+      <ui:BindingRemapper binding-mappings="DBSummaryCompetition=selectedComp">
+        <ui:BindableSwitchElement data-binding="[VisualFunction]">
+          <ui:VisualElement class="base-template-grow">
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement class="game-concepts-club-badge_small margin-right-8 align-self-center-class"/>
+              <ui:SIText class="global-text-primary heading-small-16px" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+            <ui:SIScrollView class="flex-grow-class">
+              <ui:GridSelector class="horizontal-list-shrink non-selectable-list grid-without-scroll quick_start-club-selected-tile-Border"/>
+            </ui:SIScrollView>
+          </ui:VisualElement>
+          <ui:SIScrollView class="flex-grow-class margin-top-16">
+            <ui:GridSelector class="horizontal-list-shrink non-selectable-list grid-without-scroll quick_start-club-selected-tile-Border grid-selector-full-width"/>
+          </ui:SIScrollView>
+        </ui:BindableSwitchElement>
+        <ui:SIVisible data-binding="config.ShowPhonePanels">
+          <ui:SIVisible data-binding="isunemployed">
+            <ui:SIVisible data-binding="setupgame.SelectedClub">
+              <ui:EventTrigger/>
+            </ui:SIVisible>
+          </ui:SIVisible>
+        </ui:SIVisible>
+      </ui:BindingRemapper>
+    </ui:VisualElement>
+  </ui:BindingExpect>
+</ui:UXML>

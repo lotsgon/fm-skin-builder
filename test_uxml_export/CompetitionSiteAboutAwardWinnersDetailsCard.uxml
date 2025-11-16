@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingRemapper class="base-template-grow">
+      <ui:SIVisible class="base-template-grow" data-binding="[VisualFunction]">
+        <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTemplate"/>
+      </ui:SIVisible>
+      <ui:SIVisible class="base-template-grow" data-binding="[VisualFunction]">
+        <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTemplate"/>
+      </ui:SIVisible>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

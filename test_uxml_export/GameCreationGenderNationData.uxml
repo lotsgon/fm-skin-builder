@@ -1,0 +1,85 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:VisualElement class="row-direction-normal">
+      <ui:BindableSwitchElement data-binding="[VisualFunction]">
+        <ui:SIText class="heading-small-16px global-text-primary" text-binding="[VisualFunction]"/>
+        <ui:SIText class="heading-small-16px global-text-primary" text-binding="[VisualFunction]"/>
+      </ui:BindableSwitchElement>
+    </ui:VisualElement>
+    <ui:BindingVariables>
+      <ui:TabGroup class="no_margin no_padding">
+        <ui:ButtonGroup class="row-direction-normal no_margin no_padding margin-bottom-8">
+          <ui:SIStyleSetter>
+            <ui:SIButton class="no-left-margin row-direction-normal buttons-segmented-button-row-active-small-placement-leading">
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:VisualElement class="ui-concepts-tick_small margin-right-8"/>
+              </ui:SIVisible>
+              <ui:SIText class="body-small-12px-regular global-text-primary" text-binding="[VisualFunction]"/>
+            </ui:SIButton>
+          </ui:SIStyleSetter>
+          <ui:SIStyleSetter>
+            <ui:SIButton class="no-left-margin row-direction-normal buttons-segmented-button-row-inactive-small-placement-middle">
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+              </ui:SIVisible>
+              <ui:SIText class="body-small-12px-regular global-text-primary" text-binding="[VisualFunction]"/>
+            </ui:SIButton>
+          </ui:SIStyleSetter>
+          <ui:SIStyleSetter>
+            <ui:SIButton class="no-left-margin no-right-margin row-direction-normal buttons-segmented-button-row-inactive-small-placement-trailing">
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+              </ui:SIVisible>
+              <ui:SIText class="body-small-12px-regular global-text-primary" text-binding="[VisualFunction]"/>
+            </ui:SIButton>
+          </ui:SIStyleSetter>
+        </ui:ButtonGroup>
+        <ui:SwitchElement>
+          <ui:VisualElement>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="body-small-12px-bold global-text-primary margin-right-global-gap-regular" text-binding="[VisualFunction]"/>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:VisualElement class="row-direction-normal margin-right-global-gap-extra-large">
+                    <ui:SIRadialGauge class="sisegemntedradialgauge margin-right-global-gap-small"/>
+                    <ui:SIText class="body-small-12px-regular global-text-primary margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="ui-concepts-line_small neutral-background-image-tint-colour margin-right-16"/>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:SIRadialGauge class="sisegemntedradialgauge margin-right-global-gap-small"/>
+                    <ui:SIText class="body-small-12px-regular global-text-primary margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:StreamedObjectList data-binding="SetupGame.SelectedNation.PlayableLeagues"/>
+          </ui:VisualElement>
+          <ui:VisualElement>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="body-small-12px-bold global-text-primary margin-right-global-gap-regular" text-binding="[VisualFunction]"/>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:VisualElement class="row-direction-normal margin-right-global-gap-extra-large">
+                    <ui:SIRadialGauge class="sisegemntedradialgauge margin-right-global-gap-small"/>
+                    <ui:SIText class="body-small-12px-regular global-text-primary margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="ui-concepts-line_small neutral-background-image-tint-colour margin-right-16"/>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:SIRadialGauge class="sisegemntedradialgauge margin-right-global-gap-small"/>
+                    <ui:SIText class="body-small-12px-regular global-text-primary margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:StreamedObjectList data-binding="SetupGame.SelectedNation.Competitions"/>
+          </ui:VisualElement>
+          <ui:VisualElement>
+            <ui:BindingVariables>
+              <ui:StreamedObjectList data-binding="[VisualFunction]"/>
+            </ui:BindingVariables>
+          </ui:VisualElement>
+        </ui:SwitchElement>
+      </ui:TabGroup>
+    </ui:BindingVariables>
+  </ui:BindingExpect>
+</ui:UXML>

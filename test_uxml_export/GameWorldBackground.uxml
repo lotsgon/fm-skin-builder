@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindableSwitchElement data-binding="game.BackgroundImage.Use3DBackground">
+      <ui:SIImage class="siimage padding-right-global-padding-none padding-left-global-padding-none" data-binding="game.BackgroundImage.BackgroundImage"/>
+      <ui:SIRenderTextureImage/>
+    </ui:BindableSwitchElement>
+  </ui:BindingRoot>
+</ui:UXML>

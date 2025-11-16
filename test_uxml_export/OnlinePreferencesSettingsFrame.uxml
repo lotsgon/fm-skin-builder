@@ -1,0 +1,46 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement class="align-self-stretch-class">
+    <ui:SIEnabled class="setting_block margin-bottom-8" data-binding="multiplayer.IsMultiplayerAvailable">
+      <ui:SIText class="body-large-16px-regular global-text-secondary margin-bottom-6" text-binding="[VisualFunction]"/>
+      <ui:TemplateContainer class="setting_line_no_description margin-bottom-8" template="setting_line-type-dropdown"/>
+      <ui:TemplateContainer class="margin-bottom-8" template="setting_line-type-text_field"/>
+      <ui:TemplateContainer class="margin-bottom-8" template="setting_line-type-text_field"/>
+      <ui:SIVisible data-binding="config.ShowCrossplaySetting">
+        <ui:TemplateContainer class="setting_line_no_description margin-bottom-8" template="setting_line-type-checkbox"/>
+      </ui:SIVisible>
+      <ui:SIVisible data-binding="config.ShowBlockPlayer">
+        <ui:SIEnabled class="margin-bottom-8" data-binding="[VisualFunction]">
+          <ui:TemplateContainer class="setting_line_no_description" template="setting_line-type-button_open"/>
+        </ui:SIEnabled>
+      </ui:SIVisible>
+      <ui:SIEnabled data-binding="[VisualFunction]">
+        <ui:TemplateContainer class="setting_line_no_description" template="setting_line-type-button_open"/>
+      </ui:SIEnabled>
+    </ui:SIEnabled>
+    <ui:VisualElement class="setting_block margin-bottom-8">
+      <ui:SIText class="body-large-16px-regular global-text-secondary margin-bottom-6" text-binding="[VisualFunction]"/>
+      <ui:TemplateContainer class="flex-grow-class margin-bottom-8" template="setting_line-type-dropdown"/>
+      <ui:TemplateContainer class="flex-grow-class margin-bottom-8" template="setting_line-type-dropdown"/>
+      <ui:TemplateContainer template="setting_line-type-slider_with_text"/>
+    </ui:VisualElement>
+    <ui:SIEnabled class="setting_block margin-bottom-8" data-binding="app.MultiplayerGameplayPrefsEnabled">
+      <ui:SIText class="body-large-16px-regular global-text-secondary margin-bottom-6" text-binding="[VisualFunction]"/>
+      <ui:TemplateContainer class="setting_line_no_description margin-bottom-8" template="setting_line-type-checkbox"/>
+      <ui:TemplateContainer class="setting_line_no_description margin-bottom-8" template="setting_line-type-checkbox"/>
+      <ui:TemplateContainer class="margin-bottom-8" template="setting_line-type-checkbox"/>
+      <ui:TemplateContainer class="setting_line_no_description margin-bottom-8" template="setting_line-type-checkbox"/>
+      <ui:TemplateContainer class="margin-bottom-8" template="setting_line-type-checkbox"/>
+      <ui:TemplateContainer template="setting_line-type-checkbox"/>
+    </ui:SIEnabled>
+    <ui:VisualElement class="setting_block">
+      <ui:SIText class="body-large-16px-regular global-text-secondary margin-bottom-6" text-binding="[VisualFunction]"/>
+      <ui:TemplateContainer class="margin-bottom-8" template="setting_line-type-checkbox"/>
+      <ui:BindingVariables>
+        <ui:SIEnabled data-binding="app.NativeSettings">
+          <ui:TemplateContainer class="margin-bottom-8" template="setting_line-type-dropdown"/>
+          <ui:TemplateContainer template="setting_line-type-dropdown"/>
+        </ui:SIEnabled>
+      </ui:BindingVariables>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,105 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingRemapper class="base-template-grow" binding-mappings="tutorial=tutorialmanager.Tutorial">
+      <ui:TutorialCutoutBackground class="tutorial-popup-background">
+        <ui:BindableSwitchElement data-binding="config.ShowPhonePanels">
+          <ui:VisualElement class="base-component-tutorial-popup">
+            <ui:SIGradient class=" base-component-tutorial-background">
+              <ui:SIImage class="tutorial-background"/>
+            </ui:SIGradient>
+            <ui:SIVisible class="margin-top-global-gap-regular margin-right-global-gap-regular" data-binding="tutorial.IsOneStepTutorial">
+              <ui:TemplateContainer template="button-tertiary"/>
+            </ui:SIVisible>
+            <ui:VisualElement class="base-component-tutorial">
+              <ui:SIVisible data-binding="tutorial.CurrentStep.HasImage">
+                <ui:SIImage class="base-component-tutorial-image"/>
+              </ui:SIVisible>
+              <ui:VisualElement class="base-component-tutorial-content">
+                <ui:VisualElement class="column-direction-normal base-component-tutorial-texts">
+                  <ui:SIText class="heading-large-22px" text-binding="tutorial.CurrentStep.Title"/>
+                  <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="tutorial.CurrentStep.Description"/>
+                </ui:VisualElement>
+                <ui:BindableSwitchElement class="base-component-tutorial-buttons" data-binding="tutorial.CanProceed">
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:SIVisible data-binding="tutorial.IsOneStepTutorial">
+                      <ui:SIButton class="buttons-button-base-default">
+                        <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+                        <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                      </ui:SIButton>
+                    </ui:SIVisible>
+                    <ui:SIButton class="buttons-button-primary-default">
+                      <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+                      <ui:BindableSwitchElement data-binding="tutorial.IsOneStepTutorial">
+                        <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                        <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                      </ui:BindableSwitchElement>
+                      <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+                    </ui:SIButton>
+                  </ui:VisualElement>
+                  <ui:BindableSwitchElement class="row-direction-normal" data-binding="tutorial.CurrentStep.IsSummaryStep">
+                    <ui:SIButton class="buttons-button-secondary-default margin-right-global-gap-none margin-left-global-gap-none">
+                      <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+                      <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                      <ui:VisualElement class="ui-concepts-chevron-right_small margin-right-global-gap-regular"/>
+                    </ui:SIButton>
+                    <ui:SIButton class="buttons-button-primary-default">
+                      <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+                      <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                      <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+                    </ui:SIButton>
+                  </ui:BindableSwitchElement>
+                </ui:BindableSwitchElement>
+              </ui:VisualElement>
+              <ui:SIVisible data-binding="tutorial.DisplayStepper">
+                <ui:SIStepper class="data_display-graphs-stepper-step_bar-width-size-narrow-counter"/>
+              </ui:SIVisible>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:VisualElement class="base-component-tutorial-popup-phone">
+            <ui:SIGradient class=" base-component-tutorial-background-phone">
+              <ui:SIImage class="tutorial-background"/>
+            </ui:SIGradient>
+            <ui:SIVisible class="flex-no-shrink-class margin-bottom-global-gap-extra-large margin-top-global-gap-extra-large align-self-end margin-right-global-gap-huge" data-binding="tutorial.IsOneStepTutorial">
+              <ui:TemplateContainer template="button-tertiary"/>
+            </ui:SIVisible>
+            <ui:VisualElement class="base-component-tutorial-phone">
+              <ui:VisualElement class="base-component-tutorial-content no-margin">
+                <ui:VisualElement class="column-direction-normal base-component-tutorial-texts">
+                  <ui:SIText class="heading-regular-18px margin-bottom-global-gap-small" text-binding="tutorial.CurrentStep.Title"/>
+                  <ui:SIText class="body-small-12px-regular global-text-secondary" text-binding="tutorial.CurrentStep.Description"/>
+                </ui:VisualElement>
+                <ui:BindableSwitchElement class="base-component-tutorial-buttons" data-binding="tutorial.CanProceed">
+                  <ui:VisualElement class="row-direction-normal align-self-stretch-class">
+                    <ui:SIVisible class="flex-no-shrink-class" data-binding="tutorial.IsOneStepTutorial">
+                      <ui:SIButton class="buttons-button-base-default align-self-center-class">
+                        <ui:VisualElement class="ui-concepts-reset_small"/>
+                      </ui:SIButton>
+                    </ui:SIVisible>
+                    <ui:SIButton class="buttons-button-primary-default align-self-center-class">
+                      <ui:BindableSwitchElement data-binding="tutorial.IsOneStepTutorial">
+                        <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                        <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                      </ui:BindableSwitchElement>
+                      <ui:VisualElement class="ui-concepts-tick_small margin-left-global-gap-regular"/>
+                    </ui:SIButton>
+                  </ui:VisualElement>
+                  <ui:BindableSwitchElement class="row-direction-normal" data-binding="tutorial.CurrentStep.IsSummaryStep">
+                    <ui:SIButton class="buttons-button-secondary-default margin-right-global-gap-none margin-left-global-gap-none align-self-center-class">
+                      <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                      <ui:VisualElement class="ui-concepts-chevron-right_small margin-left-global-gap-regular"/>
+                    </ui:SIButton>
+                    <ui:SIButton class="buttons-button-primary-default align-self-center-class">
+                      <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                      <ui:VisualElement class="ui-concepts-tick_small margin-left-global-gap-regular"/>
+                    </ui:SIButton>
+                  </ui:BindableSwitchElement>
+                </ui:BindableSwitchElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:BindableSwitchElement>
+        <ui:TemplateContainer template="TutorialFloatingBlock"/>
+      </ui:TutorialCutoutBackground>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

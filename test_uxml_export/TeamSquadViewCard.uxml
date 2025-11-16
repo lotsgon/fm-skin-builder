@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="controller-swap-mode-greyed-out-elements reports-focus-header-tabs-property-1-summary flex-grow-class">
+    <ui:VisualElement class="card-states-welcome-pack">
+      <ui:VisualElement class="row-direction-normal padding-left-global-padding-extra-large padding-top-4px padding-bottom-4px padding-right-8px streamed-table-cell-selector">
+        <ui:VisualElement class="row-direction-normal flex-grow-class center">
+          <ui:SIText class="global-text-secondary" text-binding="[VisualFunction]"/>
+          <ui:SIImage class="ui-concepts-chevron-right_small center"/>
+          <ui:SIText text-binding="team.Club.Name"/>
+        </ui:VisualElement>
+        <ui:TemplateContainer template="buttons-controls-pc-default"/>
+      </ui:VisualElement>
+      <ui:VisualElement class="card-states-border flex-grow-class frame-inner-team-squad">
+        <ui:SIText class="body-regular-14px-bold store-dropdown" text-binding="[VisualFunction]"/>
+        <ui:SIScrollView class="flex-grow-class streamed-table-cell-selector">
+          <ui:StreamedTable class="flex-grow-class" data-binding="team.FilteredPlayers"/>
+        </ui:SIScrollView>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

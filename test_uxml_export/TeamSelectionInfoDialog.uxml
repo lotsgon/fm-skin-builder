@@ -1,0 +1,33 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement class="sipopup-container">
+    <ui:BindingRoot>
+      <ui:VisualElement class="card-notifications-modal-dialog-quit-without-saving">
+        <ui:VisualElement>
+          <ui:VisualElement class="notifications--notifications-modal-dialog-default-default">
+            <ui:VisualElement>
+              <ui:VisualElement>
+                <ui:SIText class="heading-small-16px text-middle-center" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular text-middle-center" text-binding="Team.Tactic.TeamSelectionMessage"/>
+              </ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement>
+                  <ui:VisualElement>
+                    <ui:VisualElement class="notifications-modal-dialog-actions-default-type-confirm">
+                      <ui:BindableSwitchElement data-binding="Team.Tactic.IsTeamSelectionValid">
+                        <ui:TemplateContainer class="margin-bottom-global-gap-regular margin-right-global-gap-regular" template="button-secondary-label"/>
+                        <ui:VisualElement class="row-direction-normal row-direction-inverted">
+                          <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-label"/>
+                          <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-primary-label"/>
+                        </ui:VisualElement>
+                      </ui:BindableSwitchElement>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingRoot>
+  </ui:VisualElement>
+</ui:UXML>

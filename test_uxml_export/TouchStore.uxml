@@ -1,0 +1,109 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement class="frames-and-components-card-store">
+    <ui:BindingRoot>
+      <ui:BindingRemapper binding-mappings="store=app.Store;storeupdated=Store.Updated">
+        <ui:VisualElement class="fmc-store-background absolute-position-fill-container"/>
+        <ui:SISafeAreaElement>
+          <ui:VisualElement class="margin-right-global-gap-extra-large margin-left-global-gap-extra-large">
+            <ui:VisualElement class="row-direction-normal padding-left-global-padding-large">
+              <ui:TemplateContainer class="margin-right-global-gap-regular" template="buttons-controls-close-default"/>
+              <ui:SIVisible class="margin-right-global-gap-small margin-left-global-gap-small" data-binding="[VisualFunction]">
+                <ui:TemplateContainer class="margin-right-global-gap-small" template="data_display-graph-progress_timeline-progress_indicator"/>
+              </ui:SIVisible>
+              <ui:SIText class="fm-universe-small-16px" text-binding="[VisualFunction]"/>
+              <ui:SIVisible class="margin-left-global-gap-none" data-binding="[VisualFunction]">
+                <ui:SIText class="margin-right-global-gap-none margin-left-global-gap-small fm-universe-small-16px" text-binding="[VisualFunction]"/>
+              </ui:SIVisible>
+            </ui:VisualElement>
+            <ui:BindingVariables>
+              <ui:TabGroup>
+                <ui:ButtonGroup class="row-direction-normal padding-left-global-padding-regular" current-selected-id-binding="selectedtabid" selection-binding="selectedtabid">
+                  <ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIButton class="tab-button-height-store-fmc">
+                        <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIText text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                        <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                        <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                      </ui:SIButton>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                  <ui:SIVisible data-binding="[VisualFunction]">
+                    <ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:SIButton class="tab-button-height-store-fmc">
+                          <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                          <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                          <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                          <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                        </ui:SIButton>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:SIVisible>
+                  <ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIButton class="tab-button-height-store-fmc">
+                        <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:VisualElement class="ui-concepts-padlock-open_small margin-right-global-gap-regular"/>
+                          <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                        <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                        <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                      </ui:SIButton>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                  <ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIButton class="tab-button-height-store-fmc">
+                        <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:VisualElement class="ui-concepts-padlock-closed_small margin-right-global-gap-regular"/>
+                          <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                        <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                        <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                      </ui:SIButton>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:ButtonGroup>
+                <ui:SwitchElement>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:VisualElement>
+                      <ui:SIVisible data-binding="[VisualFunction]"/>
+                      <ui:SIScrollView>
+                        <ui:GridSelector class="store-grid-selector margin-left-global-gap-none padding-left-global-padding-none"/>
+                      </ui:SIScrollView>
+                      <ui:SIVisible class="row-direction-normal" data-binding="[VisualFunction]">
+                        <ui:VisualElement class="margin-right-global-gap-regular margin-left-global-gap-regular">
+                          <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:SIScrollView>
+                      <ui:GridSelector class="store-grid-selector margin-left-global-gap-none padding-left-global-padding-none"/>
+                    </ui:SIScrollView>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:SIScrollView>
+                      <ui:GridSelector class="store-grid-selector margin-left-global-gap-none padding-left-global-padding-none"/>
+                    </ui:SIScrollView>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:SIScrollView>
+                      <ui:GridSelector class="store-grid-selector margin-left-global-gap-none padding-left-global-padding-none"/>
+                    </ui:SIScrollView>
+                  </ui:VisualElement>
+                </ui:SwitchElement>
+              </ui:TabGroup>
+            </ui:BindingVariables>
+          </ui:VisualElement>
+        </ui:SISafeAreaElement>
+      </ui:BindingRemapper>
+    </ui:BindingRoot>
+  </ui:VisualElement>
+</ui:UXML>

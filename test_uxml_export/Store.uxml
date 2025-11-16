@@ -1,0 +1,224 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement class="frames-and-components-card-store">
+    <ui:BindingRoot>
+      <ui:BindingRemapper binding-mappings="store=app.Store;storeupdated=Store.Updated">
+        <ui:BindingVariables>
+          <ui:VisualElement class="midnight flex-grow-class fmc-store-background">
+            <ui:SIImage data-binding="[VisualFunction]"/>
+            <ui:VisualElement class="padding-right-global-padding-huge">
+              <ui:VisualElement class="row-direction-normal padding-left-global-padding-regular">
+                <ui:SIText class="fm-universe-xlarge-30px" text-binding="[VisualFunction]"/>
+                <ui:BindableSwitchElement data-binding="isInSave">
+                  <ui:TemplateContainer template="buttons-controls-close-default"/>
+                  <ui:TemplateContainer class="margin-right-global-gap-huge" template="buttons-controls-close-default"/>
+                </ui:BindableSwitchElement>
+              </ui:VisualElement>
+              <ui:BindingVariables>
+                <ui:BindingRemapper binding-mappings="type=walletselectedtype">
+                  <ui:SIVisible data-binding="storeupdated">
+                    <ui:BindingVariables>
+                      <ui:TabGroup class="margin-right-global-gap-none margin-left-global-gap-none padding-left-global-padding-none">
+                        <ui:ButtonGroup class="row-direction-normal padding-left-global-padding-none" current-selected-id-binding="selectedtabid" selection-binding="selectedtabid">
+                          <ui:VisualElement>
+                            <ui:BindingVariables>
+                              <ui:VisualElement>
+                                <ui:SIButton class="tab-button-height-store-fmc padding-left-global-padding-extra-large fmc_store_tab">
+                                  <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                                  <ui:VisualElement class="row-direction-normal">
+                                    <ui:SIVisible class="margin-right-global-gap-none" data-binding="[VisualFunction]">
+                                      <ui:TemplateContainer class="margin-right-global-gap-regular" template="data_display-graph-progress_timeline-progress_indicator"/>
+                                    </ui:SIVisible>
+                                    <ui:SIText text-binding="[VisualFunction]"/>
+                                    <ui:SIVisible class="margin-left-global-gap-regular" data-binding="[VisualFunction]">
+                                      <ui:SIText class="margin-right-global-gap-none margin-left-global-gap-none" text-binding="[VisualFunction]"/>
+                                    </ui:SIVisible>
+                                  </ui:VisualElement>
+                                  <ui:TemplateContainer class="controllers-keyboard-inputs" template="controllers-keyboard inputs"/>
+                                  <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                                </ui:SIButton>
+                              </ui:VisualElement>
+                            </ui:BindingVariables>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:VisualElement>
+                              <ui:SIButton class="tab-button-height-store-fmc padding-right-global-padding-extra-large padding-left-global-padding-extra-large fmc_store_tab">
+                                <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                                <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                                <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                                <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                              </ui:SIButton>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:VisualElement>
+                              <ui:SIButton class="tab-button-height-store-fmc padding-left-global-padding-extra-large fmc_store_tab">
+                                <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                                <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                                <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                                <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                              </ui:SIButton>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:VisualElement>
+                              <ui:SIButton class="tab-button-height-store-fmc padding-right-global-padding-extra-large padding-left-global-padding-extra-large fmc_store_tab">
+                                <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                                <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                                <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                                <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                              </ui:SIButton>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:VisualElement>
+                              <ui:SIButton class="tab-button-height-store-fmc padding-left-global-padding-extra-large fmc_store_tab">
+                                <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                                <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                                <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                                <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                              </ui:SIButton>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                        </ui:ButtonGroup>
+                        <ui:SwitchElement>
+                          <ui:VisualElement class="row-direction-normal store-tabs-content-height">
+                            <ui:VisualElement>
+                              <ui:TemplateContainer template="dropdown-base-regular"/>
+                              <ui:VisualElement>
+                                <ui:SIVisible data-binding="[VisualFunction]">
+                                  <ui:BindingRemapper binding-mappings="sectionselecteditemindex=walletselecteditemindex;sectionitems=Store.WalletItems">
+                                    <ui:TemplateContainer template="StoreGridSelector"/>
+                                  </ui:BindingRemapper>
+                                </ui:SIVisible>
+                                <ui:SIVisible class="row-direction-normal" data-binding="[VisualFunction]">
+                                  <ui:TemplateContainer template="StoreNoItemsSelector"/>
+                                </ui:SIVisible>
+                              </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement>
+                              <ui:SIVisible data-binding="[VisualFunction]">
+                                <ui:TemplateContainer template="StoreItemInfoContextTileAndTerms"/>
+                              </ui:SIVisible>
+                              <ui:SIVisible data-binding="[VisualFunction]">
+                                <ui:TemplateContainer template="StoreNoItemsData"/>
+                              </ui:SIVisible>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                          <ui:VisualElement class="row-direction-normal store-tabs-content-height">
+                            <ui:BindingVariables>
+                              <ui:BindingRemapper binding-mappings="sectionselecteditemindex=overviewselecteditemindex;sectionitems=Store.OverviewItems">
+                                <ui:VisualElement class="row-direction-normal">
+                                  <ui:TemplateContainer template="StoreGridSelector"/>
+                                  <ui:TemplateContainer template="StoreItemInfoContextTileAndTerms"/>
+                                </ui:VisualElement>
+                              </ui:BindingRemapper>
+                            </ui:BindingVariables>
+                          </ui:VisualElement>
+                          <ui:VisualElement class="row-direction-normal store-tabs-content-height">
+                            <ui:BindingRemapper binding-mappings="sectionselecteditemindex=bbbselecteditemindex;sectionitems=Store.BoostBankBalanceItems">
+                              <ui:VisualElement class="row-direction-normal">
+                                <ui:TemplateContainer template="StoreGridSelector"/>
+                                <ui:TemplateContainer template="StoreItemInfoContextTileAndTerms"/>
+                              </ui:VisualElement>
+                            </ui:BindingRemapper>
+                          </ui:VisualElement>
+                          <ui:VisualElement class="row-direction-normal store-tabs-content-height">
+                            <ui:BindingRemapper binding-mappings="sectionselecteditemindex=consumableselecteditemindex;sectionitems=Store.ConsumablesItems">
+                              <ui:VisualElement class="row-direction-normal">
+                                <ui:TemplateContainer template="StoreGridSelector"/>
+                                <ui:TemplateContainer template="StoreItemInfoContextTileAndTerms"/>
+                              </ui:VisualElement>
+                            </ui:BindingRemapper>
+                          </ui:VisualElement>
+                          <ui:VisualElement class="row-direction-normal store-tabs-content-height">
+                            <ui:BindingRemapper binding-mappings="sectionselecteditemindex=unlockableselecteditemindex;sectionitems=Store.UnlockablesItems">
+                              <ui:VisualElement class="row-direction-normal">
+                                <ui:TemplateContainer template="StoreGridSelector"/>
+                                <ui:TemplateContainer template="StoreItemInfoContextTileAndTerms"/>
+                              </ui:VisualElement>
+                            </ui:BindingRemapper>
+                          </ui:VisualElement>
+                        </ui:SwitchElement>
+                      </ui:TabGroup>
+                    </ui:BindingVariables>
+                  </ui:SIVisible>
+                  <ui:SIVisible data-binding="storeupdated">
+                    <ui:BindingVariables>
+                      <ui:TabGroup class="margin-right-global-gap-none margin-left-global-gap-none padding-left-global-padding-none">
+                        <ui:ButtonGroup class="row-direction-normal padding-left-global-padding-none" current-selected-id-binding="selectedtabid" selection-binding="selectedtabid">
+                          <ui:VisualElement>
+                            <ui:BindingVariables>
+                              <ui:VisualElement class="margin-left-global-gap-extra-small">
+                                <ui:SIButton class="tab-button-height-store-fmc padding-right-global-padding-extra-large padding-left-global-padding-extra-large fmc_store_tab">
+                                  <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                                  <ui:VisualElement class="row-direction-normal">
+                                    <ui:SIVisible class="margin-right-global-gap-none" data-binding="[VisualFunction]">
+                                      <ui:TemplateContainer class="margin-right-global-gap-regular" template="data_display-graph-progress_timeline-progress_indicator"/>
+                                    </ui:SIVisible>
+                                    <ui:SIText class="margin-left-global-gap-none" text-binding="[VisualFunction]"/>
+                                    <ui:SIVisible class="margin-left-global-gap-regular" data-binding="[VisualFunction]">
+                                      <ui:SIText class="margin-right-global-gap-none margin-left-global-gap-none" text-binding="[VisualFunction]"/>
+                                    </ui:SIVisible>
+                                  </ui:VisualElement>
+                                  <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular padding-left-global-padding-regular" template="controllers-keyboard inputs"/>
+                                  <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                                </ui:SIButton>
+                              </ui:VisualElement>
+                            </ui:BindingVariables>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:VisualElement>
+                              <ui:SIButton class="tab-button-height-store-fmc padding-right-global-padding-extra-large padding-left-global-padding-extra-large fmc_store_tab">
+                                <ui:VisualElement class="ui-concepts-tick_small  margin-right-global-gap-regular"/>
+                                <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                                <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                                <ui:VisualElement class="ui-concepts-add-to-list_small margin-right-global-gap-regular"/>
+                              </ui:SIButton>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                        </ui:ButtonGroup>
+                        <ui:SwitchElement>
+                          <ui:VisualElement class="row-direction-normal store-tabs-content-height">
+                            <ui:VisualElement>
+                              <ui:TemplateContainer template="dropdown-base-regular"/>
+                              <ui:VisualElement>
+                                <ui:SIVisible data-binding="[VisualFunction]">
+                                  <ui:BindingRemapper binding-mappings="sectionselecteditemindex=walletselecteditemindex;sectionitems=Store.WalletItems">
+                                    <ui:TemplateContainer template="StoreGridSelector"/>
+                                  </ui:BindingRemapper>
+                                </ui:SIVisible>
+                                <ui:SIVisible data-binding="[VisualFunction]">
+                                  <ui:TemplateContainer template="StoreNoItemsSelector"/>
+                                </ui:SIVisible>
+                              </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement>
+                              <ui:SIVisible data-binding="[VisualFunction]">
+                                <ui:TemplateContainer template="StoreItemInfoContextTileAndTerms"/>
+                              </ui:SIVisible>
+                              <ui:SIVisible data-binding="[VisualFunction]">
+                                <ui:TemplateContainer template="StoreNoItemsData"/>
+                              </ui:SIVisible>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                          <ui:VisualElement class="row-direction-normal store-tabs-content-height">
+                            <ui:BindingRemapper binding-mappings="sectionselecteditemindex=unlockableselecteditemindex;sectionitems=Store.UnlockablesItems">
+                              <ui:VisualElement class="row-direction-normal">
+                                <ui:TemplateContainer template="StoreGridSelector"/>
+                                <ui:TemplateContainer template="StoreItemInfoContextTileAndTerms"/>
+                              </ui:VisualElement>
+                            </ui:BindingRemapper>
+                          </ui:VisualElement>
+                        </ui:SwitchElement>
+                      </ui:TabGroup>
+                    </ui:BindingVariables>
+                  </ui:SIVisible>
+                </ui:BindingRemapper>
+              </ui:BindingVariables>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:BindingVariables>
+      </ui:BindingRemapper>
+    </ui:BindingRoot>
+  </ui:VisualElement>
+</ui:UXML>

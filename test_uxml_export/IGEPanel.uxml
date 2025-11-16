@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:EventTrigger>
+      <ui:VisualElement class="figma-base-card-template-inner-frame margin-right-global-gap-extra-large margin-left-global-gap-extra-large padding-right-global-padding-extra-large padding-left-global-padding-extra-large">
+        <ui:TemplateContainer class="si-card-title-bar-header" template="buttons-controls-close-default"/>
+        <ui:VisualElement class="row-direction-normal">
+          <ui:BindingVariables class="row-direction-normal">
+            <ui:VisualElement>
+              <ui:NestedList selection-binding="selection"/>
+            </ui:VisualElement>
+            <ui:SIVisible data-binding="selection">
+              <ui:BindingRemapper binding-mappings="field=selection">
+                <ui:DynamicItem/>
+              </ui:BindingRemapper>
+            </ui:SIVisible>
+          </ui:BindingVariables>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:EventTrigger>
+  </ui:BindingRoot>
+</ui:UXML>

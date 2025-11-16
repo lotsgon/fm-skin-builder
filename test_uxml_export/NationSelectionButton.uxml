@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="manager-creation-thumbnail">
+    <ui:VisualElement>
+      <ui:VisualElement class="manager-preset-button-bg">
+        <ui:SIGradient>
+          <ui:SIButton class="manager-preset-button">
+            <ui:VisualElement class="row-direction-normal">
+              <ui:Toggle class="radio-toggle active-toggle"/>
+              <ui:VisualElement class="passive-toggle passive-toggle-outline"/>
+            </ui:VisualElement>
+            <ui:TemplateContainer template="SummaryNationIcon"/>
+            <ui:SIText class="heading-xsmall-14px global-text-primary" text-binding="item.Name"/>
+          </ui:SIButton>
+        </ui:SIGradient>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

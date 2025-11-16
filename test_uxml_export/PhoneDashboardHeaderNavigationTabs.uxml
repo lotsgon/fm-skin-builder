@@ -1,0 +1,116 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:TutorialAnchorElement>
+      <ui:BindingVariables>
+        <ui:BindingRemapper binding-mappings="team=human.team">
+          <ui:SISafeAreaElement class="align-items-center justify-content-center">
+            <ui:TemplateContainer class="navigation-header-gradient" template="NavigationHeaderGradient"/>
+            <ui:VisualElement class="ios-layout-dashboard-header-navigation-default-view-main base-template-grow">
+              <ui:VisualElement class="row-direction-normal align-items-center width-100-percent">
+                <ui:SIVisible data-binding="human.IsUnemployed">
+                  <ui:TemplateContainer class="flex-grow-class" template="NavigationHeaderClubAndNationIcons"/>
+                </ui:SIVisible>
+                <ui:TemplateContainer class="base-template-grow" template="dashboard-hud-location-default"/>
+                <ui:SIVisible data-binding="const.IsFinal">
+                  <ui:SIButton class="dashboard-hud-additional-buttons">
+                    <ui:VisualElement class="ui-concepts-placeholder_small"/>
+                  </ui:SIButton>
+                </ui:SIVisible>
+                <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                  <ui:VisualElement>
+                    <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                      <ui:BindingVariables>
+                        <ui:BindingRemapper binding-mappings="nation=human.team.nation">
+                          <ui:TabGroup>
+                            <ui:ButtonGroup class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" current-selected-id-binding="selectedTab">
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image portal-globe"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-squad-info_large"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-transfer_large"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-tactic-secondary_medium"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-club-badge_large"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image portal-manager"/>
+                              </ui:SIButton>
+                            </ui:ButtonGroup>
+                            <ui:SwitchElement>
+                              <ui:VisualElement/>
+                              <ui:VisualElement/>
+                              <ui:VisualElement/>
+                              <ui:VisualElement/>
+                              <ui:VisualElement/>
+                              <ui:VisualElement/>
+                            </ui:SwitchElement>
+                          </ui:TabGroup>
+                        </ui:BindingRemapper>
+                      </ui:BindingVariables>
+                      <ui:BindingVariables>
+                        <ui:BindingRemapper binding-mappings="club=human.team.club">
+                          <ui:TabGroup>
+                            <ui:ButtonGroup class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" current-selected-id-binding="selectedTab">
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image portal-globe"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-squad-info_large"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-transfer_large"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-tactic-secondary_medium"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-club-badge_large"/>
+                              </ui:SIButton>
+                              <ui:SIButton class="section-button-iphone">
+                                <ui:VisualElement class="unity-image section-button-iphone__image portal-manager"/>
+                              </ui:SIButton>
+                            </ui:ButtonGroup>
+                            <ui:SwitchElement>
+                              <ui:VisualElement/>
+                              <ui:VisualElement/>
+                              <ui:VisualElement/>
+                              <ui:VisualElement/>
+                              <ui:VisualElement/>
+                              <ui:VisualElement/>
+                            </ui:SwitchElement>
+                          </ui:TabGroup>
+                        </ui:BindingRemapper>
+                      </ui:BindingVariables>
+                    </ui:BindableSwitchElement>
+                  </ui:VisualElement>
+                  <ui:BindingVariables>
+                    <ui:TabGroup>
+                      <ui:ButtonGroup class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" current-selected-id-binding="selectedTab">
+                        <ui:SIButton class="section-button-iphone">
+                          <ui:VisualElement class="unity-image section-button-iphone__image portal-globe"/>
+                        </ui:SIButton>
+                        <ui:SIButton class="section-button-iphone">
+                          <ui:VisualElement class="unity-image section-button-iphone__image portal-manager"/>
+                        </ui:SIButton>
+                      </ui:ButtonGroup>
+                      <ui:SwitchElement>
+                        <ui:VisualElement/>
+                        <ui:VisualElement/>
+                      </ui:SwitchElement>
+                    </ui:TabGroup>
+                  </ui:BindingVariables>
+                </ui:BindableSwitchElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:SISafeAreaElement>
+        </ui:BindingRemapper>
+      </ui:BindingVariables>
+    </ui:TutorialAnchorElement>
+  </ui:BindingRoot>
+</ui:UXML>

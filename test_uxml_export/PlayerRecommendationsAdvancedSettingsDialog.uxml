@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement>
+      <ui:VisualElement class="notifications--notifications-modal-large-default-default">
+        <ui:VisualElement>
+          <ui:VisualElement>
+            <ui:SIText class="heading-small-16px" text-binding="[VisualFunction]"/>
+            <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+          <ui:TemplateContainer class="layout-divider-solid-horizontal" template="layout-divider-solid-horizontal"/>
+          <ui:VisualElement class="row-direction-normal border-color-layout-modules-block-border-colour">
+            <ui:SIScrollView>
+              <ui:TemplateContainer template="RecommendationsAdvancedSettingsAndFilters"/>
+            </ui:SIScrollView>
+          </ui:VisualElement>
+          <ui:TemplateContainer class="layout-divider-solid-horizontal" template="layout-divider-solid-horizontal"/>
+          <ui:TemplateContainer class="notifications-modal-dialog-actions-default-type-confirm row-direction-inverted" template="notifications-modal-dialog-actions-default"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

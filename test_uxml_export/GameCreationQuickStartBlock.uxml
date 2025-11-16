@@ -1,0 +1,54 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="base-template-grow">
+    <ui:SISafeAreaElement class="base-template-grow">
+      <ui:BindingVariables class="flex-grow-class">
+        <ui:BindableSwitchElement class="flex-grow-class" data-binding="config.ShowPhonePanels">
+          <ui:VisualElement class="flex-grow-class margin-top-32">
+            <ui:TemplateContainer class="flex-grow-class" template="QuickStartMainInteractionPanel"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="flex-grow-class align-self-stretch-class">
+            <ui:VisualElement class="row-direction-normal flex-no-shrink-class margin-top-global-gap-extra-large ios-quick-start-header">
+              <ui:SIText class="global-text-primary flex-grow-class fm-universe-large-22px" text-binding="[VisualFunction]"/>
+              <ui:SIVisible class="flex-no-shrink-class row-direction-normal align-self-center-class align-items-center justify-content-center margin-right-global-gap-large" data-binding="[VisualFunction]">
+                <ui:SIEnabled class="row-direction-normal" data-binding="isunemployed">
+                  <ui:ButtonGroup class="align-items-center align-self-center-class row-direction-normal no-margin no-padding">
+                    <ui:TemplateContainer template="ios-navigation-tab-with-icon"/>
+                    <ui:SIVisible class="row-direction-normal" data-binding="config.AllowInternationalManagement">
+                      <ui:TemplateContainer template="ios-navigation-tab-with-icon"/>
+                    </ui:SIVisible>
+                    <ui:SIVisible data-binding="config.AllowInternationalManagement">
+                      <ui:TemplateContainer template="ios-navigation-tab-with-icon"/>
+                    </ui:SIVisible>
+                  </ui:ButtonGroup>
+                </ui:SIEnabled>
+                <ui:VisualElement class="row-direction-normal align-items-center margin-left-global-gap-regular">
+                  <ui:SICheckBox class="game-creation-unemployed-checkbox inputs-switch-checkbox-default-switch-false--icon-none" selection-binding="isunemployed">
+                    <ui:VisualElement class="row-direction-normal base-template-grow">
+                      <ui:VisualElement class="row-direction-normal align-items-center">
+                        <ui:VisualElement class="sicheckbox inputs-switch-checkbox-default-switch-false--icon-none margin-right-global-gap-regular">
+                          <ui:VisualElement class="unity-toggle__input">
+                            <ui:VisualElement class="unity-toggle__checkmark"/>
+                          </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:VisualElement>
+                            <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                          </ui:VisualElement>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:SICheckBox>
+                </ui:VisualElement>
+              </ui:SIVisible>
+              <ui:TemplateContainer class="align-self-center-class" template="GamePreferencesButton_Phone"/>
+            </ui:VisualElement>
+            <ui:BindableSwitchElement data-binding="isunemployed">
+              <ui:TemplateContainer template="GameCreationQuickStartMainInteractionPanel_PhoneLandscape"/>
+              <ui:TemplateContainer template="QuickStartUnemployed_PhoneLandscape"/>
+            </ui:BindableSwitchElement>
+          </ui:VisualElement>
+        </ui:BindableSwitchElement>
+      </ui:BindingVariables>
+    </ui:SISafeAreaElement>
+  </ui:BindingExpect>
+</ui:UXML>

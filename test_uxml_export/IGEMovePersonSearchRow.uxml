@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="row-direction-normal">
+    <ui:VisualElement>
+      <ui:VisualElement class="navigation-dropdown-menu_item-body-accent-false--selected-false">
+        <ui:SIButton class="navigation-dropdown-menu_item_base-default">
+          <ui:VisualElement class="row-direction-normal">
+            <ui:VisualElement class="row-direction-normal padding-left-global-padding-none">
+              <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+              <ui:SIText class="body-regular-14px-regular global-text-primary" text-binding="searchresult.Name"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="row-direction-normal padding-left-global-padding-regular">
+              <ui:VisualElement class="ui-concepts-open_small"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:SIButton>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

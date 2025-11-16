@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingVariables class="base-template-grow">
+      <ui:BindingRemapper binding-mappings="competitionStage=comp.CurrentStage">
+        <ui:BindingSetter>
+          <ui:BindableSwitchElement class="base-template-grow" data-binding="[VisualFunction]">
+            <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTabbedTemplate"/>
+            <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTabbedTemplate"/>
+          </ui:BindableSwitchElement>
+        </ui:BindingSetter>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

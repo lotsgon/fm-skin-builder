@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="responsibilitylinkdata=fmconstants.ResponsibilitiesMatchLink">
+      <ui:TemplateContainer template="BaseCardTemplate">
+        <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small">
+          <ui:BindingVariables>
+            <ui:SIDropdown class="margin-left-global-gap-regular padding-left-global-padding-none"/>
+            <ui:DebugPropertiesElement/>
+          </ui:BindingVariables>
+        </ui:VisualElement>
+        <ui:BindingRemapper/>
+      </ui:TemplateContainer>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

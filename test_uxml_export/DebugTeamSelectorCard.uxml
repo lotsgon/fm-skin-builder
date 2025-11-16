@@ -1,0 +1,75 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables>
+      <ui:BindingRemapper binding-mappings="boolean=game.GameCurrentManager.IsAtTeam">
+        <ui:VisualElement>
+          <ui:SITile class="sicard">
+            <ui:SIImage/>
+            <ui:VisualElement>
+              <ui:VisualElement>
+                <ui:VisualElement class="row-direction-normal margin-right-global-gap-large margin-left-global-gap-large">
+                  <ui:SIAspectRatioFitter>
+                    <ui:SIButton class="sibutton margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none"/>
+                  </ui:SIAspectRatioFitter>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:Label class="white sitile__title"/>
+                    <ui:SIText class="sitext" text-binding="Team.Name"/>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:TabGroup>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:VisualElement>
+                    <ui:SIButton class="sipreferencestab"/>
+                    <ui:SIVisible data-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                  <ui:VisualElement>
+                    <ui:SIButton class="sipreferencestab"/>
+                    <ui:SIVisible data-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                  <ui:VisualElement>
+                    <ui:SIButton class="sipreferencestab"/>
+                    <ui:SIVisible data-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:SISelector>
+                  <ui:DebugPropertiesElement>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:VisualElement>
+                        <ui:Label class="sitext"/>
+                        <ui:BindingVariables>
+                          <ui:StreamedObjectList data-binding="Team.Tactic.TacticalPositions"/>
+                        </ui:BindingVariables>
+                      </ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:Label class="sitext"/>
+                        <ui:BindingVariables>
+                          <ui:StreamedObjectList data-binding="Team.Tactic.TacticalPositions"/>
+                        </ui:BindingVariables>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:DebugPropertiesElement>
+                  <ui:DebugPropertiesElement>
+                    <ui:VisualElement>
+                      <ui:Label class="sitext"/>
+                      <ui:BindingVariables>
+                        <ui:StreamedObjectList data-binding="Team.Tactic.SwapTable"/>
+                      </ui:BindingVariables>
+                    </ui:VisualElement>
+                  </ui:DebugPropertiesElement>
+                  <ui:DebugPropertiesElement>
+                    <ui:VisualElement>
+                      <ui:BindingVariables>
+                        <ui:StreamedObjectList data-binding="Team.Rotations"/>
+                      </ui:BindingVariables>
+                    </ui:VisualElement>
+                  </ui:DebugPropertiesElement>
+                </ui:SISelector>
+              </ui:TabGroup>
+            </ui:VisualElement>
+          </ui:SITile>
+        </ui:VisualElement>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

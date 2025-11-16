@@ -1,0 +1,52 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="speakto-container">
+    <ui:SIVisible class="speakto-mobile-visible" data-binding="[VisualFunction]">
+      <ui:VisualElement class="height-100-percent speakto-size speakto-content">
+        <ui:VisualElement class="height-100-percent">
+          <ui:BindingExpect class="height-100-percent">
+            <ui:SIButton class="shortcut-fake-button height-100-percent">
+              <ui:NavigationFocusser class="height-100-percent">
+                <ui:VisualElement class="interaction-_interaction-hub-base-default">
+                  <ui:ContextShortcutsElement class="height-100-percent margin-right-global-gap-large margin-left-global-gap-large">
+                    <ui:BindingRemapper class="height-100-percent" binding-mappings="npcaction=SpeakTo.Actions.PrimaryNpcWithActions">
+                      <ui:VisualElement class="height-100-percent">
+                        <ui:BindingExpect>
+                          <ui:BindingRemapper binding-mappings="actions=npcaction.Actions;npc=npcaction.NPC;interactees=npcaction.InteracteesCount;speechbubblehistory=npcaction.SpeechBubbleHistory">
+                            <ui:VisualElement class="speakto-frame-sender-message-response height-100-percent">
+                              <ui:BindingRemapper binding-mappings="person=human">
+                                <ui:TemplateContainer template="interaction-hub-body-message_sender-primary"/>
+                              </ui:BindingRemapper>
+                              <ui:StreamedObjectList class="speak-to-speech-bubbles-or-action-button" data-binding="Actions.OptionalActions"/>
+                            </ui:VisualElement>
+                            <ui:SIVisible class="speak-to-speech-bubbles-or-action-button" data-binding="[VisualFunction]">
+                              <ui:StreamedObjectList data-binding="Actions.ExitActions"/>
+                            </ui:SIVisible>
+                          </ui:BindingRemapper>
+                        </ui:BindingExpect>
+                      </ui:VisualElement>
+                    </ui:BindingRemapper>
+                  </ui:ContextShortcutsElement>
+                  <ui:SIVisible data-binding="[VisualFunction]">
+                    <ui:BindingVariables>
+                      <ui:VisualElement>
+                        <ui:TemplateContainer template="speakto-button-additional-actions-selector"/>
+                      </ui:VisualElement>
+                      <ui:SIVisible data-binding="additionalactionsexpanded">
+                        <ui:NavigationFocusser>
+                          <ui:VisualElement class="interaction-hub-action-area-default-optional-response">
+                            <ui:StreamedObjectList data-binding="SpeakTo.AdditionalActions"/>
+                          </ui:VisualElement>
+                        </ui:NavigationFocusser>
+                        <ui:EventTrigger/>
+                      </ui:SIVisible>
+                    </ui:BindingVariables>
+                  </ui:SIVisible>
+                </ui:VisualElement>
+              </ui:NavigationFocusser>
+            </ui:SIButton>
+          </ui:BindingExpect>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:SIVisible>
+  </ui:BindingExpect>
+</ui:UXML>

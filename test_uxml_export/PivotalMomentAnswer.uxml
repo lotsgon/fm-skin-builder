@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:SIVisible class="padding-left-global-padding-extra-large" data-binding="config.UseFloatingCloseButton">
+      <ui:TemplateContainer template="buttons-controls-close-default"/>
+    </ui:SIVisible>
+    <ui:BindingRemapper binding-mappings="type=moment-id;id=answer-index;binding=game.GameCurrentManager.HumanAnsweredPivotalMoment">
+      <ui:ScalableBindableGridLayoutElement/>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

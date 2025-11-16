@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement>
+    <ui:VisualElement>
+      <ui:VisualElement>
+        <ui:VisualElement>
+          <ui:VisualElement>
+            <ui:VisualElement>
+              <ui:VisualElement class="align-items-start">
+                <ui:SIText class="body-large-16px-bold" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-small-12px-regular" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+              <ui:BindingVariables class="flex-grow-class">
+                <ui:BindingRemapper binding-mappings="issetupgame=const.True;estimatedgamespeed=SetupGame.GameSpeed;selectedrulegroups=SetupGame.SelectedRuleGroups;continentalrulegroups=SetupGame.ContinentalRuleGroups">
+                  <ui:TemplateContainer template="ActiveLeagues"/>
+                </ui:BindingRemapper>
+              </ui:BindingVariables>
+              <ui:VisualElement/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</ui:UXML>

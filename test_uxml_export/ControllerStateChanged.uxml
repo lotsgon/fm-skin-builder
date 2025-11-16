@@ -1,0 +1,48 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables>
+      <ui:VisualElement>
+        <ui:VisualElement class="notifications--notifications-modal-dialog-default-default">
+          <ui:VisualElement>
+            <ui:SIVisible data-binding="isConnected">
+              <ui:VisualElement>
+                <ui:SIText class="heading-small-16px" text-binding="[VisualFunction]"/>
+                <ui:VisualElement>
+                  <ui:VisualElement>
+                    <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIImage class="margin-right-global-gap-regular" data-binding="[VisualFunction]"/>
+                      <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement/>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:SIVisible>
+            <ui:SIVisible data-binding="isConnected">
+              <ui:VisualElement>
+                <ui:VisualElement>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:VisualElement class="ui-concepts-warning_small margin-right-global-gap-regular"/>
+                    <ui:SIText class="heading-small-16px" text-binding="[VisualFunction]"/>
+                  </ui:VisualElement>
+                  <ui:VisualElement>
+                    <ui:VisualElement>
+                      <ui:SIText class="body-regular-14px-regular" text-binding="[VisualFunction]"/>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:SIVisible>
+            <ui:TemplateContainer template="inputs-switch-checkbox-label"/>
+            <ui:VisualElement>
+              <ui:VisualElement class="notifications-modal-dialog-actions-default-type-confirm row-direction-inverted">
+                <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-label"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

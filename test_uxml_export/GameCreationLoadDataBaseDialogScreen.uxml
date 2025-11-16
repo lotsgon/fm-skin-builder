@@ -1,0 +1,51 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:VisualElement class="sipopup-container">
+      <ui:VisualElement class="card-notifications-modal-dialog-quit-without-saving">
+        <ui:VisualElement>
+          <ui:VisualElement class="notifications--notifications-modal-dialog-default-default">
+            <ui:VisualElement>
+              <ui:VisualElement>
+                <ui:SIText class="button-regular content-ellipsis content-no-wrap heading-small-16px margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                <ui:SIText class="body-regular-14px-regular text-middle-center" text-binding="setupgame.ConfirmationString"/>
+              </ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement>
+                  <ui:VisualElement>
+                    <ui:BindableSwitchElement data-binding="setupgame.CanConfirmSetup">
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIButton class="buttons-button-base-default margin-right-global-gap-regular">
+                          <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                          <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                          <ui:VisualElement class="ui-concepts-add-to-list_small"/>
+                          <ui:VisualElement class="ui-concepts-chevron-down_small"/>
+                        </ui:SIButton>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:VisualElement class="margin-right-global-gap-regular">
+                          <ui:SIButton class="buttons-button-base-default">
+                            <ui:VisualElement class="ui-concepts-cross_small margin-right-global-gap-regular"/>
+                            <ui:SIText class="button-regular content-no-wrap content-ellipsis margin-right-global-gap-regular" text-binding="[VisualFunction]"/>
+                            <ui:VisualElement class="ui-concepts-add-to-list_small"/>
+                            <ui:VisualElement class="ui-concepts-chevron-down_small"/>
+                          </ui:SIButton>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="margin-left-global-gap-regular">
+                          <ui:SIButton class="buttons-button-primary-default">
+                            <ui:VisualElement class="ui-concepts-tick_small margin-right-global-gap-regular"/>
+                            <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-right-global-gap-none" text-binding="[VisualFunction]"/>
+                            <ui:VisualElement class="ui-concepts-chevron-right_small margin-right-global-gap-regular"/>
+                          </ui:SIButton>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                    </ui:BindableSwitchElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables>
+      <ui:VisualElement class="row-direction-normal">
+        <ui:VisualElement>
+          <ui:TemplateContainer class="padding-right-global-padding-none padding-left-global-padding-none" template="reports-header-navigation-default-type-menu-header"/>
+          <ui:VisualElement>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:TemplateContainer class="tile-start-online-game-size-large margin-right-global-gap-extra-large" template="StartOnlineGameTile"/>
+                <ui:TemplateContainer class="tile-join-online-game-size-large" template="JoinOnlineGameTile"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

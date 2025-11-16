@@ -1,0 +1,100 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement class="rtl-horizontal-flip startScreen_background_texuture">
+    <ui:SIImage class="startScreen_background_texuture"/>
+  </ui:VisualElement>
+  <ui:BindingRoot>
+    <ui:BindingSetter/>
+    <ui:SIStyleSetter>
+      <ui:VisualElement class="padding-left-global-padding-huge">
+        <ui:TemplateContainer class="right-40" template="ProfileNotificationBlock"/>
+        <ui:SIText class="body-regular-14px-regular secondary-text-colour rtl.label" text-binding="app.CurrentVersion"/>
+        <ui:SIStyleSetter>
+          <ui:BindableSwitchElement class="row-direction-normal fmc-main-menu" data-binding="config.ShowFMCMainMenuHeader">
+            <ui:VisualElement class="base-template-grow">
+              <ui:VisualElement/>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:TemplateContainer class="margin-right-global-gap-small" template="AddToWishlistButton"/>
+                <ui:SIVisible data-binding="app.FMFCIsSignedIn">
+                  <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-base-label"/>
+                </ui:SIVisible>
+                <ui:SIVisible data-binding="app.FMFCIsSignedIn">
+                  <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-base-label"/>
+                </ui:SIVisible>
+                <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-primary-leading-icon-label"/>
+                <ui:VisualElement class="row-direction-normal margin-right-global-gap-regular">
+                  <ui:VisualElement>
+                    <ui:BindingVariables>
+                      <ui:BindingSetter>
+                        <ui:TemplateContainer template="dropdown-base-regular-trailing-icon-label"/>
+                      </ui:BindingSetter>
+                    </ui:BindingVariables>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:SIVisible data-binding="const.IsFinal">
+                  <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-base-label"/>
+                </ui:SIVisible>
+                <ui:SIVisible data-binding="config.ShowQuitGameButton">
+                  <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-base-label"/>
+                </ui:SIVisible>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="base-template-grow">
+              <ui:VisualElement/>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:TemplateContainer class="margin-right-global-gap-small" template="AddToWishlistButton"/>
+                <ui:VisualElement>
+                  <ui:TemplateContainer template="button-primary-leading-icon-label"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="margin-left-global-gap-regular">
+                  <ui:BindingVariables>
+                    <ui:TemplateContainer template="button-base-trailing-icon-label"/>
+                  </ui:BindingVariables>
+                </ui:VisualElement>
+                <ui:VisualElement class="row-direction-normal margin-left-global-gap-regular">
+                  <ui:VisualElement>
+                    <ui:BindingVariables>
+                      <ui:TemplateContainer template="dropdown-base-regular-trailing-icon-label"/>
+                    </ui:BindingVariables>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:SIVisible class="margin-left-global-gap-regular" data-binding="config.ShowQuitGameButton">
+                  <ui:TemplateContainer template="button-base-label"/>
+                </ui:SIVisible>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:BindableSwitchElement>
+        </ui:SIStyleSetter>
+        <ui:BindableSwitchElement data-binding="app.IsDemo">
+          <ui:BindableSwitchElement class="align-self-start" data-binding="app.FirstBoot">
+            <ui:BindableSwitchElement class="align-self-start margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-small padding-left-global-padding-small" data-binding="app.LastSave">
+              <ui:TemplateContainer template="MainMenuGridTemplate"/>
+              <ui:TemplateContainer template="MainMenuGridTemplate"/>
+            </ui:BindableSwitchElement>
+            <ui:TemplateContainer template="MainMenuGridTemplate"/>
+          </ui:BindableSwitchElement>
+          <ui:BindableSwitchElement data-binding="app.LastSave">
+            <ui:ScalableBindableGridLayoutElement/>
+            <ui:ScalableBindableGridLayoutElement/>
+          </ui:BindableSwitchElement>
+        </ui:BindableSwitchElement>
+      </ui:VisualElement>
+    </ui:SIStyleSetter>
+    <ui:SIStyleSetter>
+      <ui:SIVisible data-binding="[VisualFunction]">
+        <ui:TemplateContainer template="button-primary-leading-icon-trailing-icon-label"/>
+      </ui:SIVisible>
+    </ui:SIStyleSetter>
+    <ui:SIVisible data-binding="const.IsDebug">
+      <ui:VisualElement class="row-direction-inverted">
+        <ui:SIButton class="selectable"/>
+        <ui:SIButton class="selectable"/>
+        <ui:SIButton class="selectable"/>
+      </ui:VisualElement>
+    </ui:SIVisible>
+    <ui:SIVisible class="absolute-position-fill-container" data-binding="[VisualFunction]">
+      <ui:SISafeAreaElement>
+        <ui:SIImage data-binding="[VisualFunction]"/>
+      </ui:SISafeAreaElement>
+    </ui:SIVisible>
+  </ui:BindingRoot>
+</ui:UXML>

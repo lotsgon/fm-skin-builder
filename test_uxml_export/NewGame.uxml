@@ -1,0 +1,63 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:SISafeAreaElement>
+    <ui:BindingRoot>
+      <ui:BindingVariables>
+        <ui:BindingRemapper binding-mappings="dbsummarycompetition=selectedleague">
+          <ui:SIStyleSetter>
+            <ui:VisualElement class="setup_game_dialog">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement class="margin-right-global-gap-regular margin-left-global-gap-regular">
+                  <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:VisualElement class="setup_game_list_container">
+                      <ui:SIText class="sitextmedium setup_game_list_title" text-binding="[VisualFunction]"/>
+                      <ui:StreamedObjectList class="setup_game_list_body" data-binding="SetupGame.PlayableContinents"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setup_game_list_container">
+                      <ui:SIText class="sitextmedium setup_game_list_title" text-binding="[VisualFunction]"/>
+                      <ui:StreamedObjectList class="setup_game_list_body" data-binding="SelectedContinent.PlayableNations"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setup_game_list_container">
+                      <ui:SIText class="sitextmedium setup_game_list_title" text-binding="[VisualFunction]"/>
+                      <ui:StreamedObjectList class="setup_game_list_body" data-binding="SelectedNation.PlayableLeagues"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="setup_game_list_container">
+                      <ui:SIText class="sitextmedium setup_game_list_title" text-binding="[VisualFunction]"/>
+                      <ui:StreamedObjectList class="setup_game_list_body" data-binding="SetupGame.PlayableClubs"/>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="setup_game_info">
+                  <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="sitextsmall" text-binding="SetupGame.SelectedDatabase.Name"/>
+                  <ui:SIText class="sitextsmall" text-binding="SetupGame.SelectedDatabase.Description"/>
+                  <ui:SIText class="sitextsmall" text-binding="SetupGame.SelectedDatabase.Version"/>
+                  <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                  <ui:SIVisible data-binding="SetupGame.SelectedClub">
+                    <ui:SIText class="sitextsmall" text-binding="SetupGame.SelectedClub.Name"/>
+                  </ui:SIVisible>
+                  <ui:SIVisible data-binding="SetupGame.SelectedNationalTeam">
+                    <ui:SIText class="sitextsmall" text-binding="SetupGame.SelectedNationalTeam.Name"/>
+                  </ui:SIVisible>
+                  <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                  <ui:BindingRemapper binding-mappings="futuretransfermode=SetupGame.FutureTransferMode">
+                    <ui:SIText class="sitextsmall" text-binding="SetupGame.FutureTransferModeString"/>
+                  </ui:BindingRemapper>
+                  <ui:BindableIntEditBox/>
+                  <ui:VisualElement/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIButton class="selectable sibutton sitext"/>
+                <ui:SIButton class="selectable sibutton sitext"/>
+                <ui:SIVisible class="si-visible-flex-autosize-horizontal row-direction-normal" data-binding="SetupGame.SelectedClub">
+                  <ui:SIButton class="selectable sibutton sitext"/>
+                </ui:SIVisible>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:SIStyleSetter>
+        </ui:BindingRemapper>
+      </ui:BindingVariables>
+    </ui:BindingRoot>
+  </ui:SISafeAreaElement>
+</ui:UXML>

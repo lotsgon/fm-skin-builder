@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:BindableSwitchElement data-binding="config.ShowPhonePanels">
+      <ui:ButtonGroup class="row-direction-normal">
+        <ui:TemplateContainer template="navigation-tab-default-default"/>
+        <ui:TemplateContainer template="navigation-tab-default-default"/>
+      </ui:ButtonGroup>
+      <ui:BindingVariables class="margin-bottom-global-gap-extra-large">
+        <ui:VisualElement>
+          <ui:SIDropdown class="buttons-dropdown-icon-base-default align-self-start margin-left-global-gap-regular">
+            <ui:BindableSwitchElement data-binding="[VisualFunction]">
+              <ui:SIText class="body-regular-14px-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+              <ui:SIText class="body-regular-14px-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+            </ui:BindableSwitchElement>
+            <ui:VisualElement class="ui-concepts-chevron-down_small margin-left-global-gap-small"/>
+          </ui:SIDropdown>
+        </ui:VisualElement>
+      </ui:BindingVariables>
+    </ui:BindableSwitchElement>
+    <ui:VisualElement class="row-direction-normal">
+      <ui:SIRadioGroup class="flex-grow-class no-margin no-padding" selection-binding="setupgame.selectedcontinent"/>
+    </ui:VisualElement>
+  </ui:BindingExpect>
+</ui:UXML>

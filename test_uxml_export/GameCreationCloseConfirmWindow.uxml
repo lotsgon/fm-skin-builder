@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class">
+    <ui:VisualElement class="sipopup-container align-self-stretch-class">
+      <ui:VisualElement class="notifications-modal-dialog-default-default padding-right-global-padding-huge padding-left-global-padding-huge">
+        <ui:SIText class="heading-small-16px global-text-primary margin-bottom-global-gap-regular content-no-wrap" text-binding="[VisualFunction]"/>
+        <ui:SIText class="margin-bottom-global-gap-extra-large global-text-primary body-regular-14px-regular" text-binding="[VisualFunction]"/>
+        <ui:VisualElement class="row-direction-normal justify-content-center">
+          <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-label"/>
+          <ui:TemplateContainer template="button-primary-label"/>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

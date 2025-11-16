@@ -49,6 +49,12 @@ def main() -> None:
         help="Optional bundle file or directory (if omitted, inferred from skin config)",
     )
     p.add_argument(
+        "--uxml",
+        type=str,
+        default=None,
+        help="Optional directory containing UXML files to patch into bundles",
+    )
+    p.add_argument(
         "--patch-direct", action="store_true", help="Also patch inlined color literals"
     )
     p.add_argument(

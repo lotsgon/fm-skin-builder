@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="team=Team.NextMatchOpponent">
+      <ui:BindingRemapper binding-mappings="boolean=game.GameCurrentManager.IsAtTeam">
+        <ui:BindingVariables>
+          <ui:TemplateContainer template="BaseCardTemplate">
+            <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small">
+              <ui:VisualElement class="customcontent">
+                <ui:DebugPropertiesElement/>
+                <ui:BindingRemapper binding-mappings="fixture=Team.NextFixture">
+                  <ui:BindingRemapper binding-mappings="team=Fixture.HomeTeam">
+                    <ui:DebugPropertiesElement/>
+                  </ui:BindingRemapper>
+                  <ui:BindingRemapper binding-mappings="team=Fixture.AwayTeam">
+                    <ui:DebugPropertiesElement/>
+                  </ui:BindingRemapper>
+                </ui:BindingRemapper>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:TemplateContainer>
+        </ui:BindingVariables>
+      </ui:BindingRemapper>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

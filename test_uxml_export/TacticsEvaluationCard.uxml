@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingVariables class="flex-grow-class">
+      <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTemplate"/>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

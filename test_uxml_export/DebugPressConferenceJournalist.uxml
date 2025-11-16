@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="padding-right-global-padding-regular padding-left-global-padding-regular">
+    <ui:SIText class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small padding-right-global-padding-extra-small padding-left-global-padding-extra-small" text-binding="journalistbodylanguage.Person.Name"/>
+    <ui:SIText class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small padding-right-global-padding-extra-small padding-left-global-padding-extra-small" text-binding="journalistbodylanguage.Person.NewsMediaSource.Name"/>
+    <ui:SIText class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small padding-right-global-padding-extra-small padding-left-global-padding-extra-small" text-binding="journalistbodylanguage.InteractionBodyLanguage.InteractionBodyLanguageString"/>
+  </ui:BindingExpect>
+</ui:UXML>

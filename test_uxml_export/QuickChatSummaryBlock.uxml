@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="border-color-layout-modules-block-border-colour padding-right-global-padding-large padding-left-global-padding-large">
+    <ui:BindingRemapper binding-mappings="conversation=Person.ConversationEditSession;team=Person.Team;npc=Person.ConversationEditSession.SpeakTo.Actions.PrimaryNpcWithActions">
+      <ui:BindingSetter>
+        <ui:SIVisible data-binding="showsummary">
+          <ui:SIText class="heading-small-16px" text-binding="[VisualFunction]"/>
+          <ui:SIText class="body-regular-14px-regular" text-binding="conversation.ConversationQuickChatSummaryText"/>
+        </ui:SIVisible>
+      </ui:BindingSetter>
+    </ui:BindingRemapper>
+  </ui:BindingExpect>
+</ui:UXML>

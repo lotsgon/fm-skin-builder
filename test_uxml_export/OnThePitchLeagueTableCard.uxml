@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:TemplateContainer template="BaseCardTemplate">
+      <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small">
+        <ui:BindingVariables>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:SIText class="white" text-binding="[VisualFunction]"/>
+            <ui:SIText class="white" text-binding="[VisualFunction]"/>
+            <ui:SIText class="white" text-binding="[VisualFunction]"/>
+            <ui:SIText class="white" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+          <ui:VisualElement/>
+          <ui:StreamedObjectList data-binding="Team.Division.CurrentStage.LeagueTable"/>
+        </ui:BindingVariables>
+      </ui:VisualElement>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

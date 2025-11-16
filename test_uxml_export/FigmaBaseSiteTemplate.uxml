@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BaseCardTemplateImpl>
+    <ui:BindingVariables>
+      <ui:VisualElement>
+        <ui:VisualElement class="layout-report-default-default">
+          <ui:VisualElement class="figma-base-tool-template-inner-frame ios-card-styling">
+            <ui:VisualElement>
+              <ui:SIVisible data-binding="game.ShowReportToolSiteHeader">
+                <ui:BindableSwitchElement data-binding="config.ShowPhonePanels">
+                  <ui:TemplateContainer template="reports-header-navigation-default-type-tool-header"/>
+                  <ui:TemplateContainer class="margin-bottom-global-gap-regular" template="CardTitleBar-Phone"/>
+                </ui:BindableSwitchElement>
+              </ui:SIVisible>
+              <ui:DynamicItem/>
+            </ui:VisualElement>
+            <ui:SISafeAreaElement>
+              <ui:ScalableBindableGridLayoutElement/>
+            </ui:SISafeAreaElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingVariables>
+  </ui:BaseCardTemplateImpl>
+</ui:UXML>

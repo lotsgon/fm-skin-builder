@@ -1,0 +1,19 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingVariables class="base-template-grow">
+      <ui:BindingRemapper class="base-template-grow" binding-mappings="human=game.GameCurrentManager;position=Tactic.TacticsPositionReference;filterlistid=Tactic.SquadFilter;player=Position.Player;speakto=Tactic.PlayerSelectionSpeakTo;selected-team-selection-ref=tactic.TacticsTeamSelectionForIndex;comparisonperson=selected-team-selection-ref.PlayerIndex;rolemask=position.PositionRole;person=selected-team-selection-ref.Player">
+        <ui:BindingSetter class="flex-grow-class">
+          <ui:BindableSwitchElement class="base-template-grow" data-binding="config.ShowPhonePanels">
+            <ui:TemplateContainer class="base-template-grow" template="BaseCardTemplate"/>
+            <ui:BindingVariables>
+              <ui:VisualElement class="base-template-grow">
+                <ui:TemplateContainer template="FullScreenExpandedTableCardTemplate"/>
+                <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+          </ui:BindableSwitchElement>
+        </ui:BindingSetter>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

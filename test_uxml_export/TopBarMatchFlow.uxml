@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:VisualElement class="row-direction-normal">
+      <ui:SIVisible class="row-direction-normal" data-binding="const.true">
+        <ui:TemplateContainer template="buttons-controls-back-default"/>
+        <ui:TemplateContainer template="buttons-controls-forward-default"/>
+      </ui:SIVisible>
+      <ui:VisualElement class="row-direction-normal">
+        <ui:SIStyleSetter class="margin-right-global-gap-regular margin-left-global-gap-regular">
+          <ui:BindingRemapper binding-mappings="club=team.ClubForObjectLookupData">
+            <ui:TemplateContainer class="padding-right-global-padding-none padding-left-global-padding-none" template="ClubIcon"/>
+          </ui:BindingRemapper>
+        </ui:SIStyleSetter>
+        <ui:BindableSwitchElement data-binding="config.ShowPhonePanels">
+          <ui:VisualElement class="flex-grow-class">
+            <ui:SIText class="global-text-primary fm-universe-large-22px" text-binding="fullscreencardtitle"/>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement>
+                <ui:BindingRemapper binding-mappings="club=opponent_team.ClubForObjectLookupData">
+                  <ui:VisualElement class="row-direction-normal padding-right-global-padding-regular">
+                    <ui:TemplateContainer class="margin-right-global-gap-small" template="ClubIcon"/>
+                    <ui:SIText class="white body-small-14px-regular" text-binding="opponent_team.Name"/>
+                  </ui:VisualElement>
+                </ui:BindingRemapper>
+              </ui:VisualElement>
+              <ui:TemplateContainer template="layout-divider-solid-vertical"/>
+              <ui:SIImage class="margin-right-global-gap-small margin-left-global-gap-regular" data-binding="[VisualFunction]"/>
+              <ui:SIText class="body-regular-14px-regular white" text-binding="comp.Name"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:VisualElement class="flex-grow-class margin-left-global-gap-regular">
+            <ui:SIText class="global-text-primary fm-universe-regular-18px" text-binding="[VisualFunction]"/>
+            <ui:SIText class="global-text-secondary body-small-12px-regular" text-binding="comp.Name"/>
+          </ui:VisualElement>
+        </ui:BindableSwitchElement>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingExpect>
+</ui:UXML>

@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class align-self-stretch-class">
+    <ui:SIImage class="manager-creator-bg flex-grow-class align-self-stretch-class">
+      <ui:VisualElement class="ios-generic-background flex-grow-class"/>
+      <ui:SISafeAreaElement class="align-self-stretch-class flex-grow-class margin-left-global-gap-extra-large margin-top-global-gap-extra-large margin-right-global-gap-extra-large ios-start-journey-container">
+        <ui:VisualElement class="row-direction-normal margin-bottom-global-gap-extra-large ios-start-journey-header">
+          <ui:VisualElement class="flex-grow-class">
+            <ui:SIText class="heading-large-22px ios-fm-universe-title" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+          <ui:SIVisible data-binding="config.IsManagerCreationForFMC">
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement>
+                <ui:SIText class="heading-xsmall-14px global-text-secondary flex-grow-class margin-right-global-gap-regular" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+              <ui:BindableSwitchElement data-binding="config.ShowDatabaseVersionSelectCard">
+                <ui:TemplateContainer template="buttons-dropdown-icon-base-default-single-icon"/>
+                <ui:TemplateContainer template="buttons-button-base-default"/>
+              </ui:BindableSwitchElement>
+            </ui:VisualElement>
+          </ui:SIVisible>
+        </ui:VisualElement>
+        <ui:BindableSwitchElement class="flex-grow-class" data-binding="[VisualFunction]">
+          <ui:ScalableBindableGridLayoutElement class="flex-grow-class align-flex-start ios-start-journey-content"/>
+          <ui:ScalableBindableGridLayoutElement class="flex-grow-class align-flex-start ios-start-journey-content"/>
+        </ui:BindableSwitchElement>
+      </ui:SISafeAreaElement>
+    </ui:SIImage>
+    <ui:VisualElement class="absolute-position-fill-bottom-container">
+      <ui:SIStyleSetter class="padding-left-global-padding-extra-large">
+        <ui:SISafeAreaElement class="padding-bottom-global-padding-extra-large padding-top-global-padding-extra-large padding-left-global-padding-extra-large padding-right-global-padding-extra-large">
+          <ui:SIButton class="buttons-button-secondary-default">
+            <ui:VisualElement class="ui-concepts-chevron-left_small margin-right-global-gap-regular"/>
+            <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-left-8" text-binding="[VisualFunction]"/>
+          </ui:SIButton>
+        </ui:SISafeAreaElement>
+      </ui:SIStyleSetter>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

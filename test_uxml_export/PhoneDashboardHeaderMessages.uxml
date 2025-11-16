@@ -1,0 +1,53 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="team=human.Team">
+      <ui:TemplateContainer class="navigation-header-gradient" template="NavigationHeaderGradient"/>
+      <ui:SISafeAreaElement>
+        <ui:BindingVariables>
+          <ui:BindingRemapper class="row-direction-normal" binding-mappings="messagefiltervisible=EditBoxVisible;messagesearchstring=searchstring">
+            <ui:VisualElement class="ios-layout-dashboard-header-navigation-default-view-main">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:TemplateContainer template="NavigationHeaderClubAndNationIcons"/>
+                <ui:TemplateContainer template="dashboard-hud-location-default"/>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:ButtonGroup class="row-direction-normal margin-right-global-gap-regular margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" selection-binding="data.portalmessagesselectedtab">
+                    <ui:VisualElement>
+                      <ui:SIButton class="row-direction-normal margin-left-global-gap-none margin-right-global-gap-small">
+                        <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                        <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                      </ui:SIButton>
+                    </ui:VisualElement>
+                    <ui:VisualElement/>
+                    <ui:VisualElement/>
+                    <ui:VisualElement>
+                      <ui:SIButton class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-extra-small">
+                        <ui:SIText class="button-regular content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                        <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                      </ui:SIButton>
+                    </ui:VisualElement>
+                  </ui:ButtonGroup>
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:SIVisible data-binding="messagefiltervisible">
+                      <ui:VisualElement class="row-direction-inverted">
+                        <ui:SIButton class="buttons-controls-pc-default--active-true">
+                          <ui:VisualElement class="ui-concepts-cross_small"/>
+                        </ui:SIButton>
+                        <ui:BindableTextEditBox/>
+                      </ui:VisualElement>
+                    </ui:SIVisible>
+                    <ui:SIVisible data-binding="messagefiltervisible">
+                      <ui:SIButton class="buttons-controls-pc-default--active-true">
+                        <ui:VisualElement class="game-concepts-scouting-magnifying-glass_small"/>
+                      </ui:SIButton>
+                    </ui:SIVisible>
+                    <ui:TemplateContainer class="margin-left-global-gap-regular" template="dropdown-base-regular-trailing-icon"/>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:BindingRemapper>
+        </ui:BindingVariables>
+      </ui:SISafeAreaElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

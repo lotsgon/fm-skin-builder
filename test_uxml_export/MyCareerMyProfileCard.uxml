@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingRemapper class="base-template-grow" binding-mappings="human=game.GameCurrentManager;localTeam=person.Team">
+      <ui:BindingVariables class="base-template-grow">
+        <ui:BindingSetter>
+          <ui:BindableSwitchElement data-binding="config.ShowPhonePanels">
+            <ui:TemplateContainer template="FigmaBaseToolTabGroupTemplate">
+              <ui:BindableSwitchElement data-binding="selectedTabIndex">
+                <ui:MultiGridLayoutElement/>
+              </ui:BindableSwitchElement>
+            </ui:TemplateContainer>
+            <ui:VisualElement class="base-template-grow">
+              <ui:TemplateContainer class="base-template-grow" template="FigmaBaseReportTabbedTemplate"/>
+              <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+            </ui:VisualElement>
+          </ui:BindableSwitchElement>
+        </ui:BindingSetter>
+      </ui:BindingVariables>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

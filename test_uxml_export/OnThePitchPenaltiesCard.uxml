@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingVariables>
+      <ui:BindingSetter>
+        <ui:BindingRemapper binding-mappings="setpiece=tactic.SetPiece">
+          <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTemplate"/>
+        </ui:BindingRemapper>
+      </ui:BindingSetter>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

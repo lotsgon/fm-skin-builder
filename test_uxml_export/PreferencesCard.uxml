@@ -1,0 +1,334 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:TemplateContainer class="base-template-grow" template="BaseCardTemplate">
+      <ui:VisualElement>
+        <ui:SIScrollView>
+          <ui:BindingVariables>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SIDropdown class="si-dropdown"/>
+            </ui:VisualElement>
+          </ui:BindingVariables>
+          <ui:BindingVariables>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SICheckBox class="sitext" selection-binding="app.nativesettings"/>
+            </ui:VisualElement>
+          </ui:BindingVariables>
+          <ui:BindingVariables>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SIDropdown class="si-dropdown"/>
+            </ui:VisualElement>
+          </ui:BindingVariables>
+          <ui:BindingVariables>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SIDropdown class="si-dropdown"/>
+            </ui:VisualElement>
+          </ui:BindingVariables>
+          <ui:BindingVariables class="row-direction-normal">
+            <ui:SICheckBox selection-binding="app.nativesettings"/>
+            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+          </ui:BindingVariables>
+          <ui:BindingVariables class="row-direction-normal">
+            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            <ui:SIDropdown/>
+          </ui:BindingVariables>
+          <ui:BindingVariables class="row-direction-normal">
+            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            <ui:SICheckBox selection-binding="settings.windowmodeenabled"/>
+          </ui:BindingVariables>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            <ui:SISlider/>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            <ui:SISlider/>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            <ui:SISlider/>
+          </ui:VisualElement>
+          <ui:BindingVariables class="row-direction-normal">
+            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            <ui:SIDropdown class="si-dropdown"/>
+          </ui:BindingVariables>
+          <ui:BindingVariables>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SICheckBox class="sitext" selection-binding="app.nativesettings"/>
+            </ui:VisualElement>
+          </ui:BindingVariables>
+          <ui:VisualElement>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                <ui:SICheckBox selection-binding="app.nativesettings"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown class="si-dropdown"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+          </ui:VisualElement>
+          <ui:VisualElement>
+            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            <ui:VisualElement>
+              <ui:BindingVariables>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                  <ui:SIDropdown/>
+                </ui:VisualElement>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                <ui:BindableTextEditBox/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                <ui:BindableTextEditBox/>
+              </ui:BindingVariables>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SICheckBox selection-binding="app.nativesettings"/>
+                <ui:SIText class="sitext"/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SICheckBox selection-binding="app.nativesettings"/>
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SICheckBox selection-binding="app.nativesettings"/>
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SICheckBox selection-binding="app.nativesettings"/>
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SICheckBox selection-binding="app.nativesettings"/>
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SICheckBox selection-binding="app.nativesettings"/>
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              </ui:BindingVariables>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                <ui:SIDropdown/>
+              </ui:BindingVariables>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SICheckBox selection-binding="app.nativesettings"/>
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:BindableIntEditBox/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:BindableIntEditBox/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:BindableIntEditBox/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:BindableIntEditBox/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:BindableIntEditBox/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                <ui:BindableIntEditBox/>
+              </ui:BindingVariables>
+              <ui:BindingVariables class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SIDropdown/>
+              </ui:BindingVariables>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:VisualElement>
+            <ui:BindingVariables class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:BindableIntEditBox/>
+            </ui:BindingVariables>
+            <ui:BindingVariables class="row-direction-normal">
+              <ui:SICheckBox selection-binding="app.nativesettings"/>
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            </ui:BindingVariables>
+            <ui:BindingVariables class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SIDropdown/>
+            </ui:BindingVariables>
+            <ui:BindingVariables class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SIDropdown/>
+            </ui:BindingVariables>
+            <ui:BindingVariables class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SIDropdown/>
+            </ui:BindingVariables>
+            <ui:BindingVariables class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SIDropdown/>
+            </ui:BindingVariables>
+            <ui:BindingVariables class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SIDropdown/>
+            </ui:BindingVariables>
+            <ui:BindingVariables class="row-direction-normal">
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+              <ui:SIDropdown/>
+            </ui:BindingVariables>
+            <ui:BindingVariables class="row-direction-normal">
+              <ui:SICheckBox selection-binding="app.nativesettings"/>
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            </ui:BindingVariables>
+            <ui:BindingVariables class="row-direction-normal">
+              <ui:SICheckBox selection-binding="app.nativesettings"/>
+              <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SICheckBox class="sitext" selection-binding="app.nativesettings"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SICheckBox class="sitext" selection-binding="app.nativesettings"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SICheckBox class="sitext" selection-binding="app.nativesettings"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+            <ui:BindingVariables>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIText class="sitext"/>
+                <ui:SICheckBox class="sitext" selection-binding="app.nativesettings"/>
+              </ui:VisualElement>
+            </ui:BindingVariables>
+          </ui:VisualElement>
+        </ui:SIScrollView>
+        <ui:SIButton/>
+      </ui:VisualElement>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

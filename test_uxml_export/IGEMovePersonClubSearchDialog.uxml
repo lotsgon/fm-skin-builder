@@ -1,0 +1,66 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:EventTrigger>
+      <ui:BindingRemapper binding-mappings="search=game.Search">
+        <ui:VisualElement class="sipopup-container">
+          <ui:BindingVariables>
+            <ui:VisualElement class="notifications--notifications-modal-large-default-ige padding-right-global-padding-extra-large padding-left-global-padding-extra-large">
+              <ui:VisualElement class="padding-left-global-padding-regular padding-right-global-padding-regular">
+                <ui:VisualElement>
+                  <ui:SIText class="heading-small-16px text-middle-center" text-binding="[VisualFunction]"/>
+                  <ui:SIText class="text-middle-center" text-binding="[VisualFunction]"/>
+                </ui:VisualElement>
+                <ui:TemplateContainer class="padding-left-global-padding-small padding-right-global-padding-small" template="layout-divider-solid-horizontal"/>
+                <ui:SearchBox class="global-search-edit-box padding-right-global-padding-none"/>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:VisualElement class="padding-left-global-padding-large padding-right-global-padding-large">
+                    <ui:VisualElement>
+                      <ui:StreamedTable data-binding="game.search.Clubs"/>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:SIVisible>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:VisualElement class="padding-left-global-padding-large padding-right-global-padding-large">
+                    <ui:VisualElement>
+                      <ui:StreamedTable data-binding="game.search.ClubsPlayerCanMoveTo"/>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:SIVisible>
+                <ui:TemplateContainer class="padding-left-global-padding-small padding-right-global-padding-small" template="layout-divider-solid-horizontal"/>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:VisualElement class="row-direction-normal">
+                    <ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:SIStyleSetter>
+                          <ui:VisualElement class="notifications--notifications-toast-action_buttons-default">
+                            <ui:TemplateContainer class="margin-right-global-gap-regular" template="buttons-button-secondary-default"/>
+                            <ui:SIEnabled data-binding="[VisualFunction]">
+                              <ui:SIEnabled data-binding="game.search.SearchIsFinished">
+                                <ui:SIVisible data-binding="isstaff">
+                                  <ui:SIEnabled data-binding="isstaff">
+                                    <ui:TemplateContainer template="buttons-button-primary-default"/>
+                                  </ui:SIEnabled>
+                                </ui:SIVisible>
+                                <ui:SIVisible data-binding="isstaff">
+                                  <ui:SIEnabled data-binding="isstaff">
+                                    <ui:BindingSetter>
+                                      <ui:TemplateContainer template="buttons-button-primary-default"/>
+                                    </ui:BindingSetter>
+                                  </ui:SIEnabled>
+                                </ui:SIVisible>
+                              </ui:SIEnabled>
+                            </ui:SIEnabled>
+                          </ui:VisualElement>
+                        </ui:SIStyleSetter>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:BindingVariables>
+        </ui:VisualElement>
+      </ui:BindingRemapper>
+    </ui:EventTrigger>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="flex-grow-class">
+    <ui:TemplateContainer class="flex-grow-class" template="BaseFloatingBlocksTemplate">
+      <ui:BindingSetter class="notifications-modal-dialog-background">
+        <ui:SIText class="body-regular-14px-bold center" text-binding="[VisualFunction]"/>
+        <ui:VisualElement class="row-direction-normal">
+          <ui:StreamedObjectList data-binding="gameworldsubtabsandbookmarks.CurrentSelectedBookmarksList"/>
+          <ui:TemplateContainer template="layout-divider-solid-vertical"/>
+          <ui:SIEnabled data-binding="[VisualFunction]">
+            <ui:StreamedObjectList data-binding="gameworldsubtabsandbookmarks.CurrentUnselectedBookmarksList"/>
+          </ui:SIEnabled>
+        </ui:VisualElement>
+      </ui:BindingSetter>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

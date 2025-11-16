@@ -1,0 +1,96 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow align-self-stretch-class midnight">
+    <ui:EventTrigger/>
+    <ui:SIVisible class="sivisible-quickstart-interactionpanel" data-binding="setupgame.hascustombackground">
+      <ui:SIImage class="base-template-grow" data-binding="setupgame.BackgroundImage"/>
+    </ui:SIVisible>
+    <ui:BindableSwitchElement data-binding="currentMode">
+      <ui:SIVisible data-binding="[VisualFunction]">
+        <ui:SIGradient class="sigradient-quickstart"/>
+      </ui:SIVisible>
+      <ui:SIGradient class="sigradient-quickstart"/>
+      <ui:BindableSwitchElement data-binding="ClubAndNationStep">
+        <ui:SIGradient class="sigradient-quickstart"/>
+        <ui:SIGradient class="sigradient-quickstart"/>
+      </ui:BindableSwitchElement>
+    </ui:BindableSwitchElement>
+    <ui:VisualElement class="base-template-grow align-self-stretch-class">
+      <ui:TemplateContainer class="base-template-grow margin-bottom-32 padding-bottom-32" template="GameCreationQuickStartBlock"/>
+    </ui:VisualElement>
+    <ui:SIVisible data-binding="config.ShowPhonePanels">
+      <ui:VisualElement class="row-direction-normal justify-content-space-between absolute-position-fill-bottom-container">
+        <ui:VisualElement class="row-direction-normal align-items-center base-template-grow">
+          <ui:BindableSwitchElement class="align-self-stretch-class flex-grow-class" data-binding="[VisualFunction]">
+            <ui:VisualElement class="row-direction-normal justify-content-space-between">
+              <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                <ui:SIButton class="buttons-button-secondary-default align-self-start">
+                  <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+                  <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-left-8" text-binding="[VisualFunction]"/>
+                </ui:SIButton>
+                <ui:SIButton class="buttons-button-secondary-default align-self-start">
+                  <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+                  <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-left-8" text-binding="[VisualFunction]"/>
+                </ui:SIButton>
+              </ui:BindableSwitchElement>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:TemplateContainer template="GamePreferencesButton"/>
+                <ui:SIButton class="buttons-button-primary-default margin-right-4 margin-left-4 margin-top-2 margin-bottom-2 align-self-end">
+                  <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                  <ui:VisualElement class="ui-concepts-chevron-right_small margin-right-8"/>
+                </ui:SIButton>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:BindableSwitchElement data-binding="ClubAndNationStep">
+              <ui:VisualElement class="row-direction-normal justify-content-space-between">
+                <ui:SIButton class="buttons-button-secondary-default align-self-start">
+                  <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+                  <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-left-8" text-binding="[VisualFunction]"/>
+                </ui:SIButton>
+                <ui:VisualElement class="row-direction-normal base-template-grow">
+                  <ui:TemplateContainer template="GamePreferencesButton"/>
+                  <ui:SIButton class="buttons-button-primary-default">
+                    <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                  </ui:SIButton>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal justify-content-space-between">
+                <ui:SIButton class="buttons-button-secondary-default align-self-start">
+                  <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+                  <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis margin-left-8" text-binding="[VisualFunction]"/>
+                </ui:SIButton>
+                <ui:VisualElement class="row-direction-normal base-template-grow">
+                  <ui:TemplateContainer template="GamePreferencesButton"/>
+                  <ui:SIButton class="buttons-button-primary-default">
+                    <ui:SIText class="button-regular content-ellipsis content-no-wrap content-ellipsis" text-binding="[VisualFunction]"/>
+                  </ui:SIButton>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:BindableSwitchElement>
+          </ui:BindableSwitchElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:SIVisible>
+    <ui:SIVisible data-binding="config.ShowPhonePanels">
+      <ui:VisualElement class="advanced-start-bottom-panel-phone-color flex-grow-class absolute-position-fill-bottom-container">
+        <ui:SISafeAreaElement class="row-direction-normal justify-content-space-between align-items-centre margin-bottom-16 margin-top-16 margin-top-global-gap-extra-large margin-bottom-global-gap-extra-large">
+          <ui:VisualElement class="row-direction-normal justify-content-space-between flex-grow-class">
+            <ui:BindableSwitchElement data-binding="[VisualFunction]">
+              <ui:TemplateContainer template="button-secondary-leading-icon-label"/>
+              <ui:TemplateContainer template="button-secondary-leading-icon-label"/>
+            </ui:BindableSwitchElement>
+            <ui:SIVisible data-binding="[VisualFunction]">
+              <ui:SIText class="margin-bottom-4 align-self-center-class" text-binding="[VisualFunction]"/>
+              <ui:SIStepper class="data_display-graphs-stepper-step_bar-width-size-narrow-counter"/>
+            </ui:SIVisible>
+            <ui:BindableSwitchElement data-binding="[VisualFunction]">
+              <ui:TemplateContainer class="align-items-end" template="button-primary-trailing-icon-label"/>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:TemplateContainer template="button-primary-trailing-icon-label"/>
+              </ui:VisualElement>
+            </ui:BindableSwitchElement>
+          </ui:VisualElement>
+        </ui:SISafeAreaElement>
+      </ui:VisualElement>
+    </ui:SIVisible>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,33 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables>
+      <ui:BindingSetter>
+        <ui:EventTrigger>
+          <ui:BindingRemapper binding-mappings="setpiece=Tactic.SetPiece;setpieceroutineindex=SetPiece.SetPieceRoutineIndex;showsetpieces=SetPiece.SetPiecesHaveBeenCreated;responsibilities=setpiece.SetPieceResponsibilites">
+            <ui:BindableSwitchElement data-binding="responsibilities.DoesManagerControlSetPieceTactic">
+              <ui:BindingRemapper binding-mappings="setpieceperson=responsibilities.SetPieceTacticResponsibilityPerson;keyattributes=responsibilities.SetPieceTacticResponsibilityKeyAttributes">
+                <ui:TemplateContainer template="FigmaBaseToolTemplate"/>
+              </ui:BindingRemapper>
+              <ui:BindableSwitchElement data-binding="showsetpieces">
+                <ui:TemplateContainer template="FigmaBaseToolTemplate"/>
+                <ui:BindingSetter>
+                  <ui:BindableSwitchElement data-binding="showincompleteteamselection">
+                    <ui:TemplateContainer template="FigmaBaseToolTemplate"/>
+                    <ui:TemplateContainer template="FigmaBaseToolTemplate"/>
+                  </ui:BindableSwitchElement>
+                </ui:BindingSetter>
+              </ui:BindableSwitchElement>
+            </ui:BindableSwitchElement>
+            <ui:SIVisible data-binding="[VisualFunction]">
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:VisualElement class="tool-container">
+                  <ui:TemplateContainer class="figma-base-tool-template-inner-frame flex-grow-class" template="MatchCommentaryBarWithButtons"/>
+                </ui:VisualElement>
+              </ui:SIVisible>
+            </ui:SIVisible>
+          </ui:BindingRemapper>
+        </ui:EventTrigger>
+      </ui:BindingSetter>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

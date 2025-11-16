@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingSetter>
+      <ui:BindingRemapper class="flex-grow-class" binding-mappings="HasCompletedFirstStep=club.ClubVisionMeetingEditSession.ShouldShowMoveToSeasonExpectations;responsibilitylinkdata=fmconstants.ResponsibilitiesMatchLink;step=club.ClubVisionMeetingEditSession.Step;CanMoveToSeasonExpectations=club.ClubVisionMeetingEditSession.ClubVisionMeetingCanMoveToExpectations">
+        <ui:VisualElement class="row-direction-normal ios-team-talk-header">
+          <ui:TemplateContainer template="FullScreenExperienceClubVisionTitleBar"/>
+        </ui:VisualElement>
+        <ui:SIStyleSetter>
+          <ui:MultiGridLayoutElement class="flex-grow-class"/>
+        </ui:SIStyleSetter>
+      </ui:BindingRemapper>
+    </ui:BindingSetter>
+  </ui:BindingRoot>
+</ui:UXML>

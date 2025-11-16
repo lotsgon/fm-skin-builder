@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:SIVisible data-binding="config.ShowPhonePanels">
+      <ui:BindingRemapper binding-mappings="year1=comp.CurrentYear;viewid1=comp.TransferInOutValidTypesDefault;number1=comp.TransferInOutDirectionViewsDefault;viewid=viewid1.PropertyValue;number=number1.PropertyValue;year=year1.PropertyValue">
+        <ui:TemplateContainer template="FullScreenExpandedTableCardTemplate">
+          <ui:VisualElement class="row-direction-normal">
+            <ui:TemplateContainer template="dropdown-base-regular-leading-icon-trailing-icon-label"/>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:TemplateContainer template="dropdown-base-regular-trailing-icon-label"/>
+                <ui:SIVisible class="margin-right-global-gap-small" data-binding="[VisualFunction]">
+                  <ui:SIButton class="buttons-button-base-default padding-right-global-padding-regular padding-left-global-padding-regular">
+                    <ui:VisualElement class="ui-concepts-chevron-left_small"/>
+                  </ui:SIButton>
+                </ui:SIVisible>
+                <ui:SIVisible class="margin-right-global-gap-small" data-binding="[VisualFunction]">
+                  <ui:SIButton class="buttons-button-base-default padding-right-global-padding-regular padding-left-global-padding-regular">
+                    <ui:VisualElement class="ui-concepts-chevron-right_small"/>
+                  </ui:SIButton>
+                </ui:SIVisible>
+              </ui:VisualElement>
+              <ui:TemplateContainer template="dropdown-base-regular-trailing-icon-label"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:TemplateContainer>
+      </ui:BindingRemapper>
+    </ui:SIVisible>
+    <ui:SIVisible class="base-template-grow" data-binding="config.ShowPhonePanels">
+      <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTemplate"/>
+    </ui:SIVisible>
+  </ui:BindingRoot>
+</ui:UXML>

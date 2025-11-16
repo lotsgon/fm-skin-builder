@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper binding-mappings="speakto=const.NullRef">
+      <ui:VisualElement>
+        <ui:BindingRemapper binding-mappings="mainreg=Team.SquadRegistration">
+          <ui:BindingVariables class="base-template-grow">
+            <ui:TemplateContainer template="FigmaBaseToolTemplate"/>
+          </ui:BindingVariables>
+        </ui:BindingRemapper>
+      </ui:VisualElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

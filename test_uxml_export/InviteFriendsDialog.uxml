@@ -1,0 +1,36 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BaseCardTemplateImpl>
+      <ui:VisualElement class="card-modal-invite-friends">
+        <ui:VisualElement>
+          <ui:VisualElement class="notifications--notifications-modal-dialog-default-default">
+            <ui:VisualElement>
+              <ui:SIText class="heading-small-16px global-text-primary" text-binding="[VisualFunction]"/>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:TemplateContainer class="layout-divider-solid-horizontal" template="layout-divider-solid-horizontal"/>
+              <ui:VisualElement class="frame-states-invite-friends-filled">
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:BindingVariables>
+                    <ui:SIVisible data-binding="[VisualFunction]">
+                      <ui:StreamedObjectList data-binding="multiplayer.FriendList"/>
+                    </ui:SIVisible>
+                    <ui:SIVisible data-binding="[VisualFunction]">
+                      <ui:SIText class="body-regular-14px-regular global-text-secondary" text-binding="[VisualFunction]"/>
+                    </ui:SIVisible>
+                  </ui:BindingVariables>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:TemplateContainer class="layout-divider-solid-horizontal" template="layout-divider-solid-horizontal"/>
+              <ui:VisualElement>
+                <ui:VisualElement class="notifications-modal-dialog-actions-default-type-confirm row-direction-inverted">
+                  <ui:TemplateContainer template="button-primary-label"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BaseCardTemplateImpl>
+  </ui:BindingRoot>
+</ui:UXML>

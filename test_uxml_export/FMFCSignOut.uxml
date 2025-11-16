@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:VisualElement class="frame-states-fmfc-sign-sut-are-you-sure">
+    <ui:VisualElement class="row-direction-normal">
+      <ui:SIText class="heading-large-22px global-text-primary" text-binding="[VisualFunction]"/>
+    </ui:VisualElement>
+    <ui:SIText class="body-regular-14px-regular global-text-primary" text-binding="[VisualFunction]"/>
+    <ui:SIText class="body-regular-14px-regular global-text-primary" text-binding="app.FMFCAccountName"/>
+    <ui:VisualElement class="row-direction-normal">
+      <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-leading-icon-label"/>
+      <ui:TemplateContainer template="button-primary-label"/>
+    </ui:VisualElement>
+  </ui:VisualElement>
+</ui:UXML>

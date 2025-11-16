@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect>
+    <ui:VisualElement class="row-direction-normal margin-bottom-8">
+      <ui:SIButton class="no-margin buttons-button-base-default">
+        <ui:SIText class="button-regular content-ellipsis content-no-wrap margin-right-global-gap-regular" text-binding="[VisualFunction]"/>
+        <ui:VisualElement class="game-concepts-random"/>
+      </ui:SIButton>
+    </ui:VisualElement>
+    <ui:VisualElement class="margin-bottom-8">
+      <ui:VisualElement>
+        <ui:TemplateContainer template="dropdown-base-regular-trailing-icon"/>
+      </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement class="row-direction-normal base-template-grow">
+      <ui:SIScrollView class="flex-grow-class">
+        <ui:BindingRemapper binding-mappings="type=const.zero">
+          <ui:StreamedTable data-binding="[VisualFunction]"/>
+        </ui:BindingRemapper>
+      </ui:SIScrollView>
+    </ui:VisualElement>
+  </ui:BindingExpect>
+</ui:UXML>

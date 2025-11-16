@@ -1,0 +1,216 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="margin-right-global-gap-none margin-left-global-gap-none">
+    <ui:VisualElement>
+      <ui:BindingRemapper binding-mappings="transferoffer=Player.TransferOfferEditSession;contextdata=Player.TransferOfferEditSession.TransferOfferClientContext">
+        <ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal margin-right-global-gap-large margin-left-global-gap-large">
+            <ui:SIAspectRatioFitter>
+              <ui:SIButton class="sibutton margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none"/>
+            </ui:SIAspectRatioFitter>
+            <ui:SIText class="sitile__title white margin-right-global-gap-regular margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal margin-right-global-gap-small margin-left-global-gap-small">
+            <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small padding-right-global-padding-small padding-left-global-padding-small">
+              <ui:SIText class="text-regular padding-right-global-padding-small padding-left-global-padding-extra-small" text-binding="transferoffer.ClubMessage"/>
+              <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small padding-right-global-padding-small padding-left-global-padding-small">
+                <ui:BindingVariables>
+                  <ui:BindingRemapper binding-mappings="team=game.GameCurrentManagerClubTeam;person=Player;club=game.GameCurrentManager.Club;human=game.GameCurrentManager">
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:TemplateContainer template="TransferBudgetTile_2x2"/>
+                      <ui:VisualElement>
+                        <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                        <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                        <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:VisualElement>
+                            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                            <ui:SIText class="sitext" text-binding="Player.TransferStatusDetails.TransferStatusDescription.Text"/>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                            <ui:SIText class="sitext" text-binding="Player.LoanStatusDetails.TransferStatusDescription.Text"/>
+                          </ui:VisualElement>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:TemplateContainer template="TransferValueTile_2x1"/>
+                      <ui:VisualElement>
+                        <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:BindingRemapper>
+                </ui:BindingVariables>
+              </ui:VisualElement>
+              <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small padding-right-global-padding-small padding-left-global-padding-small">
+                <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                <ui:StreamedObjectList class="margin-right-global-gap-small margin-left-global-gap-small padding-right-global-padding-small padding-left-global-padding-small" data-binding="transferoffer.Comments"/>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small padding-right-global-padding-small padding-left-global-padding-small">
+              <ui:VisualElement class="row-direction-normal">
+                <ui:SIEnabled data-binding="transferoffer.CanMakeChangesToOffer">
+                  <ui:SIButton/>
+                </ui:SIEnabled>
+                <ui:SIEnabled data-binding="transferoffer.CanMakeChangesToOffer">
+                  <ui:SIButton/>
+                </ui:SIEnabled>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:SIDropdown>
+                    <ui:SIText class="sitext margin-left-global-gap-regular padding-right-global-padding-none padding-left-global-padding-small" text-binding="transferoffer.CurrentPreviousOfferSelection"/>
+                  </ui:SIDropdown>
+                </ui:SIVisible>
+                <ui:VisualElement class="row-direction-inverted">
+                  <ui:SIVisible data-binding="contextdata.HumanIsOffering">
+                    <ui:SIButton/>
+                  </ui:SIVisible>
+                  <ui:SIEnabled data-binding="transferoffer.negotiablebuttonprops.IsEnabled">
+                    <ui:SIButton/>
+                  </ui:SIEnabled>
+                </ui:VisualElement>
+              </ui:VisualElement>
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:StreamedObjectList data-binding="transferoffer.TransferOfferTransferBaseOptions"/>
+              </ui:SIVisible>
+              <ui:SIVisible data-binding="[VisualFunction]">
+                <ui:StreamedObjectList data-binding="transferoffer.TransferOfferLoanBaseOptions"/>
+              </ui:SIVisible>
+              <ui:SIAutoScrollView>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small padding-right-global-padding-small padding-left-global-padding-small">
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:SIText class="sitextmedium row-direction-normal" text-binding="[VisualFunction]"/>
+                        <ui:SIDropdown class="sitext"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:StreamedObjectList class="margin-left-global-gap-regular" data-binding="transferoffer.TransferOfferAdditionalFees"/>
+                  </ui:VisualElement>
+                  <ui:SIVisible data-binding="transferoffer.ExchangePlayersVisible">
+                    <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small padding-right-global-padding-small padding-left-global-padding-small">
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIText class="sitext" text-binding="transferoffer.ExchangePlayersTitleString"/>
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIButton/>
+                          <ui:SIEnabled data-binding="transferoffer.ExchangePlayersCanAddPlayer">
+                            <ui:SIText class="sitextmedium row-direction-normal" text-binding="transferoffer.ExchangePlayersAddString"/>
+                            <ui:SIDropdown class="sitext"/>
+                          </ui:SIEnabled>
+                        </ui:VisualElement>
+                      </ui:VisualElement>
+                      <ui:StreamedObjectList class="margin-left-global-gap-regular" data-binding="transferoffer.ExchangePlayersList"/>
+                    </ui:VisualElement>
+                  </ui:SIVisible>
+                  <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small padding-right-global-padding-small padding-left-global-padding-small">
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:SIText class="sitextmedium row-direction-normal" text-binding="[VisualFunction]"/>
+                        <ui:SIDropdown class="sitext"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:StreamedObjectList class="margin-left-global-gap-regular" data-binding="transferoffer.TransferOfferAdditionalClauses"/>
+                  </ui:VisualElement>
+                </ui:SIVisible>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:VisualElement class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small padding-right-global-padding-extra-small padding-left-global-padding-extra-small">
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:SIText class="sitextmedium row-direction-normal" text-binding="[VisualFunction]"/>
+                        <ui:SIDropdown class="sitext"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:StreamedObjectList class="margin-left-global-gap-regular" data-binding="transferoffer.TransferOfferLoanAdditionalClauses"/>
+                  </ui:VisualElement>
+                  <ui:VisualElement class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small padding-right-global-padding-extra-small padding-left-global-padding-extra-small">
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                      <ui:SIVisible data-binding="[VisualFunction]">
+                        <ui:SIText class="sitextmedium row-direction-normal" text-binding="[VisualFunction]"/>
+                        <ui:SIDropdown class="sitext"/>
+                      </ui:SIVisible>
+                    </ui:VisualElement>
+                    <ui:StreamedObjectList class="margin-left-global-gap-regular" data-binding="transferoffer.TransferOfferLoanAdditionalOptions"/>
+                  </ui:VisualElement>
+                  <ui:SIVisible data-binding="transferoffer.LoanToBuyVisible">
+                    <ui:VisualElement class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small padding-right-global-padding-extra-small padding-left-global-padding-extra-small">
+                      <ui:VisualElement class="row-direction-normal">
+                        <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                        <ui:SIVisible class="row-direction-normal" data-binding="[VisualFunction]">
+                          <ui:VisualElement class="row-direction-normal">
+                            <ui:SIButton/>
+                            <ui:VisualElement>
+                              <ui:SIText class="sitextmedium row-direction-normal" text-binding="[VisualFunction]"/>
+                              <ui:SIDropdown class="sitext"/>
+                            </ui:VisualElement>
+                          </ui:VisualElement>
+                        </ui:SIVisible>
+                      </ui:VisualElement>
+                      <ui:StreamedObjectList class="margin-left-global-gap-regular" data-binding="transferoffer.TransferOfferLoanFutureLoanToBuyFees"/>
+                    </ui:VisualElement>
+                    <ui:SIEnabled data-binding="transferoffer.LoanToBuyHasFeeSet">
+                      <ui:VisualElement class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small padding-right-global-padding-extra-small padding-left-global-padding-extra-small">
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                          <ui:SIVisible data-binding="[VisualFunction]">
+                            <ui:SIText class="sitextmedium row-direction-normal" text-binding="[VisualFunction]"/>
+                            <ui:SIDropdown class="sitext"/>
+                          </ui:SIVisible>
+                        </ui:VisualElement>
+                        <ui:StreamedObjectList class="margin-left-global-gap-regular" data-binding="transferoffer.TransferOfferLoanAdditionalFutureFees"/>
+                      </ui:VisualElement>
+                      <ui:VisualElement class="margin-right-global-gap-extra-small margin-left-global-gap-extra-small padding-right-global-padding-extra-small padding-left-global-padding-extra-small">
+                        <ui:VisualElement class="row-direction-normal">
+                          <ui:SIText class="sitext" text-binding="[VisualFunction]"/>
+                          <ui:SIVisible data-binding="[VisualFunction]">
+                            <ui:SIText class="sitextmedium row-direction-normal" text-binding="[VisualFunction]"/>
+                            <ui:SIDropdown class="sitext"/>
+                          </ui:SIVisible>
+                        </ui:VisualElement>
+                        <ui:StreamedObjectList class="margin-left-global-gap-regular" data-binding="transferoffer.TransferOfferLoanAdditionalFutureClauses"/>
+                      </ui:VisualElement>
+                    </ui:SIEnabled>
+                  </ui:SIVisible>
+                </ui:SIVisible>
+              </ui:SIAutoScrollView>
+              <ui:VisualElement>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:SIVisible class="row-direction-normal" data-binding="contextdata.HumanIsOffering">
+                    <ui:VisualElement class="row-direction-normal">
+                      <ui:SIVisible data-binding="contextdata.CanBeTransferListed">
+                        <ui:SICheckBox class="sitext" selection-binding="transferoffer.transferlistplayer"/>
+                      </ui:SIVisible>
+                      <ui:SIVisible data-binding="contextdata.CanBeLoanListed">
+                        <ui:SICheckBox class="sitext" selection-binding="transferoffer.loanlistplayer"/>
+                      </ui:SIVisible>
+                      <ui:SICheckBox class="sitext" selection-binding="transferoffer.proposaldeadlinedateisset"/>
+                      <ui:SIEnabled data-binding="transferoffer.ProposalDeadlineDateIsSet">
+                        <ui:SIDropdown/>
+                      </ui:SIEnabled>
+                    </ui:VisualElement>
+                  </ui:SIVisible>
+                  <ui:VisualElement>
+                    <ui:SIText class="sitext" text-binding="transferoffer.TotalTransferCost"/>
+                    <ui:SIText class="sitext" text-binding="transferoffer.TransferBudgetCost"/>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="row-direction-normal">
+                  <ui:BindingRemapper binding-mappings="undobuffer=transferoffer">
+                    <ui:TemplateContainer template="EditSessionUndoBufferWidget"/>
+                  </ui:BindingRemapper>
+                  <ui:StreamedObjectList data-binding="transferoffer.ResponseActions"/>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:BindingRemapper>
+    </ui:VisualElement>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingVariables class="base-template-grow">
+      <ui:BindingRemapper class="base-template-grow" binding-mappings="human=game.GameCurrentManager">
+        <ui:BindableSwitchElement class="flex-grow-class" data-binding="config.ShowPhonePanels">
+          <ui:TemplateContainer class="base-template-grow" template="FigmaBaseToolTemplate"/>
+          <ui:TemplateContainer class="flex-grow-class" template="FigmaBaseToolTabbedTemplate"/>
+        </ui:BindableSwitchElement>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,59 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindableSwitchElement class="flex-grow-class" data-binding="config.ShowPhonePanels">
+      <ui:BindingRemapper binding-mappings="speaktoisontheright=const.False">
+        <ui:BindingVariables>
+          <ui:VisualElement>
+            <ui:BaseCardTemplateImpl>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:BindingVariables>
+                  <ui:VisualElement>
+                    <ui:VisualElement class="layout-report-default-default">
+                      <ui:VisualElement class="figma-base-tool-template-inner-frame">
+                        <ui:VisualElement>
+                          <ui:SIVisible data-binding="config.ShowPhonePanels">
+                            <ui:TemplateContainer template="CardTitleBar-Phone"/>
+                          </ui:SIVisible>
+                          <ui:SIVisible data-binding="config.ShowPhonePanels">
+                            <ui:TemplateContainer template="reports-header-navigation-default-type-tool-header"/>
+                          </ui:SIVisible>
+                        </ui:VisualElement>
+                        <ui:SISafeAreaElement>
+                          <ui:SIVisible data-binding="game.IsServer">
+                            <ui:TabbedGridLayoutElement/>
+                          </ui:SIVisible>
+                          <ui:SIVisible data-binding="game.IsServer">
+                            <ui:TabbedGridLayoutElement/>
+                          </ui:SIVisible>
+                          <ui:SIVisible data-binding="game.GameCurrentManager.HumanIsAdmin">
+                            <ui:SIVisible data-binding="game.IsOnlineGame">
+                              <ui:SIDropdown class="margin-right-global-gap-regular padding-right-global-padding-none padding-left-global-padding-none">
+                                <ui:SIText class="body-regular-14px-regular margin-right-global-gap-regular margin-left-global-gap-regular" text-binding="[VisualFunction]"/>
+                              </ui:SIDropdown>
+                            </ui:SIVisible>
+                          </ui:SIVisible>
+                        </ui:SISafeAreaElement>
+                      </ui:VisualElement>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:BindingVariables>
+                <ui:SIVisible data-binding="config.HideSpeakToOnPhone">
+                  <ui:SIVisible data-binding="[VisualFunction]">
+                    <ui:BindingRemapper binding-mappings="speakto=SpeakTo;human=game.GameCurrentManager">
+                      <ui:SIVisible data-binding="SpeakTo.Actions.IsValid">
+                        <ui:VisualElement class="margin-left-global-gap-extra-large">
+                          <ui:TemplateContainer template="SpeakToSidePanel"/>
+                        </ui:VisualElement>
+                      </ui:SIVisible>
+                    </ui:BindingRemapper>
+                  </ui:SIVisible>
+                </ui:SIVisible>
+              </ui:VisualElement>
+            </ui:BaseCardTemplateImpl>
+          </ui:VisualElement>
+        </ui:BindingVariables>
+      </ui:BindingRemapper>
+      <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTabbedTemplate"/>
+    </ui:BindableSwitchElement>
+  </ui:BindingRoot>
+</ui:UXML>

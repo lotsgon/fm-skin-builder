@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:TemplateContainer template="BaseCardTemplate">
+      <ui:VisualElement class="margin-right-global-gap-small margin-left-global-gap-small">
+        <ui:VisualElement class="customcontent">
+          <ui:SIText class="sitile__text-bold" text-binding="[VisualFunction]"/>
+          <ui:BindingRemapper binding-mappings="human=game.GameCurrentManager">
+            <ui:DebugPropertiesElement/>
+          </ui:BindingRemapper>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:TemplateContainer>
+  </ui:BindingRoot>
+</ui:UXML>

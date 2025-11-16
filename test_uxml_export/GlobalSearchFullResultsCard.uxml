@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingRemapper class="base-template-grow" binding-mappings="team=game.GameCurrentManager.Team;player=game.GameCurrentManager.Team.Club.KeyPlayer;continent=game.GameCurrentManager.Team.Club.DisplayNation.Continent;isplayerrecruitment=const.True;club=game.GameCurrentManager.Team.Club;comp=game.GameCurrentManager.Team.Division;nation=game.GameCurrentManager.Team.Nation;teamcontainer=human.Team.TeamContainer">
+      <ui:TemplateContainer class="base-template-grow" template="FigmaBaseCardTabbedTemplate"/>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

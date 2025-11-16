@@ -1,0 +1,28 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingVariables>
+      <ui:VisualElement class="card-notifications-modal-dialog-quit-without-saving">
+        <ui:VisualElement>
+          <ui:VisualElement class="notifications--notifications-modal-dialog-default-default">
+            <ui:VisualElement>
+              <ui:VisualElement>
+                <ui:SIText class="heading-small-16px" text-binding="[VisualFunction]"/>
+              </ui:VisualElement>
+              <ui:BindableTextEditBox class="margin-bottom-global-gap-regular"/>
+              <ui:VisualElement class="row-direction-normal">
+                <ui:VisualElement>
+                  <ui:VisualElement>
+                    <ui:VisualElement class="notifications-modal-dialog-actions-default-type-confirm row-direction-inverted">
+                      <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-secondary-label"/>
+                      <ui:TemplateContainer class="margin-right-global-gap-regular" template="button-primary-label"/>
+                    </ui:VisualElement>
+                  </ui:VisualElement>
+                </ui:VisualElement>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:VisualElement>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,137 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:SISafeAreaElement>
+      <ui:SIStyleSetter class="phone-interaction-header-hidden">
+        <ui:SIEnabled data-binding="is-navigation-area-open">
+          <ui:VisualElement class="phone-interaction-header expanded-header-background">
+            <ui:BindableSwitchElement class="padding-right-global-padding-none padding-left-global-padding-none" data-binding="[VisualFunction]">
+              <ui:VisualElement>
+                <ui:BindableSwitchElement data-binding="[VisualFunction]">
+                  <ui:BindingRemapper binding-mappings="nation=human.team.nation">
+                    <ui:BindingVariables>
+                      <ui:TabGroup>
+                        <ui:ButtonGroup class="row-direction-normal" current-selected-id-binding="gameworldsubtabsandbookmarks.PrimaryTab">
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-game-mode-real-world_large"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-squad-info_large"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-transfer_large"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-tactic-secondary_medium"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-club-badge_large"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image ui-concepts-person_large"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                        </ui:ButtonGroup>
+                        <ui:SwitchElement>
+                          <ui:VisualElement/>
+                          <ui:VisualElement/>
+                          <ui:VisualElement/>
+                          <ui:VisualElement/>
+                          <ui:VisualElement/>
+                          <ui:VisualElement/>
+                        </ui:SwitchElement>
+                      </ui:TabGroup>
+                    </ui:BindingVariables>
+                  </ui:BindingRemapper>
+                  <ui:BindingRemapper binding-mappings="club=human.team.club">
+                    <ui:BindingVariables>
+                      <ui:TabGroup>
+                        <ui:ButtonGroup class="row-direction-normal" current-selected-id-binding="gameworldsubtabsandbookmarks.PrimaryTab">
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-game-mode-real-world_large"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-squad-info_large"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-transfer_large"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-tactic-secondary_medium"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-club-badge_large"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                          <ui:VisualElement>
+                            <ui:SIButton class="section-button-iphone">
+                              <ui:VisualElement class="unity-image section-button-iphone__image ui-concepts-person_large"/>
+                            </ui:SIButton>
+                          </ui:VisualElement>
+                        </ui:ButtonGroup>
+                        <ui:SwitchElement>
+                          <ui:VisualElement/>
+                          <ui:VisualElement/>
+                          <ui:VisualElement/>
+                          <ui:VisualElement/>
+                          <ui:VisualElement/>
+                          <ui:VisualElement/>
+                        </ui:SwitchElement>
+                      </ui:TabGroup>
+                    </ui:BindingVariables>
+                  </ui:BindingRemapper>
+                </ui:BindableSwitchElement>
+              </ui:VisualElement>
+              <ui:VisualElement>
+                <ui:BindingVariables>
+                  <ui:TabGroup>
+                    <ui:ButtonGroup class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none" current-selected-id-binding="selectedTab">
+                      <ui:VisualElement>
+                        <ui:SIButton class="section-button-iphone">
+                          <ui:VisualElement class="unity-image section-button-iphone__image game-concepts-game-mode-real-world_large"/>
+                        </ui:SIButton>
+                      </ui:VisualElement>
+                      <ui:VisualElement>
+                        <ui:SIButton class="section-button-iphone">
+                          <ui:VisualElement class="unity-image section-button-iphone__image ui-concepts-person_large"/>
+                        </ui:SIButton>
+                      </ui:VisualElement>
+                    </ui:ButtonGroup>
+                    <ui:SwitchElement>
+                      <ui:VisualElement/>
+                      <ui:VisualElement/>
+                    </ui:SwitchElement>
+                  </ui:TabGroup>
+                </ui:BindingVariables>
+              </ui:VisualElement>
+            </ui:BindableSwitchElement>
+            <ui:WrappedObjectList/>
+          </ui:VisualElement>
+        </ui:SIEnabled>
+        <ui:SICheckBox class="buttons-phone-interaction-header" selection-binding="is-navigation-area-open">
+          <ui:SIText class="margin-right-global-gap-small phone-header-text fm-universe-small-14px" text-binding="panelhistory.Current.DisplayValue"/>
+          <ui:SIImage class="phone-header-chevron" data-binding="[VisualFunction]"/>
+        </ui:SICheckBox>
+      </ui:SIStyleSetter>
+    </ui:SISafeAreaElement>
+  </ui:BindingRoot>
+</ui:UXML>

@@ -1,0 +1,34 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="base-template-grow">
+    <ui:BindableSwitchElement class="base-template-grow width-100-percent" data-binding="[VisualFunction]">
+      <ui:VisualElement>
+        <ui:SIVisible data-binding="human.team.IsClub">
+          <ui:ButtonGroup class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none base-template-grow" current-selected-id-binding="gameworldsubtabsandbookmarks.PrimaryTab" selection-binding="gameworldsubtabsandbookmarks.PrimaryTab">
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+          </ui:ButtonGroup>
+        </ui:SIVisible>
+        <ui:SIVisible data-binding="human.team.IsClub">
+          <ui:ButtonGroup class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none base-template-grow" current-selected-id-binding="gameworldsubtabsandbookmarks.PrimaryTab" selection-binding="gameworldsubtabsandbookmarks.PrimaryTab">
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+            <ui:TemplateContainer template="navigation-tab-portal-default"/>
+          </ui:ButtonGroup>
+        </ui:SIVisible>
+      </ui:VisualElement>
+      <ui:VisualElement>
+        <ui:ButtonGroup class="row-direction-normal margin-right-global-gap-none margin-left-global-gap-none padding-right-global-padding-none padding-left-global-padding-none base-template-grow" current-selected-id-binding="gameworldsubtabsandbookmarks.PrimaryTab" selection-binding="gameworldsubtabsandbookmarks.PrimaryTab">
+          <ui:TemplateContainer template="navigation-tab-portal-default"/>
+          <ui:TemplateContainer template="navigation-tab-portal-default"/>
+        </ui:ButtonGroup>
+      </ui:VisualElement>
+    </ui:BindableSwitchElement>
+  </ui:BindingExpect>
+</ui:UXML>

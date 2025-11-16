@@ -1,0 +1,85 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot>
+    <ui:BindingRemapper class="tutorial-floating-element" binding-mappings="tutorial=tutorialmanager.Tutorial">
+      <ui:BindableSwitchElement data-binding="config.ShowPhonePanels">
+        <ui:VisualElement class="column-direction-normal tutorial-floating-main-frame">
+          <ui:VisualElement class="row-direction-normal tutorial-floating-top-frame">
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIText class="heading-regular-18px tutorial-text-color margin-right-global-gap-small" text-binding="tutorial.CurrentStep.Title"/>
+              <ui:SIVisible class="row-direction-normal" data-binding="tutorial.DisplayStepCounter">
+                <ui:SIText class="heading-small-16px tutorial-text-step-color" text-binding="tutorial.SectionsDisplay"/>
+              </ui:SIVisible>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:SIText class="tutorial-text-color" text-binding="tutorial.CurrentStep.Description"/>
+          <ui:VisualElement class="row-direction-normal flex-grow-class tutorial-floating-bottom-buttons">
+            <ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal tutorial-floating-continue-button margin-right-global-gap-small margin-left-global-gap-none flex-grow-class">
+                <ui:SIButton class="tutorial-floating-continue-button-back-part">
+                  <ui:VisualElement class="tutorial-floating-continue-chevron">
+                    <ui:VisualElement class="ui-concepts-chevron-left_small tutorial-chevron-small"/>
+                  </ui:VisualElement>
+                </ui:SIButton>
+                <ui:SIStyleSetter class="row-direction-normal">
+                  <ui:SIButton class="tutorial-floating-continue-button-continue-part flex-shrink-class">
+                    <ui:SIText class="body-regular-14px-regular global-text-primary content-ellipsis content-no-wrap" text-binding="[VisualFunction]"/>
+                    <ui:VisualElement class="ui-concepts-chevron-right_small"/>
+                  </ui:SIButton>
+                </ui:SIStyleSetter>
+              </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:SIButton class="buttons-button-base-dark">
+                <ui:SIText class="button-regular content-no-wrap content-ellipsis search-alternative-text-color" text-binding="[VisualFunction]"/>
+                <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                <ui:VisualElement class="ui-concepts-continue_small tutorial-chevron-small margin-left-global-gap-regular"/>
+              </ui:SIButton>
+            </ui:VisualElement>
+            <ui:VisualElement>
+              <ui:SIButton class="buttons-button-base-dark margin-right-global-gap-none">
+                <ui:SIText class="button-regular content-no-wrap content-ellipsis search-alternative-text-color" text-binding="[VisualFunction]"/>
+                <ui:TemplateContainer class="controllers-keyboard-inputs margin-right-global-gap-regular" template="controllers-keyboard inputs"/>
+                <ui:VisualElement class="ui-concepts-close_small tutorial-chevron-small margin-left-global-gap-regular"/>
+              </ui:SIButton>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="column-direction-normal tutorial-floating-main-frame-phone">
+          <ui:VisualElement class="align-self-end flex-no-shrink-class margin-bottom-global-gap-regular">
+            <ui:SIButton class="buttons-button-tertiary-default tutorial-text-underline-colour">
+              <ui:SIText class="body-small-12px-regular content-ellipsis content-no-wrap content-ellipsis sitext-hover-cursor tutorial-text-color" text-binding="[VisualFunction]"/>
+            </ui:SIButton>
+          </ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal tutorial-floating-top-frame-phone flex-no-shrink-class">
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIText class="heading-regular-18px tutorial-text-color margin-right-global-gap-small" text-binding="tutorial.CurrentStep.Title"/>
+              <ui:SIVisible class="row-direction-normal" data-binding="tutorial.DisplayStepCounter">
+                <ui:SIText class="heading-small-16px tutorial-text-step-color" text-binding="tutorial.SectionsDisplay"/>
+              </ui:SIVisible>
+            </ui:VisualElement>
+          </ui:VisualElement>
+          <ui:SIScrollView>
+            <ui:SIText class="tutorial-text-color margin-bottom-global-gap-large flex-no-shrink-class body-small-12px-regular" text-binding="tutorial.CurrentStep.Description"/>
+          </ui:SIScrollView>
+          <ui:VisualElement class="row-direction-normal flex-grow-class margin-top-global-gap-extra-small flex-no-shrink-class">
+            <ui:VisualElement>
+              <ui:VisualElement class="row-direction-normal tutorial-floating-continue-button margin-right-global-gap-small margin-left-global-gap-none flex-grow-class">
+                <ui:SIButton class="tutorial-floating-continue-button-back-part">
+                  <ui:VisualElement class="tutorial-floating-continue-chevron">
+                    <ui:VisualElement class="ui-concepts-chevron-left_small tutorial-chevron-small"/>
+                  </ui:VisualElement>
+                </ui:SIButton>
+                <ui:SIStyleSetter class="row-direction-normal">
+                  <ui:SIButton class="tutorial-floating-continue-button-continue-part flex-shrink-class">
+                    <ui:SIText class="body-regular-14px-regular global-text-primary content-ellipsis content-no-wrap" text-binding="[VisualFunction]"/>
+                    <ui:VisualElement class="ui-concepts-chevron-right_small"/>
+                  </ui:SIButton>
+                </ui:SIStyleSetter>
+              </ui:VisualElement>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+      </ui:BindableSwitchElement>
+    </ui:BindingRemapper>
+  </ui:BindingRoot>
+</ui:UXML>

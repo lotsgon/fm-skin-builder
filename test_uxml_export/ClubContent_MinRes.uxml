@@ -1,0 +1,47 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingExpect class="flex-grow-class">
+    <ui:VisualElement>
+      <ui:SIGradient class="row-direction-normal border-choose-club-or-nation">
+        <ui:VisualElement class="row-direction-normal margin-right-global-gap-extra-large">
+          <ui:BindingRemapper class="margin-right-global-gap-large" binding-mappings="comp=selectedComp">
+            <ui:SIImage class="quick-actions-overflow-button" data-binding="[VisualFunction]"/>
+          </ui:BindingRemapper>
+          <ui:VisualElement>
+            <ui:SIText class="heading-small-16px" text-binding="selectedComp.Name"/>
+            <ui:VisualElement class="row-direction-normal">
+              <ui:SIImage class="nation-flag-small-16px margin-right-global-gap-regular margin-right-global-gap-none padding-right-global-padding-extra-small padding-left-global-padding-small" data-binding="[VisualFunction]"/>
+              <ui:SIText class="body-small-12px-regular content-no-wrap content-ellipsis global-text-primary" text-binding="selectedNation.Name"/>
+            </ui:VisualElement>
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:TemplateContainer class="margin-right-global-gap-extra-large margin-left-global-gap-extra-large" template="layout-divider-solid-vertical"/>
+        <ui:VisualElement>
+          <ui:VisualElement class="row-direction-normal">
+            <ui:SIText class="body-small-12px-bold global-text-secondary" text-binding="[VisualFunction]"/>
+          </ui:VisualElement>
+          <ui:VisualElement>
+            <ui:BindingRemapper binding-mappings="reputation=selectedComp.ReputationScope">
+              <ui:TemplateContainer template="LeagueReputationCell"/>
+            </ui:BindingRemapper>
+          </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:TemplateContainer class="margin-right-global-gap-extra-large margin-left-global-gap-extra-large" template="layout-divider-solid-vertical"/>
+        <ui:VisualElement class="row-direction-normal">
+          <ui:VisualElement class="game-concepts-club-badge_small margin-right-global-gap-small"/>
+          <ui:SIText class="body-regular-14px-regular content-no-wrap content-left-align content-ellipsis global-text-secondary margin-right-global-gap-small" text-binding="[VisualFunction]"/>
+        </ui:VisualElement>
+      </ui:SIGradient>
+      <ui:VisualElement class="row-direction-normal">
+        <ui:VisualElement class="game-concepts-club-badge_small margin-right-global-gap-regular"/>
+        <ui:SIText class="global-text-primary heading-small-16px" text-binding="[VisualFunction]"/>
+      </ui:VisualElement>
+      <ui:VisualElement class="flex-grow-class">
+        <ui:BindingRemapper class="flex-grow-class" binding-mappings="DBSummaryCompetition=selectedComp">
+          <ui:SIScrollView class="manager-creation-screen-scroll">
+            <ui:GridSelector class="horizontal-list-shrink non-selectable-list grid-without-scroll quick_start-club-selected-tile-Border"/>
+          </ui:SIScrollView>
+        </ui:BindingRemapper>
+      </ui:VisualElement>
+    </ui:VisualElement>
+  </ui:BindingExpect>
+</ui:UXML>

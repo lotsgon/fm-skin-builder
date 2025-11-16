@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+  <ui:BindingRoot class="base-template-grow">
+    <ui:BindingVariables>
+      <ui:BindingRemapper binding-mappings="team=targetjob.Team;jobtype=targetjob.JobType;speakto=Human.JobBoardSpeakTo">
+        <ui:TemplateContainer template="FigmaBaseCardTemplate">
+          <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+          <ui:VisualElement class="margin-right-global-gap-extra-large margin-left-global-gap-extra-large">
+            <ui:BindingExpect>
+              <ui:BindingVariables>
+                <ui:SIVisible data-binding="[VisualFunction]">
+                  <ui:TemplateContainer template="dropdown-base-regular-trailing-icon-label"/>
+                </ui:SIVisible>
+              </ui:BindingVariables>
+            </ui:BindingExpect>
+          </ui:VisualElement>
+        </ui:TemplateContainer>
+      </ui:BindingRemapper>
+    </ui:BindingVariables>
+  </ui:BindingRoot>
+</ui:UXML>
