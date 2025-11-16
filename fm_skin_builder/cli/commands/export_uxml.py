@@ -68,9 +68,16 @@ def run(args) -> None:
             if obj.type.name == "MonoBehaviour":
                 try:
                     data = obj.read()
-                    type_name = getattr(data, "m_ClassName", None)
 
-                    if type_name == "UnityEngine.UIElements.VisualTreeAsset":
+                    # Check if this is a VisualTreeAsset by looking for VTA-specific fields
+                    # (m_ClassName may not be set in Unity 2021+)
+                    is_vta = (
+                        hasattr(data, "m_VisualElementAssets") or
+                        hasattr(data, "m_TemplateAssets") or
+                        hasattr(data, "m_UxmlObjectEntries")
+                    )
+
+                    if is_vta:
                         asset_name = getattr(data, "m_Name", f"VTA_{obj.path_id}")
                         if not asset_name:
                             asset_name = f"VTA_{obj.path_id}"
