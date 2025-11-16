@@ -69,14 +69,11 @@ def test_css_variable():
 
 def test_css_class():
     """Test CSSClass model."""
-    val = CSSValueDefinition(value_type=4, index=10, resolved_value="#1976d2")
-    prop = CSSProperty(name="background-color", values=[val])
-
     cls = CSSClass(
         name=".button-primary",
         stylesheet="FMColours",
         bundle="skins.bundle",
-        properties=[prop],
+        raw_properties={"background-color": "#1976d2"},
         variables_used=["--primary-color"],
         tags=["button", "primary"],
         first_seen="2026.1.0",
@@ -84,20 +81,16 @@ def test_css_class():
     )
 
     assert cls.name == ".button-primary"
-    assert len(cls.properties) == 1
+    assert cls.raw_properties == {"background-color": "#1976d2"}
     assert "button" in cls.tags
 
 
 def test_css_class_enhanced():
     """Test CSSClass model with enhanced fields (schema 2.2.0+)."""
-    val = CSSValueDefinition(value_type=4, index=10, resolved_value="#1976d2")
-    prop = CSSProperty(name="background-color", values=[val])
-
     cls = CSSClass(
         name=".button-primary",
         stylesheet="FMColours",
         bundle="skins.bundle",
-        properties=[prop],
         raw_properties={
             "background-color": "var(--primary-color)",
             "border-radius": "4px",

@@ -294,32 +294,19 @@ def resolve_css_class_properties(
     """
     resolver = CSSResolver(css_variables)
 
-    raw_properties = {}
+    # Get raw_properties from the CSS class (already populated by extractor)
+    raw_properties = css_class.raw_properties if hasattr(css_class, "raw_properties") and css_class.raw_properties else {}
+
     resolved_properties = {}
     all_variables = set()
     all_colors = set()
     all_numerics = set()
     all_assets = set()
 
-    # Get properties list
-    properties = css_class.properties if hasattr(css_class, "properties") else css_class.get("properties", [])
-
-    for prop in properties:
-        prop_name = prop.name if hasattr(prop, "name") else prop.get("name")
-        values = prop.values if hasattr(prop, "values") else prop.get("values", [])
-
-        if not prop_name:
+    # Process each property
+    for prop_name, raw_value in raw_properties.items():
+        if not raw_value:
             continue
-
-        # Build raw value string
-        raw_value_parts = []
-        for val in values:
-            resolved = val.resolved_value if hasattr(val, "resolved_value") else val.get("resolved_value", "")
-            if resolved:
-                raw_value_parts.append(resolved)
-
-        raw_value = ", ".join(raw_value_parts)
-        raw_properties[prop_name] = raw_value
 
         # Resolve variables
         resolved_value, variables = resolver.resolve_property_value(raw_value)

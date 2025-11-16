@@ -124,7 +124,6 @@ class CSSClass(BaseModel):
     name: str = Field(..., description="Selector: '.button-primary'")
     stylesheet: str = Field(..., description="Unity asset name: 'FMColours'")
     bundle: str
-    properties: List[CSSProperty] = Field(default_factory=list)
 
     # Enhanced introspection fields (schema 2.2.0+)
     raw_properties: Optional[Dict[str, str]] = Field(

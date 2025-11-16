@@ -176,20 +176,11 @@ class TestResolveClassProperties:
             name=".test-class",
             stylesheet="TestSheet",
             bundle="test.bundle",
-            properties=[
-                CSSProperty(
-                    name="color",
-                    values=[CSSValueDefinition(value_type=10, index=0, resolved_value="var(--primary)")],
-                ),
-                CSSProperty(
-                    name="border-radius",
-                    values=[CSSValueDefinition(value_type=3, index=1, resolved_value="4px")],
-                ),
-                CSSProperty(
-                    name="background-image",
-                    values=[CSSValueDefinition(value_type=5, index=2, resolved_value="sprite://test/icon")],
-                ),
-            ],
+            raw_properties={
+                "color": "var(--primary)",
+                "border-radius": "4px",
+                "background-image": "sprite://test/icon",
+            },
             first_seen="2026.1.0",
             last_seen="2026.4.0",
         )
@@ -225,15 +216,9 @@ class TestResolveClassProperties:
             name=".test-class",
             stylesheet="TestSheet",
             bundle="test.bundle",
-            properties=[
-                CSSProperty(
-                    name="padding",
-                    values=[
-                        CSSValueDefinition(value_type=3, index=0, resolved_value="6px"),
-                        CSSValueDefinition(value_type=3, index=1, resolved_value="10px"),
-                    ],
-                ),
-            ],
+            raw_properties={
+                "padding": "6px 10px",
+            },
             first_seen="2026.1.0",
             last_seen="2026.4.0",
         )
@@ -247,7 +232,7 @@ class TestResolveClassProperties:
             asset_dependencies,
         ) = resolve_css_class_properties(css_class, {})
 
-        assert raw_properties["padding"] == "6px, 10px"
+        assert raw_properties["padding"] == "6px 10px"
         assert "6px" in numeric_tokens
         assert "10px" in numeric_tokens
 
@@ -257,12 +242,9 @@ class TestResolveClassProperties:
             name=".test-class",
             stylesheet="TestSheet",
             bundle="test.bundle",
-            properties=[
-                CSSProperty(
-                    name="color",
-                    values=[CSSValueDefinition(value_type=4, index=0, resolved_value="#FFFFFF")],
-                ),
-            ],
+            raw_properties={
+                "color": "#FFFFFF",
+            },
             first_seen="2026.1.0",
             last_seen="2026.4.0",
         )

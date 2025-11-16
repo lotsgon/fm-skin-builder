@@ -53,7 +53,7 @@ class TestCSSIntegration:
             # Check first class structure
             cls = classes[0]
             assert hasattr(cls, "name")
-            assert hasattr(cls, "properties")
+            assert hasattr(cls, "raw_properties")
             assert hasattr(cls, "stylesheet")
 
     def test_enhanced_class_data(self, ui_styles_bundle):
@@ -67,7 +67,7 @@ class TestCSSIntegration:
             # Find a class with properties
             cls_with_props = None
             for cls in classes:
-                if len(cls.properties) > 0:
+                if cls.raw_properties and len(cls.raw_properties) > 0:
                     cls_with_props = cls
                     break
 

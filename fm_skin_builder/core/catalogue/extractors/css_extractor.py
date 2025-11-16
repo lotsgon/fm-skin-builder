@@ -11,7 +11,7 @@ import UnityPy
 import re
 
 from .base import BaseAssetExtractor
-from ..models import CSSVariable, CSSClass, CSSProperty, CSSValueDefinition
+from ..models import CSSVariable, CSSClass, CSSValueDefinition
 from ...css_utils import build_selector_from_parts, format_property_value, _format_uss_value
 from ..css_resolver import CSSResolver, resolve_css_class_properties
 
@@ -274,7 +274,6 @@ class CSSExtractor(BaseAssetExtractor):
         if not properties:
             return None
 
-        css_properties = []
         variables_used = set()
         raw_properties = {}  # Store actual CSS/USS text values
 
@@ -282,9 +281,6 @@ class CSSExtractor(BaseAssetExtractor):
             prop_name = getattr(prop, "m_Name", None)
             if not prop_name:
                 continue
-
-            # Get individual value definitions (for backward compatibility)
-            value_defs = self._extract_values(prop, strings, colors, floats, dimensions)
 
             # Get the actual CSS/USS text value using the SAME logic as patch workflow
             # This reuses format_property_value() which extracts logic from serialize_stylesheet_to_uss()
@@ -306,20 +302,6 @@ class CSSExtractor(BaseAssetExtractor):
                 var_matches = re.findall(r"var\((--[\w-]+)\)", css_text_value)
                 variables_used.update(var_matches)
 
-            # Also track from value definitions (backward compatibility)
-            for val in value_defs:
-                if val.value_type == 10:  # Variable reference
-                    if val.resolved_value.startswith("var("):
-                        # Extract variable name from var(--name)
-                        match = re.search(r"var\((--[\w-]+)\)", val.resolved_value)
-                        if match:
-                            variables_used.add(match.group(1))
-                    elif val.resolved_value.startswith("--"):
-                        variables_used.add(val.resolved_value)
-
-            css_prop = CSSProperty(name=prop_name, values=value_defs)
-            css_properties.append(css_prop)
-
         # Generate tags from class name
         tags = self._generate_tags_from_selector(name)
 
@@ -327,7 +309,6 @@ class CSSExtractor(BaseAssetExtractor):
             name=name,
             stylesheet=stylesheet,
             bundle=bundle,
-            properties=css_properties,
             raw_properties=raw_properties,  # Store actual CSS/USS text
             variables_used=sorted(list(variables_used)),
             tags=tags,
