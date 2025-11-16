@@ -24,4 +24,5 @@ frontend/src-tauri/resources/backend/fm_skin_builder
 .env.local
 packages/
 assets/
+test_output*/
 
