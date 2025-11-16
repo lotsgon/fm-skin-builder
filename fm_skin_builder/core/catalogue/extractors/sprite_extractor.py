@@ -157,7 +157,10 @@ class SpriteExtractor(BaseAssetExtractor):
                 }
 
             texture = getattr(texture_ref, "texture", None)
-            if not texture:
+
+            # Check if texture PPtr is valid (not null)
+            # PPtr with m_PathID=0 means null reference
+            if not texture or (hasattr(texture, 'm_PathID') and texture.m_PathID == 0):
                 return {
                     "name": name,
                     "bundle": bundle_name,
