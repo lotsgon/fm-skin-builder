@@ -176,6 +176,12 @@ class CSSResolver:
             if path:
                 cleaned.append(path)
 
+        # NOTE: We do NOT extract <asset-ref:XXX> placeholders here because:
+        # 1. The INDEX is unstable and changes between Unity builds
+        # 2. We can't resolve them to actual asset names without the Unity bundle
+        # 3. Including them would create false positives in change detection
+        # Instead, we filter out asset-ref-only changes in version_differ.py
+
         return cleaned
 
     def build_property_summary(

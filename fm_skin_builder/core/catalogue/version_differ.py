@@ -156,6 +156,31 @@ class VersionDiffer:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
 
+    def _is_asset_ref_only_change(self, old_val: str, new_val: str) -> bool:
+        """
+        Check if a property change is only due to unstable asset reference indices.
+
+        Unity USS stores asset references as <asset-ref:INDEX> where INDEX can change
+        between builds even if the actual asset stays the same.
+
+        Args:
+            old_val: Old property value
+            new_val: New property value
+
+        Returns:
+            True if both values are asset-ref placeholders (potentially false positive)
+        """
+        import re
+
+        # Pattern to match <asset-ref:NNN> where NNN is a number
+        asset_ref_pattern = r'^<asset-ref:\d+>$'
+
+        # Check if both are asset-ref placeholders
+        old_is_ref = bool(re.match(asset_ref_pattern, old_val.strip()))
+        new_is_ref = bool(re.match(asset_ref_pattern, new_val.strip()))
+
+        return old_is_ref and new_is_ref
+
     def compare(self) -> Dict[str, Any]:
         """
         Compare catalogues and generate changelog.
@@ -952,6 +977,19 @@ class VersionDiffer:
             else:
                 # New catalogues only have raw_properties
                 has_changes = old_val != new_val
+
+                # IMPORTANT: Filter out false positives from unstable asset reference indices
+                # Unity USS stores asset references as <asset-ref:INDEX> where INDEX can change
+                # between builds even if the actual asset stays the same. We can't resolve these
+                # to actual asset names without the Unity bundle, so we skip them entirely.
+                # TODO: Implement proper asset reference resolution during extraction
+                if has_changes and self._is_asset_ref_only_change(old_val, new_val):
+                    # Both are asset-ref placeholders with different indices
+                    # This is likely a false positive - skip it
+                    has_changes = False
+                    log.debug(
+                        f"Skipping asset-ref index change in {prop_name}: {old_val} -> {new_val}"
+                    )
 
             if has_changes:
                 modified.append(
