@@ -175,128 +175,113 @@ class UXMLBinaryPatcherV2:
         """
         Rebuild asset with separate m_VisualElementAssets and m_TemplateAssets arrays.
 
-        VTA structure:
-        - Header (offset 0-151)
-        - m_VisualElementAssets count (offset 152)
-        - m_VisualElementAssets type info (offset 156-191)
-        - m_VisualElementAssets data (starts offset 192)
-        - m_TemplateAssets count
-        - m_TemplateAssets type info
-        - m_TemplateAssets data
-        - Footer
+        CORRECT VTA structure:
+        - offset 0-11:      Header part 1
+        - offset 12:        Template assets count (int32)
+        - offset 16-151:    Header part 2
+        - offset 152:       Visual elements count (int32)
+        - offset 156-195:   Visual elements type info (40 bytes)
+        - offset 196+:      Visual elements data
+        - after visual:     Template assets data (uses count from offset 12)
+        - footer:           Remaining data
         """
         if not visual_elements and not template_elements:
             return original_raw
 
         result = bytearray()
 
-        # Find visual elements array location
+        # Constants from analysis
+        TEMPLATE_COUNT_OFFSET = 12
+        VISUAL_COUNT_OFFSET = 152
+        TYPE_INFO_START = 156
+        FIRST_VISUAL_OFFSET = 196
+
+        # Calculate visual elements end
         if visual_elements:
-            visual_array_offset = 152  # Known offset from analysis
-            first_visual_elem_offset = visual_elements[0].offset
-
-            # Calculate end of visual elements array
             last_visual = visual_elements[-1]
-            visual_end = last_visual.offset + len(last_visual)
+            visual_data_end = last_visual.offset + len(last_visual)
             # Add padding
-            padding = (4 - (visual_end % 4)) % 4
-            visual_end += padding
+            padding = (4 - (visual_data_end % 4)) % 4
+            visual_data_end += padding
 
             if self.verbose:
-                log.debug(f"Visual elements array:")
-                log.debug(f"  Count field at: {visual_array_offset}")
-                log.debug(f"  First element at: {first_visual_elem_offset}")
-                log.debug(f"  Last element ends at: {visual_end}")
+                log.debug(f"Visual elements:")
+                log.debug(f"  Count: {len(visual_elements)}")
+                log.debug(f"  Data ends at: {visual_data_end}")
+        else:
+            visual_data_end = FIRST_VISUAL_OFFSET
 
-        # Find template assets array location
+        # Calculate template elements end
         if template_elements:
-            first_template_elem_offset = template_elements[0].offset
-            # Template array size field is 4 bytes before first template element
-            template_array_offset = first_template_elem_offset - 4
-
-            # Need to find type info section between arrays
-            # Type info starts after visual array ends
-            if visual_elements:
-                type_info_start = visual_end
-                type_info_end = template_array_offset
-            else:
-                # If no visual elements, find type info before templates
-                type_info_start = 152  # Start of arrays section
-                type_info_end = template_array_offset
-
-            # Calculate end of template elements array
+            # Templates start right after visual elements
+            first_template_offset = template_elements[0].offset
             last_template = template_elements[-1]
-            template_end = last_template.offset + len(last_template)
+            template_data_end = last_template.offset + len(last_template)
             # Add padding
-            padding = (4 - (template_end % 4)) % 4
-            template_end += padding
+            padding = (4 - (template_data_end % 4)) % 4
+            template_data_end += padding
 
             if self.verbose:
-                log.debug(f"Template assets array:")
-                log.debug(f"  Type info: {type_info_start}-{type_info_end}")
-                log.debug(f"  Count field at: {template_array_offset}")
-                log.debug(f"  First element at: {first_template_elem_offset}")
-                log.debug(f"  Last element ends at: {template_end}")
+                log.debug(f"Template assets:")
+                log.debug(f"  Count: {len(template_elements)}")
+                log.debug(f"  First at: {first_template_offset}")
+                log.debug(f"  Data ends at: {template_data_end}")
+        else:
+            template_data_end = visual_data_end
 
         # Build new binary data
 
-        # 1. Keep header (before visual elements array)
-        result.extend(original_raw[:visual_array_offset])
+        # 1. Keep header part 1 (0-11)
+        result.extend(original_raw[:TEMPLATE_COUNT_OFFSET])
+
+        # 2. Write template count (offset 12)
+        result.extend(struct.pack('<i', len(template_elements)))
         if self.verbose:
-            log.debug(f"Kept header: {visual_array_offset} bytes")
+            log.debug(f"Updated template count at offset {TEMPLATE_COUNT_OFFSET}: {len(template_elements)}")
 
-        # 2. Write visual elements array
-        if visual_elements:
-            # Write count
-            result.extend(struct.pack('<i', len(visual_elements)))
+        # 3. Keep header part 2 (16-151)
+        result.extend(original_raw[16:VISUAL_COUNT_OFFSET])
 
-            # Write type info (copy from original)
-            type_info = original_raw[visual_array_offset + 4:first_visual_elem_offset]
-            result.extend(type_info)
-
-            # Write elements with padding
-            for i, elem in enumerate(visual_elements):
-                elem_bytes = elem.to_bytes()
-                result.extend(elem_bytes)
-
-                # Add padding
-                padding_needed = (4 - (len(result) % 4)) % 4
-                if padding_needed > 0:
-                    result.extend(bytes(padding_needed))
-
-                if self.verbose:
-                    log.debug(f"  Visual element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding")
-
-        # 3. Write template assets array
-        if template_elements:
-            # Copy type info between arrays
-            result.extend(original_raw[visual_end:template_array_offset])
-
-            # Write count
-            result.extend(struct.pack('<i', len(template_elements)))
-
-            # Write type info (copy from original)
-            type_info = original_raw[template_array_offset + 4:first_template_elem_offset]
-            result.extend(type_info)
-
-            # Write elements with padding
-            for i, elem in enumerate(template_elements):
-                elem_bytes = elem.to_bytes()
-                result.extend(elem_bytes)
-
-                # Add padding
-                padding_needed = (4 - (len(result) % 4)) % 4
-                if padding_needed > 0:
-                    result.extend(bytes(padding_needed))
-
-                if self.verbose:
-                    log.debug(f"  Template element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding")
-
-        # 4. Keep footer (after template elements array)
-        footer_start = template_end if template_elements else visual_end
-        result.extend(original_raw[footer_start:])
+        # 4. Write visual count (offset 152)
+        result.extend(struct.pack('<i', len(visual_elements)))
         if self.verbose:
-            log.debug(f"Kept footer: {len(original_raw) - footer_start} bytes")
+            log.debug(f"Updated visual count at offset {VISUAL_COUNT_OFFSET}: {len(visual_elements)}")
+
+        # 5. Keep type info (156-195)
+        result.extend(original_raw[TYPE_INFO_START:FIRST_VISUAL_OFFSET])
+        if self.verbose:
+            log.debug(f"Kept type info: {FIRST_VISUAL_OFFSET - TYPE_INFO_START} bytes")
+
+        # 6. Write visual elements
+        for i, elem in enumerate(visual_elements):
+            elem_bytes = elem.to_bytes()
+            result.extend(elem_bytes)
+
+            # Add padding
+            padding_needed = (4 - (len(result) % 4)) % 4
+            if padding_needed > 0:
+                result.extend(bytes(padding_needed))
+
+            if self.verbose:
+                log.debug(f"  Visual element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding")
+
+        # 7. Write template elements (directly after visual, no gap)
+        for i, elem in enumerate(template_elements):
+            elem_bytes = elem.to_bytes()
+            result.extend(elem_bytes)
+
+            # Add padding
+            padding_needed = (4 - (len(result) % 4)) % 4
+            if padding_needed > 0:
+                result.extend(bytes(padding_needed))
+
+            if self.verbose:
+                log.debug(f"  Template element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding")
+
+        # 8. Keep footer (everything after template elements)
+        result.extend(original_raw[template_data_end:])
+        if self.verbose:
+            log.debug(f"Kept footer: {len(original_raw) - template_data_end} bytes")
             log.debug(f"Rebuilt asset: {len(original_raw)} → {len(result)} bytes")
 
         return bytes(result)

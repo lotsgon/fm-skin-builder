@@ -34,49 +34,62 @@ def test_uxml_patch_v2():
     patcher = UXMLBinaryPatcherV2(verbose=True)
     found = False
 
+    # First pass: find AboutClubCard without calling read()
+    target_obj = None
     for obj in env.objects:
         if obj.type.name == "MonoBehaviour":
             try:
-                data = obj.read()
-                is_vta = (hasattr(data, "m_VisualElementAssets") or
-                         hasattr(data, "m_TemplateAssets"))
-
-                if is_vta:
-                    asset_name = getattr(data, "m_Name", "")
-
-                    if asset_name == "AboutClubCard":
-                        print(f"\n✓ Found VTA: {asset_name}")
-                        found = True
-                        print(f"  → Patching AboutClubCard with V2 patcher")
-
-                        # Get separate arrays
-                        visual_elements = []
-                        template_assets = []
-                        if hasattr(data, "m_VisualElementAssets"):
-                            visual_elements = list(data.m_VisualElementAssets)
-                            print(f"  → Has {len(visual_elements)} visual elements")
-                        if hasattr(data, "m_TemplateAssets"):
-                            template_assets = list(data.m_TemplateAssets)
-                            print(f"  → Has {len(template_assets)} template assets")
-
-                        # Get raw binary data
-                        raw_data = obj.get_raw_data()
-                        print(f"  → Raw data size: {len(raw_data)} bytes")
-
-                        # Apply patch with separate arrays
-                        new_raw_data = patcher.apply_uxml_to_vta_binary(
-                            raw_data, imported_data, visual_elements, template_assets
-                        )
-
-                        if new_raw_data:
-                            print(f"  → Patch successful! New size: {len(new_raw_data)} bytes")
-                            obj.set_raw_data(new_raw_data)
-                        else:
-                            print(f"  → Patch failed!")
-                            return False
-
-            except Exception as e:
+                name = obj.peek_name()
+                if name == "AboutClubCard":
+                    print(f"\n✓ Found VTA: {name} (using peek_name)")
+                    target_obj = obj
+                    found = True
+                    break
+            except:
                 pass
+
+    if target_obj is None:
+        print("\nERROR: AboutClubCard VTA not found in bundle!")
+        return False
+
+    # Second pass: load a SEPARATE instance to get metadata WITHOUT corrupting target_obj
+    env2 = UnityPy.load(str(bundle_path))
+    visual_elements = []
+    template_assets = []
+
+    for obj2 in env2.objects:
+        if obj2.type.name == "MonoBehaviour":
+            try:
+                name = obj2.peek_name()
+                if name == "AboutClubCard":
+                    # Read from this SEPARATE object to get metadata
+                    data = obj2.read()
+                    if hasattr(data, "m_VisualElementAssets"):
+                        visual_elements = list(data.m_VisualElementAssets)
+                        print(f"  → Has {len(visual_elements)} visual elements")
+                    if hasattr(data, "m_TemplateAssets"):
+                        template_assets = list(data.m_TemplateAssets)
+                        print(f"  → Has {len(template_assets)} template assets")
+                    break
+            except:
+                pass
+
+    # Get raw binary data from target_obj (without calling read() on it!)
+    raw_data = target_obj.get_raw_data()
+    print(f"  → Raw data size: {len(raw_data)} bytes")
+
+    # Apply patch with separate arrays
+    print(f"  → Patching AboutClubCard with V2 patcher")
+    new_raw_data = patcher.apply_uxml_to_vta_binary(
+        raw_data, imported_data, visual_elements, template_assets
+    )
+
+    if new_raw_data:
+        print(f"  → Patch successful! New size: {len(new_raw_data)} bytes")
+        target_obj.set_raw_data(new_raw_data)
+    else:
+        print(f"  → Patch failed!")
+        return False
 
     if not found:
         print("\nERROR: AboutClubCard VTA not found in bundle!")
