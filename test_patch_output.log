@@ -1,0 +1,39 @@
+[INFO] Total CSS vars: 0, selector overrides: 0 from 0 files
+[INFO] Parsing and caching config...
+[INFO] 
+📦 Processing 3 bundle(s)...
+[INFO] 
+=== Processing bundle 1 of 3: ui-panelids-uxml_assets_all.bundle ===
+[INFO] 
+=== Patching bundle: test_bundles/ui-panelids-uxml_assets_all.bundle ===
+[INFO] 🔍 Scanning bundle: ui-panelids-uxml_assets_all.bundle
+[INFO] No changes detected; skipping bundle write and debug outputs.
+[INFO] Importing UXML from /home/user/fm-skin-builder/test_skin_dir/panels/CalendarTool.uxml
+[INFO] Building VisualTreeAsset for CalendarTool
+[ERROR]     [UXML] Failed to import CalendarTool: 'dict' object has no attribute 'm_XmlNamespace'
+[ERROR]       Traceback (most recent call last):
+[ERROR]         File "/home/user/fm-skin-builder/fm_skin_builder/core/css_patcher.py", line 3280, in _apply_uxml_patches
+[ERROR]           setattr(elem, field, getattr(template_elem, field))
+[ERROR]       AttributeError: 'dict' object has no attribute 'm_XmlNamespace'
+[INFO] 
+=== Processing bundle 2 of 3: ui-styles_assets_common.bundle ===
+[INFO] 
+=== Patching bundle: test_bundles/ui-styles_assets_common.bundle ===
+[INFO] 🔍 Scanning bundle: ui-styles_assets_common.bundle
+[INFO]   [GLOBAL REGISTRY] Found 890 selectors and 921 variables across 6 stylesheets
+[INFO] No changes detected; skipping bundle write and debug outputs.
+[INFO] 
+=== Processing bundle 3 of 3: ui-styles_assets_default.bundle ===
+[INFO] 
+=== Patching bundle: test_bundles/ui-styles_assets_default.bundle ===
+[INFO] 🔍 Scanning bundle: ui-styles_assets_default.bundle
+[INFO]   [GLOBAL REGISTRY] Found 5632 selectors and 50 variables across 31 stylesheets
+[INFO] No changes detected; skipping bundle write and debug outputs.
+[INFO] 
+✅ Completed processing 3 bundle(s)
+[INFO]    CSS bundles modified: 0
+[INFO]    Texture replacements: 0
+[INFO] 
+=== Overall Summary ===
+[INFO] Bundles processed: 3
+[INFO] CSS bundles modified: 0
