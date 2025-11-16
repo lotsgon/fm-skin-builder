@@ -191,10 +191,11 @@ class UXMLBinaryPatcherV2:
         result = bytearray()
 
         # Constants from analysis
-        TEMPLATE_COUNT_OFFSET = 12
-        VISUAL_COUNT_OFFSET = 152
-        TYPE_INFO_START = 156
-        FIRST_VISUAL_OFFSET = 196
+        # NOTE: Offset 12 is NOT used - it's just part of the header!
+        # TypeTree reads array counts INLINE at the start of each array.
+        VISUAL_COUNT_OFFSET = 152  # Visual array starts here (inline count)
+        TYPE_INFO_START = 156       # Type info for visual elements
+        FIRST_VISUAL_OFFSET = 196   # First visual element data
 
         # Calculate visual elements end
         if visual_elements:
@@ -230,29 +231,24 @@ class UXMLBinaryPatcherV2:
             template_data_end = visual_data_end
 
         # Build new binary data
+        # CRITICAL: TypeTree reads array counts INLINE at the start of each array,
+        # NOT from header offsets! Offset 152 is the visual array start (with inline count).
+        # Template array count is INLINE where the template array starts.
 
-        # 1. Keep header part 1 (0-11)
-        result.extend(original_raw[:TEMPLATE_COUNT_OFFSET])
+        # 1. Keep entire header (0-151) - DO NOT modify offset 12!
+        result.extend(original_raw[:VISUAL_COUNT_OFFSET])
 
-        # 2. Write template count (offset 12)
-        result.extend(struct.pack('<i', len(template_elements)))
-        if self.verbose:
-            log.debug(f"Updated template count at offset {TEMPLATE_COUNT_OFFSET}: {len(template_elements)}")
-
-        # 3. Keep header part 2 (16-151)
-        result.extend(original_raw[16:VISUAL_COUNT_OFFSET])
-
-        # 4. Write visual count (offset 152)
+        # 2. Write visual count INLINE at offset 152 (this is correct!)
         result.extend(struct.pack('<i', len(visual_elements)))
         if self.verbose:
             log.debug(f"Updated visual count at offset {VISUAL_COUNT_OFFSET}: {len(visual_elements)}")
 
-        # 5. Keep type info (156-195)
+        # 3. Keep type info (156-195)
         result.extend(original_raw[TYPE_INFO_START:FIRST_VISUAL_OFFSET])
         if self.verbose:
             log.debug(f"Kept type info: {FIRST_VISUAL_OFFSET - TYPE_INFO_START} bytes")
 
-        # 6. Write visual elements
+        # 4. Write visual elements
         for i, elem in enumerate(visual_elements):
             elem_bytes = elem.to_bytes()
             result.extend(elem_bytes)
@@ -265,7 +261,12 @@ class UXMLBinaryPatcherV2:
             if self.verbose:
                 log.debug(f"  Visual element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding")
 
-        # 7. Write template elements (directly after visual, no gap)
+        # 5. Write template count INLINE (TypeTree reads it from here!)
+        result.extend(struct.pack('<i', len(template_elements)))
+        if self.verbose:
+            log.debug(f"  Template count (inline at offset {len(result)-4}): {len(template_elements)}")
+
+        # 6. Write template elements
         for i, elem in enumerate(template_elements):
             elem_bytes = elem.to_bytes()
             result.extend(elem_bytes)
