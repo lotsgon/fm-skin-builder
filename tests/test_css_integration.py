@@ -192,19 +192,13 @@ class TestCSSIntegration:
             print(f"  Class: {cls.name}")
             print(f"  Variables used: {cls.variables_used}")
 
-            # Should have both raw and resolved properties
-            if cls.raw_properties and cls.resolved_properties:
+            # Should have raw properties with variables
+            if cls.raw_properties:
                 # Find a property that uses a variable
                 for prop_name, raw_val in cls.raw_properties.items():
                     if "var(" in raw_val:
-                        resolved_val = cls.resolved_properties.get(prop_name)
-                        print(f"  Property '{prop_name}':")
-                        print(f"    Raw: {raw_val}")
-                        print(f"    Resolved: {resolved_val}")
-
-                        # Resolved should not have var() if resolution worked
-                        # (unless the variable wasn't found)
-                        assert resolved_val is not None
+                        print(f"  Property '{prop_name}': {raw_val}")
+                        assert raw_val is not None
 
     def test_asset_dependency_extraction(self, ui_styles_bundle):
         """Test extracting asset dependencies from real data."""

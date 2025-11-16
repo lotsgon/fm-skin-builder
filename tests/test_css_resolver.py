@@ -139,11 +139,9 @@ class TestCSSResolver:
 
         var1 = CSSVariable(
             name="--primary",
+            value="#1976D2",
             stylesheet="FMColours",
             bundle="test.bundle",
-            property_name="--primary",
-            rule_index=0,
-            values=[CSSValueDefinition(value_type=4, index=0, resolved_value="#1976D2")],
             first_seen="2026.1.0",
             last_seen="2026.4.0",
         )
