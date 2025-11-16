@@ -1,0 +1,511 @@
+# Editing Skins
+
+Learn how to create and customize Football Manager skins using FM Skin Builder's CSS-first approach.
+
+## Quick Start (10 Minutes)
+
+Let's create your first skin with the absolute minimum setup:
+
+### Step 1: Create Your Skin Folder
+
+Create a new folder anywhere on your computer. For example:
+- `C:\Users\YourName\Documents\my-fm-skin` (Windows)
+- `/Users/YourName/Documents/my-fm-skin` (macOS)
+- `/home/yourname/Documents/my-fm-skin` (Linux)
+
+### Step 2: Create config.json
+
+Inside your skin folder, create a file named `config.json` with this content:
+
+```json
+{
+  "schema_version": 2,
+  "name": "My First Skin",
+  "author": "Your Name",
+  "version": "1.0.0"
+}
+```
+
+**Important**: The `schema_version` must be `2`.
+
+### Step 3: Create Your First CSS File
+
+Create a subfolder called `colours` inside your skin folder, then create `base.uss` inside it:
+
+```
+my-fm-skin/
+├── config.json
+└── colours/
+    └── base.uss
+```
+
+Edit `base.uss` and add some color changes:
+
+```css
+:root {
+  --primary: #FF0000;
+  --secondary: #00FF00;
+  --accent: #0000FF;
+}
+```
+
+This will change FM's primary color to red, secondary to green, and accent to blue.
+
+### Step 4: Build Your Skin
+
+1. Open FM Skin Builder
+2. Browse to your skin folder
+3. Click "Build Bundles"
+4. Wait for the build to complete
+
+That's it! Your modified bundle files are now in `my-fm-skin/packages/`.
+
+See [Exporting and Testing](/user-guide/exporting-and-testing) to install them in Football Manager.
+
+---
+
+## Understanding the Skin Folder Structure
+
+Here's the complete folder structure you can use:
+
+```
+my-fm-skin/
+├── config.json                  # Required: Skin metadata
+├── colours/                     # CSS/USS files go here
+│   ├── base.uss                # Your main color definitions
+│   ├── FMColours.uss           # Optional: per-stylesheet files
+│   └── mapping.json            # Optional: target specific stylesheets
+├── assets/                      # Optional: Visual assets
+│   ├── icons/                  # Custom icons
+│   │   ├── crown.png
+│   │   ├── star.svg
+│   │   └── mapping.json        # Icon name mappings
+│   └── backgrounds/            # Custom backgrounds
+│       ├── background_1.jpg
+│       └── mapping.json        # Background mappings
+├── hints.txt                    # Optional: Targeting filters
+└── packages/                    # Auto-created: Build output goes here
+```
+
+**What's required**:
+- `config.json` - This is the only required file
+- At least one CSS/USS file (in `colours/` or anywhere in your skin folder)
+
+**What's optional**:
+- Everything else! Add what you need as you go.
+
+---
+
+## The config.json File
+
+Your `config.json` tells FM Skin Builder about your skin.
+
+### Minimal Configuration
+
+```json
+{
+  "schema_version": 2,
+  "name": "My Skin Name"
+}
+```
+
+### Complete Configuration
+
+```json
+{
+  "schema_version": 2,
+  "name": "My Skin Name",
+  "author": "Your Name",
+  "version": "1.0.0",
+  "description": "A dark theme for Football Manager",
+  "includes": [
+    "assets/icons",
+    "assets/backgrounds"
+  ]
+}
+```
+
+### Field Explanations
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `schema_version` | Yes | Must be `2` (the current version) |
+| `name` | No | Your skin's display name |
+| `author` | No | Your name or username |
+| `version` | No | Version number (e.g., "1.0.0") |
+| `description` | No | Short description of your skin |
+| `includes` | No | Array of asset folders to process |
+
+### The includes Array
+
+The `includes` field tells FM Skin Builder which asset folders to process:
+
+```json
+{
+  "includes": [
+    "assets/icons",      // Process icon replacements
+    "assets/backgrounds" // Process background replacements
+  ]
+}
+```
+
+**Important**: If you don't have an `assets/` folder, you can omit `includes` entirely or use an empty array `[]`.
+
+---
+
+## Writing CSS for Your Skin
+
+FM Skin Builder uses CSS (specifically Unity StyleSheets, or USS) to define colors. If you're familiar with web CSS, this will feel very natural.
+
+### CSS Variables (The Most Common Approach)
+
+CSS variables are the primary way to change colors:
+
+```css
+:root {
+  --primary-color: #1a1a1a;
+  --text-color: #ffffff;
+  --background: #2d2d2d;
+  --accent: #ff6b35;
+}
+```
+
+**How it works**:
+- `:root` is where you define global color variables
+- Variable names start with `--` (two dashes)
+- Colors are in hex format: `#RRGGBB`
+
+**Color formats**:
+- Standard hex: `#ff0000` (red)
+- With alpha (transparency): `#ff0000cc` (semi-transparent red)
+- Uppercase or lowercase: `#FF0000` or `#ff0000` (both work)
+
+### CSS Selectors (Overriding Specific Elements)
+
+You can also target specific UI elements by their class name:
+
+```css
+.green {
+  color: #ff0000;
+}
+
+.button-primary {
+  background-color: #333333;
+}
+
+.text-positive {
+  color: #00ff00;
+}
+```
+
+**How it works**:
+- `.classname` targets all elements with that class
+- You can override `color`, `background-color`, and other color properties
+- FM Skin Builder finds these selectors in FM's stylesheets and updates them
+
+### Combining Variables and Selectors
+
+You can use both in the same file:
+
+```css
+:root {
+  --primary: #ff6b35;
+  --secondary: #4ecdc4;
+}
+
+.green {
+  color: var(--primary);
+}
+
+.button {
+  background-color: var(--secondary);
+}
+```
+
+This lets you define colors once and reuse them throughout your selectors.
+
+### Multiple CSS Files
+
+You can organize your CSS into multiple files:
+
+```
+colours/
+├── base.uss          # Main colors
+├── buttons.uss       # Button-specific overrides
+└── text.uss          # Text color overrides
+```
+
+FM Skin Builder will automatically find and process all `.uss` and `.css` files in your skin folder.
+
+---
+
+## Adding Visual Assets
+
+Beyond colors, you can replace icons and backgrounds.
+
+### Adding Custom Icons
+
+Icons can change the visual identity of your skin.
+
+**Step 1**: Create the icons folder:
+```
+assets/
+└── icons/
+    ├── crown.png
+    ├── star.svg
+    └── mapping.json
+```
+
+**Step 2**: Add your icon files (PNG or SVG)
+
+**Step 3**: Create `mapping.json` to tell FM Skin Builder which icons to replace:
+
+```json
+{
+  "cog_*": "crown",
+  "star_*": "star"
+}
+```
+
+**How mapping works**:
+- Left side: The original icon name in FM's bundles (wildcards `*` are supported)
+- Right side: Your replacement file name (without extension)
+- The tool will find all icons matching `cog_*` and replace them with `crown.png`
+
+**Step 4**: Add `"assets/icons"` to your `config.json` includes:
+
+```json
+{
+  "includes": ["assets/icons"]
+}
+```
+
+### Adding Custom Backgrounds
+
+Similar to icons, but for background images.
+
+```
+assets/
+└── backgrounds/
+    ├── main_background.jpg
+    └── mapping.json
+```
+
+**mapping.json example**:
+```json
+{
+  "background_*": "main_background"
+}
+```
+
+Supported formats: JPG, PNG
+
+Don't forget to add `"assets/backgrounds"` to your `config.json` includes.
+
+### Advanced: Vector Shapes
+
+You can also generate geometric shapes programmatically:
+
+```json
+{
+  "badge_*": {
+    "type": "vector",
+    "shape": "circle",
+    "radius": 0.64,
+    "color": [0, 255, 0, 255]
+  }
+}
+```
+
+This creates a green circle. See the [Advanced Guide](/advanced-guide/advanced-features) for more details.
+
+---
+
+## Complete Example Skin
+
+Here's a complete, real-world example you can copy and modify:
+
+**Folder structure**:
+```
+dark-theme/
+├── config.json
+├── colours/
+│   └── base.uss
+└── assets/
+    └── icons/
+        ├── star.png
+        └── mapping.json
+```
+
+**config.json**:
+```json
+{
+  "schema_version": 2,
+  "name": "Dark Theme",
+  "author": "Your Name",
+  "version": "1.0.0",
+  "description": "A sleek dark theme for FM26",
+  "includes": ["assets/icons"]
+}
+```
+
+**colours/base.uss**:
+```css
+:root {
+  /* Main colors */
+  --primary: #1e1e1e;
+  --secondary: #2d2d2d;
+  --accent: #ff6b35;
+
+  /* Text colors */
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+
+  /* UI colors */
+  --background: #121212;
+  --border: #3a3a3a;
+}
+
+/* Override specific elements */
+.green {
+  color: #4ecdc4;
+}
+
+.button-primary {
+  background-color: var(--accent);
+  color: var(--text-primary);
+}
+```
+
+**assets/icons/mapping.json**:
+```json
+{
+  "star_*": "star"
+}
+```
+
+Build this skin and you'll have a complete dark theme with custom icons!
+
+---
+
+## For FM24 Skinners: What's Different?
+
+If you're used to FM24's XML-based skinning, here's how FM Skin Builder compares:
+
+### FM24 (XML Approach):
+```xml
+<colour name="primary" value="ff0000"/>
+<colour name="secondary" value="00ff00"/>
+```
+
+### FM26 (CSS Approach):
+```css
+:root {
+  --primary: #ff0000;
+  --secondary: #00ff00;
+}
+```
+
+### Key Differences:
+
+| Aspect | FM24 (XML) | FM26 (CSS) |
+|--------|-----------|-----------|
+| **Format** | XML tags | CSS syntax |
+| **Variables** | `<colour name="x">` | `--variable-name` |
+| **Selectors** | XML element overrides | `.class-name` |
+| **Colors** | `value="RRGGBB"` | `#RRGGBB` |
+| **Files** | `.xml` | `.uss` or `.css` |
+| **Folder** | `skins/` in FM directory | Anywhere, then build to `packages/` |
+
+### What's the Same:
+- You still define colors and override UI elements
+- You still organize files into a skin folder
+- You still install the final output into FM's directory
+- The concept of targeting specific UI components is identical
+
+### What's Better:
+- **CSS is more familiar** - if you've done any web development, you already know it
+- **More flexible** - CSS variables can reference other variables
+- **Better tooling** - CSS editors with syntax highlighting work perfectly
+- **Easier iteration** - change CSS, rebuild, test - all outside of FM's directory
+
+---
+
+## Tips and Best Practices
+
+### Organizing Your CSS
+
+**Use meaningful variable names**:
+```css
+/* Good */
+--primary-button-bg: #ff6b35;
+--header-text: #ffffff;
+
+/* Less clear */
+--color1: #ff6b35;
+--col2: #ffffff;
+```
+
+**Group related styles**:
+```css
+:root {
+  /* Backgrounds */
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #2d2d2d;
+
+  /* Text */
+  --text-main: #ffffff;
+  --text-muted: #808080;
+
+  /* Accents */
+  --accent-green: #4ecdc4;
+  --accent-red: #ff6b6b;
+}
+```
+
+### Finding Variable Names
+
+Football Manager uses standard CSS variable naming. Common ones include:
+- `--primary`, `--secondary`, `--accent`
+- `--background`, `--foreground`
+- `--text-color`, `--border-color`
+
+To discover all available variables, see the [Advanced Guide: Bundle Structure](/advanced-guide/bundle-structure) for how to scan FM's bundles.
+
+### Testing Changes Quickly
+
+1. Make a small change to one color
+2. Use "Preview Build" to verify
+3. If it looks right in logs, "Build Bundles"
+4. Test in FM
+5. Iterate!
+
+Don't try to change everything at once - work incrementally.
+
+### Version Control Your Skin
+
+Consider using Git to track your skin folder:
+```bash
+cd my-fm-skin
+git init
+git add .
+git commit -m "Initial dark theme"
+```
+
+This lets you experiment fearlessly and roll back if needed.
+
+---
+
+## What's Next?
+
+Now that you've created your skin, learn how to test it in Football Manager:
+
+**[Exporting and Testing →](/user-guide/exporting-and-testing)**
+
+Or dive deeper with advanced techniques:
+
+**[Advanced Guide: Config and Mappings →](/advanced-guide/config-and-mappings)**
+
+---
+
+**Questions?** Check the [Troubleshooting](/user-guide/troubleshooting) guide or explore the community resources.

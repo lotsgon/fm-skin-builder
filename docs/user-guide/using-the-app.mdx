@@ -1,0 +1,228 @@
+# Using the App
+
+Learn how to use the FM Skin Builder desktop interface to build and preview your skins.
+
+## The Desktop Interface
+
+When you open FM Skin Builder, you'll see a clean interface with two main tabs:
+
+1. **Build Tab** - Configure and build your skin
+2. **Logs Tab** - View build output and progress
+
+### Status Indicator
+
+In the top-right corner, you'll see a status indicator:
+
+- **Green dot**: App is ready (Tauri backend connected)
+- **Yellow dot**: Preview mode (frontend only, limited functionality)
+
+If you see a yellow dot, try restarting the app. Green means everything is working correctly.
+
+## Build Tab
+
+This is where you'll spend most of your time. Let's go through each section:
+
+### 1. Skin Folder Path
+
+**What it is**: The location of your skin folder on your computer.
+
+**How to use it**:
+- Click the **"Browse"** button to open a folder picker
+- Or type/paste the full path to your skin folder
+- Example paths:
+  - Windows: `C:\Users\YourName\Documents\my-fm-skin`
+  - macOS: `/Users/YourName/Documents/my-fm-skin`
+  - Linux: `/home/yourname/Documents/my-fm-skin`
+
+**What should be in this folder**:
+Your skin folder should contain a `config.json` file at minimum. See [Editing Skins](/user-guide/editing-skins) for the complete folder structure.
+
+### 2. Bundles Directory Path
+
+**What it is**: The location of Football Manager's game files (Unity bundles).
+
+**How to use it**:
+- **Usually**: Leave this blank - the app will auto-detect FM's installation
+- **Sometimes**: If FM isn't installed in the default location, click "Browse" to select it manually
+
+**Common bundle locations**:
+
+**Windows (Steam)**:
+```
+C:\Program Files (x86)\Steam\steamapps\common\Football Manager 2026\data\
+```
+
+**Windows (Epic)**:
+```
+C:\Program Files\Epic Games\Football Manager 2026\data\
+```
+
+**macOS (Steam)**:
+```
+~/Library/Application Support/Steam/steamapps/common/Football Manager 2026/data/
+```
+
+**Linux (Steam)**:
+```
+~/.steam/steam/steamapps/common/Football Manager 2026/data/
+```
+
+**Tip**: If you're not sure where FM is installed, check your Steam library or Epic Games launcher.
+
+### 3. Debug Mode Toggle
+
+**What it does**: Enables detailed debugging output when building your skin.
+
+**When to enable it**:
+- Your colors aren't changing and you want to see why
+- You want to inspect the before/after stylesheets
+- You're troubleshooting unexpected behavior
+
+**What it creates**:
+When enabled, the build process creates a `debug/` folder in your skin's output directory with:
+- Original `.uss` files (what FM had before)
+- Patched `.uss` files (what your changes produced)
+- JSON files showing the internal structure
+
+**Tip**: Only enable this when troubleshooting - it slows down builds slightly and creates extra files.
+
+### 4. Preview Build Button
+
+**What it does**: Runs a "dry run" of your skin build without actually writing any files.
+
+**Why use it**:
+- Check if your CSS will apply correctly
+- See how many bundles will be modified
+- Verify texture replacements before committing
+- Quick validation while iterating
+
+**How to use it**:
+1. Fill in your skin folder path
+2. Click **"Preview Build"**
+3. Switch to the **Logs** tab to see the results
+
+**What to look for in the output**:
+```
+✓ Successfully parsed CSS files
+✓ Found 45 color variables
+✓ Would modify 12 bundles
+✓ Would replace 5 textures
+```
+
+The word "would" indicates this was a preview - nothing was written.
+
+### 5. Build Bundles Button
+
+**What it does**: Actually builds your skin and writes the modified files.
+
+**How to use it**:
+1. Fill in your skin folder path
+2. (Optional) Preview first to verify
+3. Click **"Build Bundles"**
+4. Wait for the build to complete
+5. Check the Logs tab for confirmation
+
+**What happens**:
+- Reads your CSS files and assets
+- Loads FM's bundle files
+- Applies your color changes
+- Replaces textures (if you have any)
+- Writes modified bundles to `<your-skin>/packages/`
+
+**Build time**: Typically 10-30 seconds depending on your skin's complexity.
+
+**Success looks like**:
+```
+✓ Build complete!
+✓ Modified 12 bundles
+✓ Replaced 5 textures
+✓ Output: /path/to/your-skin/packages/
+```
+
+## Logs Tab
+
+The Logs tab shows real-time output from the build process.
+
+### Reading the Logs
+
+**Green text**: Successful operations
+```
+✓ Successfully parsed config.json
+✓ Loaded 3 CSS files
+```
+
+**Yellow text**: Warnings (non-critical)
+```
+⚠ Selector '.green' matched multiple stylesheets
+⚠ Icon 'old_icon' not found in bundles
+```
+
+**Red text**: Errors (build failed)
+```
+✗ Error: config.json not found
+✗ Failed to parse CSS file
+```
+
+### Common Log Messages
+
+**"Auto-detected bundle directory"**
+- Good! The app found your FM installation automatically
+
+**"Using scan cache"**
+- Good! The build will be faster because it's reusing previous scans
+
+**"No changes detected"**
+- Your CSS didn't produce any actual changes to the bundles
+- Check your CSS syntax or variable names
+
+**"Conflict: selector touches multiple assets"**
+- A warning that one of your CSS rules affects multiple bundles
+- Usually harmless, but see [Advanced Guide](/advanced-guide/config-and-mappings) for fine-tuning
+
+### Clearing Logs
+
+The logs persist across builds so you can compare results. To clear them, simply restart the app.
+
+## Typical Workflow
+
+Here's how most skinners use the app:
+
+### First Time Setup:
+1. Create your skin folder (see [Editing Skins](/user-guide/editing-skins))
+2. Open FM Skin Builder
+3. Browse to your skin folder
+4. Click "Build Bundles"
+5. Install the output in FM (see [Exporting and Testing](/user-guide/exporting-and-testing))
+
+### Iterating on Your Skin:
+1. Make changes to your CSS or assets
+2. Click "Preview Build" to verify
+3. If preview looks good, click "Build Bundles"
+4. Test in FM
+5. Repeat!
+
+**Pro tip**: Keep FM Skin Builder open while you edit your CSS files. Just save your changes, then hit "Build Bundles" again. The app will automatically detect the changes.
+
+## Tips for Faster Builds
+
+1. **Use Preview Build**: Catch errors before waiting for a full build
+2. **Keep debug mode off**: Only enable when troubleshooting
+3. **Don't move your skin folder**: The app caches information based on the path
+4. **Bundles auto-detect**: Let the app find FM automatically instead of manually specifying
+
+## Keyboard Shortcuts
+
+Currently there are no keyboard shortcuts, but you can navigate the interface with:
+- **Tab**: Move between input fields
+- **Enter**: Activate buttons
+- **Ctrl+C** (in Logs): Copy log output
+
+## What's Next?
+
+Now that you know the interface, it's time to create your first skin!
+
+Head to **[Editing Skins](/user-guide/editing-skins)** to learn how to set up your skin folder and write CSS.
+
+---
+
+**Questions?** Check the [Troubleshooting](/user-guide/troubleshooting) guide or ask in the community.

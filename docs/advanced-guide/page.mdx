@@ -1,0 +1,122 @@
+# Advanced Guide
+
+Deep dive into FM Skin Builder's advanced features and technical details.
+
+## Who is this for?
+
+The Advanced Guide is for skinners who want:
+
+- **Fine-grained control** over which stylesheets are modified
+- **Understanding** of how the tool works under the hood
+- **Power features** like vector generation and debug exports
+- **Precision targeting** for complex skins
+- **Technical knowledge** to troubleshoot edge cases
+
+If you just want to create skins, the [User Guide](/user-guide) has everything you need.
+
+## What's in the Advanced Guide?
+
+### [Architecture](/advanced-guide/architecture)
+How FM Skin Builder works internally:
+- The CSS-to-Bundle pipeline
+- Texture swapping system
+- Caching mechanism
+- How builds are processed
+
+Great for curious users who want to understand the "why" behind the tool.
+
+### [Bundle Structure](/advanced-guide/bundle-structure)
+Understanding Football Manager's Unity bundles:
+- What bundles contain
+- How stylesheets are stored
+- How to scan and inspect bundles
+- Finding variable names
+
+Essential if you want to discover all available CSS variables or understand what you can modify.
+
+### [Config and Mappings](/advanced-guide/config-and-mappings)
+Advanced configuration techniques:
+- Per-stylesheet targeting
+- Mapping files for precise control
+- Texture mapping patterns
+- Vector shape definitions
+- Targeting hints
+
+Use this when you need surgical precision in your modifications.
+
+### [Advanced Features](/advanced-guide/advanced-features)
+Power user features:
+- Debug exports (before/after comparison)
+- Conflict detection and resolution
+- Cache management
+- Direct literal patching
+
+For expert skinners who want maximum control and visibility.
+
+### [Verification and Restore](/advanced-guide/verification-and-restore)
+Safety and validation tools:
+- Previewing changes before building
+- Using debug exports to verify changes
+- Understanding what changed
+- Restoring original files
+
+Important for cautious users or when working on complex skins.
+
+## Do I Need This?
+
+**You probably don't need the Advanced Guide if**:
+- You're happy with how your skin looks
+- Your CSS changes are applying correctly
+- You don't need to target specific stylesheets differently
+
+**You'll want the Advanced Guide if**:
+- Some variables aren't changing and you need to find out why
+- You want different colors on different screens
+- You're creating very complex skins
+- You want to understand the technical details
+- You're troubleshooting unusual issues
+
+## Advanced vs. User Guide
+
+| Feature | User Guide | Advanced Guide |
+|---------|-----------|----------------|
+| Creating skins | ✓ Complete | Details |
+| Using the app | ✓ Complete | - |
+| Basic CSS | ✓ Complete | - |
+| Installing skins | ✓ Complete | - |
+| How it works | Overview | ✓ Deep dive |
+| Bundle internals | - | ✓ Complete |
+| Per-sheet targeting | - | ✓ Complete |
+| Debug tools | Basic | ✓ Complete |
+| Vector generation | Mention | ✓ Complete |
+
+## Getting Started with Advanced Features
+
+If you're new to the Advanced Guide, we recommend reading in this order:
+
+1. **[Architecture](/advanced-guide/architecture)** - Understand how the tool works
+2. **[Bundle Structure](/advanced-guide/bundle-structure)** - Learn what's in FM's bundles
+3. **[Verification and Restore](/advanced-guide/verification-and-restore)** - Use debug tools effectively
+
+Then dive into specific topics as needed:
+- Need precise control? → [Config and Mappings](/advanced-guide/config-and-mappings)
+- Want all features? → [Advanced Features](/advanced-guide/advanced-features)
+
+## Technical Level
+
+The Advanced Guide assumes:
+- You're comfortable with the basic features (covered in User Guide)
+- You can navigate file systems and understand folder structures
+- You have a text editor and know how to use it
+- You're willing to experiment and iterate
+
+We **don't** assume:
+- Programming knowledge
+- Unity engine experience
+- Deep CSS expertise
+
+Everything is explained with examples and practical use cases.
+
+---
+
+**Ready to dive deeper?** Start with [Architecture](/advanced-guide/architecture) to understand how FM Skin Builder works, or jump to a specific topic that interests you.

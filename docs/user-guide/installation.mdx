@@ -1,0 +1,103 @@
+# Installation
+
+Get FM Skin Builder up and running on your system in just a few minutes.
+
+## System Requirements
+
+FM Skin Builder works on all major operating systems:
+
+- **Windows**: Windows 10 or later
+- **macOS**: macOS 10.15 (Catalina) or later
+- **Linux**: Most modern distributions (Ubuntu 20.04+, Fedora, etc.)
+
+You'll also need:
+- Football Manager 2026 installed
+- At least 200MB of free disk space
+
+## Download the App
+
+### Option 1: Download Release (Recommended)
+
+1. Visit the [Releases page](https://github.com/lotsgon-org/fm-skin-builder/releases)
+2. Download the installer for your operating system:
+   - **Windows**: `fm-skin-builder-setup.exe`
+   - **macOS**: `fm-skin-builder.dmg`
+   - **Linux**: `fm-skin-builder.AppImage` or `.deb` package
+
+### Option 2: Build from Source
+
+If you're comfortable with development tools, you can build from source:
+
+```bash
+git clone https://github.com/lotsgon-org/fm-skin-builder.git
+cd fm-skin-builder
+npm install
+npm run tauri:build
+```
+
+The built application will be in `frontend/src-tauri/target/release/`.
+
+## Installation Instructions
+
+### Windows
+
+1. Run the downloaded `fm-skin-builder-setup.exe`
+2. Follow the installation wizard
+3. Launch FM Skin Builder from the Start Menu
+
+**Security Note**: Windows may show a "Windows protected your PC" warning because the app isn't signed. Click "More info" then "Run anyway" to proceed.
+
+### macOS
+
+1. Open the downloaded `fm-skin-builder.dmg` file
+2. Drag the FM Skin Builder icon to your Applications folder
+3. Launch from Applications
+
+**Security Note**: macOS may block the app on first launch. Go to System Preferences → Security & Privacy and click "Open Anyway".
+
+### Linux
+
+#### Using AppImage:
+```bash
+chmod +x fm-skin-builder.AppImage
+./fm-skin-builder.AppImage
+```
+
+#### Using .deb package (Debian/Ubuntu):
+```bash
+sudo dpkg -i fm-skin-builder.deb
+sudo apt-get install -f  # Fix any dependencies
+```
+
+Launch from your application menu or run `fm-skin-builder` from terminal.
+
+## First Launch
+
+When you first open FM Skin Builder:
+
+1. The app will display a green indicator showing it's ready
+2. You'll see two main tabs: **Build** and **Logs**
+3. The app will attempt to auto-detect your FM installation
+
+If the app can't find your Football Manager installation automatically, don't worry - you can manually specify the bundle location in the [Using the App](/user-guide/using-the-app) guide.
+
+## Verifying Your Installation
+
+To make sure everything is working:
+
+1. Open FM Skin Builder
+2. Check that the status indicator in the top-right is green
+3. You should see the Build interface with input fields
+
+If you see any errors, check the [Troubleshooting](/user-guide/troubleshooting) guide.
+
+## What's Next?
+
+Now that FM Skin Builder is installed, you're ready to:
+
+1. **[Learn the interface](/user-guide/using-the-app)** - Understand the desktop app
+2. **[Create your first skin](/user-guide/editing-skins)** - Set up your skin folder
+
+---
+
+**Having trouble?** Check the [Troubleshooting](/user-guide/troubleshooting) guide or open an issue on [GitHub](https://github.com/lotsgon-org/fm-skin-builder/issues).

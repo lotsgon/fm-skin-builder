@@ -1,0 +1,385 @@
+# Exporting and Testing
+
+Learn how to build your skin, install it in Football Manager, and iterate on your design.
+
+## Building Your Skin
+
+There are two ways to build your skin: Preview mode (for testing) and Full build (for installation).
+
+### Preview Build (Recommended First Step)
+
+Before doing a full build, it's smart to preview your changes:
+
+1. Open FM Skin Builder
+2. Select your skin folder
+3. Click **"Preview Build"**
+4. Switch to the **Logs** tab
+
+**What happens**:
+- FM Skin Builder analyzes your CSS and assets
+- It shows you what would change without writing files
+- You'll see a summary of affected bundles and textures
+
+**Example preview output**:
+```
+✓ Successfully parsed config.json
+✓ Loaded 2 CSS files
+✓ Found 24 color variables
+✓ Found 8 selector overrides
+✓ Would modify 15 bundles
+✓ Would replace 3 textures
+✓ No errors detected
+```
+
+**Why preview first**:
+- Catch CSS syntax errors before building
+- Verify your changes will apply
+- See warnings about potential conflicts
+- Faster than a full build
+
+### Full Build
+
+Once your preview looks good, do a full build:
+
+1. Click **"Build Bundles"**
+2. Wait for the build to complete (usually 10-30 seconds)
+3. Check the Logs tab for success confirmation
+
+**Successful build output**:
+```
+✓ Build complete!
+✓ Modified 15 bundles
+✓ Replaced 3 textures
+✓ Output: C:\Users\YourName\Documents\my-skin\packages\
+✓ Build finished in 12.3 seconds
+```
+
+**Where are the files?**
+
+Your built skin is in the `packages/` folder inside your skin directory:
+
+```
+my-skin/
+├── config.json
+├── colours/
+│   └── base.uss
+└── packages/              ← Your built files are here!
+    ├── FMColours.bundle
+    ├── UIStyles.bundle
+    └── ... (more .bundle files)
+```
+
+These `.bundle` files are modified versions of FM's game files with your colors and assets applied.
+
+---
+
+## Installing Your Skin in Football Manager
+
+Now that you've built your skin, let's install it in FM.
+
+### Step 1: Locate FM's Skins Directory
+
+Football Manager looks for custom skins in a specific location:
+
+**Windows**:
+```
+C:\Users\[YourName]\Documents\Sports Interactive\Football Manager 2026\skins\
+```
+
+**macOS**:
+```
+~/Documents/Sports Interactive/Football Manager 2026/skins/
+```
+
+**Linux**:
+```
+~/.local/share/Sports Interactive/Football Manager 2026/skins/
+```
+
+If the `skins` folder doesn't exist, create it.
+
+### Step 2: Copy Your Skin Files
+
+There are two approaches:
+
+**Option A: Copy the packages folder** (Simplest)
+
+Copy your entire `packages/` folder into FM's skins directory:
+
+```
+Football Manager 2026/
+└── skins/
+    └── my-skin/          ← Create this folder
+        └── (paste your .bundle files here)
+```
+
+**Option B: Use a descriptive folder name**
+
+Rename `packages/` to your skin name before copying:
+
+```
+Football Manager 2026/
+└── skins/
+    └── dark-theme/       ← Your skin name
+        └── (your .bundle files)
+```
+
+### Step 3: Activate Your Skin in FM
+
+1. Launch Football Manager 2026
+2. Go to **Preferences** (from the main menu)
+3. Click on the **Interface** section
+4. Find the **Skin** dropdown
+5. Select your skin from the list
+6. Click **Confirm**
+7. FM will reload with your skin applied
+
+**Tip**: Some changes may require restarting FM completely to take effect.
+
+---
+
+## Testing Your Skin
+
+Now the fun part - seeing your changes in action!
+
+### What to Check
+
+**Colors**:
+- Do your primary/secondary colors appear correctly?
+- Check menus, buttons, and text
+- Navigate different screens to see coverage
+
+**Icons**:
+- Do your custom icons appear?
+- Are they the right size and quality?
+- Check multiple locations where the icon appears
+
+**Backgrounds**:
+- Are background images positioned correctly?
+- Do they tile or stretch as expected?
+
+**Overall**:
+- Is text still readable?
+- Do colors have enough contrast?
+- Does everything feel cohesive?
+
+### Testing Different Screens
+
+Make sure to test your skin across various FM screens:
+
+- Main menu
+- Squad screen
+- Match day screens
+- Tactics board
+- Transfer screens
+- Club info pages
+
+Different screens may use different stylesheets, so colors might vary slightly.
+
+---
+
+## Iterating on Your Design
+
+Skinning is an iterative process. Here's an efficient workflow:
+
+### The Quick Iteration Loop
+
+1. **Keep FM Skin Builder open**
+2. **Edit your CSS files** in your favorite text editor
+3. **Click "Preview Build"** to check for errors
+4. **Click "Build Bundles"** once preview is good
+5. **In FM, reload the skin**:
+   - Go to Preferences → Interface
+   - Switch to another skin, then back to yours
+   - Or restart FM for guaranteed reload
+6. **Check your changes**
+7. **Repeat!**
+
+### Pro Tips for Faster Iteration
+
+**Use a text editor with auto-save**:
+- VS Code, Sublime Text, or Notepad++
+- Changes are saved automatically
+- Just hit "Build" in FM Skin Builder
+
+**Work on one area at a time**:
+- Don't change 50 colors at once
+- Focus on buttons, then text, then backgrounds
+- Easier to see what worked
+
+**Keep notes**:
+- Document which variables affect which UI elements
+- Build a personal reference as you discover mappings
+
+**Use debug mode when stuck**:
+- Enable Debug Mode in FM Skin Builder
+- Check the `debug/` output to see before/after stylesheets
+- Helps identify why a color isn't changing
+
+---
+
+## Sharing Your Skin
+
+Once you're happy with your skin, you might want to share it with others.
+
+### What to Share
+
+Share your **source files**, not just the built bundles:
+
+```
+my-skin/
+├── config.json
+├── colours/
+│   └── base.uss
+├── assets/
+│   └── icons/
+│       ├── star.png
+│       └── mapping.json
+└── README.md  ← Optional: Add usage instructions
+```
+
+**Don't share the `packages/` folder** - let users build it themselves with FM Skin Builder. This ensures compatibility and gives them the source to customize.
+
+### Distribution Options
+
+**Option 1: GitHub Repository**
+- Create a repo with your skin folder
+- Include a README with setup instructions
+- Users can clone and build
+
+**Option 2: ZIP Download**
+- Compress your skin folder (without `packages/`)
+- Host on file sharing site or forums
+- Include a README with instructions
+
+**Option 3: Community Sites**
+- Share on FM community forums
+- Include screenshots
+- Provide FM Skin Builder instructions
+
+### Include Instructions
+
+Always include these instructions for users:
+
+```markdown
+# My Awesome Skin
+
+## Installation
+
+1. Download and install FM Skin Builder
+2. Download this skin folder
+3. Open FM Skin Builder and select this folder
+4. Click "Build Bundles"
+5. Copy the `packages/` folder contents to:
+   - Windows: Documents/Sports Interactive/Football Manager 2026/skins/my-skin/
+   - macOS: ~/Documents/Sports Interactive/Football Manager 2026/skins/my-skin/
+6. In FM, go to Preferences → Interface → Skin and select "my-skin"
+
+## Credits
+
+Created by [Your Name]
+Built with FM Skin Builder
+```
+
+---
+
+## Troubleshooting Builds
+
+### Build Succeeded but Nothing Changed in FM
+
+**Possible causes**:
+
+1. **FM didn't reload the skin**
+   - Solution: Restart FM completely
+
+2. **Files weren't copied correctly**
+   - Solution: Verify your `.bundle` files are in FM's skins directory
+   - Check you're not in a subfolder of `packages/`
+
+3. **Your CSS variables don't match FM's variables**
+   - Solution: Enable Debug Mode and check the exported USS files
+   - See [Advanced Guide: Bundle Structure](/advanced-guide/bundle-structure)
+
+4. **Cache issues**
+   - Solution: Try rebuilding with cache refresh (see [Troubleshooting](/user-guide/troubleshooting))
+
+### Colors Are Wrong or Inconsistent
+
+**Check**:
+- CSS syntax (missing semicolons, wrong hex format)
+- Alpha channel values (transparency might be unexpected)
+- Variable names (case-sensitive)
+
+See the [Troubleshooting](/user-guide/troubleshooting) guide for more solutions.
+
+---
+
+## Advanced Testing Techniques
+
+### Using Debug Mode
+
+Enable Debug Mode in FM Skin Builder before building:
+
+**What you get**:
+- `debug/` folder in your skin directory
+- Original USS files (what FM had)
+- Patched USS files (what you changed)
+- JSON structure files
+
+**How to use it**:
+1. Build with Debug Mode enabled
+2. Look in `my-skin/debug/`
+3. Compare `original/` vs `patched/` USS files
+4. See exactly what changed
+
+**Example**:
+```css
+/* original/FMColours.uss */
+--primary: #3498db;
+
+/* patched/FMColours.uss */
+--primary: #ff0000;  ← Your change!
+```
+
+This confirms your CSS was applied correctly.
+
+### A/B Testing
+
+Compare your skin to FM's default:
+
+1. Install your skin in `skins/my-skin/`
+2. Switch between default and your skin in FM Preferences
+3. Note which screens look different
+4. Refine based on observations
+
+---
+
+## Performance Considerations
+
+Skins built with FM Skin Builder have **no performance impact** on Football Manager:
+
+- Bundle files are the same format as FM's originals
+- No runtime overhead
+- Colors are baked in at build time
+- No scripting or dynamic processing
+
+Your skin will run exactly as fast as the default FM skin.
+
+---
+
+## What's Next?
+
+You now know the complete workflow: build, install, test, iterate!
+
+**Want to dive deeper?**
+- [Troubleshooting](/user-guide/troubleshooting) - Fix common issues
+- [Advanced Guide](/advanced-guide) - Advanced techniques and fine-tuning
+
+**Ready to share?**
+- Post your skin in the community
+- Include screenshots and credits
+- Help other skinners learn!
+
+---
+
+**Happy skinning!** If you create something cool, share it with the community.

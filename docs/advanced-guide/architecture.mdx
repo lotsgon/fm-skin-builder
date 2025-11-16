@@ -1,0 +1,533 @@
+# Architecture
+
+Understand how FM Skin Builder works under the hood.
+
+## Overview
+
+FM Skin Builder is a **CSS-first tooling platform** that transforms your CSS definitions into modified Unity bundle files for Football Manager. It consists of two main parts:
+
+1. **Desktop App** (Frontend) - The graphical interface you interact with
+2. **Patching Engine** (Backend) - The core logic that modifies bundles
+
+## High-Level Flow
+
+Here's what happens when you click "Build Bundles":
+
+```
+Your CSS Files
+      ↓
+Parse CSS Variables & Selectors
+      ↓
+Load FM's Unity Bundles
+      ↓
+Apply Color Patches
+      ↓
+Swap Textures (if any)
+      ↓
+Save Modified Bundles
+      ↓
+Output to packages/
+```
+
+Let's break down each step.
+
+---
+
+## The Desktop App (Frontend)
+
+### Technology Stack
+
+- **Framework**: Tauri 2 (Rust-based desktop framework)
+- **UI**: React 18 + TypeScript
+- **Styling**: Tailwind CSS
+- **Build Tool**: Vite
+
+### Architecture
+
+The desktop app is a **thin wrapper** around the patching engine:
+
+```
+[React UI] → [Tauri Backend] → [Python Process] → [Patching Engine]
+```
+
+**What the frontend does**:
+1. Provides file selection dialogs
+2. Displays configuration options (Debug Mode, paths)
+3. Invokes the backend with user inputs
+4. Streams build logs back to the UI
+
+**What the frontend doesn't do**:
+- No bundle manipulation
+- No CSS parsing
+- No actual patching logic
+
+This separation keeps the UI simple and the patching logic reusable.
+
+### Communication Flow
+
+When you click "Build Bundles":
+
+1. **React** gathers inputs (skin path, bundle path, options)
+2. **Tauri (Rust)** receives the build request via IPC
+3. **Rust** spawns a Python subprocess with arguments
+4. **Python** runs the patching engine
+5. **Stdout/stderr** stream back through Rust to React
+6. **React** displays logs in the Logs tab
+
+---
+
+## The Patching Engine (Backend)
+
+### Technology Stack
+
+- **Language**: Python 3.8+
+- **Bundle Handling**: UnityPy (deserializes Unity bundle files)
+- **Data Validation**: Pydantic
+- **CSS Parsing**: Custom CSS parser
+
+### Core Components
+
+#### 1. CSS Parser (`css_utils.py`)
+
+**Purpose**: Extracts variables and selectors from your CSS files.
+
+**Input**:
+```css
+:root {
+  --primary: #ff0000;
+}
+.green { color: #00ff00; }
+```
+
+**Output**:
+```python
+{
+  "variables": {
+    "--primary": {"r": 255, "g": 0, "b": 0, "a": 255}
+  },
+  "selectors": {
+    ".green": {
+      "color": {"r": 0, "g": 255, "b": 0, "a": 255}
+    }
+  }
+}
+```
+
+The parser normalizes hex colors to RGBA values and builds a dictionary of changes.
+
+#### 2. Bundle Inspector (`bundle_inspector.py`)
+
+**Purpose**: Scans Unity bundles to find stylesheets and their structure.
+
+**What it does**:
+1. Opens bundle files using UnityPy
+2. Finds `MonoBehaviour` objects (where stylesheets live)
+3. Extracts color arrays and string references
+4. Builds an index of where each stylesheet is
+
+**Caching**: Results are cached to `.cache/skins/<skin>/<hash>.json` for speed.
+
+#### 3. CSS Patcher (`css_patcher.py`)
+
+**Purpose**: The heart of the tool - applies CSS changes to bundles.
+
+**How variable patching works**:
+
+1. **Find the variable**: Look for the variable name string in the stylesheet
+2. **Find the color**: Look for a color value at the same index
+3. **Verify match**: Ensure both the string and color exist at the same position
+4. **Update color**: Replace the RGBA values with your new color
+
+**Example**:
+```
+Stylesheet array:
+  strings[42] = "--primary"
+  colors[42] = {r: 52, g: 152, b: 219, a: 255}
+
+Your CSS:
+  --primary: #ff0000
+
+Patching:
+  colors[42] = {r: 255, g: 0, b: 0, a: 255}  ✓
+```
+
+**How selector patching works**:
+
+1. **Find the selector**: Search for `.classname` in the stylesheet
+2. **Find the property**: Look for the property (e.g., `color`) in that selector's rules
+3. **Update the value**: Replace the color value
+
+This is more complex because selectors can have multiple properties, and properties can be nested.
+
+#### 4. Texture Swapper (`textures.py`)
+
+**Purpose**: Replaces icons and backgrounds in bundles.
+
+**How it works**:
+
+1. **Prefilter**: Quickly check if a bundle contains any target texture names (skips most bundles)
+2. **Load textures**: For matching bundles, load `Texture2D` and `Sprite` objects
+3. **Match names**: Compare texture names to your mapping patterns (wildcards supported)
+4. **Replace data**: Swap the image data with your custom PNG/SVG
+5. **Update references**: Ensure all sprite references point to the new texture
+
+**Vector generation**:
+For vector shapes, the tool generates a texture programmatically (e.g., circles with custom colors) instead of loading from a file.
+
+#### 5. Patch Pipeline (`services.py`)
+
+**Purpose**: Orchestrates the entire patching process.
+
+**Flow**:
+
+```python
+for each bundle in bundles:
+    context = BundleContext(bundle_path)
+    context.load()
+
+    # Apply CSS patches
+    css_service.apply(context, css_overrides)
+
+    # Apply texture swaps
+    texture_service.apply(context, asset_mappings)
+
+    if context.is_dirty:
+        context.save_modified(output_dir)
+    else:
+        skip (no changes needed)
+
+    context.dispose()
+```
+
+**Key features**:
+- **Change-aware**: Only writes bundles that actually changed
+- **Lazy loading**: Bundles are loaded on-demand
+- **Memory efficient**: Disposes of bundles after processing
+- **Rollback safe**: Original files are never modified (unless using backup mode)
+
+---
+
+## Data Flow: A Complete Build
+
+Let's trace what happens during a full build.
+
+### 1. Initialization
+
+**User clicks "Build Bundles"**
+
+The app:
+- Validates skin folder exists
+- Loads `config.json`
+- Collects all CSS/USS files
+- Parses CSS into variables and selectors
+
+**Output**: Dictionary of CSS overrides and asset mappings
+
+### 2. Bundle Discovery
+
+**Find FM's bundles**
+
+The app:
+- Auto-detects FM installation (or uses user-specified path)
+- Lists all `.bundle` files in the `data/` directory
+- Filters out irrelevant bundles (no stylesheets)
+
+**Output**: List of bundle file paths to process
+
+### 3. Scanning (First Build Only)
+
+**Build an index of stylesheets**
+
+For each bundle:
+- Load with UnityPy
+- Extract MonoBehaviour objects
+- Parse stylesheet data structures
+- Record color positions and selector trees
+- Save to cache
+
+**Output**: Cached scan indices for fast future builds
+
+### 4. CSS Patching
+
+**Apply color changes**
+
+For each bundle (using cached indices):
+- Load bundle
+- For each CSS variable:
+  - Find matching color in stylesheet
+  - Update RGBA values
+- For each CSS selector:
+  - Find matching rule
+  - Update color properties
+- Mark bundle as dirty if any changes
+
+**Output**: Modified bundle objects (in memory)
+
+### 5. Texture Swapping
+
+**Replace images**
+
+For each bundle:
+- Prefilter: check if bundle has target textures
+- If match:
+  - Load texture objects
+  - Match names to mappings
+  - Replace image data or generate vectors
+  - Mark bundle as dirty
+
+**Output**: Modified bundle objects with new textures
+
+### 6. Writing
+
+**Save modified bundles**
+
+For each dirty bundle:
+- Serialize to bytes (UnityPy)
+- Write to `<skin>/packages/<bundle_name>.bundle`
+- Preserve original filename and structure
+
+**Output**: Your built skin in `packages/`
+
+### 7. Reporting
+
+**Generate summary**
+
+- Count bundles modified
+- Count textures swapped
+- List any warnings or conflicts
+- Display build time
+
+**Output**: Build summary in the Logs tab
+
+---
+
+## Caching System
+
+Scanning bundles is slow (UnityPy deserialization is expensive). Caching makes subsequent builds fast.
+
+### What Gets Cached?
+
+- Stylesheet indices (where colors/selectors are)
+- Bundle structure (MonoBehaviour locations)
+- String/color array positions
+
+### Cache Key
+
+Caches are keyed by:
+- FM bundle file paths
+- Skin folder path
+- Config file modification time
+
+If any of these change, the cache is invalidated automatically.
+
+### Cache Location
+
+```
+<your-skin>/.cache/skins/<skin-name>/<hash>.json
+```
+
+### Cache Lifecycle
+
+**First build**:
+1. No cache exists
+2. Full scan (slow, ~30 seconds)
+3. Write cache to disk
+
+**Subsequent builds**:
+1. Cache exists and is valid
+2. Load cached indices (fast, <1 second)
+3. Skip scanning entirely
+
+**Cache invalidation**:
+- Moving skin folder: New path → new cache
+- Updating config.json: New mtime → cache refresh
+- FM update: New bundles → cache refresh
+
+---
+
+## Why This Architecture?
+
+### CSS-First Design
+
+**Why CSS instead of direct bundle editing?**
+
+- **Familiar**: Web developers already know CSS
+- **Readable**: `--primary: #ff0000` is clearer than hex arrays
+- **Portable**: CSS files are text, bundles are binary
+- **Versionable**: CSS works with Git, bundles don't
+- **Reusable**: One CSS file can define colors for all bundles
+
+### Separation of Concerns
+
+**Desktop App** (presentation):
+- User interface
+- File selection
+- Configuration UI
+
+**Patching Engine** (logic):
+- CSS parsing
+- Bundle manipulation
+- Texture processing
+
+This allows:
+- GUI and engine to evolve independently
+- Future tools (web app, CLI) to reuse the engine
+- Testing the engine without UI dependencies
+
+### Change-Aware Processing
+
+**Why check if bundles changed?**
+
+- **Speed**: Don't write files unnecessarily
+- **Safety**: Reduces disk I/O
+- **Clarity**: Build summary shows actual impact
+
+Only bundles that CSS or texture changes affected are written.
+
+### Caching Strategy
+
+**Why cache scan results?**
+
+First build: ~30 seconds (scanning overhead)
+Cached builds: ~10 seconds (just patching)
+
+3x speedup for iterative development.
+
+---
+
+## Design Principles
+
+FM Skin Builder follows these principles:
+
+### 1. Non-Destructive
+
+- Original FM files are **never** modified
+- Bundles are read, copied, and modified in output directory
+- Easy to revert (delete `packages/` folder)
+
+### 2. Transparent
+
+- All operations are logged
+- Debug mode shows before/after
+- No hidden magic
+
+### 3. Fail-Safe
+
+- Validation at every step (Pydantic models)
+- Errors are reported, not silently ignored
+- Invalid CSS is caught early
+
+### 4. Performance-Conscious
+
+- Caching for speed
+- Prefiltering to skip work
+- Lazy loading to save memory
+
+### 5. Extensible
+
+- Modular architecture (separate CSS, texture, services)
+- Clear interfaces between components
+- Easy to add new features (e.g., new asset types)
+
+---
+
+## Performance Characteristics
+
+### Build Time Breakdown
+
+For a typical skin with 20 color variables and 5 icons:
+
+```
+CSS Parsing:          <1 second
+Bundle Discovery:     <1 second
+Scanning (cached):    <1 second
+CSS Patching:         ~5 seconds
+Texture Swapping:     ~3 seconds
+Writing Bundles:      ~2 seconds
+--------------------------------
+Total:                ~12 seconds
+```
+
+### Memory Usage
+
+- Peak: ~500MB (loading large bundles)
+- Average: ~200MB
+- UnityPy bundles are disposed after processing
+
+### Disk Usage
+
+- Cached indices: ~2MB per skin
+- Built bundles: ~50-100MB (similar to FM's originals)
+- Debug exports: ~10-20MB (if enabled)
+
+---
+
+## Limitations
+
+### What FM Skin Builder Can't Do
+
+**1. Modify non-color properties**
+- Can't change fonts, sizes, layouts
+- CSS only affects colors
+- Unity bundles store these separately
+
+**2. Add new UI elements**
+- Can only modify existing elements
+- Can't create new buttons, screens, etc.
+
+**3. Dynamic styling**
+- Colors are baked at build time
+- No runtime theme switching in FM
+
+**4. Non-Unity assets**
+- Only works with Unity bundles
+- Can't modify other FM file types
+
+### Workarounds
+
+For some limitations:
+- **Fonts**: Not supported (FM limitation)
+- **Layouts**: Not supported (beyond tool scope)
+- **Dynamic themes**: Build multiple skins
+
+---
+
+## Future Architecture
+
+Potential enhancements:
+
+- **Web-based GUI**: Replace Tauri with web app
+- **Plugin system**: Allow community extensions
+- **Real-time preview**: Show changes before building
+- **Cloud builds**: Build skins in browser without installing
+
+The modular architecture supports these additions without major refactoring.
+
+---
+
+## Understanding the Code
+
+If you want to explore the source code:
+
+**Key files**:
+- `css_patcher.py`: Core patching logic
+- `textures.py`: Texture swapping
+- `services.py`: Orchestration
+- `bundle_inspector.py`: Scanning
+- `css_utils.py`: CSS parsing
+
+**Entry point**:
+- Frontend: `frontend/src/App.tsx`
+- Backend: `fm_skin_builder/core/services.py` (SkinPatchPipeline)
+
+---
+
+## What's Next?
+
+Now that you understand how the tool works:
+
+- **[Bundle Structure](/advanced-guide/bundle-structure)** - Learn what's inside FM's bundles
+- **[Config and Mappings](/advanced-guide/config-and-mappings)** - Fine-tune your targeting
+- **[Advanced Features](/advanced-guide/advanced-features)** - Explore power user features
+
+Understanding the architecture helps you troubleshoot issues and use advanced features effectively.

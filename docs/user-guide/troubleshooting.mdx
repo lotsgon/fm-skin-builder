@@ -1,0 +1,525 @@
+# Troubleshooting
+
+Solutions to common issues when using FM Skin Builder.
+
+## Installation Issues
+
+### "App won't open" (Windows)
+
+**Windows protected your PC** warning:
+
+This happens because the app isn't digitally signed.
+
+**Solution**:
+1. Click "More info" in the warning dialog
+2. Click "Run anyway"
+3. The app will open normally
+
+**Why**: Code signing certificates are expensive. The app is safe to run.
+
+### "Cannot be opened" (macOS)
+
+**"App cannot be opened because it is from an unidentified developer"**
+
+**Solution**:
+1. Go to System Preferences → Security & Privacy
+2. Click the lock to make changes
+3. You'll see a message about FM Skin Builder
+4. Click "Open Anyway"
+5. Confirm you want to open it
+
+**Alternative**:
+Right-click the app → Open → Click "Open" in the dialog
+
+### App crashes on launch
+
+**Check**:
+1. You're running a supported OS version (see [Installation](/user-guide/installation))
+2. You have the latest version of FM Skin Builder
+3. Try deleting and reinstalling
+
+**Still crashing?**
+Open an issue on [GitHub](https://github.com/lotsgon-org/fm-skin-builder/issues) with:
+- Your OS and version
+- What you did before the crash
+- Any error messages
+
+---
+
+## Build Issues
+
+### "Bundle directory not found"
+
+**Error message**:
+```
+✗ Error: Could not auto-detect Football Manager bundle directory
+```
+
+**Why this happens**:
+FM Skin Builder couldn't find your Football Manager installation automatically.
+
+**Solution**:
+Manually specify the bundle path:
+
+1. In FM Skin Builder, click "Browse" next to **Bundles Directory Path**
+2. Navigate to your FM installation's `data/` folder
+
+**Common FM locations**:
+
+**Windows (Steam)**:
+```
+C:\Program Files (x86)\Steam\steamapps\common\Football Manager 2026\data
+```
+
+**Windows (Epic)**:
+```
+C:\Program Files\Epic Games\Football Manager 2026\data
+```
+
+**macOS (Steam)**:
+```
+~/Library/Application Support/Steam/steamapps/common/Football Manager 2026/data
+```
+
+**Linux (Steam)**:
+```
+~/.steam/steam/steamapps/common/Football Manager 2026/data
+```
+
+**Still can't find it?**
+Search your computer for "Football Manager 2026" and look for a `data/` folder containing `.bundle` files.
+
+### "config.json not found"
+
+**Error message**:
+```
+✗ Error: config.json not found in skin folder
+```
+
+**Why this happens**:
+You selected the wrong folder or haven't created a config file yet.
+
+**Solution**:
+1. Make sure you selected the root of your skin folder
+2. Create `config.json` in that folder (see [Editing Skins](/user-guide/editing-skins))
+
+**Minimal config.json**:
+```json
+{
+  "schema_version": 2,
+  "name": "My Skin"
+}
+```
+
+### "No CSS files found"
+
+**Error message**:
+```
+✗ Error: No CSS/USS files found in skin folder
+```
+
+**Why this happens**:
+Your skin folder doesn't contain any `.css` or `.uss` files.
+
+**Solution**:
+1. Create a `colours/` folder in your skin
+2. Create a file like `base.uss` inside it
+3. Add some CSS (see [Editing Skins](/user-guide/editing-skins))
+
+### "Invalid config.json"
+
+**Error messages**:
+```
+✗ Error: Invalid JSON syntax in config.json
+✗ Error: schema_version is required
+✗ Error: schema_version must be 2
+```
+
+**Why this happens**:
+Your `config.json` has syntax errors or missing required fields.
+
+**Solution**:
+
+**Check JSON syntax**:
+- Use a JSON validator: https://jsonlint.com/
+- Common mistakes:
+  - Missing commas between fields
+  - Trailing commas (after the last field)
+  - Missing quotes around strings
+  - Missing closing braces `}`
+
+**Correct example**:
+```json
+{
+  "schema_version": 2,
+  "name": "My Skin"
+}
+```
+
+**Common mistakes**:
+```json
+{
+  "schema_version": "2",    // ✗ Should be number, not string
+  "name": "My Skin",        // ✗ Trailing comma
+}
+```
+
+**Ensure schema_version is present and equals 2**:
+```json
+{
+  "schema_version": 2    // ✓ Required field
+}
+```
+
+---
+
+## Color Issues
+
+### "My colors aren't changing"
+
+You built successfully but FM looks the same.
+
+**Possible causes and solutions**:
+
+#### 1. FM didn't reload the skin
+
+**Try**:
+- Restart Football Manager completely
+- In FM, change to a different skin, then back to yours
+
+#### 2. CSS variable names don't match
+
+Your variable names must match exactly what FM uses.
+
+**Example**:
+```css
+/* This might not work: */
+--my-custom-primary: #ff0000;
+
+/* Try standard names instead: */
+--primary: #ff0000;
+--secondary: #00ff00;
+--accent: #0000ff;
+```
+
+**How to find correct variable names**:
+See [Advanced Guide: Bundle Structure](/advanced-guide/bundle-structure) for how to scan and inspect FM's bundles.
+
+#### 3. CSS syntax errors
+
+**Check**:
+- All colors have `#` prefix: `#ff0000` not `ff0000`
+- Hex colors are 6 or 8 characters: `#ff0000` or `#ff0000cc`
+- Lines end with semicolons: `--primary: #ff0000;`
+- Variables are in `:root { }` block
+
+**Example of correct syntax**:
+```css
+:root {
+  --primary: #ff0000;
+  --secondary: #00ff00;
+}
+```
+
+#### 4. Files weren't installed correctly
+
+**Verify**:
+1. Built files exist in `my-skin/packages/`
+2. You copied them to FM's skins directory
+3. Path is correct: `Documents/Sports Interactive/Football Manager 2026/skins/your-skin/`
+4. You selected the right skin in FM Preferences
+
+### "Some colors changed but not others"
+
+**Why this happens**:
+- Some variables might not exist in FM's stylesheets
+- Different screens use different stylesheets
+- Some UI elements might be images, not styleable colors
+
+**Solution**:
+- Enable Debug Mode and check the patched USS files
+- See which variables actually exist in the bundles
+- Focus on variables that appear in the debug output
+
+### "Colors look washed out or wrong"
+
+**Possible causes**:
+
+#### Alpha channel issues
+
+If you included alpha (transparency) by accident:
+
+```css
+/* This makes red semi-transparent (might look washed out): */
+--primary: #ff0000cc;
+
+/* This is fully opaque red: */
+--primary: #ff0000;
+```
+
+**Solution**: Remove the last two characters if you don't want transparency.
+
+#### Color format mistakes
+
+**Check**:
+- You're using hex format: `#RRGGBB`
+- Not RGB format: `rgb(255, 0, 0)` won't work
+- Not HSL format: `hsl(0, 100%, 50%)` won't work
+
+#### Wrong color space
+
+Colors in FM are RGB. If you're converting from another space (like HSL), make sure the conversion is accurate.
+
+---
+
+## Asset Issues
+
+### "My icons aren't showing up"
+
+**Checklist**:
+
+1. **Icons are in the right place**:
+   ```
+   assets/
+   └── icons/
+       ├── my_icon.png
+       └── mapping.json
+   ```
+
+2. **Included in config.json**:
+   ```json
+   {
+     "includes": ["assets/icons"]
+   }
+   ```
+
+3. **Mapping is correct**:
+   ```json
+   {
+     "star_*": "my_icon"
+   }
+   ```
+   - Left side: FM's original icon name
+   - Right side: Your file name (without extension)
+
+4. **File format is supported**:
+   - PNG: ✓
+   - SVG: ✓
+   - JPG: ✗ (use PNG for icons)
+
+5. **File name has no extension in mapping**:
+   ```json
+   "star_*": "my_icon"     // ✓ Correct
+   "star_*": "my_icon.png" // ✗ Wrong
+   ```
+
+**Still not working?**
+
+The icon name on the left might not match FM's bundles.
+
+**Solution**: Use wildcards or scan bundles to find exact names (see [Advanced Guide: Bundle Structure](/advanced-guide/bundle-structure)).
+
+### "My backgrounds aren't showing up"
+
+Same troubleshooting steps as icons, but:
+
+1. Check `assets/backgrounds/` folder
+2. Make sure `"assets/backgrounds"` is in config includes
+3. Supported formats: JPG, PNG
+
+---
+
+## Performance Issues
+
+### "Build takes too long"
+
+**Normal build time**: 10-30 seconds
+
+If it's taking minutes:
+
+**Possible causes**:
+
+1. **Very large images**
+   - Solution: Resize images to reasonable sizes (icons: 256x256, backgrounds: 1920x1080)
+
+2. **Debug mode enabled**
+   - Solution: Disable Debug Mode for faster builds
+
+3. **No scan cache**
+   - The first build scans all bundles and caches the results
+   - Subsequent builds should be faster
+   - If not, see below
+
+### "Cache not working"
+
+**Symptoms**: Every build is slow, even after the first one.
+
+**Check**:
+1. Look for `.cache/` folder in your skin directory
+2. It should contain JSON files
+
+**If cache folder is missing**:
+- The app doesn't have write permissions
+- Solution: Run FM Skin Builder with appropriate permissions
+
+**If cache exists but builds are still slow**:
+- You might be changing the skin folder path
+- Solution: Keep the same path consistently
+
+---
+
+## Debug Mode Issues
+
+### "Debug folder is empty"
+
+**Enable Debug Mode before building**:
+1. Check the "Debug Mode" toggle in FM Skin Builder
+2. Then click "Build Bundles"
+
+The `debug/` folder appears after building with debug mode enabled.
+
+### "Can't understand debug output"
+
+Debug output shows before/after USS files and JSON structures.
+
+**For colors**:
+Compare `debug/original/` vs `debug/patched/` USS files:
+
+```css
+/* original/FMColours.uss */
+--primary: #3498db;
+
+/* patched/FMColours.uss */
+--primary: #ff0000;
+```
+
+If the patched file doesn't show your change, your CSS variable name doesn't match.
+
+**For structure**:
+JSON files show the internal bundle structure. These are technical and mainly useful for advanced users.
+
+See [Advanced Guide: Verification](/advanced-guide/verification-and-restore) for more details.
+
+---
+
+## Common Warning Messages
+
+### "Selector matched multiple stylesheets"
+
+**Warning message**:
+```
+⚠ Warning: Selector '.green' matched stylesheets in multiple bundles
+```
+
+**What it means**:
+Your CSS selector (like `.green`) appears in multiple stylesheet files across different bundles.
+
+**Is this bad?**
+Usually no - it means your change will apply everywhere that class appears.
+
+**When it might be a problem**:
+If you wanted to change `.green` only in one specific location, this warns you it's changing everywhere.
+
+**Solution** (if you need precision):
+See [Advanced Guide: Config and Mappings](/advanced-guide/config-and-mappings) for per-stylesheet targeting.
+
+### "Conflict: asset touched by multiple files"
+
+**Warning message**:
+```
+⚠ Conflict: StyleSheet 'FMColours' touched by both base.uss and buttons.uss
+```
+
+**What it means**:
+Multiple CSS files in your skin are modifying the same stylesheet.
+
+**Is this bad?**
+Not necessarily - the tool merges all changes together. But if both files change the same variable, the last one wins.
+
+**Solution**:
+- Organize your CSS to avoid duplication
+- Or accept that one will override the other
+
+### "Using scan cache from..."
+
+**Info message**:
+```
+ℹ Using scan cache from previous build
+```
+
+**What it means**:
+The tool found cached bundle data and is using it for speed.
+
+**Is this good?**
+Yes! This means your build will be fast.
+
+**If you want fresh scanning**:
+You can't currently force cache refresh via GUI. For most users, the cache is always accurate.
+
+---
+
+## Getting Help
+
+If you've tried everything and still have issues:
+
+### Before asking for help
+
+Gather this information:
+
+1. **Your setup**:
+   - Operating system and version
+   - FM Skin Builder version
+   - FM installation type (Steam, Epic, etc.)
+
+2. **What you did**:
+   - Steps to reproduce the issue
+   - What you expected to happen
+   - What actually happened
+
+3. **Logs**:
+   - Copy the full build log from the Logs tab
+   - Include any error messages
+
+4. **Your config**:
+   - Share your `config.json` (sanitize personal info)
+   - Share a sample of your CSS (if relevant)
+
+### Where to ask
+
+1. **GitHub Issues** (preferred for bugs):
+   - https://github.com/lotsgon-org/fm-skin-builder/issues
+   - Search existing issues first
+   - Create a new issue with details above
+
+2. **Community Forums**:
+   - FM skinning communities
+   - Post with the information above
+
+3. **Documentation**:
+   - Re-read the relevant guides
+   - Check [Advanced Guide](/advanced-guide) for deeper topics
+
+---
+
+## Quick Reference
+
+Common issues and their pages:
+
+| Issue | See |
+|-------|-----|
+| Installation problems | [Installation](/user-guide/installation) |
+| App interface confusion | [Using the App](/user-guide/using-the-app) |
+| CSS not applying | This page (Color Issues section) |
+| Skin folder setup | [Editing Skins](/user-guide/editing-skins) |
+| Installing in FM | [Exporting and Testing](/user-guide/exporting-and-testing) |
+| Advanced features | [Advanced Guide](/advanced-guide) |
+
+---
+
+Most issues are solved by:
+1. Checking CSS syntax
+2. Restarting FM
+3. Verifying file paths
+4. Enabling Debug Mode
+
+Good luck! Most problems have simple solutions once you know where to look.

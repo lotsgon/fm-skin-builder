@@ -1,0 +1,690 @@
+# Verification and Restore
+
+Safety techniques for verifying changes and restoring original files.
+
+## Why Verification Matters
+
+When creating complex skins, you want to be confident that:
+- Your CSS changes were actually applied
+- Only the intended elements changed
+- You can revert if something goes wrong
+- Your skin won't break FM
+
+This guide covers verification techniques and safety practices.
+
+---
+
+## Preview Before You Build
+
+The simplest form of verification: check before you commit.
+
+### Using Preview Build
+
+**Always preview first** when:
+- Testing new CSS
+- Making major changes
+- Working with complex mappings
+- Unsure if changes will apply
+
+**How to preview**:
+1. Configure your skin in FM Skin Builder
+2. Click **"Preview Build"**
+3. Read the Logs tab carefully
+
+### What to Look For
+
+**Successful preview**:
+```
+✓ Successfully parsed config.json
+✓ Loaded 3 CSS files
+✓ Found 24 color variables
+✓ Found 12 selector overrides
+✓ Would modify 15 bundles
+✓ Would replace 5 textures
+```
+
+**Key indicators**:
+- "Would modify X bundles" - Shows impact scope
+- "Would replace X textures" - Confirms texture mappings
+- No errors - CSS syntax is valid
+
+**Warning signs**:
+```
+ℹ No bundles would be modified
+```
+Means: Your CSS didn't match any bundle variables/selectors. Check variable names!
+
+### Preview Workflow
+
+```
+Edit CSS
+    ↓
+Preview Build
+    ↓
+Check logs
+    ↓
+Issues? → Fix CSS → Preview again
+    ↓
+Looks good? → Build Bundles
+```
+
+Preview is **fast** (no file writing) and **safe** (no side effects).
+
+---
+
+## Debug Exports: Before and After
+
+The most powerful verification tool.
+
+### Enable Debug Mode
+
+1. Check **"Debug Mode"** in FM Skin Builder
+2. Click "Build Bundles"
+3. Wait for build to complete
+4. Check `<your-skin>/debug/` folder
+
+### Directory Structure
+
+```
+debug/
+├── original/
+│   ├── FMColours.uss      # FM's default
+│   ├── UIStyles.uss       # Before your changes
+│   └── ... (more)
+└── patched/
+    ├── FMColours.uss      # After your changes
+    ├── UIStyles.uss       # What you modified
+    └── ... (more)
+```
+
+### Verification Process
+
+**Step 1: Check original/**
+
+See what FM had before your changes:
+
+**debug/original/FMColours.uss**:
+```css
+:root {
+  --primary: #3498db;      /* FM's default blue */
+  --secondary: #2ecc71;
+  --accent: #e74c3c;
+}
+```
+
+**Use this to**:
+- Verify variable names exist
+- See FM's default colors
+- Understand what you're changing
+
+**Step 2: Check patched/**
+
+See what your skin produced:
+
+**debug/patched/FMColours.uss**:
+```css
+:root {
+  --primary: #ff0000;      /* ← Your red! */
+  --secondary: #2ecc71;    /* Unchanged */
+  --accent: #e74c3c;       /* Unchanged */
+}
+```
+
+**Verification questions**:
+- ✓ Did `--primary` change to `#ff0000`?
+- ✓ Did other variables stay default (as expected)?
+- ✗ Are there unexpected changes?
+
+**Step 3: Compare Side-by-Side**
+
+**Manual comparison**:
+Open both files in a text editor with split view.
+
+**Command-line diff** (Linux/Mac):
+```bash
+diff debug/original/FMColours.uss debug/patched/FMColours.uss
+```
+
+**Output**:
+```
+< --primary: #3498db;
+> --primary: #ff0000;
+```
+
+Shows exactly what changed!
+
+**GUI diff tools**:
+- VS Code: Compare files with built-in diff
+- Beyond Compare, Meld, etc.
+
+### What to Verify
+
+**✓ Your changes applied**:
+```css
+/* You wanted */
+--primary: #ff0000;
+
+/* Patched file shows */
+--primary: #ff0000;  ✓
+```
+
+**✓ No unintended changes**:
+```css
+/* You didn't touch */
+--secondary: ...
+
+/* Patched file shows */
+--secondary: #2ecc71;  ✓ (unchanged)
+```
+
+**✗ Missing changes**:
+```css
+/* You wanted */
+--custom-color: #ff0000;
+
+/* Patched file shows */
+/* Variable doesn't exist! */
+```
+
+This means the variable name doesn't exist in FM's stylesheet.
+
+---
+
+## Verifying Texture Replacements
+
+Debug mode doesn't export images, but you can verify texture swaps through logs.
+
+### Build Logs
+
+**Successful texture swap**:
+```
+✓ Processing texture: star_small
+✓ Replaced with: my_star.png
+✓ Processing texture: star_large
+✓ Replaced with: my_star.png
+✓ Replaced 2 textures in Icons.bundle
+```
+
+**Failed texture swap**:
+```
+⚠ Warning: Texture 'old_icon' not found in bundles
+```
+
+Either:
+- Texture name is wrong in your mapping
+- FM removed that texture in an update
+- Wildcard pattern doesn't match
+
+### Verifying in FM
+
+The ultimate verification: **see it in-game**.
+
+**Checklist**:
+1. Build your skin
+2. Copy `packages/` to FM skins directory
+3. Activate skin in FM Preferences
+4. Navigate to screens where the texture appears
+5. Verify it's your custom image
+
+**Texture not showing?**
+- Check mapping.json syntax
+- Verify file names (no extension in mapping)
+- Ensure config.json includes the assets folder
+- Check build logs for warnings
+
+---
+
+## Understanding What Changed
+
+Reading build summaries to verify scope.
+
+### Build Summary Report
+
+```
+✓ Modified 15 bundles
+✓ Replaced 5 textures
+✓ Output: /path/to/skin/packages/
+```
+
+**What this tells you**:
+
+**15 bundles modified**:
+- Your CSS affected 15 different bundle files
+- Check: Is this expected?
+- Too many? Maybe use per-stylesheet targeting
+- Too few? Maybe variable names don't match
+
+**5 textures replaced**:
+- Your texture mappings matched 5 icons/backgrounds
+- Check: Are there more you expected?
+- Missing some? Check mapping patterns
+
+### Detailed Logs
+
+Scroll through the Logs tab for:
+
+**Which bundles were modified**:
+```
+Processing: FMColours.bundle... ✓ Modified
+Processing: UIStyles.bundle... ✓ Modified
+Processing: MatchEngine.bundle... ○ No changes
+```
+
+**Which textures were found**:
+```
+Found texture: star_small
+Found texture: star_large
+Matched pattern: star_*
+```
+
+**Any warnings**:
+```
+⚠ Selector '.green' matched multiple stylesheets
+```
+
+---
+
+## Restoring Original Files
+
+If something goes wrong, how do you revert?
+
+### Method 1: Delete Built Files
+
+**Simplest**: Just delete the built skin.
+
+**Steps**:
+1. Go to FM's skins directory:
+   - Windows: `Documents/Sports Interactive/Football Manager 2026/skins/`
+   - macOS: `~/Documents/Sports Interactive/Football Manager 2026/skins/`
+2. Delete your skin folder
+3. Restart FM
+4. FM will use its default files
+
+**What happens**:
+- FM's original bundles are in the game installation directory
+- Never modified by FM Skin Builder
+- Deleting your skin folder has no permanent effect
+
+### Method 2: Rebuild from Source
+
+**If you have your skin source**:
+
+1. Fix issues in your CSS or config
+2. Rebuild with FM Skin Builder
+3. Replace the problematic `packages/` folder
+4. Reinstall in FM
+
+**This is why version control matters** - you can always rebuild!
+
+### Method 3: Verify FM Game Files (Steam)
+
+**If something feels broken in FM itself** (rare):
+
+**Steam**:
+1. Right-click Football Manager 2026 in library
+2. Properties → Local Files → Verify Integrity of Game Files
+3. Steam re-downloads any corrupted files
+
+**This is safe** - your skins are in Documents, not game files.
+
+**When to use this**:
+- FM crashes after installing a skin (very rare)
+- FM looks corrupted beyond just skin issues
+- You manually edited FM's original bundles (don't do this!)
+
+---
+
+## Backup Strategies
+
+Protect your work and FM's integrity.
+
+### Built-in Backup (Future Feature)
+
+FM Skin Builder has a `--backup` flag in the backend that could create `.bak` files, but it's not currently exposed in the GUI.
+
+**What it would do**:
+```
+packages/
+├── FMColours.bundle
+├── FMColours.bundle.bak  # Backup before patching
+```
+
+**Why it's not in GUI**: Backups aren't necessary - original bundles are never touched.
+
+### Your Own Backups
+
+**Backup your skin source**:
+```bash
+cd my-skin
+zip -r ../my-skin-backup.zip .
+```
+
+Or use Git:
+```bash
+git init
+git add .
+git commit -m "v1.0.0 - initial release"
+git tag v1.0.0
+```
+
+**Backup built packages** (optional):
+```bash
+cp -r packages packages-v1.0.0
+```
+
+Useful if you want to compare builds across versions.
+
+### What NOT to Backup
+
+**Don't backup**:
+- FM's original game bundles (they're in the game install, always safe)
+- Debug exports (can be regenerated)
+- Cache files (can be regenerated)
+
+---
+
+## Verification Checklist
+
+Before distributing or finalizing a skin, verify:
+
+### ✓ CSS Verification
+
+- [ ] Preview build succeeds
+- [ ] No syntax errors in logs
+- [ ] All intended variables are in debug/patched/
+- [ ] No unintended variables changed
+- [ ] Selectors modified as expected
+
+### ✓ Texture Verification
+
+- [ ] Texture replacement logs show correct files
+- [ ] No "texture not found" warnings
+- [ ] Images appear correctly in FM
+- [ ] Icons are the right size and quality
+
+### ✓ Functional Testing
+
+- [ ] Skin installs in FM without errors
+- [ ] FM launches normally with skin active
+- [ ] All major screens look correct (menu, squad, match)
+- [ ] Text is readable (contrast is adequate)
+- [ ] No broken or missing UI elements
+
+### ✓ Distribution Preparation
+
+- [ ] Remove debug/ folder (not needed by users)
+- [ ] Remove .cache/ folder (user-specific)
+- [ ] Include README with installation instructions
+- [ ] Version number in config.json is correct
+- [ ] Test installation on a clean system (if possible)
+
+---
+
+## Troubleshooting Verification Issues
+
+### "Debug exports are empty"
+
+**Cause**: Debug mode wasn't enabled before building.
+
+**Solution**:
+1. Enable Debug Mode toggle
+2. Build again
+3. Check debug/ folder
+
+### "Patched file looks the same as original"
+
+**Possible causes**:
+
+**1. Variable name doesn't exist**:
+Your CSS references `--custom-var` but FM has `--primary`.
+
+**Solution**: Check original USS files for correct names.
+
+**2. CSS syntax error**:
+Typo in your CSS prevented it from being parsed.
+
+**Solution**: Check build logs for parsing errors.
+
+**3. Per-stylesheet targeting excluded this file**:
+Your mapping.json targeted a different stylesheet.
+
+**Solution**: Review your mapping configuration.
+
+### "Too many things changed"
+
+**Cause**: Global CSS affecting more than intended.
+
+**Solution**: Use [per-stylesheet targeting](/advanced-guide/config-and-mappings) to narrow scope.
+
+### "Build says modified bundles but packages/ is empty"
+
+**Cause**: You ran Preview Build, not Build Bundles.
+
+**Solution**: Click "Build Bundles" (not "Preview Build").
+
+---
+
+## Safety Best Practices
+
+### 1. Always Preview First
+
+Never skip preview build for major changes.
+
+### 2. Use Version Control
+
+Git or simple file backups of your skin source.
+
+**Example workflow**:
+```bash
+git commit -m "v1.0 - initial dark theme"
+# Make changes
+git commit -m "v1.1 - adjusted button colors"
+# Can always revert:
+git checkout v1.0
+```
+
+### 3. Test Incrementally
+
+Don't change 50 colors at once. Work in small steps:
+
+```
+Change 5 variables → Build → Test → Commit
+Add icon replacements → Build → Test → Commit
+Adjust more colors → Build → Test → Commit
+```
+
+Easier to identify what broke if something goes wrong.
+
+### 4. Keep Original USS for Reference
+
+After first debug build, save `debug/original/` somewhere safe:
+
+```bash
+cp -r debug/original ~/fm-defaults/
+```
+
+Now you always have FM's defaults to reference, even after FM updates.
+
+### 5. Document Changes
+
+Keep notes on what you modified:
+
+**CHANGELOG.md**:
+```markdown
+## v1.1.0
+- Changed --primary to #ff0000 (red theme)
+- Replaced star icons with custom gold stars
+- Fixed button contrast issue
+
+## v1.0.0
+- Initial release
+```
+
+Helps you track what changed and why.
+
+---
+
+## Verification Tools
+
+### Built-in (FM Skin Builder)
+
+- **Preview Build**: See impact before writing
+- **Debug Mode**: Compare before/after
+- **Build Logs**: Detailed operation summary
+
+### External Tools
+
+**Text editors with diff**:
+- VS Code (built-in diff)
+- Sublime Text (with plugins)
+- Atom
+
+**Dedicated diff tools**:
+- Beyond Compare (Windows/Mac)
+- Meld (Linux)
+- KDiff3 (cross-platform)
+
+**Command-line**:
+```bash
+# Basic diff
+diff file1 file2
+
+# Side-by-side comparison
+diff -y file1 file2
+
+# Color diff (if available)
+colordiff file1 file2
+```
+
+---
+
+## When Things Go Wrong
+
+### FM Won't Launch
+
+**Rare**, but if it happens:
+
+1. **Remove your skin** from FM's skins directory
+2. **Restart FM** with default skin
+3. **Check FM forums** - might be unrelated to your skin
+4. **Verify game files** (Steam) if still broken
+
+### Colors Look Wrong In-Game
+
+**Not a safety issue**, just unexpected results:
+
+1. **Check debug/patched/** - Did CSS apply correctly?
+2. **Test on different screens** - Some screens use different stylesheets
+3. **Adjust CSS** and rebuild
+
+### Textures Missing
+
+**Not dangerous**, just visual:
+
+1. **Check build logs** for texture warnings
+2. **Verify mapping.json** syntax
+3. **Ensure files exist** in assets/ folder
+
+### Can't Undo a Change
+
+**If you didn't backup your CSS**:
+
+- Start over with FM defaults (export from debug/original/)
+- Rebuild your skin from scratch
+- Lesson learned: use Git!
+
+---
+
+## Verification Workflow Example
+
+A complete safe workflow:
+
+### Step 1: Initial State
+
+```bash
+git init
+git add config.json colours/
+git commit -m "v1.0 baseline"
+```
+
+### Step 2: Make Changes
+
+Edit `colours/base.uss`:
+```css
+--primary: #ff0000;
+```
+
+### Step 3: Preview
+
+Click "Preview Build" in FM Skin Builder.
+
+**Logs show**:
+```
+✓ Would modify 12 bundles
+```
+
+Looks reasonable!
+
+### Step 4: Enable Debug and Build
+
+Enable Debug Mode, click "Build Bundles".
+
+### Step 5: Verify Exports
+
+Check `debug/patched/FMColours.uss`:
+```css
+--primary: #ff0000;  ✓
+```
+
+Perfect!
+
+### Step 6: Test in FM
+
+1. Copy `packages/` to FM skins directory
+2. Activate skin
+3. Check main menu, squad screen, match screen
+
+Looks good!
+
+### Step 7: Commit
+
+```bash
+git add .
+git commit -m "v1.1 - red primary theme"
+git tag v1.1.0
+```
+
+### Step 8: Distribute
+
+Clean up and package:
+```bash
+rm -rf debug/ .cache/
+zip -r my-skin-v1.1.0.zip .
+```
+
+Safe, verified, version-controlled!
+
+---
+
+## Key Takeaways
+
+1. **Always preview first** - Fast and safe
+2. **Use debug mode** for verification - See before/after
+3. **FM's originals are never touched** - Easy to revert
+4. **Version control your source** - Git or backups
+5. **Test incrementally** - Small changes, frequent testing
+6. **Verify in FM** - Final test is in-game
+
+With these practices, you can skin confidently and recover from any mistakes.
+
+---
+
+## What's Next?
+
+You now have all the tools for professional skinning:
+
+- [User Guide](/user-guide) - If you need a refresher on basics
+- [Advanced Features](/advanced-guide/advanced-features) - More power tools
+- [Config and Mappings](/advanced-guide/config-and-mappings) - Precision targeting
+
+**Happy skinning, and stay safe!**

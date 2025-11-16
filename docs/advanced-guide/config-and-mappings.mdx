@@ -1,0 +1,798 @@
+# Config and Mappings
+
+Master advanced configuration techniques for precise control over your skin.
+
+## Overview
+
+By default, FM Skin Builder applies your CSS globally across all bundles. But sometimes you need surgical precision:
+
+- Apply different colors to specific stylesheets
+- Target only certain bundles
+- Map textures with patterns
+- Generate vector shapes programmatically
+
+This guide covers advanced configuration files that give you fine-grained control.
+
+---
+
+## config.json Deep Dive
+
+We covered the basics in the [User Guide](/user-guide/editing-skins#the-configjson-file). Let's go deeper.
+
+### Complete Schema
+
+```json
+{
+  "schema_version": 2,
+  "name": "My Skin",
+  "author": "Your Name",
+  "version": "1.0.0",
+  "description": "A detailed description",
+  "includes": [
+    "assets/icons",
+    "assets/backgrounds"
+  ]
+}
+```
+
+### Field Details
+
+#### schema_version (required)
+
+**Type**: Integer
+**Value**: Must be `2`
+
+Tells FM Skin Builder which config format you're using. Future versions might introduce schema version 3 with different features.
+
+**Example**:
+```json
+{
+  "schema_version": 2
+}
+```
+
+#### name (optional)
+
+**Type**: String
+**Purpose**: Display name for your skin
+
+Not currently used by FM Skin Builder, but useful for documentation and future features.
+
+**Example**:
+```json
+{
+  "name": "Dark Mode Pro"
+}
+```
+
+#### author (optional)
+
+**Type**: String
+**Purpose**: Your name or username
+
+**Example**:
+```json
+{
+  "author": "John Doe"
+}
+```
+
+#### version (optional)
+
+**Type**: String
+**Purpose**: Semantic version number
+
+**Best practice**: Use semantic versioning (MAJOR.MINOR.PATCH)
+
+**Example**:
+```json
+{
+  "version": "1.2.3"
+}
+```
+
+Version bump examples:
+- `1.0.0` → `1.0.1`: Bug fixes, small tweaks
+- `1.0.0` → `1.1.0`: New colors or icons added
+- `1.0.0` → `2.0.0`: Major redesign
+
+#### description (optional)
+
+**Type**: String
+**Purpose**: Describe your skin
+
+**Example**:
+```json
+{
+  "description": "A sleek dark theme with vibrant accent colors"
+}
+```
+
+#### includes (optional)
+
+**Type**: Array of strings
+**Purpose**: Which asset folders to process
+
+**Example**:
+```json
+{
+  "includes": [
+    "assets/icons",
+    "assets/backgrounds"
+  ]
+}
+```
+
+**Valid values**:
+- `"assets/icons"` - Process icon replacements
+- `"assets/backgrounds"` - Process background replacements
+
+**Default**: Empty array (no assets processed)
+
+**Important**: If you have an `assets/` folder but don't include it here, those assets will be ignored!
+
+---
+
+## Per-Stylesheet Mapping
+
+The most powerful advanced feature: targeting specific stylesheets with specific CSS files.
+
+### The Problem
+
+By default, your CSS applies to **all** matching variables/selectors across **all** bundles.
+
+**Example**:
+```css
+--primary: #ff0000;
+```
+
+This changes `--primary` in:
+- FMColours.bundle
+- UIStyles.bundle
+- MatchEngine.bundle
+- Everywhere it exists!
+
+Sometimes you want different colors in different places.
+
+### The Solution: mapping.json
+
+Create `colours/mapping.json` to control which CSS targets which stylesheets.
+
+### Basic Syntax
+
+```json
+{
+  "filename.uss": "StylesheetName"
+}
+```
+
+**Left side**: Your CSS file name (without path)
+**Right side**: The stylesheet name in bundles to target
+
+**Example**:
+```json
+{
+  "FMColours.uss": "FMColours",
+  "MatchColours.uss": "MatchColours"
+}
+```
+
+This means:
+- `colours/FMColours.uss` only applies to `FMColours` stylesheet
+- `colours/MatchColours.uss` only applies to `MatchColours` stylesheet
+
+### Advanced Syntax
+
+**Target multiple stylesheets with one CSS file**:
+
+```json
+{
+  "base.uss": ["FMColours", "UIStyles", "BaseStyleSheet"]
+}
+```
+
+**Full object syntax for clarity**:
+
+```json
+{
+  "base.uss": {
+    "stylesheets": ["FMColours", "UIStyles"]
+  }
+}
+```
+
+### Finding Stylesheet Names
+
+**Use debug mode** to discover available stylesheet names:
+
+1. Build with Debug Mode enabled
+2. Check `debug/original/` folder
+3. File names correspond to stylesheet names:
+   - `FMColours.uss` → stylesheet name is `FMColours`
+   - `UIStyles.uss` → stylesheet name is `UIStyles`
+
+### Practical Example
+
+**Goal**: Different primary colors for main UI vs. match engine
+
+**Folder structure**:
+```
+my-skin/
+├── config.json
+└── colours/
+    ├── main.uss
+    ├── match.uss
+    └── mapping.json
+```
+
+**colours/main.uss**:
+```css
+:root {
+  --primary: #3498db;  /* Blue for main UI */
+}
+```
+
+**colours/match.uss**:
+```css
+:root {
+  --primary: #2ecc71;  /* Green for match screens */
+}
+```
+
+**colours/mapping.json**:
+```json
+{
+  "main.uss": ["FMColours", "UIStyles"],
+  "match.uss": ["MatchColours", "MatchEngine"]
+}
+```
+
+Now:
+- Main UI uses blue
+- Match screens use green
+- Surgical precision!
+
+### Stem Matching (Automatic)
+
+If you **don't** provide a mapping, FM Skin Builder tries to match file stems to stylesheet names automatically.
+
+**Example**:
+- `FMColours.uss` automatically targets `FMColours` stylesheet
+- `UIStyles.uss` automatically targets `UIStyles` stylesheet
+
+This works without a mapping.json, but mapping gives you explicit control.
+
+### Files Without Mapping
+
+CSS files **not** in mapping.json apply globally (to all matching stylesheets).
+
+**Example**:
+```
+colours/
+├── base.uss         # Global (no mapping)
+├── FMColours.uss    # Mapped to FMColours
+└── mapping.json
+```
+
+- `base.uss` applies everywhere
+- `FMColours.uss` only applies to FMColours stylesheet
+
+---
+
+## Texture Mapping
+
+Control which textures get replaced and how.
+
+### Icon Mapping
+
+**Location**: `assets/icons/mapping.json`
+
+**Purpose**: Map original FM icon names to your replacement files
+
+### Basic Icon Mapping
+
+```json
+{
+  "original_icon_name": "your_icon_file"
+}
+```
+
+**Example**:
+```json
+{
+  "club_crest": "my_crest",
+  "star": "my_star"
+}
+```
+
+**File references** (note: no extension):
+- `"my_crest"` → looks for `my_crest.png` or `my_crest.svg`
+- `"my_star"` → looks for `my_star.png` or `my_star.svg`
+
+### Wildcard Patterns
+
+Use `*` to match multiple icons with one pattern:
+
+```json
+{
+  "cog_*": "settings_icon",
+  "star_*": "rating_icon",
+  "badge_*": "custom_badge"
+}
+```
+
+This means:
+- `cog_small`, `cog_large`, `cog_settings` all become `settings_icon.png`
+- `star_gold`, `star_silver` both become `rating_icon.png`
+
+**Why wildcards?**
+
+FM sometimes has multiple versions of the same icon (different sizes, states). Wildcards let you replace all variants with one mapping.
+
+### Finding Original Icon Names
+
+**Use debug builds**:
+
+1. Enable Debug Mode
+2. Build your skin
+3. Check build logs for warnings like:
+   ```
+   Found icon: club_crest_small
+   Found icon: star_rating_gold
+   ```
+
+Or use trial and error with wildcards.
+
+### Background Mapping
+
+**Location**: `assets/backgrounds/mapping.json`
+
+Same syntax as icons:
+
+```json
+{
+  "main_background": "my_bg",
+  "menu_background_*": "menu_bg"
+}
+```
+
+**Files**:
+- `my_bg.jpg` or `my_bg.png`
+- `menu_bg.jpg` or `menu_bg.png`
+
+---
+
+## Vector Shape Generation
+
+Generate textures programmatically instead of using image files.
+
+### Why Vector Shapes?
+
+**Use cases**:
+- Custom colored badges
+- Dynamic icons with skin colors
+- Geometric patterns
+- Placeholder graphics
+
+### Vector Mapping Syntax
+
+```json
+{
+  "icon_name": {
+    "type": "vector",
+    "shape": "circle",
+    "radius": 0.64,
+    "segments": 32,
+    "color": [255, 0, 0, 255]
+  }
+}
+```
+
+### Parameters
+
+#### type (required)
+
+**Value**: `"vector"`
+
+Tells FM Skin Builder this is a generated shape, not a file.
+
+#### shape (required)
+
+**Value**: `"circle"` (currently the only supported shape)
+
+Future versions may support `"rectangle"`, `"polygon"`, etc.
+
+#### radius (optional)
+
+**Type**: Float (0.0 to 1.0)
+**Default**: `0.5`
+
+Radius of the circle as a fraction of the texture size.
+
+**Examples**:
+- `0.5` - Half the texture (default)
+- `0.64` - 64% of texture width
+- `1.0` - Full size (fills texture)
+
+#### segments (optional)
+
+**Type**: Integer
+**Default**: `32`
+
+Number of segments to approximate the circle.
+
+**Higher = smoother, but larger file size**:
+- `16` - Rough circle
+- `32` - Good balance (recommended)
+- `64` - Very smooth
+
+#### color (required)
+
+**Type**: Array [R, G, B, A]
+**Values**: 0-255 for each channel
+
+**Example**:
+```json
+"color": [255, 0, 0, 255]  // Red, fully opaque
+"color": [0, 255, 0, 128]  // Green, 50% transparent
+```
+
+### Practical Example
+
+**Goal**: Replace all badge icons with green circles
+
+**assets/icons/mapping.json**:
+```json
+{
+  "badge_*": {
+    "type": "vector",
+    "shape": "circle",
+    "radius": 0.64,
+    "segments": 32,
+    "color": [46, 204, 113, 255]
+  }
+}
+```
+
+**config.json** (don't forget to include it):
+```json
+{
+  "includes": ["assets/icons"]
+}
+```
+
+Now all badges are green circles!
+
+### Combining File and Vector Mappings
+
+You can mix file-based and vector-based mappings:
+
+```json
+{
+  "star_*": "custom_star",
+  "badge_*": {
+    "type": "vector",
+    "shape": "circle",
+    "color": [255, 215, 0, 255]
+  }
+}
+```
+
+- Stars use `custom_star.png`
+- Badges are generated gold circles
+
+---
+
+## Targeting Hints
+
+Narrow the scope of your CSS patches with targeting filters.
+
+### What Are Hints?
+
+**Location**: `hints.txt` in your skin folder
+
+**Purpose**: Tell FM Skin Builder to only apply specific selectors or properties, ignoring others.
+
+### Why Use Hints?
+
+**Performance**: Skip unnecessary work
+**Precision**: Avoid unintended changes
+**Conflict reduction**: Only touch what you mean to
+
+### Syntax
+
+**Filter by selectors**:
+```
+selectors:
+.green
+.button-primary
+.text-positive
+```
+
+**Filter by selector-property pairs**:
+```
+selector_props:
+.button:background-color
+.text:color
+.green:color
+```
+
+### Example
+
+**Goal**: Only change the color property of `.green` selector, nothing else.
+
+**hints.txt**:
+```
+selector_props:
+.green:color
+```
+
+**Your CSS**:
+```css
+.green {
+  color: #ff0000;
+  background-color: #00ff00;  /* This will be IGNORED due to hints */
+}
+```
+
+FM Skin Builder will only apply the `color` property because that's what the hint specifies.
+
+### Practical Use Case
+
+You have a large CSS file but only want to apply button changes:
+
+**hints.txt**:
+```
+selectors:
+.button
+.button-primary
+.button-secondary
+.button-danger
+```
+
+All non-button selectors in your CSS will be skipped.
+
+### Performance Impact
+
+Hints reduce:
+- Processing time (fewer selectors to match)
+- Conflict warnings (less chance of touching multiple stylesheets)
+- Bundle writes (fewer changes = faster builds)
+
+### When to Use Hints
+
+**Use hints when**:
+- You have a large CSS file but only want to apply part of it
+- You want to avoid conflicts
+- You're troubleshooting which selectors are causing issues
+
+**Skip hints when**:
+- Your CSS is already focused (small file)
+- You want everything applied
+- You're just starting out
+
+---
+
+## Complete Example: Advanced Skin
+
+Let's put it all together.
+
+### Goal
+
+Create a skin with:
+- Different colors for main UI vs match screens
+- Custom star icons
+- Generated circle badges
+- Targeted button changes only
+
+### Folder Structure
+
+```
+pro-skin/
+├── config.json
+├── colours/
+│   ├── main.uss
+│   ├── match.uss
+│   ├── buttons.uss
+│   └── mapping.json
+├── assets/
+│   └── icons/
+│       ├── star.png
+│       └── mapping.json
+└── hints.txt
+```
+
+### config.json
+
+```json
+{
+  "schema_version": 2,
+  "name": "Pro Skin",
+  "author": "Advanced Skinner",
+  "version": "2.0.0",
+  "description": "Demonstrates all advanced features",
+  "includes": ["assets/icons"]
+}
+```
+
+### colours/main.uss
+
+```css
+:root {
+  --primary: #2c3e50;
+  --accent: #3498db;
+}
+```
+
+### colours/match.uss
+
+```css
+:root {
+  --primary: #27ae60;
+  --accent: #f39c12;
+}
+```
+
+### colours/buttons.uss
+
+```css
+.button-primary {
+  background-color: #e74c3c;
+  color: #ffffff;
+}
+
+.button-secondary {
+  background-color: #95a5a6;
+}
+```
+
+### colours/mapping.json
+
+```json
+{
+  "main.uss": ["FMColours", "UIStyles"],
+  "match.uss": ["MatchColours"],
+  "buttons.uss": ["UIStyles"]
+}
+```
+
+### assets/icons/mapping.json
+
+```json
+{
+  "star_*": "star",
+  "badge_*": {
+    "type": "vector",
+    "shape": "circle",
+    "radius": 0.6,
+    "color": [241, 196, 15, 255]
+  }
+}
+```
+
+### hints.txt
+
+```
+selector_props:
+.button-primary:background-color
+.button-primary:color
+.button-secondary:background-color
+```
+
+### Result
+
+When built:
+- Main UI: Dark blue theme
+- Match screens: Green theme
+- Buttons: Custom red/gray colors (only those properties)
+- Stars: Custom PNG icons
+- Badges: Gold circles
+
+Surgical precision across the entire skin!
+
+---
+
+## Best Practices
+
+### 1. Start Simple, Add Complexity
+
+Don't use every advanced feature at once:
+
+1. Build basic skin with global CSS
+2. Identify areas that need per-stylesheet targeting
+3. Add mapping.json gradually
+4. Use hints only if needed
+
+### 2. Document Your Mappings
+
+Add comments (JSON doesn't support them, but you can use a README):
+
+**README.md**:
+```markdown
+## Mapping Strategy
+
+- `main.uss` → FMColours, UIStyles (main UI theme)
+- `match.uss` → MatchColours (green for match screens)
+- `buttons.uss` → UIStyles (custom button colors)
+```
+
+### 3. Test Incrementally
+
+After adding advanced config:
+- Use Preview Build to verify targeting works
+- Enable Debug Mode to see which stylesheets were affected
+- Build and test in FM
+
+### 4. Version Control Mappings
+
+Track `mapping.json` and `hints.txt` in version control:
+- Document why you made certain targeting decisions
+- Revert if something breaks
+
+### 5. Keep Global CSS for Common Changes
+
+Don't over-use per-stylesheet mapping. If a variable should change everywhere, use global CSS.
+
+**Good**:
+```
+base.uss (global) - changes --primary everywhere
+```
+
+**Over-complicated**:
+```
+FMColours.uss, UIStyles.uss, MatchColours.uss - all changing --primary to the same value
+```
+
+---
+
+## Troubleshooting Mappings
+
+### "Mapping not applying"
+
+**Check**:
+1. Mapping file is named exactly `mapping.json`
+2. JSON syntax is valid (use a validator)
+3. File names in mapping match your actual CSS files
+4. Stylesheet names are correct (check debug exports)
+
+### "Vector shapes not showing"
+
+**Check**:
+1. Mapping is in `assets/icons/mapping.json`
+2. `"assets/icons"` is in config.json includes
+3. Syntax is correct (type: "vector")
+4. Color array has 4 values [R, G, B, A]
+
+### "Hints not working"
+
+**Check**:
+1. File is named exactly `hints.txt` (not .md, not .text)
+2. Format is correct (`selectors:` or `selector_props:` header)
+3. Selector names match your CSS exactly (case-sensitive)
+
+---
+
+## Limitations
+
+### What Mappings Can't Do
+
+1. **Conditional logic**: No "if this then that"
+2. **Variables in mappings**: Can't reference config variables
+3. **Dynamic colors**: Vector colors are static RGBA
+
+### Workarounds
+
+For dynamic needs:
+- Build multiple skins with different configs
+- Use build scripts to generate configs
+
+---
+
+## What's Next?
+
+You now have surgical control over your skin!
+
+- **[Advanced Features](/advanced-guide/advanced-features)** - Explore debug tools and power features
+- **[Verification and Restore](/advanced-guide/verification-and-restore)** - Verify your targeting worked
+
+Mastering mappings unlocks professional-grade skins with precise, per-screen customization.

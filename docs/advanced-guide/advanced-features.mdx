@@ -1,0 +1,716 @@
+# Advanced Features
+
+Explore power user features for maximum control and visibility into the skinning process.
+
+## Debug Mode
+
+The most powerful troubleshooting and exploration tool in FM Skin Builder.
+
+### What is Debug Mode?
+
+When enabled, FM Skin Builder exports detailed before/after comparisons of every stylesheet it modifies, plus internal structure data.
+
+### How to Enable
+
+In the FM Skin Builder desktop app:
+1. Check the **"Debug Mode"** toggle
+2. Click "Build Bundles" (or "Preview Build")
+3. Check your skin folder for a new `debug/` directory
+
+### What Gets Exported
+
+After a debug build, you'll find:
+
+```
+my-skin/
+├── debug/
+│   ├── original/
+│   │   ├── FMColours.uss
+│   │   ├── UIStyles.uss
+│   │   ├── FMColours.json
+│   │   └── UIStyles.json
+│   └── patched/
+│       ├── FMColours.uss
+│       ├── UIStyles.uss
+│       ├── FMColours.json
+│       └── UIStyles.json
+```
+
+#### original/ Folder
+
+**USS files**: FM's default stylesheets (before your changes)
+**JSON files**: Internal structure (variables, selectors, indices)
+
+**Use this to**:
+- Discover available CSS variables
+- See FM's default colors
+- Find selector names
+- Understand bundle structure
+
+#### patched/ Folder
+
+**USS files**: Stylesheets after your CSS was applied
+**JSON files**: Structure after patching
+
+**Use this to**:
+- Verify your changes were applied
+- See exactly what changed
+- Troubleshoot why colors didn't change
+- Compare before vs after
+
+### Practical Example
+
+**Your CSS**:
+```css
+:root {
+  --primary: #ff0000;
+  --accent: #00ff00;
+}
+```
+
+**debug/original/FMColours.uss**:
+```css
+:root {
+  --primary: #3498db;  /* Original blue */
+  --accent: #2ecc71;   /* Original green */
+  --secondary: #95a5a6;
+  /* ... many more variables */
+}
+```
+
+**debug/patched/FMColours.uss**:
+```css
+:root {
+  --primary: #ff0000;  /* ← Your red! */
+  --accent: #00ff00;   /* ← Your green! */
+  --secondary: #95a5a6;  /* Unchanged */
+  /* ... many more variables */
+}
+```
+
+**What you learn**:
+- ✓ `--primary` and `--accent` changed correctly
+- ✓ Other variables like `--secondary` remain default
+- ✓ You can now copy any variable name for future use
+
+### Using JSON Exports
+
+JSON files show the internal structure:
+
+**debug/original/FMColours.json** (simplified):
+```json
+{
+  "stylesheet_name": "FMColours",
+  "strings": [
+    "--primary",
+    "--accent",
+    "--secondary"
+  ],
+  "colors": [
+    {"r": 52, "g": 152, "b": 219, "a": 255},
+    {"r": 46, "g": 204, "b": 113, "a": 255},
+    {"r": 149, "g": 165, "b": 166, "a": 255}
+  ],
+  "selectors": [
+    {
+      "name": ".green",
+      "properties": [...]
+    }
+  ]
+}
+```
+
+**Use this for**:
+- Understanding how variables map to color indices
+- Seeing the complete selector tree
+- Advanced debugging (correlating strings to colors)
+
+**Most users can ignore JSON** - USS files are more readable.
+
+### Debug Mode Tips
+
+**1. Always use debug mode when**:
+- Colors aren't changing as expected
+- Discovering available variables
+- Troubleshooting selector issues
+
+**2. Compare original vs patched**:
+```bash
+# On Linux/Mac, use diff:
+diff debug/original/FMColours.uss debug/patched/FMColours.uss
+
+# Shows exactly what changed
+```
+
+**3. Clean debug folder between builds**:
+Debug output accumulates. Delete `debug/` folder to start fresh.
+
+**4. Disable for production builds**:
+Debug mode is slower and creates extra files. Only enable when needed.
+
+---
+
+## Conflict Detection
+
+FM Skin Builder warns you when selectors or variables affect multiple bundles or stylesheets.
+
+### What Are Conflicts?
+
+**Conflict**: When one CSS rule touches multiple assets (bundles or stylesheets).
+
+**Example warning**:
+```
+⚠ Warning: Selector '.green' found in multiple stylesheets:
+  - FMColours.bundle: FMColours
+  - UIStyles.bundle: UIStyles
+  - MatchEngine.bundle: MatchColours
+```
+
+### Is This Bad?
+
+**Usually no!** Most of the time, you *want* global changes.
+
+**Example**:
+```css
+.green { color: #ff0000; }
+```
+
+You probably want all green elements across the entire game to be red. The warning just confirms this is happening.
+
+### When Conflicts Matter
+
+**Conflicts are a problem when**:
+- You wanted to change `.green` only in one place
+- Different screens should have different `.green` colors
+- You're seeing unexpected changes in FM
+
+### Resolving Conflicts
+
+**Option 1: Accept it**
+If you want the global change, ignore the warning. It's informational, not an error.
+
+**Option 2: Use per-stylesheet targeting**
+See [Config and Mappings](/advanced-guide/config-and-mappings) to target specific stylesheets.
+
+**Example**:
+
+**Before** (conflict):
+```css
+/* base.uss - applies everywhere */
+.green { color: #ff0000; }
+```
+
+**After** (targeted):
+```css
+/* main.uss */
+.green { color: #ff0000; }
+```
+
+**colours/mapping.json**:
+```json
+{
+  "main.uss": ["FMColours"]
+}
+```
+
+Now `.green` only changes in FMColours, not everywhere.
+
+### Reading Conflict Messages
+
+**Format**:
+```
+⚠ Conflict: [Element] found in multiple [Locations]
+```
+
+**Example 1**:
+```
+⚠ Selector '.button' found in 3 stylesheets
+```
+**Meaning**: Your `.button` rule affects 3 different stylesheets
+
+**Example 2**:
+```
+⚠ Variable '--primary' found in 5 bundles
+```
+**Meaning**: Changing `--primary` affects 5 bundle files
+
+### Conflict Surfacing Workflow
+
+1. **Build your skin** normally
+2. **Check logs** for conflict warnings
+3. **Decide**: Is this intended?
+   - ✓ Yes → Ignore warning
+   - ✗ No → Use per-stylesheet targeting
+4. **Rebuild** and verify
+
+---
+
+## Cache Management
+
+FM Skin Builder caches bundle scan results for speed. Understand how it works.
+
+### What is Cached?
+
+**Scan indices**:
+- Where stylesheets are in bundles
+- Variable/selector positions
+- Color array indices
+
+**Not cached**:
+- Your CSS files (always re-read)
+- Bundle contents (always re-read)
+
+### Cache Location
+
+```
+my-skin/.cache/skins/<skin-name>/<hash>.json
+```
+
+**Hash** is based on:
+- Bundle file paths
+- Skin folder path
+- Config modification time
+
+If any of these change, a new cache is created.
+
+### Cache Lifecycle
+
+**First build (no cache)**:
+```
+Scanning bundle 1 of 45...
+Scanning bundle 2 of 45...
+... (slow, ~30 seconds)
+✓ Scan complete, cache saved
+```
+
+**Second build (using cache)**:
+```
+ℹ Using scan cache
+✓ Build complete in 8 seconds
+```
+
+3-4x faster!
+
+### Cache Invalidation
+
+Cache is **automatically** invalidated when:
+- You move your skin folder (path changes)
+- You modify `config.json` (mtime changes)
+- FM updates (bundle paths change)
+
+You don't need to manually manage the cache in most cases.
+
+### Manual Cache Management
+
+**When to clear cache**:
+- Troubleshooting weird behavior
+- Ensuring fresh scan after FM update
+- Cache seems corrupted
+
+**How to clear cache**:
+1. Close FM Skin Builder
+2. Delete `<your-skin>/.cache/` folder
+3. Reopen and rebuild (fresh scan)
+
+**Note**: There's currently no GUI button to refresh cache - just delete the folder.
+
+### Cache and Multiple Skins
+
+Each skin has its own cache:
+```
+skin-a/.cache/...
+skin-b/.cache/...
+```
+
+They don't interfere with each other.
+
+---
+
+## Preview Build (Dry Run)
+
+Test your changes without writing any files.
+
+### What is Preview Build?
+
+**Preview Build** simulates the entire build process but doesn't write modified bundles to disk.
+
+### How to Use
+
+1. Configure your skin folder
+2. Click **"Preview Build"** instead of "Build Bundles"
+3. Check the **Logs** tab
+
+### What You See
+
+**Normal output with "would" language**:
+```
+✓ Successfully parsed CSS
+✓ Found 15 color variables
+✓ Found 8 selector overrides
+✓ Would modify 12 bundles
+✓ Would replace 3 textures
+✓ No files written (dry run)
+```
+
+The word **"would"** indicates simulation mode.
+
+### Why Use Preview?
+
+**Before every build**:
+- Catch CSS syntax errors
+- Verify mappings are correct
+- See which bundles will be affected
+- Check for conflicts
+
+**Faster than full build**:
+- Skips file writing (I/O is slow)
+- Skips serialization
+- Still validates everything
+
+**Workflow**:
+```
+Edit CSS → Preview → Fix errors → Preview again → Build
+```
+
+### Preview vs Debug
+
+| Feature | Preview Build | Debug Mode |
+|---------|--------------|------------|
+| Writes files | No | Yes |
+| Shows what would change | Yes | No |
+| Exports USS | No | Yes |
+| Speed | Fast | Slower |
+| Use case | Validation | Exploration |
+
+**Combine them**: Enable debug mode + preview to simulate *and* export debug files without writing bundles.
+
+---
+
+## Understanding Build Reports
+
+Every build produces a summary report. Learn to read it.
+
+### Successful Build Report
+
+```
+✓ Successfully parsed config.json
+✓ Loaded 3 CSS files from skin
+✓ Found 24 CSS variables
+✓ Found 12 selector overrides
+✓ Auto-detected bundle directory
+✓ Processing 45 bundles...
+ℹ Using scan cache
+✓ Modified 15 bundles
+✓ Replaced 5 textures
+✓ Output: /path/to/skin/packages/
+✓ Build complete in 10.2 seconds
+```
+
+**What each line means**:
+
+| Line | Meaning |
+|------|---------|
+| Parsed config | `config.json` is valid |
+| Loaded 3 CSS files | Found and parsed 3 `.uss`/`.css` files |
+| Found 24 variables | Counted CSS variables in `:root` |
+| Found 12 overrides | Counted selector rules |
+| Auto-detected bundles | FM installation found automatically |
+| Processing 45 bundles | Total bundles being checked |
+| Using scan cache | Cache hit (fast build) |
+| Modified 15 bundles | Actually changed 15 files |
+| Replaced 5 textures | Swapped 5 icons/backgrounds |
+| Output: ... | Where built files are |
+| Build complete | Total time |
+
+### Warning Messages
+
+**Non-critical issues**:
+
+```
+⚠ Selector '.green' matched multiple stylesheets
+⚠ Icon 'old_icon' not found in bundles (may have been removed)
+⚠ Variable '--deprecated' not found
+```
+
+**What to do**:
+- Read the warning
+- Decide if it's expected or needs fixing
+- Build still succeeds
+
+### Error Messages
+
+**Critical failures**:
+
+```
+✗ Error: config.json not found
+✗ Error: Invalid JSON syntax in base.uss
+✗ Error: Bundle directory not found
+✗ Build failed
+```
+
+**What to do**:
+- Read the error carefully
+- Fix the issue (syntax error, missing file, etc.)
+- Try again
+
+See [Troubleshooting](/user-guide/troubleshooting) for common errors.
+
+### Change Summary
+
+**No changes detected**:
+```
+ℹ No bundles were modified (no matching variables/selectors)
+✓ Build complete (no output files)
+```
+
+**What this means**:
+- Your CSS didn't match anything in FM's bundles
+- Check variable names or selector names
+- Enable debug mode to see what's available
+
+---
+
+## Direct Literal Patching
+
+An advanced mode that patches color values directly, not just variables.
+
+### What is Direct Literal Patching?
+
+**Normal mode**:
+- Patches CSS variables (e.g., `--primary`)
+- Patches selectors (e.g., `.green { color: ... }`)
+
+**Direct literal mode** (hypothetical - not exposed in GUI currently):
+- Also patches literal color values in stylesheets
+- Even if they're not referenced by a variable
+
+### When Would You Use This?
+
+**Example scenario**:
+FM has a hardcoded color `#3498db` somewhere in a stylesheet that's not assigned to a variable.
+
+Normal patching can't touch it (no variable name to target).
+
+Direct literal patching could change all instances of `#3498db` to your color.
+
+### Risks
+
+- **Broad impact**: Changes ALL instances of a color, everywhere
+- **Unintended changes**: Might affect UI elements you didn't mean to touch
+- **Hard to predict**: Can't easily control which elements are affected
+
+### Current Status
+
+Direct literal patching exists in the backend but **isn't exposed in the GUI**.
+
+**Why**: Too risky for most users. Per-stylesheet targeting is safer.
+
+If you desperately need this, you'd have to modify the source code or request a feature.
+
+---
+
+## Asset Prefiltering
+
+An optimization that skips bundles quickly.
+
+### What is Prefiltering?
+
+Before opening a bundle (expensive operation), FM Skin Builder checks if it contains target textures.
+
+**How**:
+- Read bundle header (fast)
+- Check if texture names match your mappings
+- If no match, skip entire bundle (don't even load it)
+
+### Why This Matters
+
+**Without prefiltering**:
+```
+Load bundle 1... (no textures we want) - 2s wasted
+Load bundle 2... (no textures we want) - 2s wasted
+Load bundle 3... (found one!) - 2s
+Total: 6 seconds
+```
+
+**With prefiltering**:
+```
+Skip bundle 1 (prefilter check: 0.1s)
+Skip bundle 2 (prefilter check: 0.1s)
+Load bundle 3 (prefilter match, load) - 2s
+Total: 2.2 seconds
+```
+
+**Massive speedup** for texture swapping!
+
+### How It Works
+
+**Your texture mapping**:
+```json
+{
+  "star_*": "my_star"
+}
+```
+
+**Prefilter logic**:
+- Check bundle index for "star_small", "star_large", etc.
+- Match found? → Load bundle and swap texture
+- No match? → Skip bundle entirely
+
+### User Impact
+
+You don't control this - it's automatic and transparent. Just know that FM Skin Builder is optimized for speed!
+
+---
+
+## Change-Aware Bundle Writing
+
+FM Skin Builder only writes bundles that actually changed.
+
+### What is Change-Aware Writing?
+
+After patching a bundle in memory:
+- Compare modified bundle to original
+- If identical → Skip writing
+- If different → Write to output
+
+### Why This Matters
+
+**Without change detection**:
+- Write all 45 bundles even if only 5 changed
+- Slower builds
+- More disk wear
+
+**With change detection**:
+- Only write the 5 that changed
+- Faster builds
+- Less I/O
+
+### How You See This
+
+**Build report**:
+```
+✓ Processing 45 bundles...
+✓ Modified 12 bundles
+```
+
+**What this means**:
+- Checked 45 bundles
+- Only 12 actually had changes
+- Only 12 files written to `packages/`
+
+### Edge Case
+
+If you build the same skin twice without changes:
+```
+ℹ No bundles were modified
+✓ Build complete (no output files)
+```
+
+Nothing written - no wasted work!
+
+---
+
+## Performance Tips
+
+### Build Faster
+
+1. **Keep debug mode off** (unless troubleshooting)
+2. **Don't move skin folder** (preserves cache)
+3. **Use preview build** for validation (skips writing)
+4. **Minimize texture mappings** (fewer wildcards = faster prefilter)
+
+### Iterate Faster
+
+1. **Keep FM Skin Builder open** while editing CSS
+2. **Use an auto-save editor** (VS Code, Sublime)
+3. **Preview before building** (catch errors early)
+4. **Work on one stylesheet at a time** (easier to test)
+
+### Optimize Skin Size
+
+**Minimize output bundles**:
+- Use per-stylesheet targeting (fewer bundles modified)
+- Only include assets you actually replace
+- Remove unused CSS rules
+
+**Smaller `packages/` folder**:
+- Faster to copy to FM
+- Easier to distribute
+- Less disk space
+
+---
+
+## Advanced Debugging Workflow
+
+A systematic approach to troubleshooting complex issues.
+
+### Step 1: Enable Debug Mode
+
+Always start here for serious issues.
+
+### Step 2: Preview Build
+
+See what would happen without committing to files.
+
+### Step 3: Check Debug Exports
+
+**Look for your variables**:
+```bash
+# Search for your variable in original USS
+grep --primary debug/original/*.uss
+```
+
+**Not found?**
+- Variable name doesn't exist in FM
+- Try different variable name
+- Check debug/original/ for similar variables
+
+**Found?**
+- Compare debug/original/ vs debug/patched/
+- Verify color changed
+
+### Step 4: Check Conflicts
+
+Look for conflict warnings in build logs.
+
+**Multiple matches?**
+- Decide if global change is OK
+- Or use per-stylesheet targeting
+
+### Step 5: Verify in FM
+
+Install and test. Some changes might not be visible on all screens.
+
+### Step 6: Iterate
+
+Make adjustments based on findings. Repeat until satisfied.
+
+---
+
+## Limitations of Advanced Features
+
+### What You Can't Do
+
+1. **Real-time preview**: Must build, install, launch FM to see changes
+2. **Undo builds**: No rollback feature (delete `packages/` manually)
+3. **GUI cache refresh**: Must delete `.cache/` folder manually
+4. **Automatic FM reload**: Must restart FM to see new skin
+
+### Future Possibilities
+
+Features that could be added:
+- GUI cache refresh button
+- Before/after screenshot comparison
+- Automatic FM skin reloading (if FM supports it)
+- Incremental builds (only re-process changed files)
+
+---
+
+## What's Next?
+
+You've mastered the advanced features!
+
+- **[Verification and Restore](/advanced-guide/verification-and-restore)** - Safety and verification techniques
+- **[Config and Mappings](/advanced-guide/config-and-mappings)** - Combine with advanced features for maximum control
+
+With these tools, you can create professional-quality skins and troubleshoot any issue that arises.

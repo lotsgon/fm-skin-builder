@@ -1,0 +1,486 @@
+# Bundle Structure
+
+Understand what's inside Football Manager's Unity bundles and how to explore them.
+
+## What Are Unity Bundles?
+
+Football Manager 2026 uses the **Unity game engine**. Unity stores game assets in **bundle files** (`.bundle`), which are compressed, binary containers holding:
+
+- **Stylesheets**: CSS-like files defining colors and styles
+- **Textures**: Images (icons, backgrounds, sprites)
+- **Scripts**: Game logic (MonoBehaviour objects)
+- **Other assets**: Fonts, audio, prefabs, etc.
+
+FM Skin Builder focuses on:
+- **Stylesheets** (for color changes)
+- **Textures** (for icon/background swaps)
+
+---
+
+## Bundle File Locations
+
+FM's bundles are in the game's `data/` directory:
+
+**Windows (Steam)**:
+```
+C:\Program Files (x86)\Steam\steamapps\common\Football Manager 2026\data\
+```
+
+**macOS (Steam)**:
+```
+~/Library/Application Support/Steam/steamapps/common/Football Manager 2026/data/
+```
+
+**Linux (Steam)**:
+```
+~/.steam/steam/steamapps/common/Football Manager 2026/data/
+```
+
+Inside `data/`, you'll find hundreds of `.bundle` files:
+```
+data/
+├── FMColours.bundle
+├── UIStyles.bundle
+├── MatchEngine.bundle
+├── Icons.bundle
+└── ... (many more)
+```
+
+Not all bundles contain stylesheets - FM Skin Builder automatically filters to relevant ones.
+
+---
+
+## Bundle Contents: Stylesheets
+
+### What's a Stylesheet?
+
+Inside bundles, stylesheets are stored as **MonoBehaviour** objects with these components:
+
+**1. Strings Array**
+- Variable names (e.g., `"--primary"`, `"--secondary"`)
+- Selector names (e.g., `".green"`, `".button"`)
+- Property names (e.g., `"color"`, `"background-color"`)
+
+**2. Colors Array**
+- RGBA values (e.g., `{r: 255, g: 0, b: 0, a: 255}`)
+- Each color corresponds to a string at the same index
+
+**3. Selector Tree**
+- Hierarchical structure of CSS rules
+- Maps selectors to properties to values
+
+### Example Bundle Structure
+
+Imagine a simplified bundle containing `FMColours` stylesheet:
+
+```
+FMColours.bundle
+└── MonoBehaviour: "FMColours"
+    ├── strings:
+    │   [0] = "--primary"
+    │   [1] = "--secondary"
+    │   [2] = ".green"
+    │   [3] = "color"
+    │
+    ├── colors:
+    │   [0] = {r: 52, g: 152, b: 219, a: 255}  # Blue
+    │   [1] = {r: 46, g: 204, b: 113, a: 255}  # Green
+    │
+    └── selectors:
+        [0] = {
+          name: ".green",
+          rules: [
+            {property: "color", value: colors[1]}
+          ]
+        }
+```
+
+**How CSS patching works**:
+
+Your CSS:
+```css
+--primary: #ff0000;
+```
+
+FM Skin Builder:
+1. Finds `"--primary"` at strings[0]
+2. Updates colors[0] to `{r: 255, g: 0, b: 0, a: 255}`
+
+Your new primary color is now red!
+
+---
+
+## Common Bundles and Their Purpose
+
+Not all bundles are relevant for skinning. Here are the main ones:
+
+| Bundle File | Contains | Useful For |
+|-------------|----------|------------|
+| `FMColours.bundle` | Primary color palette | Main theme colors |
+| `UIStyles.bundle` | UI component styles | Buttons, text, borders |
+| `MatchEngine.bundle` | Match screen styles | In-match UI colors |
+| `Icons.bundle` | Icon sprites | Replacing icons |
+| `Backgrounds.bundle` | Background images | Custom backgrounds |
+| `AttributeColours.bundle` | Player attribute colors | Stats display |
+
+**Most skins focus on**:
+- `FMColours.bundle` (core colors)
+- `UIStyles.bundle` (UI elements)
+
+---
+
+## Discovering Available Variables
+
+Want to know what CSS variables you can modify? You can export stylesheets from bundles.
+
+### Why Export Stylesheets?
+
+**Use cases**:
+- See all available CSS variables
+- Discover selector names
+- Understand FM's default colors
+- Plan your skin systematically
+
+### How to Export (Conceptually)
+
+While there's no GUI button to export directly, you can use **Debug Mode** to see stylesheets:
+
+1. Enable **Debug Mode** in FM Skin Builder
+2. Build your skin with any CSS
+3. Check `<your-skin>/debug/original/`
+4. You'll see exported USS files showing FM's defaults
+
+**Example output** (`debug/original/FMColours.uss`):
+```css
+:root {
+  --primary: #3498db;
+  --secondary: #2ecc71;
+  --accent: #e74c3c;
+  --background: #ecf0f1;
+  --text-primary: #2c3e50;
+  /* ... many more variables */
+}
+
+.green {
+  color: #2ecc71;
+}
+
+.red {
+  color: #e74c3c;
+}
+
+/* ... many more selectors */
+```
+
+Now you know exactly what variables exist!
+
+### Systematic Approach
+
+**Step 1**: Build a minimal skin with debug mode
+```css
+:root {
+  --test: #ff0000;  /* Any variable, just to trigger a build */
+}
+```
+
+**Step 2**: Check `debug/original/`
+
+**Step 3**: Browse the exported USS files
+
+**Step 4**: Copy variable names you want to override
+
+**Step 5**: Create your real skin CSS
+
+---
+
+## Understanding Stylesheet Names
+
+Each bundle can contain multiple stylesheets. Common names:
+
+- `FMColours` - Main color palette
+- `FMColoursDark` - Dark mode variant
+- `AttributeColours` - Player attributes
+- `MatchColours` - Match engine UI
+- `BaseStyleSheet` - Foundation styles
+
+**Why this matters**:
+If you want to target a specific stylesheet (not all of them), you'll use [per-stylesheet mapping](/advanced-guide/config-and-mappings).
+
+---
+
+## Color Storage Format
+
+Colors in bundles are stored as **RGBA** (Red, Green, Blue, Alpha) with values 0-255:
+
+```
+{
+  r: 255,  // Red channel (0-255)
+  g: 0,    // Green channel (0-255)
+  b: 0,    // Blue channel (0-255)
+  a: 255   // Alpha/opacity (0 = transparent, 255 = opaque)
+}
+```
+
+**Your CSS hex colors are converted automatically**:
+
+```css
+--primary: #ff0000;     → {r: 255, g: 0, b: 0, a: 255}
+--accent: #3498dbcc;    → {r: 52, g: 152, b: 219, a: 204}
+```
+
+Alpha channel (last 2 hex digits) is optional - defaults to `ff` (255, fully opaque).
+
+---
+
+## Texture Storage
+
+Textures are stored as **Texture2D** and **Sprite** objects:
+
+**Texture2D**:
+- Raw image data (PNG/JPG compressed)
+- Width, height, format
+- Name (how we identify it)
+
+**Sprite**:
+- Reference to a Texture2D
+- Cropping rectangle (if using sprite sheets)
+- Pivot point
+
+**How texture swapping works**:
+
+1. FM Skin Builder finds Texture2D by name
+2. Replaces the image data with your PNG/SVG
+3. Updates Sprite references to use the new texture
+
+---
+
+## Bundle Inspection Workflow
+
+Want to explore bundles manually? Here's the workflow:
+
+### 1. Enable Debug Mode and Build
+
+Create a skin (any CSS will do) and build with Debug Mode:
+
+```css
+:root {
+  --primary: #ff0000;
+}
+```
+
+### 2. Explore Debug Output
+
+Check these folders:
+
+**`debug/original/`**:
+- USS files showing FM's default stylesheets
+- JSON files showing internal structure
+
+**`debug/patched/`**:
+- USS files showing your changes applied
+- Comparison with original
+
+### 3. Identify Targets
+
+From the USS files, note:
+- Variable names you want to change
+- Selectors that control specific UI elements
+- Stylesheet names for per-sheet targeting
+
+### 4. Build Your Skin
+
+Now you know exactly what to modify!
+
+---
+
+## Example: Finding Button Colors
+
+Let's say you want to change all button colors.
+
+**Step 1: Export stylesheets with debug mode**
+
+Build any skin with debug enabled.
+
+**Step 2: Search debug/original/ for "button"**
+
+Look through exported USS files for button-related classes:
+
+```css
+.button-primary {
+  background-color: #3498db;
+  color: #ffffff;
+}
+
+.button-secondary {
+  background-color: #95a5a6;
+  color: #2c3e50;
+}
+
+.button-danger {
+  background-color: #e74c3c;
+  color: #ffffff;
+}
+```
+
+**Step 3: Override in your skin**
+
+```css
+.button-primary {
+  background-color: #ff6b35;  /* Your custom orange */
+}
+
+.button-secondary {
+  background-color: #4ecdc4;  /* Your custom teal */
+}
+```
+
+Done! You've systematically customized buttons.
+
+---
+
+## Bundle Versioning and FM Updates
+
+**What happens when FM updates?**
+
+FM patches may:
+- Add new bundles
+- Modify bundle structures
+- Add/remove variables
+- Change default colors
+
+**Impact on your skin**:
+- Your CSS still works (variables that exist will patch)
+- New variables won't be in your skin (FM uses defaults)
+- Removed variables are silently skipped (no errors)
+
+**Best practice**:
+After major FM updates, rebuild your skin and check for new variables using debug exports.
+
+---
+
+## Advanced: Understanding Selector Trees
+
+Selectors in bundles aren't flat - they're hierarchical:
+
+```
+Selector: ".green"
+  ├─ Property: "color"
+  │    └─ Value: colors[5]
+  ├─ Property: "background-color"
+  │    └─ Value: colors[12]
+  └─ Child: ".green .text"
+       └─ Property: "color"
+            └─ Value: colors[8]
+```
+
+**Why this matters**:
+When you override a selector, FM Skin Builder navigates this tree to find the right property to modify.
+
+**Complex selectors**:
+Some selectors have child selectors (nested classes). FM Skin Builder handles these automatically.
+
+---
+
+## Limitations
+
+### What You Can't Change
+
+**1. Hardcoded colors**
+- Some colors are in code, not stylesheets
+- These can't be modified via bundles
+
+**2. Image-based UI elements**
+- If a button is a PNG image, CSS won't help
+- You'd need to replace the entire image
+
+**3. Computed colors**
+- Some colors are calculated at runtime
+- Beyond the scope of bundle patching
+
+**4. Non-color properties**
+- Font sizes, layouts, positions
+- Only colors/textures are supported
+
+### Workarounds
+
+For hardcoded elements:
+- Look for related variables that might affect them
+- Check if textures can be replaced instead
+- Some elements just can't be skinned
+
+---
+
+## Performance Implications
+
+**Why does scanning take time?**
+
+UnityPy needs to:
+1. Decompress bundle files (~10-50MB each)
+2. Deserialize Unity's binary format
+3. Parse MonoBehaviour object trees
+4. Extract stylesheet data structures
+
+**This takes ~1-2 seconds per bundle**, hence caching!
+
+**Cached builds are fast** because we skip scanning entirely - just load the cached index and patch directly.
+
+---
+
+## Exploring Beyond Stylesheets
+
+Bundles contain more than just stylesheets:
+
+- **Prefabs**: UI component templates
+- **Scenes**: Screen layouts
+- **Meshes**: 3D models (for match engine)
+- **Audio**: Sound effects
+- **Shaders**: Visual effects
+
+FM Skin Builder only touches stylesheets and textures, but the bundles contain the entire game's assets.
+
+**Could we modify other things?**
+
+Technically yes, but:
+- Much more complex
+- Higher risk of breaking the game
+- Beyond the scope of a skinning tool
+
+---
+
+## Bundle Tools
+
+For advanced exploration, you can use external tools:
+
+**AssetStudio**:
+- GUI tool for exploring Unity bundles
+- Can extract textures, audio, etc.
+- Useful for learning what's in bundles
+
+**UnityPy** (Python library):
+- What FM Skin Builder uses internally
+- Can be used standalone for custom scripts
+
+These are for research only - use FM Skin Builder for actual skinning.
+
+---
+
+## Key Takeaways
+
+1. **Bundles are binary containers** holding stylesheets and textures
+2. **Stylesheets store colors as RGBA arrays** indexed by variable/selector names
+3. **Debug mode exports original USS files** for discovering variables
+4. **Not all bundles have stylesheets** - FM Skin Builder filters automatically
+5. **Caching makes repeated builds fast** by skipping deserialization
+6. **FM updates may change bundle structure** - rebuild skins after patches
+
+---
+
+## What's Next?
+
+Now that you understand bundle structure:
+
+- **[Config and Mappings](/advanced-guide/config-and-mappings)** - Target specific stylesheets with precision
+- **[Advanced Features](/advanced-guide/advanced-features)** - Use debug tools to explore bundles
+- **[Verification and Restore](/advanced-guide/verification-and-restore)** - Compare before/after USS files
+
+Understanding bundles unlocks advanced skinning techniques and helps troubleshoot issues.
