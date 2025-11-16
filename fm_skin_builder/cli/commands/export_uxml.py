@@ -96,9 +96,9 @@ def run(args) -> None:
                             out_dir.mkdir(exist_ok=True, parents=True)
 
                             try:
-                                doc = exporter.export_visual_tree_asset(
-                                    data, asset_name=asset_name
-                                )
+                                doc = exporter.export_visual_tree_asset(data)
+                                # Set the asset name on the document
+                                doc.asset_name = asset_name
                                 exporter.write_uxml(doc, output_file)
                                 bundle_exported += 1
                                 total_exported += 1
