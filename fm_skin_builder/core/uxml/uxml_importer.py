@@ -108,15 +108,7 @@ class UXMLImporter:
 
         # Initialize data structures
         visual_elements = []
-        strings = []
-        string_map = {}  # Map string -> index
-
-        # Build string table helper
-        def add_string(s: str) -> int:
-            if s not in string_map:
-                string_map[s] = len(strings)
-                strings.append(s)
-            return string_map[s]
+        template_elements = []  # Track template instances separately
 
         # Convert element tree to Unity format
         element_id = 0
@@ -130,29 +122,35 @@ class UXMLImporter:
             current_id = element_id
             element_id += 1
 
+            # Check if this is a TemplateContainer
+            is_template = elem.element_type == 'TemplateContainer'
+            template_alias = None
+
             # Build VisualElementAsset structure
+            # Unity 2021+ stores data directly (not as string indices)
             ve_asset = {
-                'id': current_id,
-                'parentId': parent_id,
-                'orderInDocument': len(visual_elements),
-                'm_TypeName': elem.element_type,
+                'm_Id': current_id,
+                'm_ParentId': parent_id,
+                'm_OrderInDocument': len(visual_elements) + len(template_elements),
+                'm_FullTypeName': self._get_full_type_name(elem.element_type),
+                'm_Name': '',
                 'm_Classes': [],
-                'm_ClassList': [],
             }
 
             # Process attributes
             for attr in elem.attributes:
                 if attr.name == 'name':
-                    # Store name as string index
-                    name_index = add_string(attr.value)
-                    ve_asset['m_Name'] = name_index
+                    # Unity 2021+ stores name as direct string
+                    ve_asset['m_Name'] = attr.value
 
                 elif attr.name == 'class':
-                    # Store classes as string indices
+                    # Unity 2021+ stores classes as direct strings
                     classes = [c.strip() for c in attr.value.split() if c.strip()]
-                    class_indices = [add_string(c) for c in classes]
-                    ve_asset['m_Classes'] = class_indices
-                    ve_asset['m_ClassList'] = class_indices
+                    ve_asset['m_Classes'] = classes
+
+                elif attr.name == 'template':
+                    # Template reference - store the template alias
+                    template_alias = attr.value
 
                 elif attr.name == 'style':
                     # Inline style - store for later processing
@@ -160,18 +158,22 @@ class UXMLImporter:
                     pass
 
                 else:
-                    # Other attributes - store in m_Attributes if needed
-                    # Unity has specific trait handling for each attribute
-                    # For now, we'll skip unknown attributes
+                    # Other attributes (bindings, etc.) - skip for now
+                    # These will need special handling in UxmlSerializedData
                     pass
 
             # Process text content
             if elem.text:
-                text_index = add_string(elem.text)
-                ve_asset['m_Text'] = text_index
+                # Unity 2021+ stores text as direct string
+                ve_asset['m_Text'] = elem.text
 
-            # Add to visual elements list
-            visual_elements.append(ve_asset)
+            # If this is a template element, add template-specific fields
+            if is_template and template_alias:
+                ve_asset['m_TemplateAlias'] = template_alias
+                template_elements.append(ve_asset)
+            else:
+                # Regular visual element
+                visual_elements.append(ve_asset)
 
             # Process children
             for child in elem.children:
@@ -183,21 +185,11 @@ class UXMLImporter:
         if doc.root:
             process_element(doc.root)
 
-        # Build template assets
-        template_assets = []
-        for template in doc.templates:
-            template_assets.append({
-                'm_Name': template.name,
-                'm_FileID': template.file_id or 0,
-                'guid': template.guid or ''
-            })
-
         # Build the final VTA structure
         vta_structure = {
             'm_Name': doc.asset_name or 'ImportedUXML',
             'm_VisualElementAssets': visual_elements,
-            'm_TemplateAssets': template_assets,
-            'm_Strings': strings,
+            'm_TemplateAssets': template_elements,  # Template instances from UXML
         }
 
         # If we have inline styles, we need to build a StyleSheet
@@ -206,6 +198,30 @@ class UXMLImporter:
             vta_structure['m_InlineSheet'] = inline_stylesheet
 
         return vta_structure
+
+    def _get_full_type_name(self, element_type: str) -> str:
+        """
+        Convert element type to full Unity type name.
+
+        Args:
+            element_type: Short element type (e.g., "Label", "Button")
+
+        Returns:
+            Full type name (e.g., "UnityEngine.UIElements.Label")
+        """
+        # Map of common SI.Bindable types
+        si_bindable_types = {
+            'BindingRoot', 'BindingVariables', 'BindingRemapper',
+            'BindableSwitchElement', 'SIText', 'SIImage', 'SIButton',
+            'SIVisible', 'SIDropdown', 'TabbedGridLayoutElement',
+        }
+
+        # Check if it's an SI.Bindable type
+        if element_type in si_bindable_types:
+            return f'SI.Bindable.{element_type}'
+
+        # Default to UnityEngine.UIElements namespace
+        return f'UnityEngine.UIElements.{element_type}'
 
     def _extract_templates_from_xml(self, root_xml: ET.Element) -> List[UXMLTemplate]:
         """

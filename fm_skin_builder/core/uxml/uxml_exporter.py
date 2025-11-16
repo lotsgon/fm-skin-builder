@@ -116,7 +116,14 @@ class UXMLExporter:
         """
         # Unity stores visual elements in m_VisualElementAssets
         visual_elements = getattr(vta_data, "m_VisualElementAssets", [])
-        if not visual_elements:
+
+        # Unity also stores template instances in m_TemplateAssets
+        template_elements = getattr(vta_data, "m_TemplateAssets", [])
+
+        # Combine both lists
+        all_elements = list(visual_elements) + list(template_elements)
+
+        if not all_elements:
             log.warning("No visual elements found in VisualTreeAsset")
             return None
 
@@ -124,13 +131,13 @@ class UXMLExporter:
         elements_by_id: Dict[int, UXMLElement] = {}
 
         # First pass: create all elements
-        for ve_asset in visual_elements:
+        for ve_asset in all_elements:
             element = self._create_element_from_asset(ve_asset, vta_data)
             if element.id is not None:
                 elements_by_id[element.id] = element
 
         # Second pass: build hierarchy using m_Id and m_ParentId
-        for ve_asset in visual_elements:
+        for ve_asset in all_elements:
             elem_id = getattr(ve_asset, "m_Id", None)
             parent_id = getattr(ve_asset, "m_ParentId", None)
 
@@ -143,7 +150,7 @@ class UXMLExporter:
 
         # Find root element (parent_id == 0)
         root = None
-        for ve_asset in visual_elements:
+        for ve_asset in all_elements:
             parent_id = getattr(ve_asset, "m_ParentId", None)
             elem_id = getattr(ve_asset, "m_Id", None)
 
@@ -207,6 +214,11 @@ class UXMLExporter:
         Returns:
             Element type name (e.g., "VisualElement", "Label", "Button")
         """
+        # Check if this is a template asset (has m_TemplateAlias)
+        template_alias = getattr(ve_asset, "m_TemplateAlias", None)
+        if template_alias:
+            return "TemplateContainer"
+
         # Unity stores the full type name in m_FullTypeName
         # e.g., "UnityEngine.UIElements.Label" -> "Label"
         # or "SI.Bindable.SIText" -> "SIText"
@@ -451,6 +463,14 @@ class UXMLExporter:
                     name="binding-mappings",
                     value=";".join(mapping_strs)
                 ))
+
+        # Extract template reference (for TemplateContainer elements)
+        template_id = getattr(ref_data, "templateId", None)
+        if template_id and template_id.strip():
+            attributes.append(UXMLAttribute(
+                name="template",
+                value=template_id
+            ))
 
         return attributes
 
