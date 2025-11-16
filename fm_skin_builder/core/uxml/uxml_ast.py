@@ -167,6 +167,9 @@ class UXMLDocument:
     # Template references used in this document
     templates: List[UXMLTemplate] = field(default_factory=list)
 
+    # Stylesheet references (USS files)
+    stylesheets: List[str] = field(default_factory=list)  # List of GUIDs or paths
+
     # Inline styles (compiled into a StyleSheet)
     inline_styles: Optional[str] = None
 

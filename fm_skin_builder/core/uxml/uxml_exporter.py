@@ -58,6 +58,9 @@ class UXMLExporter:
         # Extract templates
         doc.templates = self._extract_templates(vta_data)
 
+        # Extract stylesheet references
+        doc.stylesheets = self._extract_stylesheets(vta_data)
+
         # Extract visual element hierarchy
         doc.root = self._extract_visual_tree(vta_data)
 
@@ -103,6 +106,31 @@ class UXMLExporter:
                 ))
 
         return templates
+
+    def _extract_stylesheets(self, vta_data: Any) -> List[str]:
+        """
+        Extract stylesheet references from VisualTreeAsset.
+
+        Args:
+            vta_data: Unity VisualTreeAsset object
+
+        Returns:
+            List of stylesheet GUIDs/paths
+        """
+        stylesheets = set()
+
+        # Check all visual elements for stylesheet paths
+        visual_elements = getattr(vta_data, "m_VisualElementAssets", [])
+        template_elements = getattr(vta_data, "m_TemplateAssets", [])
+        all_elements = list(visual_elements) + list(template_elements)
+
+        for elem in all_elements:
+            stylesheet_paths = getattr(elem, "m_StylesheetPaths", [])
+            for path in stylesheet_paths:
+                if path:  # Skip empty strings
+                    stylesheets.add(path)
+
+        return list(stylesheets)
 
     def _extract_visual_tree(self, vta_data: Any) -> Optional[UXMLElement]:
         """
@@ -597,6 +625,12 @@ class UXMLExporter:
             template_elem = ET.SubElement(root_elem, "Template")
             template_elem.set("name", template.name)
             template_elem.set("src", template.src)
+
+        # Add stylesheet references
+        for stylesheet in doc.stylesheets:
+            style_elem = ET.SubElement(root_elem, "Style")
+            # Use GUID as src (Unity's convention)
+            style_elem.set("src", f"#{stylesheet}")
 
         # Add visual tree (skip the root UXML element itself, add its children)
         if doc.root:
