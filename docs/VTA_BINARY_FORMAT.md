@@ -14,27 +14,37 @@ This document describes the binary structure of Unity's VisualTreeAsset (VTA) fi
 
 ```
 ┌─────────────────────────────────────┐
-│ Header (variable size)              │  ← Contains m_Name, metadata
+│ Fixed Header (72 bytes)             │  ← Unity object metadata
+│  - Zeros, flags, type ID            │
+│  - m_Name length + data             │
+│  - Padding to template refs         │
+├─────────────────────────────────────┤
+│ Template References (variable)      │  ← Metadata for unique templates
+│  - Count of unique templates        │
+│  - Each template: name + GUID       │
 ├─────────────────────────────────────┤
 │ Visual Elements Array:              │
 │  - Count (4 bytes)                  │
 │  - TypeTree metadata (40 bytes)     │
 │  - Element data (variable)          │
 ├─────────────────────────────────────┤
-│ Template Assets Array:              │
+│ Template Instances Array:           │
 │  - Count (4 bytes)                  │
 │  - TypeTree metadata (12 bytes)     │
 │  - Element data (variable)          │
 └─────────────────────────────────────┘
 ```
 
-**Key Discovery**: Array counts are NOT at fixed offsets! They appear immediately before each array's data.
+**Key Discoveries**:
+1. Array counts are NOT at fixed offsets - they appear immediately before each array's data
+2. Template References section contains UNIQUE template types, not instances
+3. Header size varies based on m_Name length and number of unique templates
 
 ---
 
 ## Detailed Format (PlayerAttributesLargeBlock Example)
 
-### Header Section (Offsets 0-571)
+### Header Section (Variable Size)
 
 ```
 Offset  Size  Value       Description
@@ -42,16 +52,53 @@ Offset  Size  Value       Description
 0       12    0x00...     Unknown (all zeros)
 12      4     1           Unknown flag/counter
 16      4     1           Unknown flag/counter
-20      4     11995       Unknown
+20      4     11995       Unknown (type ID? version?)
 24      4     0           Unknown
 28      4     26          m_Name string length
 32      26    "Player..." m_Name string data
-58      ?     ...         Unknown header data continues
-...
-572     →     (Visual count starts here)
+58      1     0x00        m_Name null terminator
+59      1     padding     Align to 4-byte boundary
+60      12    0x00...     Padding/unknown (12 bytes)
+72      →     ...         Template References Section starts
 ```
 
-**Header Size**: Variable, depends on m_Name length and other metadata
+**Header Size**: Variable, ~72 bytes before template references
+
+### Template References Section (Variable Size)
+
+**CRITICAL DISCOVERY**: This section contains metadata for UNIQUE template types referenced by the VTA.
+
+```
+Offset  Size  Value       Description
+------  ----  ----------  -----------
+72      4     6           Count of unique template references
+76      var   ...         Template reference 1
+        var   ...         Template reference 2
+        ...   ...         (etc.)
+```
+
+**Each Template Reference Structure**:
+```
++0      4     length      Template name string length
++4      var   "name"      Template name (e.g., "AttributesTableSmall")
++?      1     0x00        Null terminator
++?      0-3   padding     Align to 4-byte boundary
++?      4     32          GUID string length (always 32)
++?      32    "guid..."   GUID hex string (32 chars)
++?      1     0x00        Null terminator
++?      0-3   padding     Align to 4-byte boundary
++?      12    0x00...     Unknown padding (12 bytes, all zeros)
+```
+
+**Example** (PlayerAttributesSmallBlock):
+- 9 template instances in m_TemplateAssets
+- 6 unique template references in header
+- Unique templates: AttributesTableSmall, FootednessStepperWithBorderCell, etc.
+
+**Header Size**: Variable, depends on:
+- m_Name length
+- Number of unique template references
+- Length of template names
 
 ### Visual Elements Array (Offsets 572-7155)
 
