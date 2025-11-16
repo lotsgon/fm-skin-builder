@@ -1,7 +1,7 @@
 """Export UXML files from Unity bundles"""
 from __future__ import annotations
 from pathlib import Path
-from ...core.unity.asset_bundle import AssetBundle
+import UnityPy
 from ...core.uxml.uxml_exporter import UXMLExporter
 from ...core.logger import get_logger
 
@@ -52,7 +52,7 @@ def run(args) -> None:
         log.info(f"\nProcessing bundle: {bundle_file.name}")
 
         try:
-            bundle = AssetBundle.from_file(bundle_file)
+            env = UnityPy.load(str(bundle_file))
         except Exception as e:
             log.error(f"Failed to load bundle {bundle_file.name}: {e}")
             continue
@@ -60,7 +60,7 @@ def run(args) -> None:
         bundle_exported = 0
 
         # Find all VisualTreeAssets
-        for obj in bundle.objects:
+        for obj in env.objects:
             if obj.type.name == "MonoBehaviour":
                 try:
                     data = obj.read()

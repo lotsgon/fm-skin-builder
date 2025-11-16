@@ -2,7 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import shutil
-from ...core.unity.asset_bundle import AssetBundle
+import UnityPy
 from ...core.uxml.uxml_importer import UXMLImporter
 from ...core.logger import get_logger
 
@@ -53,7 +53,7 @@ def run(args) -> None:
     # Load bundle
     log.info(f"Loading bundle: {bundle_path}")
     try:
-        bundle = AssetBundle.from_file(bundle_path)
+        env = UnityPy.load(str(bundle_path))
     except Exception as e:
         log.error(f"Failed to load bundle: {e}")
         return
@@ -66,7 +66,7 @@ def run(args) -> None:
     uxml_lookup = {f.stem: f for f in uxml_files}
 
     # Find and update VisualTreeAssets
-    for obj in bundle.objects:
+    for obj in env.objects:
         if obj.type.name == "MonoBehaviour":
             try:
                 data = obj.read()
@@ -117,7 +117,9 @@ def run(args) -> None:
     if not args.dry_run and modified_count > 0:
         log.info(f"\nSaving patched bundle to: {out_path}")
         out_path.parent.mkdir(exist_ok=True, parents=True)
-        bundle.save(out_path)
+
+        with open(out_path, "wb") as f:
+            f.write(env.file.save())
 
     # Summary
     log.info("\n=== Import Summary ===")
