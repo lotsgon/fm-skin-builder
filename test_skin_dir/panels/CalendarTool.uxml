@@ -1,12 +1,12 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-  <ui:BindingRoot class="base-template-grow calendar-button-group test-class-added">
-    <ui:BindingVariables class="base-template-grow">
-      <ui:BindingRemapper class="base-template-grow calender-button-group" binding-mappings="yearindex=Year.PropertyValue;team=Human.Team">
-        <ui:BindableSwitchElement class="base-template-grow" data-binding="config.ShowPhonePanels">
-          <ui:TemplateContainer class="base-template-grow" template="FigmaBaseToolTabbedTemplate"/>
-          <ui:TemplateContainer class="base-template-grow" template="FigmaBaseToolTabbedTemplate"/>
+  <ui:BindingRoot data-unity-id="-1188085499" class="base-template-grow calendar-button-group test-class-added">
+    <ui:BindingVariables data-unity-id="-117709161" class="base-template-grow">
+      <ui:BindingRemapper data-unity-id="-568467118" class="base-template-grow calender-button-group" binding-mappings="yearindex=Year.PropertyValue;team=Human.Team">
+        <ui:BindableSwitchElement data-unity-id="1754607926" class="base-template-grow" data-binding="config.ShowPhonePanels">
+          <ui:TemplateContainer data-unity-id="-1738418621" class="base-template-grow" template="FigmaBaseToolTabbedTemplate"/>
+          <ui:TemplateContainer data-unity-id="1035414380" class="base-template-grow" template="FigmaBaseToolTabbedTemplate"/>
         </ui:BindableSwitchElement>
-        <ui:TemplateContainer class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
+        <ui:TemplateContainer data-unity-id="1486172337" class="quick-action-buttons-template-layout" template="QuickActionMenuButtons"/>
       </ui:BindingRemapper>
     </ui:BindingVariables>
   </ui:BindingRoot>

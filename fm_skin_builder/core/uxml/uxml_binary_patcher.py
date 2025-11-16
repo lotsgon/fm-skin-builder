@@ -83,6 +83,9 @@ class UXMLBinaryPatcher:
         """
         elements = []
 
+        if self.verbose:
+            log.debug(f"Parsing {len(original_elements)} elements from binary")
+
         for orig_elem in original_elements:
             offset = find_element_offset(raw_data, orig_elem.m_Id)
             if offset == -1:
@@ -98,9 +101,10 @@ class UXMLBinaryPatcher:
 
             if self.verbose:
                 classes_str = ', '.join(f'"{c}"' for c in parsed.m_Classes) if parsed.m_Classes else 'none'
+                paths_str = ', '.join(f'"{p}"' for p in parsed.m_StylesheetPaths) if parsed.m_StylesheetPaths else 'none'
                 log.debug(
-                    f"Parsed element {parsed.m_Id}: order={parsed.m_OrderInDocument}, "
-                    f"classes=[{classes_str}]"
+                    f"Parsed element {parsed.m_Id}: type={parsed.m_Type}, name={parsed.m_Name or '(empty)'}, "
+                    f"order={parsed.m_OrderInDocument}, classes=[{classes_str}], paths=[{paths_str}]"
                 )
 
         return elements
@@ -135,25 +139,14 @@ class UXMLBinaryPatcher:
             imported = imported_by_id[elem.m_Id]
             matched_imported_ids.add(elem.m_Id)
 
-            # Update integer fields
-            if 'm_OrderInDocument' in imported:
-                old_order = elem.m_OrderInDocument
-                elem.m_OrderInDocument = imported['m_OrderInDocument']
-                if self.verbose and old_order != elem.m_OrderInDocument:
-                    log.debug(
-                        f"Element {elem.m_Id}: order {old_order} → {elem.m_OrderInDocument}"
-                    )
+            # IMPORTANT: Do NOT update m_OrderInDocument or m_ParentId from UXML
+            # These are internal VTA structure fields that should not be modified
+            # The UXML importer generates these incorrectly, so we ignore them
 
-            if 'm_ParentId' in imported:
-                old_parent = elem.m_ParentId
-                elem.m_ParentId = imported['m_ParentId']
-                if self.verbose and old_parent != elem.m_ParentId:
-                    log.debug(
-                        f"Element {elem.m_Id}: parent {old_parent} → {elem.m_ParentId}"
-                    )
-
-            if 'm_RuleIndex' in imported:
-                elem.m_RuleIndex = imported['m_RuleIndex']
+            # Only update m_RuleIndex if explicitly provided (rare)
+            # Most of the time this should not change
+            # if 'm_RuleIndex' in imported:
+            #     elem.m_RuleIndex = imported['m_RuleIndex']
 
             # Update CSS classes
             if 'm_Classes' in imported:
@@ -204,27 +197,63 @@ class UXMLBinaryPatcher:
         # The array size field is 4 bytes before the first element
         array_size_offset = first_elem_offset - 4
 
-        # Find the last element's end
+        # Calculate the last element's end using element parser
+        # The last element also has padding after it for 4-byte alignment
         last_elem = elements[-1]
-        last_elem_end = last_elem.offset + len(last_elem)
+
+        # Calculate end based on actual element structure
+        last_elem_end_without_padding = last_elem.offset + len(last_elem)
+
+        # Account for padding to 4-byte boundary after last element
+        # Unity aligns each element (including the last one) to 4-byte boundary
+        last_elem_calculated_end = last_elem_end_without_padding
+        padding_after_last = (4 - (last_elem_calculated_end % 4)) % 4
+        last_elem_calculated_end += padding_after_last
+
+        if self.verbose:
+            log.debug(f"Rebuild info:")
+            log.debug(f"  First element at offset {first_elem_offset}")
+            log.debug(f"  Array size field at offset {array_size_offset}")
+            log.debug(f"  Last element (ID {last_elem.m_Id}) at offset {last_elem.offset}")
+            log.debug(f"  Last element calculated end: {last_elem_calculated_end}")
+            log.debug(f"  Elements to write: {len(elements)}")
 
         # Build new binary data
         result = bytearray()
 
         # 1. Keep everything before the elements array
         result.extend(original_raw[:array_size_offset])
+        if self.verbose:
+            log.debug(f"  Kept {array_size_offset} bytes before array")
 
         # 2. Write new array size (should be same)
         result.extend(struct.pack('<i', len(elements)))
 
-        # 3. Write all elements
-        for elem in elements:
-            result.extend(elem.to_bytes())
+        # 3. Write all elements (with 4-byte alignment padding between them)
+        total_elem_bytes = 0
+        for i, elem in enumerate(elements):
+            elem_bytes = elem.to_bytes()
+            result.extend(elem_bytes)
+            total_elem_bytes += len(elem_bytes)
 
-        # 4. Keep everything after the elements array
-        result.extend(original_raw[last_elem_end:])
+            # Add padding to align to 4-byte boundary
+            # Unity pads each element to 4-byte alignment
+            padding_needed = (4 - (len(result) % 4)) % 4
+            if padding_needed > 0:
+                result.extend(bytes(padding_needed))
+                total_elem_bytes += padding_needed
+
+            if self.verbose:
+                log.debug(f"  Element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding")
 
         if self.verbose:
+            log.debug(f"  Total element bytes written: {total_elem_bytes}")
+
+        # 4. Keep everything after the elements array
+        bytes_after = len(original_raw) - last_elem_calculated_end
+        result.extend(original_raw[last_elem_calculated_end:])
+        if self.verbose:
+            log.debug(f"  Kept {bytes_after} bytes after array")
             log.debug(f"Rebuilt asset: {len(original_raw)} → {len(result)} bytes")
 
         return bytes(result)
