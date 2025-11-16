@@ -64,54 +64,180 @@ class UXMLBinaryPatcherV2:
             log.debug(f"Parsed {len(visual_parsed)} visual elements and {len(template_parsed)} template assets from binary")
 
         # Apply modifications to both element lists
-        self._apply_modifications(visual_parsed + template_parsed, imported_data['m_VisualElementAssets'])
+        # Combine both visual and template arrays from imported data
+        imported_all = imported_data['m_VisualElementAssets'] + imported_data.get('m_TemplateAssets', [])
+        self._apply_modifications(visual_parsed + template_parsed, imported_all)
 
-        # Rebuild with separate arrays
-        new_raw_data = self._rebuild_with_separate_arrays(
-            raw_data, visual_parsed, template_parsed, visual_elements, template_assets
+        # Try in-place patching (preserves exact binary structure Unity expects)
+        raw_modified = bytearray(raw_data)
+        success = self._patch_elements_in_place(
+            raw_modified, visual_parsed + template_parsed
         )
 
-        if new_raw_data:
+        if success:
             if self.verbose:
-                log.debug(f"Binary patch successful: {len(raw_data)} → {len(new_raw_data)} bytes")
+                log.debug(f"Binary patch successful: {len(raw_data)} bytes (in-place)")
+            return bytes(raw_modified)
         else:
-            log.error("Failed to rebuild asset with separate arrays")
-
-        return new_raw_data
+            # In-place patching failed (likely due to element growth)
+            # Rebuild method produces bundles that crash the game, so return None
+            log.error("In-place patching failed due to element growth - cannot patch this UXML")
+            log.error("To fix: reduce the size of modified elements (shorter class names, etc.)")
+            return None
 
     def _parse_elements_from_array(
         self,
         raw_data: bytes,
         original_elements: List[Any]
     ) -> Optional[List[UXMLElementBinary]]:
-        """Parse elements from a specific array (visual or template)."""
+        """Parse elements from a specific array (visual or template).
+
+        Uses UnityPy's already-parsed element data instead of custom binary parsing.
+        """
         elements = []
 
         if self.verbose:
-            log.debug(f"Parsing {len(original_elements)} elements from binary")
+            log.debug(f"Converting {len(original_elements)} elements from UnityPy format")
 
-        for orig_elem in original_elements:
+        if not original_elements:
+            if self.verbose:
+                log.debug("No elements in array, skipping")
+            return elements
+
+        # Calculate original sizes by finding next element offset
+        offsets_and_elems = []
+        for i, orig_elem in enumerate(original_elements):
             offset = find_element_offset(raw_data, orig_elem.m_Id)
             if offset == -1:
-                log.error(f"Could not find element {orig_elem.m_Id} in binary data")
+                log.warning(f"Could not find element {orig_elem.m_Id} in binary data")
+                offset = 0
+            offsets_and_elems.append((offset, orig_elem, i))
+
+        # Sort by offset to calculate sizes
+        offsets_and_elems.sort(key=lambda x: x[0])
+
+        for idx, (offset, orig_elem, i) in enumerate(offsets_and_elems):
+            if offset == 0:
+                log.warning(f"Skipping element {orig_elem.m_Id} with offset 0")
+                continue
+
+            # Use parse_element_at_offset to get the complete binary structure
+            element = parse_element_at_offset(raw_data, offset, debug=False)
+
+            if element is None:
+                log.warning(f"Failed to parse element at offset {offset}, skipping")
+                continue
+
+            # Verify the element ID matches
+            if element.m_Id != orig_elem.m_Id:
+                log.warning(f"Element ID mismatch at offset {offset}: expected {orig_elem.m_Id}, got {element.m_Id}")
+                # Still use it - the offset might be slightly wrong but the parse succeeded
+
+            # Store the parsed element
+            try:
+                elements.append(element)
+
+                if self.verbose:
+                    classes_str = ', '.join(f'"{c}"' for c in element.m_Classes) if element.m_Classes else 'none'
+                    paths_str = ', '.join(f'"{p}"' for p in element.m_StylesheetPaths) if element.m_StylesheetPaths else 'none'
+                    log.debug(
+                        f"Converted element {element.m_Id}: type={element.m_Type}, name={element.m_Name or '(empty)'}, "
+                        f"order={element.m_OrderInDocument}, classes=[{classes_str}], paths=[{paths_str}]"
+                    )
+
+            except Exception as e:
+                log.error(f"Failed to convert UnityPy element {i}: {e}")
                 return None
-
-            parsed = parse_element_at_offset(raw_data, offset, debug=self.verbose)
-            if not parsed:
-                log.error(f"Failed to parse element at offset {offset}")
-                return None
-
-            elements.append(parsed)
-
-            if self.verbose:
-                classes_str = ', '.join(f'"{c}"' for c in parsed.m_Classes) if parsed.m_Classes else 'none'
-                paths_str = ', '.join(f'"{p}"' for p in parsed.m_StylesheetPaths) if parsed.m_StylesheetPaths else 'none'
-                log.debug(
-                    f"Parsed element {parsed.m_Id}: type={parsed.m_Type}, name={parsed.m_Name or '(empty)'}, "
-                    f"order={parsed.m_OrderInDocument}, classes=[{classes_str}], paths=[{paths_str}]"
-                )
 
         return elements
+
+    def _patch_elements_in_place(
+        self,
+        raw_data: bytearray,
+        elements: List[UXMLElementBinary]
+    ) -> bool:
+        """
+        Patch elements in-place by modifying only the m_Classes array.
+
+        This preserves the exact binary structure for all other fields.
+
+        Args:
+            raw_data: Mutable binary data to patch
+            elements: List of modified elements
+
+        Returns:
+            True if successful
+        """
+        import struct
+
+        for elem in elements:
+            if elem.offset == 0:
+                log.warning(f"Element {elem.m_Id} has offset 0, skipping")
+                continue
+
+            # Calculate where m_Classes array starts (after 36 bytes of fixed fields)
+            classes_offset = elem.offset + 36
+
+            # Read current classes array to calculate its size
+            if classes_offset + 4 > len(raw_data):
+                log.error(f"Element {elem.m_Id}: offset out of bounds")
+                return False
+
+            old_count = struct.unpack_from('<i', raw_data, classes_offset)[0]
+
+            # Calculate old classes array size
+            old_size = 4  # count field
+            pos = classes_offset + 4
+            for i in range(old_count):
+                if pos + 4 > len(raw_data):
+                    log.error(f"Element {elem.m_Id}: not enough data to read class string {i}")
+                    return False
+                str_len = struct.unpack_from('<i', raw_data, pos)[0]
+                if str_len < 0 or str_len > 1000:
+                    print(f"[PATCH DEBUG] Element {elem.m_Id}: unreasonable class string length: {str_len} at class {i}/{old_count}")
+                    print(f"[PATCH DEBUG]   Position in raw_data: {pos}, classes_offset: {classes_offset}")
+                    print(f"[PATCH DEBUG]   Hex at position: {raw_data[pos:pos+16].hex()}")
+                    return False
+                pos += 4 + str_len  # length + data (NO null terminator)
+                # Strings are packed together without nulls
+
+            # Add alignment padding for entire array
+            remainder = pos % 4
+            if remainder != 0:
+                pos += 4 - remainder
+
+            old_size = pos - classes_offset
+
+            # Serialize new classes array
+            new_classes_bytes = bytearray()
+            new_classes_bytes.extend(struct.pack('<i', len(elem.m_Classes)))
+            for class_name in elem.m_Classes:
+                class_bytes = class_name.encode('utf-8')
+                new_classes_bytes.extend(struct.pack('<i', len(class_bytes)))
+                new_classes_bytes.extend(class_bytes)
+                # NO null terminator - strings are packed together
+
+            # Add alignment padding for entire array
+            while len(new_classes_bytes) % 4 != 0:
+                new_classes_bytes.append(0)
+
+            # Check if new array fits
+            if len(new_classes_bytes) > old_size:
+                print(f"[PATCH DEBUG] Element {elem.m_Id}: classes array grew from {old_size} to {len(new_classes_bytes)} bytes")
+                print(f"[PATCH DEBUG]   Old classes (count={old_count})")
+                print(f"[PATCH DEBUG]   New classes (count={len(elem.m_Classes)}): {elem.m_Classes}")
+                return False
+
+            # Patch the classes array in-place
+            raw_data[classes_offset:classes_offset + len(new_classes_bytes)] = new_classes_bytes
+
+            # If smaller, we might need to shift data or just leave it
+            # For now, just leave the extra bytes (they'll be ignored by Unity)
+
+            if self.verbose:
+                log.debug(f"Patched element {elem.m_Id} classes array: {old_count} → {len(elem.m_Classes)} items")
+
+        return True
 
     def _apply_modifications(
         self,
@@ -197,10 +323,11 @@ class UXMLBinaryPatcherV2:
         TYPE_INFO_START = 156       # Type info for visual elements
         FIRST_VISUAL_OFFSET = 196   # First visual element data
 
-        # Calculate visual elements end
+        # Calculate visual elements end (in ORIGINAL binary)
         if visual_elements:
             last_visual = visual_elements[-1]
-            visual_data_end = last_visual.offset + len(last_visual)
+            # Use original_size to find where it ended in the original binary
+            visual_data_end = last_visual.offset + last_visual.original_size
             # Add padding
             padding = (4 - (visual_data_end % 4)) % 4
             visual_data_end += padding
@@ -208,16 +335,17 @@ class UXMLBinaryPatcherV2:
             if self.verbose:
                 log.debug(f"Visual elements:")
                 log.debug(f"  Count: {len(visual_elements)}")
-                log.debug(f"  Data ends at: {visual_data_end}")
+                log.debug(f"  Data ends at: {visual_data_end} (in original binary)")
         else:
             visual_data_end = FIRST_VISUAL_OFFSET
 
-        # Calculate template elements end
+        # Calculate template elements end (in ORIGINAL binary)
         if template_elements:
             # Templates start right after visual elements
             first_template_offset = template_elements[0].offset
             last_template = template_elements[-1]
-            template_data_end = last_template.offset + len(last_template)
+            # Use original_size to find where it ended in the original binary
+            template_data_end = last_template.offset + last_template.original_size
             # Add padding
             padding = (4 - (template_data_end % 4)) % 4
             template_data_end += padding
@@ -226,7 +354,7 @@ class UXMLBinaryPatcherV2:
                 log.debug(f"Template assets:")
                 log.debug(f"  Count: {len(template_elements)}")
                 log.debug(f"  First at: {first_template_offset}")
-                log.debug(f"  Data ends at: {template_data_end}")
+                log.debug(f"  Data ends at: {template_data_end} (in original binary)")
         else:
             template_data_end = visual_data_end
 

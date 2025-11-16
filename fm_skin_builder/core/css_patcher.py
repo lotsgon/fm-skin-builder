@@ -3222,7 +3222,6 @@ class SkinPatchPipeline:
         # Build lookup of available UXML files
         uxml_lookup = {f.stem: f for f in uxml_files}
 
-        from .uxml.uxml_importer import UXMLImporter
         from .uxml.uxml_binary_patcher_v2 import UXMLBinaryPatcherV2
 
         importer = UXMLImporter()
@@ -3242,7 +3241,7 @@ class SkinPatchPipeline:
                     asset_name = obj.peek_name()
                     if asset_name and asset_name in uxml_lookup:
                         vtas_to_patch.append((obj, asset_name, uxml_lookup[asset_name]))
-                except:
+                except Exception:
                     pass
 
         # Second pass: load metadata from a SEPARATE bundle instance
@@ -3266,7 +3265,8 @@ class SkinPatchPipeline:
                             if hasattr(data, "m_TemplateAssets"):
                                 template_assets = list(data.m_TemplateAssets)
                             metadata_cache[name] = (visual_elements, template_assets)
-                    except:
+                    except Exception:
+                        # Some VTAs cannot be parsed by UnityPy - skip them
                         pass
 
         # Third pass: apply patches without calling read() on target objects
@@ -3289,6 +3289,12 @@ class SkinPatchPipeline:
                         asset_name, ([], [])
                     )
 
+                    if not visual_elements and not template_assets:
+                        log.warning(f"  [UXML] No metadata found in cache for {asset_name} - skipping")
+                        continue
+
+                    log.debug(f"  [UXML] {asset_name}: {len(visual_elements)} visual, {len(template_assets)} template elements")
+
                     # Apply binary patch using V2 patcher
                     new_raw_data = patcher.apply_uxml_to_vta_binary(
                         raw_data,
@@ -3298,8 +3304,9 @@ class SkinPatchPipeline:
                     )
 
                     if new_raw_data:
-                        # Set modified binary data
+                        # Use binary patching via set_raw_data
                         target_obj.set_raw_data(new_raw_data)
+
                         modified_count += 1
                         bundle_ctx.mark_dirty()
 

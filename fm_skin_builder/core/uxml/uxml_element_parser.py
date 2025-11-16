@@ -37,6 +37,8 @@ class UXMLElementBinary:
 
     # Original offset in file
     offset: int
+    # Original size in bytes (as parsed from binary)
+    original_size: int = 0
 
     def __len__(self) -> int:
         """Calculate total size of this element in bytes."""
@@ -44,27 +46,29 @@ class UXMLElementBinary:
         size += 20  # UI behavior fields (5 int32s)
         size += 4  # m_Classes array size
 
-        # Add size of each class string (4-byte aligned)
+        # Add size of each class string (NO null, NO per-string alignment)
         for class_name in self.m_Classes:
             size += 4  # String length field
             str_len = len(class_name.encode('utf-8'))
-            size += str_len + 1  # String data + null terminator
-            # Align to 4-byte boundary
-            remainder = (size) % 4
-            if remainder != 0:
-                size += 4 - remainder
+            size += str_len  # String data only
+
+        # Align entire m_Classes array to 4-byte boundary
+        remainder = size % 4
+        if remainder != 0:
+            size += 4 - remainder
 
         size += 4  # m_StylesheetPaths array size
 
-        # Add size of each path string (4-byte aligned)
+        # Add size of each path string (NO null, NO per-string alignment)
         for path in self.m_StylesheetPaths:
             size += 4  # String length field
             str_len = len(path.encode('utf-8'))
-            size += str_len + 1  # String data + null terminator
-            # Align to 4-byte boundary
-            remainder = (size) % 4
-            if remainder != 0:
-                size += 4 - remainder
+            size += str_len  # String data only
+
+        # Align entire m_StylesheetPaths array to 4-byte boundary
+        remainder = size % 4
+        if remainder != 0:
+            size += 4 - remainder
 
         size += 16  # Serialization fields (4 int32s)
 
@@ -112,10 +116,11 @@ class UXMLElementBinary:
             class_bytes = class_name.encode('utf-8')
             data.extend(struct.pack('<i', len(class_bytes)))
             data.extend(class_bytes)
-            data.append(0)  # Null terminator
-            # Align to 4-byte boundary
-            while len(data) % 4 != 0:
-                data.append(0)
+            # NO null terminator, NO padding per string
+
+        # Align entire array to 4-byte boundary
+        while len(data) % 4 != 0:
+            data.append(0)
 
         # m_StylesheetPaths array
         data.extend(struct.pack('<i', len(self.m_StylesheetPaths)))
@@ -123,10 +128,11 @@ class UXMLElementBinary:
             path_bytes = path.encode('utf-8')
             data.extend(struct.pack('<i', len(path_bytes)))
             data.extend(path_bytes)
-            data.append(0)  # Null terminator
-            # Align to 4-byte boundary
-            while len(data) % 4 != 0:
-                data.append(0)
+            # NO null terminator, NO padding per string
+
+        # Align entire array to 4-byte boundary
+        while len(data) % 4 != 0:
+            data.append(0)
 
         # Serialization fields (16 bytes)
         data.extend(struct.pack('<i', self.unknown_field_3))
@@ -233,7 +239,7 @@ def parse_element_at_offset(raw_data: bytes, offset: int, debug: bool = False) -
                         print(f"DEBUG: Not enough data to read {array_name}[{i}] string at {pos}")
                     return None, pos
 
-                # Read string bytes (+ null terminator)
+                # Read string bytes (NO null terminator between strings)
                 str_bytes = raw_data[pos:pos + str_len]
                 try:
                     string_val = str_bytes.decode('utf-8')
@@ -246,15 +252,17 @@ def parse_element_at_offset(raw_data: bytes, offset: int, debug: bool = False) -
                         print(f"  Bytes: {str_bytes[:20]}")
                     return None, pos
 
-                pos += str_len + 1  # +1 for null terminator
+                pos += str_len  # NO null terminator
 
-                # Align to 4-byte boundary for next field
-                remainder = pos % 4
-                if remainder != 0:
-                    padding = 4 - remainder
-                    pos += padding
-                    if debug:
-                        print(f"    added {padding} bytes of padding, now at pos {pos}")
+                # NO alignment per string - strings are packed together
+
+            # After all strings, align to 4-byte boundary
+            remainder = pos % 4
+            if remainder != 0:
+                padding = 4 - remainder
+                pos += padding
+                if debug:
+                    print(f"  {array_name} array: added {padding} bytes of padding after all strings, now at pos {pos}")
 
             return strings, pos
 
@@ -359,8 +367,12 @@ def parse_element_at_offset(raw_data: bytes, offset: int, debug: bool = False) -
 
         pos += name_len + 1  # +1 for null terminator
 
+        # Calculate original size (from start offset to end position)
+        original_size = pos - offset
+
         if debug:
             print(f"  Element parsing complete, ended at pos {pos}")
+            print(f"  Original size: {original_size} bytes")
 
         return UXMLElementBinary(
             m_Id=m_id,
@@ -380,7 +392,8 @@ def parse_element_at_offset(raw_data: bytes, offset: int, debug: bool = False) -
             unknown_field_5=unknown_field_5,
             m_Type=m_type,
             m_Name=m_name,
-            offset=offset
+            offset=offset,
+            original_size=original_size
         )
 
     except Exception as e:

@@ -113,26 +113,28 @@ class UXMLImporter:
                 elem.tag = elem.tag.split('}')[1]
 
         # Build the structure
-        visual_elements = self._build_element_assets_from_xml(root_xml)
+        visual_elements, template_assets = self._build_element_assets_from_xml(root_xml)
 
         result = {
             'm_VisualElementAssets': visual_elements,
+            'm_TemplateAssets': template_assets,
             'm_UxmlObjectAssets': [],
         }
 
         return result
 
-    def _build_element_assets_from_xml(self, root_xml: ET.Element) -> List[Dict[str, Any]]:
+    def _build_element_assets_from_xml(self, root_xml: ET.Element) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """
-        Convert XML elements to m_VisualElementAssets list.
+        Convert XML elements to m_VisualElementAssets and m_TemplateAssets lists.
 
         Args:
             root_xml: XML root element
 
         Returns:
-            List of VisualElementAsset dictionaries
+            Tuple of (visual_elements, template_assets)
         """
-        elements = []
+        visual_elements = []
+        template_assets = []
         element_counter = [0]  # Use list for mutable counter in nested function
 
         def process_element(elem: ET.Element, parent_id: int = 0) -> Optional[Dict[str, Any]]:
@@ -151,10 +153,14 @@ class UXMLImporter:
                 element_id = element_counter[0]
                 element_counter[0] += 1
 
+            # Check if this is a TemplateContainer
+            is_template = elem.tag == 'TemplateContainer'
+            template_alias = elem.get('template') if is_template else None
+
             # Build the element asset
             element_asset = {
                 'm_Id': element_id,
-                'm_OrderInDocument': len(elements),
+                'm_OrderInDocument': len(visual_elements) + len(template_assets),
                 'm_ParentId': parent_id,
                 'm_RuleIndex': -1,
                 'm_Type': elem.tag,
@@ -162,11 +168,16 @@ class UXMLImporter:
                 'm_Classes': elem.get('class', '').split() if elem.get('class') else []
             }
 
-            elements.append(element_asset)
+            # Add to appropriate list
+            if is_template and template_alias:
+                element_asset['m_TemplateAlias'] = template_alias
+                template_assets.append(element_asset)
+            else:
+                visual_elements.append(element_asset)
 
             # Process children
             for child in elem:
-                # Skip Template includes for now (they're references, not actual elements)
+                # Skip Template definitions (they're references, not actual elements)
                 if child.tag == 'Template':
                     continue
                 process_element(child, element_id)
@@ -180,7 +191,7 @@ class UXMLImporter:
                 continue
             process_element(child)
 
-        return elements
+        return visual_elements, template_assets
 
     def build_visual_tree_asset(
         self,
