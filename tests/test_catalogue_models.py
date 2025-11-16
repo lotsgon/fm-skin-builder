@@ -48,20 +48,18 @@ def test_css_property():
 
 def test_css_variable():
     """Test CSSVariable model."""
-    val = CSSValueDefinition(value_type=4, index=10, resolved_value="#1976d2")
     var = CSSVariable(
         name="--primary-color",
+        value="#1976d2",
         stylesheet="FMColours",
         bundle="skins.bundle",
-        property_name="background-color",
-        rule_index=5,
-        values=[val],
         colors=["#1976d2"],
         first_seen="2026.1.0",
         last_seen="2026.4.0",
     )
 
     assert var.name == "--primary-color"
+    assert var.value == "#1976d2"
     assert var.stylesheet == "FMColours"
     assert var.colors == ["#1976d2"]
     assert var.status == AssetStatus.ACTIVE
@@ -95,20 +93,10 @@ def test_css_class_enhanced():
             "background-color": "var(--primary-color)",
             "border-radius": "4px",
         },
-        resolved_properties={
-            "background-color": "#1976d2",
-            "border-radius": "4px",
-        },
         asset_dependencies=["FMImages_1x/button_bg"],
         variables_used=["--primary-color"],
         color_tokens=["#1976d2"],
         numeric_tokens=["4px"],
-        summary={
-            "colors": ["#1976d2"],
-            "assets": ["FMImages_1x/button_bg"],
-            "variables": ["--primary-color"],
-            "layout": {"border-radius": "4px"},
-        },
         tags=["button", "primary"],
         first_seen="2026.1.0",
         last_seen="2026.4.0",
@@ -118,9 +106,6 @@ def test_css_class_enhanced():
     assert cls.raw_properties is not None
     assert cls.raw_properties["background-color"] == "var(--primary-color)"
 
-    assert cls.resolved_properties is not None
-    assert cls.resolved_properties["background-color"] == "#1976d2"
-
     assert len(cls.asset_dependencies) == 1
     assert "FMImages_1x/button_bg" in cls.asset_dependencies
 
@@ -129,12 +114,6 @@ def test_css_class_enhanced():
 
     assert len(cls.numeric_tokens) == 1
     assert "4px" in cls.numeric_tokens
-
-    assert cls.summary is not None
-    assert "colors" in cls.summary
-    assert "assets" in cls.summary
-    assert "variables" in cls.summary
-    assert "layout" in cls.summary
 
 
 def test_sprite():

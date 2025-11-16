@@ -77,21 +77,9 @@ class CSSVariable(BaseModel):
     """CSS custom property (CSS variable)."""
 
     name: str = Field(..., description="Variable name: '--primary-color'")
+    value: str = Field(..., description="Resolved value: '#1976d2' or '10px' or 'row'")
     stylesheet: str = Field(..., description="Unity asset name: 'FMColours'")
     bundle: str = Field(..., description="Bundle filename: 'skins.bundle'")
-    property_name: str = Field(..., description="Property: 'background-color'")
-    rule_index: int = Field(..., description="Rule index in stylesheet")
-
-    # Multi-value support
-    values: List[CSSValueDefinition] = Field(default_factory=list)
-
-    # Reverse engineering indices
-    string_index: Optional[int] = Field(
-        None, description="Index in strings array (type 3/8/10)"
-    )
-    color_index: Optional[int] = Field(
-        None, description="Index in colors array (type 4)"
-    )
 
     # Extracted colors for search
     colors: List[str] = Field(
@@ -102,9 +90,6 @@ class CSSVariable(BaseModel):
     status: AssetStatus = AssetStatus.ACTIVE
     first_seen: str = Field(..., description="FM version first appeared: '2026.1.0'")
     last_seen: str = Field(..., description="FM version last seen: '2026.4.0'")
-    modified_in: Optional[str] = Field(
-        None, description="FM version modified: '2026.3.0'"
-    )
 
     # Change tracking (schema 2.1.0+) - vs previous stable version
     change_status: Optional[str] = Field(
@@ -113,8 +98,8 @@ class CSSVariable(BaseModel):
     changed_in_version: Optional[str] = Field(
         None, description="Version where this change occurred"
     )
-    previous_values: Optional[str] = Field(
-        None, description="Previous values for modified assets"
+    previous_value: Optional[str] = Field(
+        None, description="Previous value for modified variables"
     )
 
 
@@ -129,10 +114,6 @@ class CSSClass(BaseModel):
     raw_properties: Optional[Dict[str, str]] = Field(
         None,
         description="Raw property values (before variable resolution): {'color': 'var(--primary)'}",
-    )
-    resolved_properties: Optional[Dict[str, str]] = Field(
-        None,
-        description="Resolved property values (after variable resolution): {'color': '#1976d2'}",
     )
     asset_dependencies: List[str] = Field(
         default_factory=list,
@@ -151,12 +132,6 @@ class CSSClass(BaseModel):
     numeric_tokens: List[str] = Field(
         default_factory=list,
         description="Numeric tokens: ['4px', '10px', '50%']",
-    )
-
-    # Property summary for quick overview
-    summary: Optional[Dict[str, Any]] = Field(
-        None,
-        description="Property summary: {colors: [...], assets: [...], variables: [...], layout: {...}}",
     )
 
     tags: List[str] = Field(

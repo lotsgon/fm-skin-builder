@@ -77,20 +77,14 @@ class TestCSSIntegration:
                 # Check for enhanced fields
                 # Note: Some may be None if no variables/assets are used
                 assert hasattr(cls_with_props, "raw_properties")
-                assert hasattr(cls_with_props, "resolved_properties")
                 assert hasattr(cls_with_props, "asset_dependencies")
                 assert hasattr(cls_with_props, "color_tokens")
                 assert hasattr(cls_with_props, "numeric_tokens")
-                assert hasattr(cls_with_props, "summary")
 
                 # If enhanced, check structure
                 if cls_with_props.raw_properties:
                     print(f"  - Raw properties: {list(cls_with_props.raw_properties.keys())}")
                     assert isinstance(cls_with_props.raw_properties, dict)
-
-                if cls_with_props.resolved_properties:
-                    print(f"  - Resolved properties: {list(cls_with_props.resolved_properties.keys())}")
-                    assert isinstance(cls_with_props.resolved_properties, dict)
 
                 if cls_with_props.color_tokens:
                     print(f"  - Color tokens: {cls_with_props.color_tokens[:3]}")

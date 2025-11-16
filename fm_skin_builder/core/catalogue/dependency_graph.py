@@ -249,14 +249,12 @@ class DependencyGraphBuilder:
         adjacency: Dict[str, List[str]] = defaultdict(list)
 
         for var in css_variables:
-            # Check if this variable's values reference other variables
-            for value_def in var.values:
-                resolved = value_def.resolved_value
-                # Find var() references
-                matches = var_ref_pattern.findall(resolved)
-                for ref_var in matches:
-                    if ref_var != var.name:  # Skip self-references
-                        adjacency[var.name].append(ref_var)
+            # Check if this variable's value references other variables
+            # Find var() references in the value string
+            matches = var_ref_pattern.findall(var.value)
+            for ref_var in matches:
+                if ref_var != var.name:  # Skip self-references
+                    adjacency[var.name].append(ref_var)
 
         # Build nodes metadata
         nodes = []

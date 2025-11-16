@@ -74,9 +74,6 @@ class CSSExtractor(BaseAssetExtractor):
                         if not prop_name:
                             continue
 
-                        # Parse values
-                        value_defs = self._extract_values(prop, strings, colors, floats, dimensions)
-
                         # Check if this property defines a CSS variable
                         if prop_name and prop_name.startswith("--"):
                             # This is a CSS variable definition
@@ -84,8 +81,11 @@ class CSSExtractor(BaseAssetExtractor):
                                 name=prop_name,
                                 stylesheet=stylesheet_name,
                                 bundle=bundle_name,
-                                rule_index=rule_idx,
-                                values=value_defs,
+                                prop=prop,
+                                strings=strings,
+                                colors_array=colors,
+                                floats=floats,
+                                dimensions=dimensions,
                             )
                             if css_var:
                                 variables.append(css_var)
@@ -225,36 +225,43 @@ class CSSExtractor(BaseAssetExtractor):
         name: str,
         stylesheet: str,
         bundle: str,
-        rule_index: int,
-        values: List[CSSValueDefinition],
+        prop: Any,
+        strings: List[str],
+        colors_array: List[Any],
+        floats: List[float],
+        dimensions: List[Any],
     ) -> CSSVariable | None:
         """Create a CSSVariable model instance."""
-        if not values:
+        # Get the actual CSS/USS text value using format_property_value()
+        css_text_value = format_property_value(
+            prop,
+            strings,
+            colors_array,
+            floats,
+            dimensions,
+        )
+
+        if not css_text_value:
             return None
 
-        # Extract colors from values
+        # Extract colors from the value for search indexing
         colors = []
-        string_index = None
-        color_index = None
+        # Match hex colors in the value
+        hex_matches = re.findall(r"#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?", css_text_value)
+        colors.extend(hex_matches)
 
-        for val in values:
-            if val.value_type == 4 and val.resolved_value.startswith("#"):
-                colors.append(val.resolved_value)
-                if color_index is None:
-                    color_index = val.index
-            elif val.value_type in (3, 8, 10):
-                if string_index is None:
-                    string_index = val.index
+        # Also match rgba() colors and convert to hex if needed
+        rgba_matches = re.findall(r"rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)", css_text_value)
+        for r, g, b in rgba_matches:
+            hex_color = f"#{int(r):02X}{int(g):02X}{int(b):02X}"
+            if hex_color not in colors:
+                colors.append(hex_color)
 
         return CSSVariable(
             name=name,
+            value=css_text_value,
             stylesheet=stylesheet,
             bundle=bundle,
-            property_name=name,  # For variables, property_name == name
-            rule_index=rule_index,
-            values=values,
-            string_index=string_index,
-            color_index=color_index,
             colors=colors,
             **self._create_default_status(),
         )
@@ -374,7 +381,6 @@ class CSSExtractor(BaseAssetExtractor):
                 # Resolve properties and extract comprehensive data
                 (
                     old_raw_properties,
-                    resolved_properties,
                     variables_used,
                     color_tokens,
                     numeric_tokens,
@@ -382,23 +388,11 @@ class CSSExtractor(BaseAssetExtractor):
                 ) = resolve_css_class_properties(css_class, var_registry)
 
                 # Update class with enhanced data
-                # IMPORTANT: Don't overwrite raw_properties! It was already set correctly
-                # using format_property_value() which reuses the USS serialization logic.
-                # The resolve_css_class_properties() function builds raw_properties from
-                # individual CSSValueDefinition objects which have placeholder values.
-                # css_class.raw_properties is already correct, so keep it!
-
-                css_class.resolved_properties = resolved_properties
+                # raw_properties was already set correctly during _create_css_class()
                 css_class.variables_used = variables_used
                 css_class.color_tokens = color_tokens
                 css_class.numeric_tokens = numeric_tokens
                 css_class.asset_dependencies = asset_dependencies
-
-                # Build property summary using the correct raw_properties from the class
-                resolver = CSSResolver(var_registry)
-                css_class.summary = resolver.build_property_summary(
-                    css_class.raw_properties, resolved_properties
-                )
 
             except Exception as e:
                 # Log error but don't fail the entire extraction

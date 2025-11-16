@@ -251,22 +251,12 @@ class CSSResolver:
 
         for var in css_variables:
             name = var.name if hasattr(var, "name") else var.get("name")
-            values = var.values if hasattr(var, "values") else var.get("values", [])
+            value = var.value if hasattr(var, "value") else var.get("value")
 
-            if not name or not values:
+            if not name or not value:
                 continue
 
-            # Get the first resolved value (most CSS variables have a single value)
-            resolved_value = None
-            if isinstance(values, list) and len(values) > 0:
-                first_value = values[0]
-                if hasattr(first_value, "resolved_value"):
-                    resolved_value = first_value.resolved_value
-                elif isinstance(first_value, dict):
-                    resolved_value = first_value.get("resolved_value")
-
-            if resolved_value:
-                registry[name] = resolved_value
+            registry[name] = value
 
         log.debug(f"Built variable registry with {len(registry)} variables")
         return registry
@@ -275,7 +265,7 @@ class CSSResolver:
 def resolve_css_class_properties(
     css_class: Any,
     css_variables: Dict[str, str],
-) -> Tuple[Dict[str, str], Dict[str, str], List[str], List[str], List[str], List[str]]:
+) -> Tuple[Dict[str, str], List[str], List[str], List[str], List[str]]:
     """
     Resolve all properties of a CSS class, extracting comprehensive data.
 
@@ -286,7 +276,6 @@ def resolve_css_class_properties(
     Returns:
         Tuple of:
         - raw_properties: Dict mapping property name to raw value
-        - resolved_properties: Dict mapping property name to resolved value
         - variables_used: List of unique variable names used
         - color_tokens: List of unique color tokens
         - numeric_tokens: List of unique numeric tokens
@@ -297,7 +286,6 @@ def resolve_css_class_properties(
     # Get raw_properties from the CSS class (already populated by extractor)
     raw_properties = css_class.raw_properties if hasattr(css_class, "raw_properties") and css_class.raw_properties else {}
 
-    resolved_properties = {}
     all_variables = set()
     all_colors = set()
     all_numerics = set()
@@ -308,9 +296,8 @@ def resolve_css_class_properties(
         if not raw_value:
             continue
 
-        # Resolve variables
+        # Resolve variables to extract data
         resolved_value, variables = resolver.resolve_property_value(raw_value)
-        resolved_properties[prop_name] = resolved_value
         all_variables.update(variables)
 
         # Extract colors from resolved value
@@ -327,7 +314,6 @@ def resolve_css_class_properties(
 
     return (
         raw_properties,
-        resolved_properties,
         sorted(list(all_variables)),
         sorted(list(all_colors)),
         sorted(list(all_numerics)),

@@ -189,7 +189,6 @@ class TestResolveClassProperties:
 
         (
             raw_properties,
-            resolved_properties,
             variables_used,
             color_tokens,
             numeric_tokens,
@@ -199,10 +198,6 @@ class TestResolveClassProperties:
         # Check raw properties
         assert raw_properties["color"] == "var(--primary)"
         assert raw_properties["border-radius"] == "4px"
-
-        # Check resolved properties
-        assert resolved_properties["color"] == "#1976D2"
-        assert resolved_properties["border-radius"] == "4px"
 
         # Check extracted data
         assert "--primary" in variables_used
@@ -225,7 +220,6 @@ class TestResolveClassProperties:
 
         (
             raw_properties,
-            resolved_properties,
             variables_used,
             color_tokens,
             numeric_tokens,
@@ -251,7 +245,6 @@ class TestResolveClassProperties:
 
         (
             raw_properties,
-            resolved_properties,
             variables_used,
             color_tokens,
             numeric_tokens,
@@ -259,7 +252,7 @@ class TestResolveClassProperties:
         ) = resolve_css_class_properties(css_class, {})
 
         assert len(variables_used) == 0
-        assert resolved_properties["color"] == "#FFFFFF"
+        assert raw_properties["color"] == "#FFFFFF"
         assert "#FFFFFF" in color_tokens
 
     def test_extract_variable_references(self):
