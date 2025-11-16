@@ -32,9 +32,13 @@ def run(args) -> None:
     # Handle directory of bundles
     if bundle_path.is_dir():
         log.info(f"Scanning directory: {bundle_path}")
-        bundle_files = list(bundle_path.glob("*.unity3d"))
+        # Look for both .unity3d and .bundle files
+        bundle_files = (
+            list(bundle_path.glob("*.unity3d")) +
+            list(bundle_path.glob("*.bundle"))
+        )
         if not bundle_files:
-            log.error(f"No .unity3d files found in {bundle_path}")
+            log.error(f"No bundle files (.unity3d or .bundle) found in {bundle_path}")
             return
         log.info(f"Found {len(bundle_files)} bundle(s)")
     else:
