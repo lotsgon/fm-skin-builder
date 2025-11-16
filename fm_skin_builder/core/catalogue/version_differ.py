@@ -909,8 +909,11 @@ class VersionDiffer:
         # Note: Use .get() without default to get None if key doesn't exist
         old_raw = old_cls.get("raw_properties")
         new_raw = new_cls.get("raw_properties")
-        old_resolved = old_cls.get("resolved_properties")
-        new_resolved = new_cls.get("resolved_properties")
+
+        # Note: resolved_properties was removed in schema simplification
+        # We now only compare raw_properties
+        old_resolved = old_cls.get("resolved_properties") or {}
+        new_resolved = new_cls.get("resolved_properties") or {}
 
         # If enhanced properties not available, fall back to basic comparison
         if old_raw is None and new_raw is None:
@@ -938,10 +941,19 @@ class VersionDiffer:
         for prop_name in common:
             old_val = old_raw.get(prop_name, "")
             new_val = new_raw.get(prop_name, "")
-            old_resolved_val = old_resolved.get(prop_name, "")
-            new_resolved_val = new_resolved.get(prop_name, "")
+            old_resolved_val = old_resolved.get(prop_name, "") if old_resolved else ""
+            new_resolved_val = new_resolved.get(prop_name, "") if new_resolved else ""
 
-            if old_val != new_val or old_resolved_val != new_resolved_val:
+            # Only compare raw values if resolved properties are not available
+            # (they were removed in model simplification)
+            if old_resolved or new_resolved:
+                # Old catalogues might have resolved_properties
+                has_changes = old_val != new_val or old_resolved_val != new_resolved_val
+            else:
+                # New catalogues only have raw_properties
+                has_changes = old_val != new_val
+
+            if has_changes:
                 modified.append(
                     {
                         "property": prop_name,
