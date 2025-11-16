@@ -113,40 +113,48 @@ class UXMLBinaryPatcher:
         """
         Apply modifications from imported data to parsed elements.
 
+        Matches elements by position (m_OrderInDocument) rather than ID,
+        since UXML files don't preserve element IDs.
+
         Args:
             elements: Parsed binary elements (modified in-place)
             imported_elements: Imported element data from UXML
         """
-        # Create lookup by ID
-        imported_by_id = {elem['m_Id']: elem for elem in imported_elements}
+        # Sort both lists by order to ensure correct matching
+        elements_by_order = sorted(elements, key=lambda e: e.m_OrderInDocument)
+        imported_by_order = sorted(imported_elements, key=lambda e: e['m_OrderInDocument'])
 
-        for elem in elements:
-            if elem.m_Id not in imported_by_id:
-                if self.verbose:
-                    log.debug(f"Element {elem.m_Id} not in imported data, keeping original")
-                continue
+        # Handle count mismatch
+        if len(elements_by_order) != len(imported_by_order):
+            log.warning(
+                f"Element count mismatch: original has {len(elements_by_order)} elements, "
+                f"imported has {len(imported_by_order)} elements. "
+                f"This may indicate added/removed elements which is not fully supported yet."
+            )
+            # For now, only process up to the minimum count
+            min_count = min(len(elements_by_order), len(imported_by_order))
+        else:
+            min_count = len(elements_by_order)
 
-            imported = imported_by_id[elem.m_Id]
+        # Match and apply changes by position
+        for i in range(min_count):
+            elem = elements_by_order[i]
+            imported = imported_by_order[i]
 
-            # Update integer fields
-            if 'm_OrderInDocument' in imported:
+            # Preserve the original ID (don't change it)
+            # Only update order if it changed
+            if 'm_OrderInDocument' in imported and imported['m_OrderInDocument'] != elem.m_OrderInDocument:
                 old_order = elem.m_OrderInDocument
                 elem.m_OrderInDocument = imported['m_OrderInDocument']
-                if self.verbose and old_order != elem.m_OrderInDocument:
+                if self.verbose:
                     log.debug(
                         f"Element {elem.m_Id}: order {old_order} → {elem.m_OrderInDocument}"
                     )
 
-            if 'm_ParentId' in imported:
-                old_parent = elem.m_ParentId
-                elem.m_ParentId = imported['m_ParentId']
-                if self.verbose and old_parent != elem.m_ParentId:
-                    log.debug(
-                        f"Element {elem.m_Id}: parent {old_parent} → {elem.m_ParentId}"
-                    )
-
-            if 'm_RuleIndex' in imported:
-                elem.m_RuleIndex = imported['m_RuleIndex']
+            # Update parent ID mapping (map from imported position to original ID)
+            # Note: Parent IDs need special handling since they reference other elements
+            # For now, keep original parent relationships
+            # TODO: Handle parent ID remapping for element hierarchy changes
 
             # Update CSS classes
             if 'm_Classes' in imported:
