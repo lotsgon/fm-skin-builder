@@ -61,6 +61,7 @@ class CSSExtractor(BaseAssetExtractor):
                 colors = getattr(data, "colors", [])
                 floats = getattr(data, "floats", []) if hasattr(data, "floats") else []
                 dimensions = getattr(data, "dimensions", []) if hasattr(data, "dimensions") else []
+                assets = getattr(data, "assets", []) if hasattr(data, "assets") else []
                 rules = getattr(data, "m_Rules", [])
                 rule_selectors = self._get_rule_selectors(data)
 
@@ -86,6 +87,7 @@ class CSSExtractor(BaseAssetExtractor):
                                 colors_array=colors,
                                 floats=floats,
                                 dimensions=dimensions,
+                                assets=assets,
                             )
                             if css_var:
                                 variables.append(css_var)
@@ -103,6 +105,7 @@ class CSSExtractor(BaseAssetExtractor):
                                     colors=colors,
                                     floats=floats,
                                     dimensions=dimensions,
+                                    assets=assets,
                                 )
                                 if css_class:
                                     classes.append(css_class)
@@ -160,6 +163,7 @@ class CSSExtractor(BaseAssetExtractor):
         colors: List[Any],
         floats: List[float],
         dimensions: List[Any],
+        assets: List[Any] = None,
     ) -> List[CSSValueDefinition]:
         """
         Extract value definitions from a property.
@@ -173,6 +177,7 @@ class CSSExtractor(BaseAssetExtractor):
             colors: Color array
             floats: Floats array
             dimensions: Dimensions array
+            assets: Assets array (for resolving PPtr references)
 
         Returns:
             List of CSSValueDefinition objects with properly formatted USS values
@@ -197,6 +202,7 @@ class CSSExtractor(BaseAssetExtractor):
                 floats=floats,
                 dimensions=dimensions,
                 prop_name=prop_name,
+                assets=assets,
             )
 
             # Store raw color data for color values (for backward compatibility)
@@ -230,6 +236,7 @@ class CSSExtractor(BaseAssetExtractor):
         colors_array: List[Any],
         floats: List[float],
         dimensions: List[Any],
+        assets: List[Any] = None,
     ) -> CSSVariable | None:
         """Create a CSSVariable model instance."""
         # Get the actual CSS/USS text value using format_property_value()
@@ -239,6 +246,7 @@ class CSSExtractor(BaseAssetExtractor):
             colors_array,
             floats,
             dimensions,
+            assets,
         )
 
         if not css_text_value:
@@ -276,6 +284,7 @@ class CSSExtractor(BaseAssetExtractor):
         colors: List[Any],
         floats: List[float],
         dimensions: List[Any],
+        assets: List[Any] = None,
     ) -> CSSClass | None:
         """Create a CSSClass model instance."""
         if not properties:
@@ -297,6 +306,7 @@ class CSSExtractor(BaseAssetExtractor):
                 colors,
                 floats,
                 dimensions,
+                assets,
             )
 
             # Store the actual CSS/USS text value

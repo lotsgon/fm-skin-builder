@@ -765,9 +765,20 @@ def _format_uss_value(
     floats: List[float],
     dimensions: List[Any],
     prop_name: str,
+    assets: Optional[List[Any]] = None,
 ) -> Optional[str]:
     """
     Format a Unity USS value based on its type.
+
+    Args:
+        value_type: Unity value type enum
+        value_index: Index into the appropriate array
+        strings: String array from StyleSheet
+        colors: Color array from StyleSheet
+        floats: Float array from StyleSheet
+        dimensions: Dimension array from StyleSheet
+        prop_name: Property name for context
+        assets: Asset array from StyleSheet (for Type 6 PPtr resolution)
 
     Returns:
         Formatted value string, or None if invalid
@@ -911,8 +922,28 @@ def _format_uss_value(
 
     elif value_type == 6:  # Asset reference (PPtr)
         # Type 6 is an asset reference (e.g., font, sprite, texture)
-        # These are stored as indices into some asset array or as pointer references
-        # For now, represent as a placeholder since we don't have the asset data here
+        # The value_index points into the StyleSheet's assets array
+
+        # Try to resolve the asset reference to its actual name
+        if assets and 0 <= value_index < len(assets):
+            try:
+                asset_ptr = assets[value_index]
+                # PPtr objects have a read() method to dereference them
+                if hasattr(asset_ptr, 'read'):
+                    resolved_asset = asset_ptr.read()
+                    # Get the asset name
+                    if hasattr(resolved_asset, 'm_Name'):
+                        asset_name = resolved_asset.m_Name
+                        if asset_name:
+                            # Return the actual asset name instead of placeholder
+                            # Format: resource("AssetName") for clarity
+                            return f'resource("{asset_name}")'
+            except Exception:
+                # If resolution fails (e.g., external file not found), fall through to placeholder
+                pass
+
+        # Fallback: Return placeholder if we can't resolve
+        # This can happen if assets array isn't provided or asset is in external file
         return f"<asset-ref:{value_index}>"
 
     elif (
@@ -1149,6 +1180,7 @@ def format_property_value(
     colors: List[Any],
     floats: List[float],
     dimensions: List[Any],
+    assets: Optional[List[Any]] = None,
 ) -> str:
     """
     Format a Unity USS property to CSS/USS value text.
@@ -1161,6 +1193,7 @@ def format_property_value(
     - Multi-value shorthand properties: border-color, margin, padding, etc.
     - Single-value properties with priority-based value selection
     - All 11 Unity USS value types
+    - Asset references (Type 6) with PPtr resolution to actual asset names
 
     Args:
         prop: Unity property object with m_Name and m_Values
@@ -1168,9 +1201,10 @@ def format_property_value(
         colors: Stylesheet colors array
         floats: Stylesheet floats array
         dimensions: Stylesheet dimensions array
+        assets: Stylesheet assets array (for resolving PPtr references)
 
     Returns:
-        Formatted CSS/USS value string (e.g., "var(--my-color)", "10px", "none")
+        Formatted CSS/USS value string (e.g., "var(--my-color)", "10px", "none", "resource('FontName')")
     """
     from collections import defaultdict
     from typing import List as TList, Tuple as TTuple
@@ -1246,6 +1280,7 @@ def format_property_value(
                 floats,
                 dimensions,
                 prop_name,
+                assets,
             )
 
             if formatted_value:

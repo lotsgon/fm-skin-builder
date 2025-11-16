@@ -18,7 +18,7 @@ HEX_COLOR_PATTERN = re.compile(r"#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})")
 RGBA_PATTERN = re.compile(r"rgba?\([^)]+\)")
 VAR_REFERENCE_PATTERN = re.compile(r"var\((--[\w-]+)\)")
 SPRITE_REFERENCE_PATTERN = re.compile(
-    r"(?:url\(['\"]?|sprite://|resource://)([^'\")\s]+)"
+    r"(?:url\(['\"]?|sprite://|resource://|resource\(['\"]?)([^'\")\s]+)"
 )
 NUMERIC_TOKEN_PATTERN = re.compile(r"\d+(?:\.\d+)?(?:px|%|em|rem)")
 
@@ -153,13 +153,19 @@ class CSSResolver:
 
     def extract_asset_references(self, value: str) -> List[str]:
         """
-        Extract asset references (sprites, textures) from a value.
+        Extract asset references (sprites, textures, fonts) from a value.
+
+        Supports formats:
+        - url("AssetName") or url('AssetName')
+        - sprite://AssetName
+        - resource://AssetName
+        - resource("AssetName") (new format from PPtr resolution)
 
         Args:
             value: CSS property value
 
         Returns:
-            List of asset references (e.g., ['FMImages_1x/star_full'])
+            List of asset references (e.g., ['FMImages_1x/star_full', 'Roboto-Regular'])
         """
         if not value:
             return []
@@ -177,10 +183,9 @@ class CSSResolver:
                 cleaned.append(path)
 
         # NOTE: We do NOT extract <asset-ref:XXX> placeholders here because:
-        # 1. The INDEX is unstable and changes between Unity builds
-        # 2. We can't resolve them to actual asset names without the Unity bundle
-        # 3. Including them would create false positives in change detection
-        # Instead, we filter out asset-ref-only changes in version_differ.py
+        # 1. Those are fallback values when PPtr resolution fails
+        # 2. The INDEX is unstable and changes between Unity builds
+        # 3. We filter out asset-ref-only changes in version_differ.py to prevent false positives
 
         return cleaned
 
