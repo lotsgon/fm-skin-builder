@@ -3266,7 +3266,12 @@ class SkinPatchPipeline:
                                     raw_data = obj.get_raw_data()
 
                                     # Get original elements list for reference
-                                    original_elements = list(data.m_VisualElementAssets) if hasattr(data, "m_VisualElementAssets") else []
+                                    # Include both visual elements and template assets
+                                    original_elements = []
+                                    if hasattr(data, "m_VisualElementAssets"):
+                                        original_elements.extend(list(data.m_VisualElementAssets))
+                                    if hasattr(data, "m_TemplateAssets"):
+                                        original_elements.extend(list(data.m_TemplateAssets))
 
                                     # Apply binary patch
                                     new_raw_data = patcher.apply_uxml_to_vta_binary(

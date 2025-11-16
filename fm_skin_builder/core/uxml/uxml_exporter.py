@@ -653,6 +653,11 @@ class UXMLExporter:
         # This includes both standard Unity elements and custom SI elements
         xml_elem = ET.SubElement(parent_xml, f"{{UnityEngine.UIElements}}{element.element_type}")
 
+        # Add data-unity-id attribute to preserve element ID for round-trip
+        # This enables ID-based matching during re-import
+        if element.id is not None:
+            xml_elem.set("data-unity-id", str(element.id))
+
         # Add attributes
         for attr in element.attributes:
             xml_elem.set(attr.name, attr.value)
