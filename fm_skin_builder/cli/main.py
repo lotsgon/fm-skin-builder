@@ -8,6 +8,8 @@ from .commands import (
     patch as cmd_patch,
     scan as cmd_scan,
     catalogue as cmd_catalogue,
+    export_uxml as cmd_export_uxml,
+    import_uxml as cmd_import_uxml,
 )
 import os
 import sys
@@ -173,6 +175,57 @@ def main() -> None:
     )
     d.add_argument("--pretty", action="store_true", help="Pretty-print JSON output")
 
+    # Export UXML command
+    e = sub.add_parser("export-uxml", help="Export UXML files from Unity bundles")
+    e.add_argument(
+        "--bundle",
+        type=str,
+        required=True,
+        help="Bundle file or directory to export from",
+    )
+    e.add_argument(
+        "--out",
+        type=str,
+        default="exported_uxml",
+        help="Output directory for UXML files (default: exported_uxml)",
+    )
+    e.add_argument(
+        "--filter",
+        type=str,
+        default=None,
+        help="Comma-separated list of asset names to export (e.g., 'CalendarTool,PlayerOverview')",
+    )
+    e.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview what would be exported without writing files",
+    )
+
+    # Import UXML command
+    i = sub.add_parser("import-uxml", help="Import UXML files and patch Unity bundles")
+    i.add_argument(
+        "--bundle", type=str, required=True, help="Bundle file to patch"
+    )
+    i.add_argument(
+        "--uxml",
+        type=str,
+        required=True,
+        help="Directory containing edited UXML files",
+    )
+    i.add_argument(
+        "--out", type=str, required=True, help="Output path for patched bundle"
+    )
+    i.add_argument(
+        "--backup",
+        action="store_true",
+        help="Create .bak backup of original bundle",
+    )
+    i.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview what would be imported without writing files",
+    )
+
     args = parser.parse_args()
 
     if args.command == "build":
@@ -193,6 +246,10 @@ def main() -> None:
         from .commands import catalogue_diff as cmd_catalogue_diff
 
         cmd_catalogue_diff.run(args)
+    elif args.command == "export-uxml":
+        cmd_export_uxml.run(args)
+    elif args.command == "import-uxml":
+        cmd_import_uxml.run(args)
 
     # Mitigate rare CPython finalization crash observed with C extensions (e.g., compression libs)
     # by forcing an immediate process exit after flushing. Can be disabled by setting FM_HARD_EXIT=0.
