@@ -14,7 +14,6 @@ def run(args) -> None:
     else:
         out_dir = css_dir / "packages"
     bundle = Path(args.bundle) if args.bundle else None
-    uxml_dir = Path(args.uxml).resolve() if args.uxml else None
     result = run_patch(
         css_dir=css_dir,
         out_dir=out_dir,
@@ -25,7 +24,6 @@ def run(args) -> None:
         dry_run=args.dry_run,
         use_scan_cache=not args.no_scan_cache,
         refresh_scan_cache=args.refresh_scan_cache,
-        uxml_dir=uxml_dir,
     )
 
     if result.summary_lines:

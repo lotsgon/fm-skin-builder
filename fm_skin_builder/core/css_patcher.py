@@ -2858,12 +2858,10 @@ class SkinPatchPipeline:
         css_dir: Path,
         out_dir: Path,
         options: PipelineOptions,
-        uxml_dir: Optional[Path] = None,
     ) -> None:
         self.css_dir = css_dir
         self.out_dir = out_dir
         self.options = options
-        self.uxml_dir = uxml_dir
 
     def run(self, bundle: Optional[Path] = None) -> PipelineResult:
         css_data = collect_css_from_dir(self.css_dir)
@@ -2968,6 +2966,19 @@ class SkinPatchPipeline:
                 )
             )
 
+        # UXML patching - discover from panels or layouts directory
+        uxml_targets_present = any(
+            x.strip().lower() in {"panels", "layouts", "uxml"} for x in includes_list
+        )
+        uxml_dir: Optional[Path] = None
+        if uxml_targets_present:
+            # Try panels first, then layouts, then uxml
+            for dir_name in ["panels", "layouts", "uxml"]:
+                potential_dir = self.css_dir / dir_name
+                if potential_dir.exists() and potential_dir.is_dir():
+                    uxml_dir = potential_dir
+                    break
+
         summary_lines: List[str] = []
         bundle_reports: List[PatchReport] = []
         css_bundles_modified = 0
@@ -2997,6 +3008,7 @@ class SkinPatchPipeline:
                 replace_stems=replace_stems,
                 want_icons=want_icons,
                 want_bgs=want_bgs,
+                uxml_dir=uxml_dir,
             )
 
             if report is None:
@@ -3074,6 +3086,7 @@ class SkinPatchPipeline:
         replace_stems: Set[str],
         want_icons: bool,
         want_bgs: bool,
+        uxml_dir: Optional[Path],
     ) -> Optional[PatchReport]:
         if self.options.backup:
             ts = os.environ.get("FM_SKIN_BACKUP_TS") or "backup"
@@ -3167,9 +3180,9 @@ class SkinPatchPipeline:
                     log.warning(f"[WARN] Font swap skipped due to error: {exc}")
 
             # UXML replacement
-            if self.uxml_dir and self.uxml_dir.exists():
+            if uxml_dir and uxml_dir.exists():
                 try:
-                    uxml_count = self._apply_uxml_patches(bundle_ctx, report)
+                    uxml_count = self._apply_uxml_patches(bundle_ctx, report, uxml_dir)
                     if uxml_count > 0:
                         log.info(f"[UXML] Applied {uxml_count} UXML patch(es)")
                 except Exception as exc:
@@ -3184,21 +3197,26 @@ class SkinPatchPipeline:
         return report
 
     def _apply_uxml_patches(
-        self, bundle_ctx: BundleContext, report: PatchReport
+        self, bundle_ctx: BundleContext, report: PatchReport, uxml_dir: Path
     ) -> int:
         """
-        Apply UXML patches from self.uxml_dir to the bundle.
+        Apply UXML patches from the given uxml_dir to the bundle.
+
+        Args:
+            bundle_ctx: Bundle context
+            report: Patch report to update
+            uxml_dir: Directory containing UXML files
 
         Returns:
             Number of VTA assets successfully patched.
         """
-        if not self.uxml_dir or not self.uxml_dir.exists():
+        if not uxml_dir or not uxml_dir.exists():
             return 0
 
         # Find UXML files
-        uxml_files = list(self.uxml_dir.glob("*.uxml"))
+        uxml_files = list(uxml_dir.glob("*.uxml"))
         if not uxml_files:
-            log.debug(f"[UXML] No .uxml files found in {self.uxml_dir}")
+            log.debug(f"[UXML] No .uxml files found in {uxml_dir}")
             return 0
 
         # Build lookup of available UXML files
@@ -3298,7 +3316,6 @@ def run_patch(
     dry_run: bool = False,
     use_scan_cache: bool = True,
     refresh_scan_cache: bool = False,
-    uxml_dir: Optional[Path] = None,
 ) -> PipelineResult:
     """High-level entry to patch bundles based on CSS in css_dir."""
 
@@ -3310,5 +3327,5 @@ def run_patch(
         use_scan_cache=use_scan_cache,
         refresh_scan_cache=refresh_scan_cache,
     )
-    pipeline = SkinPatchPipeline(css_dir, out_dir, options, uxml_dir=uxml_dir)
+    pipeline = SkinPatchPipeline(css_dir, out_dir, options)
     return pipeline.run(bundle=bundle)

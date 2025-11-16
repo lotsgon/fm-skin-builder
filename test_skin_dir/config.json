@@ -1,1 +1,1 @@
-{"name": "test_skin", "version": "1.0", "includes": []}
+{"name": "test_skin", "version": "1.0", "includes": ["panels"]}
