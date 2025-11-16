@@ -100,11 +100,13 @@ def merge_assets_by_hash(
 
             for asset in assets:
                 asset_hash = asset.get(hash_key)
-                if not asset_hash:
-                    # No hash, keep it anyway (shouldn't happen but be defensive)
+                if asset_hash is None:
+                    # No hash key in asset, keep it anyway (shouldn't happen but be defensive)
                     merged_assets.append(asset)
                     continue
 
+                # Treat empty hash as a valid hash (e.g., sprites without images)
+                # This ensures they participate in deduplication
                 if asset_hash in seen_hashes:
                     # Duplicate - skip it
                     continue
