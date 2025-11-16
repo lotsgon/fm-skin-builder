@@ -89,6 +89,103 @@ class UXMLImporter:
 
         return doc
 
+    def apply_uxml_to_vta(self, doc: UXMLDocument, vta_data: Any) -> None:
+        """
+        Apply UXML changes to an existing VTA object by modifying existing elements.
+
+        This reuses existing Unity objects rather than creating new ones,
+        which preserves all Unity typing, complex objects, and required fields.
+
+        Args:
+            doc: UXMLDocument with the desired structure
+            vta_data: Existing VTA data object to modify
+        """
+        log.info(f"Applying UXML changes to VisualTreeAsset: {doc.asset_name}")
+
+        # Get existing elements to reuse
+        existing_visuals = list(vta_data.m_VisualElementAssets) if hasattr(vta_data, "m_VisualElementAssets") else []
+        existing_templates = list(vta_data.m_TemplateAssets) if hasattr(vta_data, "m_TemplateAssets") else []
+
+        # Build new element lists by reusing existing objects
+        new_visual_elements = []
+        new_template_elements = []
+        element_id = 0
+        visual_idx = 0
+        template_idx = 0
+
+        def process_element(elem: UXMLElement, parent_id: int = -1) -> int:
+            nonlocal element_id, visual_idx, template_idx
+
+            current_id = element_id
+            element_id += 1
+
+            # Check if this is a TemplateContainer
+            is_template = elem.element_type == 'TemplateContainer'
+
+            # Reuse an existing element object or skip if we run out
+            if is_template:
+                if template_idx < len(existing_templates):
+                    ve_asset = existing_templates[template_idx]
+                    template_idx += 1
+                else:
+                    log.warning(f"Not enough existing template elements to reuse (need {template_idx + 1}, have {len(existing_templates)})")
+                    return current_id
+            else:
+                if visual_idx < len(existing_visuals):
+                    ve_asset = existing_visuals[visual_idx]
+                    visual_idx += 1
+                else:
+                    log.warning(f"Not enough existing visual elements to reuse (need {visual_idx + 1}, have {len(existing_visuals)})")
+                    return current_id
+
+            # Update the fields from UXML (modifying in-place)
+            ve_asset.m_Id = current_id
+            ve_asset.m_ParentId = parent_id
+            ve_asset.m_OrderInDocument = len(new_visual_elements) + len(new_template_elements)
+            ve_asset.m_FullTypeName = self._get_full_type_name(elem.element_type)
+            ve_asset.m_Name = ''
+            ve_asset.m_Classes = []
+            ve_asset.m_Text = ''
+
+            # Process attributes
+            for attr in elem.attributes:
+                if attr.name == 'name':
+                    ve_asset.m_Name = attr.value
+                elif attr.name == 'class':
+                    classes = [c.strip() for c in attr.value.split() if c.strip()]
+                    ve_asset.m_Classes = classes
+                elif attr.name == 'template':
+                    # Set template alias if this is a TemplateContainer
+                    if hasattr(ve_asset, 'm_TemplateAlias'):
+                        ve_asset.m_TemplateAlias = attr.value
+
+            # Process text content
+            if elem.text:
+                ve_asset.m_Text = elem.text
+
+            # Add to appropriate list
+            if is_template:
+                new_template_elements.append(ve_asset)
+            else:
+                new_visual_elements.append(ve_asset)
+
+            # Process children
+            for child in elem.children:
+                process_element(child, current_id)
+
+            return current_id
+
+        # Process the element tree
+        if doc.root:
+            process_element(doc.root)
+
+        # Update the VTA data with the modified element lists
+        vta_data.m_VisualElementAssets = new_visual_elements
+        if hasattr(vta_data, "m_TemplateAssets"):
+            vta_data.m_TemplateAssets = new_template_elements
+
+        log.info(f"Applied {len(new_visual_elements)} visual elements and {len(new_template_elements)} template elements")
+
     def build_visual_tree_asset(
         self,
         doc: UXMLDocument,

@@ -3255,56 +3255,19 @@ class SkinPatchPipeline:
                                 log.debug(f"  [UXML] Importing: {asset_name}")
 
                                 try:
-                                    # FIXME: UXML patching is currently not functional
-                                    # The UXML importer creates dictionary structures, but UnityPy
-                                    # requires proper typed objects for serialization.
-                                    # This needs to be refactored to create proper UnityPy objects.
-                                    log.warning(f"  [UXML] Skipping {asset_name}: UXML patching not yet fully implemented")
-                                    log.warning(f"        The UXML importer needs refactoring to create UnityPy-compatible objects")
-                                    continue
+                                    # Import UXML
+                                    doc = importer.import_uxml(uxml_file)
 
-                                    # # Import UXML
-                                    # doc = importer.import_uxml(uxml_file)
+                                    # Apply UXML changes to the existing VTA object
+                                    # This modifies the object in-place, preserving all Unity typing
+                                    importer.apply_uxml_to_vta(doc, data)
 
-                                    # # Convert to VTA structure
-                                    # vta_structure = importer.build_visual_tree_asset(doc)
+                                    # Save changes
+                                    obj.save_typetree(data)
+                                    modified_count += 1
+                                    bundle_ctx.mark_dirty()
 
-                                    # # Update VTA elements by copying structure from original
-                                    # # and only modifying the fields we care about
-                                    # if "m_VisualElementAssets" in vta_structure:
-                                    #     new_elements = vta_structure["m_VisualElementAssets"]
-
-                                    #     # Copy default values from first original element if available
-                                    #     if hasattr(data, "m_VisualElementAssets") and data.m_VisualElementAssets:
-                                    #         template_elem = data.m_VisualElementAssets[0]
-
-                                    #         # Update each new element with default fields from template
-                                    #         for elem in new_elements:
-                                    #             # Add missing fields with default values from template
-                                    #             # All fields except the core ones (m_Id, m_ParentId, etc.)
-                                    #             for field in ['m_XmlNamespace', 'm_NamespaceDefinitions',
-                                    #                          'm_PickingMode', 'm_RuleIndex', 'm_SerializedData',
-                                    #                          'm_SkipClone', 'm_StylesheetPaths', 'm_Stylesheets',
-                                    #                          'm_Properties', 'm_Text']:
-                                    #                 # Handle both dict and object formats
-                                    #                 if isinstance(elem, dict):
-                                    #                     if field not in elem and hasattr(template_elem, field):
-                                    #                         elem[field] = getattr(template_elem, field)
-                                    #                 else:
-                                    #                     if not hasattr(elem, field) and hasattr(template_elem, field):
-                                    #                         setattr(elem, field, getattr(template_elem, field))
-
-                                    #     data.m_VisualElementAssets = new_elements
-
-                                    # if "m_TemplateAssets" in vta_structure:
-                                    #     data.m_TemplateAssets = vta_structure["m_TemplateAssets"]
-                                    # if "m_InlineSheet" in vta_structure:
-                                    #     data.m_InlineSheet = vta_structure["m_InlineSheet"]
-
-                                    # # Save changes
-                                    # obj.save_typetree(data)
-                                    # modified_count += 1
-                                    # bundle_ctx.mark_dirty()
+                                    log.info(f"  [UXML] Successfully patched: {asset_name}")
 
                                 except Exception as e:
                                     import traceback
