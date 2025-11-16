@@ -89,102 +89,98 @@ class UXMLImporter:
 
         return doc
 
-    def apply_uxml_to_vta(self, doc: UXMLDocument, vta_data: Any) -> None:
+    def parse_uxml_to_dict(self, uxml_path: Path) -> Dict[str, Any]:
         """
-        Apply UXML changes to an existing VTA object by modifying existing elements.
+        Parse UXML file and return Unity VisualTreeAsset structure as dictionary.
 
-        This reuses existing Unity objects rather than creating new ones,
-        which preserves all Unity typing, complex objects, and required fields.
+        This is used for binary patching approach, not for direct UnityPy serialization.
 
         Args:
-            doc: UXMLDocument with the desired structure
-            vta_data: Existing VTA data object to modify
+            uxml_path: Path to UXML file
+
+        Returns:
+            Dictionary representing VisualTreeAsset with m_VisualElementAssets list
         """
-        log.info(f"Applying UXML changes to VisualTreeAsset: {doc.asset_name}")
+        log.info(f"Parsing UXML to dictionary: {uxml_path}")
 
-        # Get existing elements to reuse
-        existing_visuals = list(vta_data.m_VisualElementAssets) if hasattr(vta_data, "m_VisualElementAssets") else []
-        existing_templates = list(vta_data.m_TemplateAssets) if hasattr(vta_data, "m_TemplateAssets") else []
+        # Parse XML
+        tree = ET.parse(str(uxml_path))
+        root_xml = tree.getroot()
 
-        # Build new element lists by reusing existing objects
-        new_visual_elements = []
-        new_template_elements = []
-        element_id = 0
-        visual_idx = 0
-        template_idx = 0
+        # Remove namespace for easier processing
+        for elem in root_xml.iter():
+            if '}' in elem.tag:
+                elem.tag = elem.tag.split('}')[1]
 
-        def process_element(elem: UXMLElement, parent_id: int = -1) -> int:
-            nonlocal element_id, visual_idx, template_idx
+        # Build the structure
+        visual_elements = self._build_element_assets_from_xml(root_xml)
 
-            current_id = element_id
-            element_id += 1
+        result = {
+            'm_VisualElementAssets': visual_elements,
+            'm_UxmlObjectAssets': [],
+        }
 
-            # Check if this is a TemplateContainer
-            is_template = elem.element_type == 'TemplateContainer'
+        return result
 
-            # Reuse an existing element object or skip if we run out
-            if is_template:
-                if template_idx < len(existing_templates):
-                    ve_asset = existing_templates[template_idx]
-                    template_idx += 1
-                else:
-                    log.warning(f"Not enough existing template elements to reuse (need {template_idx + 1}, have {len(existing_templates)})")
-                    return current_id
+    def _build_element_assets_from_xml(self, root_xml: ET.Element) -> List[Dict[str, Any]]:
+        """
+        Convert XML elements to m_VisualElementAssets list.
+
+        Args:
+            root_xml: XML root element
+
+        Returns:
+            List of VisualElementAsset dictionaries
+        """
+        elements = []
+        element_counter = [0]  # Use list for mutable counter in nested function
+
+        def process_element(elem: ET.Element, parent_id: int = 0) -> Optional[Dict[str, Any]]:
+            """Recursively process XML elements."""
+
+            # Get element ID from data-unity-id attribute (if present in exported UXML)
+            # Otherwise use counter
+            unity_id_str = elem.get('data-unity-id')
+            if unity_id_str:
+                try:
+                    element_id = int(unity_id_str)
+                except ValueError:
+                    element_id = element_counter[0]
+                    element_counter[0] += 1
             else:
-                if visual_idx < len(existing_visuals):
-                    ve_asset = existing_visuals[visual_idx]
-                    visual_idx += 1
-                else:
-                    log.warning(f"Not enough existing visual elements to reuse (need {visual_idx + 1}, have {len(existing_visuals)})")
-                    return current_id
+                element_id = element_counter[0]
+                element_counter[0] += 1
 
-            # Update the fields from UXML (modifying in-place)
-            ve_asset.m_Id = current_id
-            ve_asset.m_ParentId = parent_id
-            ve_asset.m_OrderInDocument = len(new_visual_elements) + len(new_template_elements)
-            ve_asset.m_FullTypeName = self._get_full_type_name(elem.element_type)
-            ve_asset.m_Name = ''
-            ve_asset.m_Classes = []
-            ve_asset.m_Text = ''
+            # Build the element asset
+            element_asset = {
+                'm_Id': element_id,
+                'm_OrderInDocument': len(elements),
+                'm_ParentId': parent_id,
+                'm_RuleIndex': -1,
+                'm_Type': elem.tag,
+                'm_Name': elem.get('name', ''),
+                'm_Classes': elem.get('class', '').split() if elem.get('class') else []
+            }
 
-            # Process attributes
-            for attr in elem.attributes:
-                if attr.name == 'name':
-                    ve_asset.m_Name = attr.value
-                elif attr.name == 'class':
-                    classes = [c.strip() for c in attr.value.split() if c.strip()]
-                    ve_asset.m_Classes = classes
-                elif attr.name == 'template':
-                    # Set template alias if this is a TemplateContainer
-                    if hasattr(ve_asset, 'm_TemplateAlias'):
-                        ve_asset.m_TemplateAlias = attr.value
-
-            # Process text content
-            if elem.text:
-                ve_asset.m_Text = elem.text
-
-            # Add to appropriate list
-            if is_template:
-                new_template_elements.append(ve_asset)
-            else:
-                new_visual_elements.append(ve_asset)
+            elements.append(element_asset)
 
             # Process children
-            for child in elem.children:
-                process_element(child, current_id)
+            for child in elem:
+                # Skip Template includes for now (they're references, not actual elements)
+                if child.tag == 'Template':
+                    continue
+                process_element(child, element_id)
 
-            return current_id
+            return element_asset
 
-        # Process the element tree
-        if doc.root:
-            process_element(doc.root)
+        # Process all top-level elements
+        for child in root_xml:
+            # Skip non-element nodes
+            if child.tag in ['Template', 'Style'] or callable(child.tag):
+                continue
+            process_element(child)
 
-        # Update the VTA data with the modified element lists
-        vta_data.m_VisualElementAssets = new_visual_elements
-        if hasattr(vta_data, "m_TemplateAssets"):
-            vta_data.m_TemplateAssets = new_template_elements
-
-        log.info(f"Applied {len(new_visual_elements)} visual elements and {len(new_template_elements)} template elements")
+        return elements
 
     def build_visual_tree_asset(
         self,

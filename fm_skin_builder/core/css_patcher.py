@@ -3222,7 +3222,11 @@ class SkinPatchPipeline:
         # Build lookup of available UXML files
         uxml_lookup = {f.stem: f for f in uxml_files}
 
+        from .uxml.uxml_importer import UXMLImporter
+        from .uxml.uxml_binary_patcher import UXMLBinaryPatcher
+
         importer = UXMLImporter()
+        patcher = UXMLBinaryPatcher(verbose=False)
         modified_count = 0
 
         # Find and update VisualTreeAssets
@@ -3255,26 +3259,38 @@ class SkinPatchPipeline:
                                 log.debug(f"  [UXML] Importing: {asset_name}")
 
                                 try:
-                                    # Import UXML
-                                    doc = importer.import_uxml(uxml_file)
+                                    # Parse UXML to dictionary format
+                                    imported_data = importer.parse_uxml_to_dict(uxml_file)
 
-                                    # Apply UXML changes to the existing VTA object
-                                    # This modifies the object in-place, preserving all Unity typing
-                                    importer.apply_uxml_to_vta(doc, data)
+                                    # Get raw binary data
+                                    raw_data = obj.get_raw_data()
 
-                                    # Save changes
-                                    obj.save_typetree(data)
-                                    modified_count += 1
-                                    bundle_ctx.mark_dirty()
+                                    # Get original elements list for reference
+                                    original_elements = list(data.m_VisualElementAssets) if hasattr(data, "m_VisualElementAssets") else []
 
-                                    log.info(f"  [UXML] Successfully patched: {asset_name}")
+                                    # Apply binary patch
+                                    new_raw_data = patcher.apply_uxml_to_vta_binary(
+                                        raw_data,
+                                        imported_data,
+                                        original_elements
+                                    )
+
+                                    if new_raw_data:
+                                        # Set modified binary data
+                                        obj.set_raw_data(new_raw_data)
+                                        modified_count += 1
+                                        bundle_ctx.mark_dirty()
+
+                                        log.info(f"  [UXML] Successfully patched: {asset_name}")
+                                    else:
+                                        log.error(f"  [UXML] Failed to patch {asset_name}: binary patcher returned None")
 
                                 except Exception as e:
                                     import traceback
-                                    log.error(f"    [UXML] Failed to import {asset_name}: {e}")
+                                    log.error(f"  [UXML] Failed to import {asset_name}: {e}")
                                     # Log full traceback to help debug
                                     for line in traceback.format_exc().splitlines():
-                                        log.error(f"      {line}")
+                                        log.error(f"    {line}")
 
                 except Exception as e:
                     log.debug(f"  [UXML] Failed to process object {obj.path_id}: {e}")
