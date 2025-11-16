@@ -3223,83 +3223,96 @@ class SkinPatchPipeline:
         uxml_lookup = {f.stem: f for f in uxml_files}
 
         from .uxml.uxml_importer import UXMLImporter
-        from .uxml.uxml_binary_patcher import UXMLBinaryPatcher
+        from .uxml.uxml_binary_patcher_v2 import UXMLBinaryPatcherV2
 
         importer = UXMLImporter()
-        patcher = UXMLBinaryPatcher(verbose=False)
+        patcher = UXMLBinaryPatcherV2(verbose=False)
         modified_count = 0
 
-        # Find and update VisualTreeAssets
+        # CRITICAL: We must NOT call obj.read() on objects we plan to patch with set_raw_data()
+        # This causes bundle corruption. Instead, we use peek_name() and parse metadata from
+        # a separate bundle load or from the binary itself.
+
+        # First pass: identify VTAs that need patching using peek_name()
+        vtas_to_patch = []
         for obj in bundle_ctx.env.objects:
             if obj.type.name == "MonoBehaviour":
                 try:
-                    data = obj.read()
+                    # Use peek_name() instead of read() to avoid corruption
+                    asset_name = obj.peek_name()
+                    if asset_name and asset_name in uxml_lookup:
+                        vtas_to_patch.append((obj, asset_name, uxml_lookup[asset_name]))
+                except:
+                    pass
 
-                    # Check if this is a VisualTreeAsset by looking for VTA-specific fields
-                    # (m_ClassName may not be set in Unity 2021+)
-                    is_vta = (
-                        hasattr(data, "m_VisualElementAssets")
-                        or hasattr(data, "m_TemplateAssets")
-                        or hasattr(data, "m_UxmlObjectEntries")
+        # Second pass: load metadata from a SEPARATE bundle instance
+        # This allows us to read() metadata without corrupting the target objects
+        if vtas_to_patch:
+            log.debug(f"  [UXML] Found {len(vtas_to_patch)} VTA(s) to patch, loading metadata...")
+            metadata_env = UnityPy.load(str(bundle_ctx.bundle_path))
+            metadata_cache = {}
+
+            for obj in metadata_env.objects:
+                if obj.type.name == "MonoBehaviour":
+                    try:
+                        name = obj.peek_name()
+                        if name and name in uxml_lookup:
+                            # Read metadata from this separate instance
+                            data = obj.read()
+                            visual_elements = []
+                            template_assets = []
+                            if hasattr(data, "m_VisualElementAssets"):
+                                visual_elements = list(data.m_VisualElementAssets)
+                            if hasattr(data, "m_TemplateAssets"):
+                                template_assets = list(data.m_TemplateAssets)
+                            metadata_cache[name] = (visual_elements, template_assets)
+                    except:
+                        pass
+
+        # Third pass: apply patches without calling read() on target objects
+        for target_obj, asset_name, uxml_file in vtas_to_patch:
+            if self.options.dry_run:
+                log.info(f"  [UXML DRY-RUN] Would import: {asset_name}")
+                modified_count += 1
+            else:
+                log.debug(f"  [UXML] Importing: {asset_name}")
+
+                try:
+                    # Parse UXML to dictionary format
+                    imported_data = importer.parse_uxml_to_dict(uxml_file)
+
+                    # Get raw binary data (WITHOUT calling read() on target_obj!)
+                    raw_data = target_obj.get_raw_data()
+
+                    # Get metadata from cache
+                    visual_elements, template_assets = metadata_cache.get(
+                        asset_name, ([], [])
                     )
 
-                    if is_vta:
-                        asset_name = getattr(data, "m_Name", f"VTA_{obj.path_id}")
-                        if not asset_name:
-                            asset_name = f"VTA_{obj.path_id}"
+                    # Apply binary patch using V2 patcher
+                    new_raw_data = patcher.apply_uxml_to_vta_binary(
+                        raw_data,
+                        imported_data,
+                        visual_elements,
+                        template_assets
+                    )
 
-                        # Check if we have a UXML file for this asset
-                        uxml_file = uxml_lookup.get(asset_name)
+                    if new_raw_data:
+                        # Set modified binary data
+                        target_obj.set_raw_data(new_raw_data)
+                        modified_count += 1
+                        bundle_ctx.mark_dirty()
 
-                        if uxml_file:
-                            if self.options.dry_run:
-                                log.info(f"  [UXML DRY-RUN] Would import: {asset_name}")
-                                modified_count += 1
-                            else:
-                                log.debug(f"  [UXML] Importing: {asset_name}")
-
-                                try:
-                                    # Parse UXML to dictionary format
-                                    imported_data = importer.parse_uxml_to_dict(uxml_file)
-
-                                    # Get raw binary data
-                                    raw_data = obj.get_raw_data()
-
-                                    # Get original elements list for reference
-                                    # Include both visual elements and template assets
-                                    original_elements = []
-                                    if hasattr(data, "m_VisualElementAssets"):
-                                        original_elements.extend(list(data.m_VisualElementAssets))
-                                    if hasattr(data, "m_TemplateAssets"):
-                                        original_elements.extend(list(data.m_TemplateAssets))
-
-                                    # Apply binary patch
-                                    new_raw_data = patcher.apply_uxml_to_vta_binary(
-                                        raw_data,
-                                        imported_data,
-                                        original_elements
-                                    )
-
-                                    if new_raw_data:
-                                        # Set modified binary data
-                                        obj.set_raw_data(new_raw_data)
-                                        modified_count += 1
-                                        bundle_ctx.mark_dirty()
-
-                                        log.info(f"  [UXML] Successfully patched: {asset_name}")
-                                    else:
-                                        log.error(f"  [UXML] Failed to patch {asset_name}: binary patcher returned None")
-
-                                except Exception as e:
-                                    import traceback
-                                    log.error(f"  [UXML] Failed to import {asset_name}: {e}")
-                                    # Log full traceback to help debug
-                                    for line in traceback.format_exc().splitlines():
-                                        log.error(f"    {line}")
+                        log.info(f"  [UXML] Successfully patched: {asset_name}")
+                    else:
+                        log.error(f"  [UXML] Failed to patch {asset_name}: binary patcher returned None")
 
                 except Exception as e:
-                    log.debug(f"  [UXML] Failed to process object {obj.path_id}: {e}")
-                    continue
+                    import traceback
+                    log.error(f"  [UXML] Failed to import {asset_name}: {e}")
+                    # Log full traceback to help debug
+                    for line in traceback.format_exc().splitlines():
+                        log.error(f"    {line}")
 
         report.uxml_replacements = modified_count
         return modified_count
