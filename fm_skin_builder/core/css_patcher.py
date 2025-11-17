@@ -3247,7 +3247,9 @@ class SkinPatchPipeline:
         # Second pass: load metadata from a SEPARATE bundle instance
         # This allows us to read() metadata without corrupting the target objects
         if vtas_to_patch:
-            log.debug(f"  [UXML] Found {len(vtas_to_patch)} VTA(s) to patch, loading metadata...")
+            log.debug(
+                f"  [UXML] Found {len(vtas_to_patch)} VTA(s) to patch, loading metadata..."
+            )
             metadata_env = UnityPy.load(str(bundle_ctx.bundle_path))
             metadata_cache = {}
 
@@ -3290,17 +3292,18 @@ class SkinPatchPipeline:
                     )
 
                     if not visual_elements and not template_assets:
-                        log.warning(f"  [UXML] No metadata found in cache for {asset_name} - skipping")
+                        log.warning(
+                            f"  [UXML] No metadata found in cache for {asset_name} - skipping"
+                        )
                         continue
 
-                    log.debug(f"  [UXML] {asset_name}: {len(visual_elements)} visual, {len(template_assets)} template elements")
+                    log.debug(
+                        f"  [UXML] {asset_name}: {len(visual_elements)} visual, {len(template_assets)} template elements"
+                    )
 
                     # Apply binary patch using V2 patcher
                     new_raw_data = patcher.apply_uxml_to_vta_binary(
-                        raw_data,
-                        imported_data,
-                        visual_elements,
-                        template_assets
+                        raw_data, imported_data, visual_elements, template_assets
                     )
 
                     if new_raw_data:
@@ -3312,10 +3315,13 @@ class SkinPatchPipeline:
 
                         log.info(f"  [UXML] Successfully patched: {asset_name}")
                     else:
-                        log.error(f"  [UXML] Failed to patch {asset_name}: binary patcher returned None")
+                        log.error(
+                            f"  [UXML] Failed to patch {asset_name}: binary patcher returned None"
+                        )
 
                 except Exception as e:
                     import traceback
+
                     log.error(f"  [UXML] Failed to import {asset_name}: {e}")
                     # Log full traceback to help debug
                     for line in traceback.format_exc().splitlines():

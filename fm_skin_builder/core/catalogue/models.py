@@ -259,37 +259,33 @@ class VisualTreeAsset(BaseModel):
     element_count: int = Field(default=0, description="Total number of visual elements")
     element_types: List[str] = Field(
         default_factory=list,
-        description="Unique element types used: ['VisualElement', 'Label', 'Button']"
+        description="Unique element types used: ['VisualElement', 'Label', 'Button']",
     )
 
     # CSS classes used in this UXML
     classes_used: List[str] = Field(
-        default_factory=list,
-        description="CSS classes referenced in this UXML"
+        default_factory=list, description="CSS classes referenced in this UXML"
     )
 
     # Templates referenced
     templates_used: List[str] = Field(
-        default_factory=list,
-        description="Template assets referenced"
+        default_factory=list, description="Template assets referenced"
     )
 
     # Inline stylesheet reference
     has_inline_styles: bool = Field(
-        default=False,
-        description="True if this VTA has an inline StyleSheet"
+        default=False, description="True if this VTA has an inline StyleSheet"
     )
 
     # Auto-tags
     tags: List[str] = Field(
         default_factory=list,
-        description="Auto-generated tags: ['menu', 'ui', 'screen']"
+        description="Auto-generated tags: ['menu', 'ui', 'screen']",
     )
 
     # Export path (for exported UXML files)
     export_path: Optional[str] = Field(
-        None,
-        description="Relative path to exported UXML file: 'uxml/MainMenu.uxml'"
+        None, description="Relative path to exported UXML file: 'uxml/MainMenu.uxml'"
     )
 
     # Version tracking

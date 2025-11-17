@@ -1,4 +1,5 @@
 """Export UXML files from Unity bundles"""
+
 from __future__ import annotations
 from pathlib import Path
 import UnityPy
@@ -33,9 +34,8 @@ def run(args) -> None:
     if bundle_path.is_dir():
         log.info(f"Scanning directory: {bundle_path}")
         # Look for both .unity3d and .bundle files
-        bundle_files = (
-            list(bundle_path.glob("*.unity3d")) +
-            list(bundle_path.glob("*.bundle"))
+        bundle_files = list(bundle_path.glob("*.unity3d")) + list(
+            bundle_path.glob("*.bundle")
         )
         if not bundle_files:
             log.error(f"No bundle files (.unity3d or .bundle) found in {bundle_path}")
@@ -72,9 +72,9 @@ def run(args) -> None:
                     # Check if this is a VisualTreeAsset by looking for VTA-specific fields
                     # (m_ClassName may not be set in Unity 2021+)
                     is_vta = (
-                        hasattr(data, "m_VisualElementAssets") or
-                        hasattr(data, "m_TemplateAssets") or
-                        hasattr(data, "m_UxmlObjectEntries")
+                        hasattr(data, "m_VisualElementAssets")
+                        or hasattr(data, "m_TemplateAssets")
+                        or hasattr(data, "m_UxmlObjectEntries")
                     )
 
                     if is_vta:
@@ -110,7 +110,9 @@ def run(args) -> None:
                     continue
 
         if bundle_exported > 0 or args.dry_run:
-            log.info(f"  Exported {bundle_exported} UXML file(s) from {bundle_file.name}")
+            log.info(
+                f"  Exported {bundle_exported} UXML file(s) from {bundle_file.name}"
+            )
 
     # Summary
     log.info("\n=== Export Summary ===")

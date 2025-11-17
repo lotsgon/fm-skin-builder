@@ -7,6 +7,7 @@ Usage:
 
 This will read edited UXML files and update the corresponding VisualTreeAssets in the bundle.
 """
+
 import sys
 import argparse
 from pathlib import Path
@@ -22,10 +23,7 @@ log = get_logger(__name__)
 
 
 def import_uxml_to_bundle(
-    bundle_path: Path,
-    uxml_dir: Path,
-    output_bundle: Path,
-    backup: bool = True
+    bundle_path: Path, uxml_dir: Path, output_bundle: Path, backup: bool = True
 ) -> int:
     """
     Import edited UXML files back into a bundle.
@@ -54,6 +52,7 @@ def import_uxml_to_bundle(
         backup_path = bundle_path.with_suffix(bundle_path.suffix + ".bak")
         if not backup_path.exists():
             import shutil
+
             shutil.copy2(bundle_path, backup_path)
             log.info(f"Backup created: {backup_path}")
 
@@ -113,36 +112,27 @@ def main():
         description="Import UXML files and patch a Unity bundle"
     )
     parser.add_argument(
-        "--bundle",
-        type=Path,
-        required=True,
-        help="Path to Unity bundle file to patch"
+        "--bundle", type=Path, required=True, help="Path to Unity bundle file to patch"
     )
     parser.add_argument(
         "--uxml",
         type=Path,
         required=True,
-        help="Directory containing edited UXML files"
+        help="Directory containing edited UXML files",
     )
     parser.add_argument(
-        "--out",
-        type=Path,
-        required=True,
-        help="Output path for patched bundle"
+        "--out", type=Path, required=True, help="Output path for patched bundle"
     )
     parser.add_argument(
         "--no-backup",
         action="store_true",
-        help="Skip creating backup of original bundle"
+        help="Skip creating backup of original bundle",
     )
 
     args = parser.parse_args()
 
     count = import_uxml_to_bundle(
-        args.bundle,
-        args.uxml,
-        args.out,
-        backup=not args.no_backup
+        args.bundle, args.uxml, args.out, backup=not args.no_backup
     )
 
     if count == 0:

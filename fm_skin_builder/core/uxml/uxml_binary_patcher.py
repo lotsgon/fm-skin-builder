@@ -27,7 +27,7 @@ class UXMLBinaryPatcher:
         self,
         raw_data: bytes,
         imported_data: Dict[str, Any],
-        original_elements: List[Any]
+        original_elements: List[Any],
     ) -> Optional[bytes]:
         """
         Apply UXML changes to VisualTreeAsset by directly patching binary data.
@@ -50,26 +50,27 @@ class UXMLBinaryPatcher:
                 return None
 
             # Apply modifications from imported data
-            self._apply_modifications(elements, imported_data['m_VisualElementAssets'])
+            self._apply_modifications(elements, imported_data["m_VisualElementAssets"])
 
             # Rebuild the asset with modified elements
             new_raw_data = self._rebuild_asset(raw_data, elements)
 
             if self.verbose:
-                log.debug(f"Binary patch successful: {len(raw_data)} → {len(new_raw_data)} bytes")
+                log.debug(
+                    f"Binary patch successful: {len(raw_data)} → {len(new_raw_data)} bytes"
+                )
 
             return new_raw_data
 
         except Exception as e:
             log.error(f"Failed to apply binary UXML patch: {e}")
             import traceback
+
             log.debug(traceback.format_exc())
             return None
 
     def _parse_all_elements(
-        self,
-        raw_data: bytes,
-        original_elements: List[Any]
+        self, raw_data: bytes, original_elements: List[Any]
     ) -> Optional[List[UXMLElementBinary]]:
         """
         Parse all elements from raw binary data.
@@ -100,8 +101,16 @@ class UXMLBinaryPatcher:
             elements.append(parsed)
 
             if self.verbose:
-                classes_str = ', '.join(f'"{c}"' for c in parsed.m_Classes) if parsed.m_Classes else 'none'
-                paths_str = ', '.join(f'"{p}"' for p in parsed.m_StylesheetPaths) if parsed.m_StylesheetPaths else 'none'
+                classes_str = (
+                    ", ".join(f'"{c}"' for c in parsed.m_Classes)
+                    if parsed.m_Classes
+                    else "none"
+                )
+                paths_str = (
+                    ", ".join(f'"{p}"' for p in parsed.m_StylesheetPaths)
+                    if parsed.m_StylesheetPaths
+                    else "none"
+                )
                 log.debug(
                     f"Parsed element {parsed.m_Id}: type={parsed.m_Type}, name={parsed.m_Name or '(empty)'}, "
                     f"order={parsed.m_OrderInDocument}, classes=[{classes_str}], paths=[{paths_str}]"
@@ -110,9 +119,7 @@ class UXMLBinaryPatcher:
         return elements
 
     def _apply_modifications(
-        self,
-        elements: List[UXMLElementBinary],
-        imported_elements: List[Dict[str, Any]]
+        self, elements: List[UXMLElementBinary], imported_elements: List[Dict[str, Any]]
     ):
         """
         Apply modifications from imported data to parsed elements.
@@ -125,7 +132,7 @@ class UXMLBinaryPatcher:
             imported_elements: Imported element data from UXML
         """
         # Create lookup by ID
-        imported_by_id = {elem['m_Id']: elem for elem in imported_elements}
+        imported_by_id = {elem["m_Id"]: elem for elem in imported_elements}
 
         # Track which imported elements were matched
         matched_imported_ids = set()
@@ -133,7 +140,9 @@ class UXMLBinaryPatcher:
         for elem in elements:
             if elem.m_Id not in imported_by_id:
                 if self.verbose:
-                    log.debug(f"Element {elem.m_Id} not in imported data, keeping original")
+                    log.debug(
+                        f"Element {elem.m_Id} not in imported data, keeping original"
+                    )
                 continue
 
             imported = imported_by_id[elem.m_Id]
@@ -149,15 +158,21 @@ class UXMLBinaryPatcher:
             #     elem.m_RuleIndex = imported['m_RuleIndex']
 
             # Update CSS classes
-            if 'm_Classes' in imported:
+            if "m_Classes" in imported:
                 old_classes = elem.m_Classes.copy()
-                elem.m_Classes = imported['m_Classes']
+                elem.m_Classes = imported["m_Classes"]
                 if self.verbose and old_classes != elem.m_Classes:
-                    old_str = ', '.join(f'"{c}"' for c in old_classes) if old_classes else 'none'
-                    new_str = ', '.join(f'"{c}"' for c in elem.m_Classes) if elem.m_Classes else 'none'
-                    log.debug(
-                        f"Element {elem.m_Id}: classes [{old_str}] → [{new_str}]"
+                    old_str = (
+                        ", ".join(f'"{c}"' for c in old_classes)
+                        if old_classes
+                        else "none"
                     )
+                    new_str = (
+                        ", ".join(f'"{c}"' for c in elem.m_Classes)
+                        if elem.m_Classes
+                        else "none"
+                    )
+                    log.debug(f"Element {elem.m_Id}: classes [{old_str}] → [{new_str}]")
 
         # Warn about any imported elements that weren't matched
         unmatched = set(imported_by_id.keys()) - matched_imported_ids
@@ -168,9 +183,7 @@ class UXMLBinaryPatcher:
             )
 
     def _rebuild_asset(
-        self,
-        original_raw: bytes,
-        elements: List[UXMLElementBinary]
+        self, original_raw: bytes, elements: List[UXMLElementBinary]
     ) -> bytes:
         """
         Rebuild the asset binary data with modified elements.
@@ -214,7 +227,9 @@ class UXMLBinaryPatcher:
             log.debug("Rebuild info:")
             log.debug(f"  First element at offset {first_elem_offset}")
             log.debug(f"  Array size field at offset {array_size_offset}")
-            log.debug(f"  Last element (ID {last_elem.m_Id}) at offset {last_elem.offset}")
+            log.debug(
+                f"  Last element (ID {last_elem.m_Id}) at offset {last_elem.offset}"
+            )
             log.debug(f"  Last element calculated end: {last_elem_calculated_end}")
             log.debug(f"  Elements to write: {len(elements)}")
 
@@ -227,7 +242,7 @@ class UXMLBinaryPatcher:
             log.debug(f"  Kept {array_size_offset} bytes before array")
 
         # 2. Write new array size (should be same)
-        result.extend(struct.pack('<i', len(elements)))
+        result.extend(struct.pack("<i", len(elements)))
 
         # 3. Write all elements (with 4-byte alignment padding between them)
         total_elem_bytes = 0
@@ -244,7 +259,9 @@ class UXMLBinaryPatcher:
                 total_elem_bytes += padding_needed
 
             if self.verbose:
-                log.debug(f"  Element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding")
+                log.debug(
+                    f"  Element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding"
+                )
 
         if self.verbose:
             log.debug(f"  Total element bytes written: {total_elem_bytes}")

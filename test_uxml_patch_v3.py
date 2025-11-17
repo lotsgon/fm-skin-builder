@@ -10,7 +10,8 @@ from fm_skin_builder.core.uxml.uxml_importer import UXMLImporter
 from fm_skin_builder.core.uxml.uxml_binary_patcher_v2 import UXMLBinaryPatcherV2
 
 # Enable debug logging
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
+
 
 def test_uxml_patch_v3():
     """Test UXML patching V3 with careful object handling."""
@@ -84,7 +85,7 @@ def test_uxml_patch_v3():
 
         # Save the modified bundle
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'wb') as f:
+        with open(output_path, "wb") as f:
             f.write(env.file.save())
 
         print(f"\n✅ Saved modified bundle to: {output_path}")
@@ -92,6 +93,7 @@ def test_uxml_patch_v3():
     else:
         print("  → Patch failed!")
         return False
+
 
 if __name__ == "__main__":
     success = test_uxml_patch_v3()

@@ -11,7 +11,10 @@ Combines:
 from __future__ import annotations
 from typing import List
 from .vta_header_parser import parse_vta_header, serialize_template_references
-from .vta_element_serializer import serialize_visual_elements_array, serialize_template_assets_array
+from .vta_element_serializer import (
+    serialize_visual_elements_array,
+    serialize_template_assets_array,
+)
 from .uxml_element_parser import UXMLElementBinary
 
 
@@ -30,7 +33,7 @@ class VTABuilder:
     def build(
         self,
         visual_elements: List[UXMLElementBinary],
-        template_elements: List[UXMLElementBinary]
+        template_elements: List[UXMLElementBinary],
     ) -> bytes:
         """
         Build complete VTA binary.
@@ -53,15 +56,13 @@ class VTABuilder:
 
         # 3. Write visual elements array
         visual_array = serialize_visual_elements_array(
-            visual_elements,
-            self.header.visual_typetree
+            visual_elements, self.header.visual_typetree
         )
         data.extend(visual_array)
 
         # 4. Write template assets array
         template_array = serialize_template_assets_array(
-            template_elements,
-            self.header.template_typetree
+            template_elements, self.header.template_typetree
         )
         data.extend(template_array)
 

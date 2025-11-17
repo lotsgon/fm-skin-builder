@@ -1,4 +1,5 @@
 """Import UXML files and patch Unity bundles"""
+
 from __future__ import annotations
 from pathlib import Path
 import shutil
@@ -74,9 +75,9 @@ def run(args) -> None:
                 # Check if this is a VisualTreeAsset by looking for VTA-specific fields
                 # (m_ClassName may not be set in Unity 2021+)
                 is_vta = (
-                    hasattr(data, "m_VisualElementAssets") or
-                    hasattr(data, "m_TemplateAssets") or
-                    hasattr(data, "m_UxmlObjectEntries")
+                    hasattr(data, "m_VisualElementAssets")
+                    or hasattr(data, "m_TemplateAssets")
+                    or hasattr(data, "m_UxmlObjectEntries")
                 )
 
                 if is_vta:

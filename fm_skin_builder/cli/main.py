@@ -203,9 +203,7 @@ def main() -> None:
 
     # Import UXML command
     i = sub.add_parser("import-uxml", help="Import UXML files and patch Unity bundles")
-    i.add_argument(
-        "--bundle", type=str, required=True, help="Bundle file to patch"
-    )
+    i.add_argument("--bundle", type=str, required=True, help="Bundle file to patch")
     i.add_argument(
         "--uxml",
         type=str,

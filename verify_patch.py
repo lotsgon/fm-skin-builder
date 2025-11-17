@@ -4,6 +4,7 @@
 from pathlib import Path
 import UnityPy
 
+
 def verify_patch():
     """Verify AboutClubCard was patched correctly."""
     bundle_path = Path("test_output/ui-panelids-uxml_assets_all.bundle")
@@ -22,8 +23,9 @@ def verify_patch():
         if obj.type.name == "MonoBehaviour":
             try:
                 data = obj.read()
-                is_vta = (hasattr(data, "m_VisualElementAssets") or
-                         hasattr(data, "m_TemplateAssets"))
+                is_vta = hasattr(data, "m_VisualElementAssets") or hasattr(
+                    data, "m_TemplateAssets"
+                )
 
                 if is_vta:
                     found_count += 1
@@ -32,18 +34,24 @@ def verify_patch():
                         print("\n✓ Found AboutClubCard VTA")
 
                         if hasattr(data, "m_VisualElementAssets"):
-                            print(f"\nVisual elements: {len(data.m_VisualElementAssets)}")
+                            print(
+                                f"\nVisual elements: {len(data.m_VisualElementAssets)}"
+                            )
                             for i, elem in enumerate(data.m_VisualElementAssets):
                                 print(f"\nElement {i} (ID {elem.m_Id}):")
-                                print(f"  Type: {elem.m_Type if hasattr(elem, 'm_Type') else 'N/A'}")
+                                print(
+                                    f"  Type: {elem.m_Type if hasattr(elem, 'm_Type') else 'N/A'}"
+                                )
                                 print(f"  Classes: {elem.m_Classes}")
 
                                 # Check for our test class
-                                if 'test-class-added' in elem.m_Classes:
+                                if "test-class-added" in elem.m_Classes:
                                     print("  ✅ Found 'test-class-added' class!")
                                     return True
 
-                        print("\n❌ ERROR: 'test-class-added' class not found in any element!")
+                        print(
+                            "\n❌ ERROR: 'test-class-added' class not found in any element!"
+                        )
                         return False
 
             except Exception as e:
@@ -54,7 +62,9 @@ def verify_patch():
     print("\n❌ ERROR: AboutClubCard VTA not found!")
     return False
 
+
 if __name__ == "__main__":
     import sys
+
     success = verify_patch()
     sys.exit(0 if success else 1)

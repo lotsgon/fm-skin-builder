@@ -4,14 +4,19 @@
 from pathlib import Path
 import UnityPy
 
-from fm_skin_builder.core.uxml.uxml_element_parser import parse_element_at_offset, find_element_offset
+from fm_skin_builder.core.uxml.uxml_element_parser import (
+    parse_element_at_offset,
+    find_element_offset,
+)
+
 
 def hex_dump(data, label, max_bytes=64):
     """Print hex dump."""
     print(f"\n{label} ({len(data)} bytes):")
     for i in range(0, min(len(data), max_bytes), 16):
-        hex_str = ' '.join(f'{b:02x}' for b in data[i:i+16])
+        hex_str = " ".join(f"{b:02x}" for b in data[i : i + 16])
         print(f"  {i:04x}: {hex_str}")
+
 
 def compare():
     """Compare element -277358335 before and after patching."""
@@ -22,7 +27,9 @@ def compare():
         if obj.type.name == "MonoBehaviour":
             try:
                 data = obj.read()
-                is_vta = (hasattr(data, "m_VisualElementAssets") or hasattr(data, "m_TemplateAssets"))
+                is_vta = hasattr(data, "m_VisualElementAssets") or hasattr(
+                    data, "m_TemplateAssets"
+                )
 
                 if is_vta:
                     asset_name = getattr(data, "m_Name", "")
@@ -49,17 +56,19 @@ def compare():
                             print(f"  m_StylesheetPaths: {elem.m_StylesheetPaths}")
                             print(f"  m_Type: '{elem.m_Type}'")
                             print(f"  m_Name: '{elem.m_Name}'")
-                            print(f"  Parsed size: from offset {elem.offset} to {elem.offset + len(elem)}")
+                            print(
+                                f"  Parsed size: from offset {elem.offset} to {elem.offset + len(elem)}"
+                            )
 
                             # Get original bytes and size
                             original_size = len(elem)
-                            original_bytes = raw_data[offset:offset+200]
+                            original_bytes = raw_data[offset : offset + 200]
                             hex_dump(original_bytes, "Original binary")
 
                             # Now modify and serialize
                             print("\n\nModifying classes:")
                             print(f"  Before: {elem.m_Classes}")
-                            elem.m_Classes = ['base-template-grow', 'test-class-added']
+                            elem.m_Classes = ["base-template-grow", "test-class-added"]
                             print(f"  After: {elem.m_Classes}")
 
                             modified_bytes = elem.to_bytes()
@@ -68,15 +77,24 @@ def compare():
                             hex_dump(modified_bytes, "Modified binary", max_bytes=200)
 
                             print("\n\nSize comparison:")
-                            print(f"  Original: {original_size} bytes (calculated before modification)")
-                            print(f"  Modified (__len__): {modified_size} bytes (calculated after modification)")
-                            print(f"  Modified (actual): {len(modified_bytes)} bytes (serialized)")
-                            print(f"  Difference: {len(modified_bytes) - original_size} bytes")
+                            print(
+                                f"  Original: {original_size} bytes (calculated before modification)"
+                            )
+                            print(
+                                f"  Modified (__len__): {modified_size} bytes (calculated after modification)"
+                            )
+                            print(
+                                f"  Modified (actual): {len(modified_bytes)} bytes (serialized)"
+                            )
+                            print(
+                                f"  Difference: {len(modified_bytes) - original_size} bytes"
+                            )
 
                         return
 
             except Exception:
                 pass
+
 
 if __name__ == "__main__":
     compare()

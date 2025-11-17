@@ -5,6 +5,7 @@ from pathlib import Path
 import struct
 import UnityPy
 
+
 def locate_arrays():
     """Locate the two separate arrays in VTA binary data."""
     bundle_path = Path("test_skin_dir/packages/ui-panelids-uxml_assets_all.bundle")
@@ -14,7 +15,9 @@ def locate_arrays():
         if obj.type.name == "MonoBehaviour":
             try:
                 data = obj.read()
-                is_vta = (hasattr(data, "m_VisualElementAssets") or hasattr(data, "m_TemplateAssets"))
+                is_vta = hasattr(data, "m_VisualElementAssets") or hasattr(
+                    data, "m_TemplateAssets"
+                )
 
                 if is_vta:
                     asset_name = getattr(data, "m_Name", "")
@@ -22,11 +25,15 @@ def locate_arrays():
                         print("=== Array Location Analysis ===\n")
 
                         print("UnityPy reports:")
-                        print(f"  m_VisualElementAssets: {len(data.m_VisualElementAssets)} elements")
+                        print(
+                            f"  m_VisualElementAssets: {len(data.m_VisualElementAssets)} elements"
+                        )
                         for elem in data.m_VisualElementAssets:
                             print(f"    - ID {elem.m_Id}")
 
-                        print(f"  m_TemplateAssets: {len(data.m_TemplateAssets)} elements")
+                        print(
+                            f"  m_TemplateAssets: {len(data.m_TemplateAssets)} elements"
+                        )
                         for elem in data.m_TemplateAssets:
                             print(f"    - ID {elem.m_Id}")
 
@@ -35,11 +42,13 @@ def locate_arrays():
                         print(f"\nRaw data size: {len(raw_data)} bytes\n")
 
                         # Search for count markers
-                        print("Searching for array size markers (value 2 and value 1):\n")
+                        print(
+                            "Searching for array size markers (value 2 and value 1):\n"
+                        )
 
                         # Look for the value 2 (VisualElements count)
                         visual_count = 2
-                        visual_count_bytes = struct.pack('<i', visual_count)
+                        visual_count_bytes = struct.pack("<i", visual_count)
 
                         offset = 0
                         visual_offsets = []
@@ -54,7 +63,7 @@ def locate_arrays():
 
                         # Look for the value 1 (TemplateAssets count)
                         template_count = 1
-                        template_count_bytes = struct.pack('<i', template_count)
+                        template_count_bytes = struct.pack("<i", template_count)
 
                         offset = 0
                         template_offsets = []
@@ -70,18 +79,22 @@ def locate_arrays():
                         # We know element 0 starts at 196
                         # So visual elements array should have size field at 192
                         print("Expected locations:")
-                        print("  m_VisualElementAssets count at: 192 (value should be 2)")
+                        print(
+                            "  m_VisualElementAssets count at: 192 (value should be 2)"
+                        )
                         print("  First visual element at: 196")
 
                         # Verify
-                        val_at_192 = struct.unpack_from('<i', raw_data, 192)[0]
+                        val_at_192 = struct.unpack_from("<i", raw_data, 192)[0]
                         print(f"  → Actual value at 192: {val_at_192}")
 
                         # Element 1 ends around 389, element 2 starts at 392
                         # Template array size should be somewhere around 389
-                        print("\n  Checking around offset 389 (after visual elements)...")
+                        print(
+                            "\n  Checking around offset 389 (after visual elements)..."
+                        )
                         for check_offset in range(385, 395):
-                            val = struct.unpack_from('<i', raw_data, check_offset)[0]
+                            val = struct.unpack_from("<i", raw_data, check_offset)[0]
                             if val == 1:
                                 print(f"  → Found value '1' at offset {check_offset}")
 
@@ -90,7 +103,7 @@ def locate_arrays():
                         gap_bytes = raw_data[385:400]
                         for i in range(0, len(gap_bytes), 4):
                             if i + 4 <= len(gap_bytes):
-                                val = struct.unpack('<i', gap_bytes[i:i+4])[0]
+                                val = struct.unpack("<i", gap_bytes[i : i + 4])[0]
                                 actual_offset = 385 + i
                                 print(f"    offset {actual_offset}: {val}")
 
@@ -98,8 +111,10 @@ def locate_arrays():
 
             except Exception as e:
                 import traceback
+
                 print(f"Error: {e}")
                 traceback.print_exc()
+
 
 if __name__ == "__main__":
     locate_arrays()

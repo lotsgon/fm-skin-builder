@@ -7,6 +7,7 @@ Usage:
 
 This will export all VisualTreeAssets as human-readable UXML files.
 """
+
 import sys
 import argparse
 from pathlib import Path
@@ -84,13 +85,13 @@ def main():
         "--bundle",
         type=Path,
         required=True,
-        help="Path to Unity bundle file (e.g., ui.unity3d)"
+        help="Path to Unity bundle file (e.g., ui.unity3d)",
     )
     parser.add_argument(
         "--out",
         type=Path,
         default=Path("exported_uxml"),
-        help="Output directory for UXML files (default: exported_uxml)"
+        help="Output directory for UXML files (default: exported_uxml)",
     )
 
     args = parser.parse_args()

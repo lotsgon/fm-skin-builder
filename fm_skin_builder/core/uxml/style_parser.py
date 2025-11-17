@@ -75,9 +75,7 @@ class StyleParser:
                 if not prop_name:
                     continue
 
-                values = self._parse_property_values(
-                    prop, strings, colors
-                )
+                values = self._parse_property_values(prop, strings, colors)
 
                 if values:
                     value_str = ", ".join(values)
@@ -173,10 +171,7 @@ class StyleParser:
         return selector_str.strip()
 
     def _parse_property_values(
-        self,
-        prop: Any,
-        strings: List[str],
-        colors: List[Any]
+        self, prop: Any, strings: List[str], colors: List[Any]
     ) -> List[str]:
         """
         Parse property values into CSS strings.
@@ -273,7 +268,9 @@ class StyleParser:
         else:
             return f"#{r:02x}{g:02x}{b:02x}"
 
-    def parse_inline_styles(self, element_data: Any, strings: List[str], colors: List[Any]) -> str:
+    def parse_inline_styles(
+        self, element_data: Any, strings: List[str], colors: List[Any]
+    ) -> str:
         """
         Parse inline styles from a VisualElement.
 

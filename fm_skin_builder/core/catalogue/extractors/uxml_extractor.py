@@ -21,7 +21,12 @@ log = get_logger(__name__)
 class UXMLExtractor(BaseAssetExtractor):
     """Extracts UXML/VisualTreeAsset assets from bundles."""
 
-    def __init__(self, fm_version: str, export_uxml: bool = False, export_dir: Optional[Path] = None):
+    def __init__(
+        self,
+        fm_version: str,
+        export_uxml: bool = False,
+        export_dir: Optional[Path] = None,
+    ):
         """
         Initialize UXML extractor.
 
@@ -100,10 +105,7 @@ class UXMLExtractor(BaseAssetExtractor):
         return vta_assets
 
     def _extract_vta_data(
-        self,
-        vta_data: Any,
-        bundle_name: str,
-        obj: Any
+        self, vta_data: Any, bundle_name: str, obj: Any
     ) -> Optional[VisualTreeAsset]:
         """
         Extract VisualTreeAsset data and metadata.
@@ -137,7 +139,9 @@ class UXMLExtractor(BaseAssetExtractor):
         templates_used = [t.name for t in uxml_doc.templates]
 
         # Check for inline styles
-        has_inline_styles = uxml_doc.inline_styles is not None and len(uxml_doc.inline_styles) > 0
+        has_inline_styles = (
+            uxml_doc.inline_styles is not None and len(uxml_doc.inline_styles) > 0
+        )
 
         # Generate tags
         tags = self._generate_tags(name, element_types, classes_used)
@@ -159,7 +163,7 @@ class UXMLExtractor(BaseAssetExtractor):
             has_inline_styles=has_inline_styles,
             tags=tags,
             export_path=export_path,
-            **self._create_default_status()
+            **self._create_default_status(),
         )
 
         return vta_entry
@@ -208,7 +212,7 @@ class UXMLExtractor(BaseAssetExtractor):
             hash_parts.append(f"styles:{uxml_doc.inline_styles}")
 
         # Compute hash
-        hash_content = "\n".join(hash_parts).encode('utf-8')
+        hash_content = "\n".join(hash_parts).encode("utf-8")
         return hashlib.sha256(hash_content).hexdigest()
 
     def _gather_statistics(self, uxml_doc: Any) -> tuple:
@@ -235,17 +239,10 @@ class UXMLExtractor(BaseAssetExtractor):
             for cls in elem.get_classes():
                 classes_used.add(cls)
 
-        return (
-            element_count,
-            sorted(list(element_types)),
-            sorted(list(classes_used))
-        )
+        return (element_count, sorted(list(element_types)), sorted(list(classes_used)))
 
     def _generate_tags(
-        self,
-        name: str,
-        element_types: List[str],
-        classes_used: List[str]
+        self, name: str, element_types: List[str], classes_used: List[str]
     ) -> List[str]:
         """
         Generate auto-tags for VTA.

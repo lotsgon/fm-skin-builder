@@ -5,19 +5,19 @@ import UnityPy
 from UnityPy.streams import EndianBinaryReader
 
 # Load generated data
-with open('/tmp/generated_vta.bin', 'rb') as f:
+with open("/tmp/generated_vta.bin", "rb") as f:
     generated_data = f.read()
 
-print(f'Generated data size: {len(generated_data)} bytes')
+print(f"Generated data size: {len(generated_data)} bytes")
 print()
 
 # Load original to get TypeTree
-env = UnityPy.load('test_skin_dir/packages/ui-panelids-uxml_assets_all.bundle')
+env = UnityPy.load("test_skin_dir/packages/ui-panelids-uxml_assets_all.bundle")
 
 for obj in env.objects:
-    if obj.type.name == 'MonoBehaviour':
+    if obj.type.name == "MonoBehaviour":
         try:
-            if obj.peek_name() == 'AboutClubCard':
+            if obj.peek_name() == "AboutClubCard":
                 # Get TypeTree
                 node = obj._get_typetree_node()
 
@@ -52,25 +52,41 @@ for obj in env.objects:
                         elif isinstance(value, dict):
                             summary = f"dict with {len(value)} keys"
                         elif isinstance(value, str):
-                            summary = f'"{value[:30]}..."' if len(value) > 30 else f'"{value}"'
+                            summary = (
+                                f'"{value[:30]}..."'
+                                if len(value) > 30
+                                else f'"{value}"'
+                            )
                         else:
                             summary = str(value)
 
-                        print(f"✓ Field {i} ({child.m_Name}): {bytes_read} bytes, value: {summary}")
+                        print(
+                            f"✓ Field {i} ({child.m_Name}): {bytes_read} bytes, value: {summary}"
+                        )
 
                     except Exception as e:
                         pos_after = reader.Position
                         bytes_read = pos_after - pos_before
-                        print(f"✗ Field {i} ({child.m_Name}): FAILED after {bytes_read} bytes at position {pos_after}")
+                        print(
+                            f"✗ Field {i} ({child.m_Name}): FAILED after {bytes_read} bytes at position {pos_after}"
+                        )
                         print(f"  Error: {e}")
                         print(f"  Reader position: {reader.Position}")
-                        print(f"  Data remaining: {len(generated_data) - reader.Position} bytes")
+                        print(
+                            f"  Data remaining: {len(generated_data) - reader.Position} bytes"
+                        )
 
                         # Show context
                         if reader.Position < len(generated_data):
                             print("  Next 32 bytes:")
-                            for j in range(reader.Position, min(reader.Position + 32, len(generated_data)), 16):
-                                hex_str = ' '.join(f'{b:02x}' for b in generated_data[j:j+16])
+                            for j in range(
+                                reader.Position,
+                                min(reader.Position + 32, len(generated_data)),
+                                16,
+                            ):
+                                hex_str = " ".join(
+                                    f"{b:02x}" for b in generated_data[j : j + 16]
+                                )
                                 print(f"    {j:04d}: {hex_str}")
                         break
 
@@ -78,4 +94,5 @@ for obj in env.objects:
         except Exception as e:
             print(f"Error: {e}")
             import traceback
+
             traceback.print_exc()

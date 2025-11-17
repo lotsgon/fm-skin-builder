@@ -10,7 +10,8 @@ from fm_skin_builder.core.uxml.uxml_importer import UXMLImporter
 from fm_skin_builder.core.uxml.uxml_binary_patcher import UXMLBinaryPatcher
 
 # Enable debug logging
-logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s: %(message)s")
+
 
 def test_uxml_patch():
     """Test UXML patching on AboutClubCard."""
@@ -27,7 +28,7 @@ def test_uxml_patch():
     imported_data = importer.parse_uxml_to_dict(uxml_path)
 
     print(f"Imported {len(imported_data['m_VisualElementAssets'])} elements from UXML")
-    for i, elem in enumerate(imported_data['m_VisualElementAssets']):
+    for i, elem in enumerate(imported_data["m_VisualElementAssets"]):
         print(f"  Imported element {i}: ID={elem['m_Id']}, classes={elem['m_Classes']}")
 
     # Find the CalendarTool VTA
@@ -38,8 +39,9 @@ def test_uxml_patch():
         if obj.type.name == "MonoBehaviour":
             try:
                 data = obj.read()
-                is_vta = (hasattr(data, "m_VisualElementAssets") or
-                         hasattr(data, "m_TemplateAssets"))
+                is_vta = hasattr(data, "m_VisualElementAssets") or hasattr(
+                    data, "m_TemplateAssets"
+                )
 
                 if is_vta:
                     asset_name = getattr(data, "m_Name", f"VTA_{obj.path_id}")
@@ -53,10 +55,14 @@ def test_uxml_patch():
                         original_elements = []
                         if hasattr(data, "m_VisualElementAssets"):
                             original_elements.extend(list(data.m_VisualElementAssets))
-                            print(f"  → Has {len(data.m_VisualElementAssets)} visual elements")
+                            print(
+                                f"  → Has {len(data.m_VisualElementAssets)} visual elements"
+                            )
                         if hasattr(data, "m_TemplateAssets"):
                             original_elements.extend(list(data.m_TemplateAssets))
-                            print(f"  → Has {len(data.m_TemplateAssets)} template assets")
+                            print(
+                                f"  → Has {len(data.m_TemplateAssets)} template assets"
+                            )
 
                         # Get raw binary data
                         raw_data = obj.get_raw_data()
@@ -68,7 +74,9 @@ def test_uxml_patch():
                         )
 
                         if new_raw_data:
-                            print(f"  → Patch successful! New size: {len(new_raw_data)} bytes")
+                            print(
+                                f"  → Patch successful! New size: {len(new_raw_data)} bytes"
+                            )
                             obj.set_raw_data(new_raw_data)
                         else:
                             print("  → Patch failed!")
@@ -83,11 +91,12 @@ def test_uxml_patch():
 
     # Save the modified bundle
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, 'wb') as f:
+    with open(output_path, "wb") as f:
         f.write(env.file.save())
 
     print(f"\n✅ Saved modified bundle to: {output_path}")
     return True
+
 
 if __name__ == "__main__":
     success = test_uxml_patch()

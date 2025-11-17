@@ -60,8 +60,7 @@ class UXMLAttribute:
         """Render as XML attribute."""
         # Escape XML special characters
         escaped_value = (
-            self.value
-            .replace("&", "&amp;")
+            self.value.replace("&", "&amp;")
             .replace('"', "&quot;")
             .replace("<", "&lt;")
             .replace(">", "&gt;")
@@ -202,15 +201,15 @@ class UXMLDocument:
     def find_elements_by_type(self, element_type: str) -> List[UXMLElement]:
         """Find all elements of a specific type."""
         return [
-            elem for elem in self.get_all_elements()
+            elem
+            for elem in self.get_all_elements()
             if elem.element_type == element_type
         ]
 
     def find_elements_by_class(self, class_name: str) -> List[UXMLElement]:
         """Find all elements with a specific CSS class."""
         return [
-            elem for elem in self.get_all_elements()
-            if class_name in elem.get_classes()
+            elem for elem in self.get_all_elements() if class_name in elem.get_classes()
         ]
 
     def find_element_by_name(self, name: str) -> Optional[UXMLElement]:

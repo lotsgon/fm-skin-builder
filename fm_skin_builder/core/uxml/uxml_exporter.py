@@ -32,9 +32,7 @@ class UXMLExporter:
         self._ref_by_id: Dict[int, Any] = {}  # Cache for references lookup
 
     def export_visual_tree_asset(
-        self,
-        vta_data: Any,
-        output_path: Optional[Path] = None
+        self, vta_data: Any, output_path: Optional[Path] = None
     ) -> UXMLDocument:
         """
         Export a VisualTreeAsset to a UXML document.
@@ -95,12 +93,14 @@ class UXMLExporter:
             file_id = getattr(template_ref, "m_FileID", None)
 
             if name:
-                templates.append(UXMLTemplate(
-                    name=name,
-                    src=f"{name}.uxml",  # Conventional path
-                    guid=guid,
-                    file_id=file_id
-                ))
+                templates.append(
+                    UXMLTemplate(
+                        name=name,
+                        src=f"{name}.uxml",  # Conventional path
+                        guid=guid,
+                        file_id=file_id,
+                    )
+                )
 
         return templates
 
@@ -164,11 +164,7 @@ class UXMLExporter:
 
         return root
 
-    def _create_element_from_asset(
-        self,
-        ve_asset: Any,
-        vta_data: Any
-    ) -> UXMLElement:
+    def _create_element_from_asset(self, ve_asset: Any, vta_data: Any) -> UXMLElement:
         """
         Create a UXMLElement from a VisualElementAsset.
 
@@ -187,7 +183,7 @@ class UXMLExporter:
             element_type=type_name,
             id=getattr(ve_asset, "m_Id", None),
             parent_id=getattr(ve_asset, "m_ParentId", None),
-            order_in_document=getattr(ve_asset, "m_OrderInDocument", None)
+            order_in_document=getattr(ve_asset, "m_OrderInDocument", None),
         )
 
         # Extract attributes from UxmlTraits
@@ -226,7 +222,7 @@ class UXMLExporter:
 
         if full_type:
             # Extract the last part after the final dot
-            parts = full_type.split('.')
+            parts = full_type.split(".")
             type_name = parts[-1]
 
             # Handle special case: UXML root element
@@ -238,11 +234,7 @@ class UXMLExporter:
         # Fallback
         return "VisualElement"
 
-    def _extract_attributes(
-        self,
-        ve_asset: Any,
-        vta_data: Any
-    ) -> List[UXMLAttribute]:
+    def _extract_attributes(self, ve_asset: Any, vta_data: Any) -> List[UXMLAttribute]:
         """
         Extract UXML attributes from VisualElementAsset.
 
@@ -264,10 +256,7 @@ class UXMLExporter:
         classes = getattr(ve_asset, "m_Classes", [])
         if classes:
             # Classes are already strings in Unity 2021+
-            attributes.append(UXMLAttribute(
-                name="class",
-                value=" ".join(classes)
-            ))
+            attributes.append(UXMLAttribute(name="class", value=" ".join(classes)))
 
         # Extract properties (custom attributes)
         properties = getattr(ve_asset, "m_Properties", [])
@@ -280,10 +269,7 @@ class UXMLExporter:
             # Properties can have different value types
             prop_value = self._extract_property_value(prop)
             if prop_value is not None:
-                attributes.append(UXMLAttribute(
-                    name=prop_name,
-                    value=str(prop_value)
-                ))
+                attributes.append(UXMLAttribute(name=prop_name, value=str(prop_value)))
 
         # Extract binding attributes
         binding_attrs = self._extract_binding_attributes(ve_asset, vta_data)
@@ -326,11 +312,7 @@ class UXMLExporter:
 
         return None
 
-    def _extract_text_content(
-        self,
-        ve_asset: Any,
-        vta_data: Any
-    ) -> Optional[str]:
+    def _extract_text_content(self, ve_asset: Any, vta_data: Any) -> Optional[str]:
         """
         Extract text content from element (for Label, Button, etc.).
 
@@ -373,9 +355,7 @@ class UXMLExporter:
                     self._ref_by_id[uxml_id] = ref_data
 
     def _extract_binding_attributes(
-        self,
-        ve_asset: Any,
-        vta_data: Any
+        self, ve_asset: Any, vta_data: Any
     ) -> List[UXMLAttribute]:
         """
         Extract binding-related attributes from element's reference data.
@@ -401,48 +381,37 @@ class UXMLExporter:
         if text_binding:
             path = self._extract_binding_path(text_binding)
             if path:
-                attributes.append(UXMLAttribute(
-                    name="text-binding",
-                    value=path
-                ))
+                attributes.append(UXMLAttribute(name="text-binding", value=path))
 
         # Extract Binding (for BindableSwitchElement, SIImage, etc.)
         binding = getattr(ref_data, "Binding", None)
         if binding:
             path = self._extract_binding_path(binding)
             if path:
-                attributes.append(UXMLAttribute(
-                    name="data-binding",
-                    value=path
-                ))
+                attributes.append(UXMLAttribute(name="data-binding", value=path))
 
         # Extract selection bindings (for TabbedGridLayoutElement)
         current_sel_binding = getattr(ref_data, "CurrentSelectedIdBinding", None)
         if current_sel_binding:
             path = self._extract_simple_binding_path(current_sel_binding)
             if path:
-                attributes.append(UXMLAttribute(
-                    name="current-selected-id-binding",
-                    value=path
-                ))
+                attributes.append(
+                    UXMLAttribute(name="current-selected-id-binding", value=path)
+                )
 
         selection_binding = getattr(ref_data, "SelectionBinding", None)
         if selection_binding:
             path = self._extract_simple_binding_path(selection_binding)
             if path:
-                attributes.append(UXMLAttribute(
-                    name="selection-binding",
-                    value=path
-                ))
+                attributes.append(UXMLAttribute(name="selection-binding", value=path))
 
         selected_tab_binding = getattr(ref_data, "SelectedTabBinding", None)
         if selected_tab_binding:
             path = self._extract_simple_binding_path(selected_tab_binding)
             if path:
-                attributes.append(UXMLAttribute(
-                    name="selected-tab-binding",
-                    value=path
-                ))
+                attributes.append(
+                    UXMLAttribute(name="selected-tab-binding", value=path)
+                )
 
         # Extract mappings (for BindingRemapper)
         mappings = getattr(ref_data, "Mappings", [])
@@ -450,27 +419,23 @@ class UXMLExporter:
             # Serialize mappings as JSON-like format
             mapping_strs = []
             for mapping in mappings:
-                from_var = getattr(mapping, 'from_', None)
-                to_obj = getattr(mapping, 'to', None)
+                from_var = getattr(mapping, "from_", None)
+                to_obj = getattr(mapping, "to", None)
                 to_path = None
                 if to_obj:
-                    to_path = getattr(to_obj, 'm_path', None)
+                    to_path = getattr(to_obj, "m_path", None)
                 if from_var and to_path:
                     mapping_strs.append(f"{from_var}={to_path}")
 
             if mapping_strs:
-                attributes.append(UXMLAttribute(
-                    name="binding-mappings",
-                    value=";".join(mapping_strs)
-                ))
+                attributes.append(
+                    UXMLAttribute(name="binding-mappings", value=";".join(mapping_strs))
+                )
 
         # Extract template reference (for TemplateContainer elements)
         template_id = getattr(ref_data, "templateId", None)
         if template_id and template_id.strip():
-            attributes.append(UXMLAttribute(
-                name="template",
-                value=template_id
-            ))
+            attributes.append(UXMLAttribute(name="template", value=template_id))
 
         return attributes
 
@@ -488,20 +453,20 @@ class UXMLExporter:
             return None
 
         # Get m_kind (1=direct, 2=visual function)
-        kind = getattr(binding_obj, 'm_kind', None)
+        kind = getattr(binding_obj, "m_kind", None)
 
         if kind == 1:  # Direct binding
-            direct = getattr(binding_obj, 'm_direct', None)
+            direct = getattr(binding_obj, "m_direct", None)
             if direct:
-                path = getattr(direct, 'm_path', None)
+                path = getattr(direct, "m_path", None)
                 if path and path.strip():
                     return path
         elif kind == 2:  # Visual function binding
             # For visual functions, we can't extract a simple path
             # Return a marker to indicate this is a visual function
-            visual_func = getattr(binding_obj, 'm_visualFunction', None)
+            visual_func = getattr(binding_obj, "m_visualFunction", None)
             if visual_func:
-                is_assigned = getattr(visual_func, 'm_isAssigned', 0)
+                is_assigned = getattr(visual_func, "m_isAssigned", 0)
                 if is_assigned:
                     return "[VisualFunction]"
 
@@ -520,7 +485,7 @@ class UXMLExporter:
         if binding_obj is None:
             return None
 
-        path = getattr(binding_obj, 'm_path', None)
+        path = getattr(binding_obj, "m_path", None)
         if path and path.strip():
             return path
 
@@ -588,8 +553,10 @@ class UXMLExporter:
 
         # Create root element
         root_elem = ET.Element("{UnityEngine.UIElements}UXML")
-        root_elem.set("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation",
-                      "../../UIElementsSchema/UIElements.xsd")
+        root_elem.set(
+            "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation",
+            "../../UIElementsSchema/UIElements.xsd",
+        )
         root_elem.set("editor-extension-mode", "False")
 
         # Add templates
@@ -617,31 +584,27 @@ class UXMLExporter:
             root_elem.append(style_comment)
 
         # Convert to pretty-printed XML
-        xml_str = ET.tostring(root_elem, encoding='unicode')
+        xml_str = ET.tostring(root_elem, encoding="unicode")
         try:
             dom = minidom.parseString(xml_str)
             pretty_xml = dom.toprettyxml(indent="  ")
 
             # Remove extra blank lines and the XML declaration
             lines = []
-            for line in pretty_xml.split('\n'):
-                if line.strip() and not line.strip().startswith('<?xml'):
+            for line in pretty_xml.split("\n"):
+                if line.strip() and not line.strip().startswith("<?xml"):
                     lines.append(line)
-            pretty_xml = '\n'.join(lines)
+            pretty_xml = "\n".join(lines)
 
         except Exception as e:
             log.warning(f"Failed to pretty-print XML: {e}")
             pretty_xml = xml_str
 
         # Write to file
-        output_path.write_text(pretty_xml, encoding='utf-8')
+        output_path.write_text(pretty_xml, encoding="utf-8")
         log.info(f"Wrote UXML to {output_path}")
 
-    def _build_xml_element(
-        self,
-        element: UXMLElement,
-        parent_xml: ET.Element
-    ) -> None:
+    def _build_xml_element(self, element: UXMLElement, parent_xml: ET.Element) -> None:
         """
         Recursively build XML elements.
 
@@ -651,7 +614,9 @@ class UXMLExporter:
         """
         # All UI elements use the ui: namespace (UnityEngine.UIElements)
         # This includes both standard Unity elements and custom SI elements
-        xml_elem = ET.SubElement(parent_xml, f"{{UnityEngine.UIElements}}{element.element_type}")
+        xml_elem = ET.SubElement(
+            parent_xml, f"{{UnityEngine.UIElements}}{element.element_type}"
+        )
 
         # Add data-unity-id attribute to preserve element ID for round-trip
         # This enables ID-based matching during re-import

@@ -5,6 +5,7 @@ from pathlib import Path
 import struct
 import UnityPy
 
+
 def verify_counts():
     """Verify array count field locations."""
     bundle_path = Path("test_skin_dir/packages/ui-panelids-uxml_assets_all.bundle")
@@ -17,9 +18,9 @@ def verify_counts():
                 if hasattr(data, "m_Name") and data.m_Name == "AboutClubCard":
                     raw = obj.get_raw_data()
 
-                    print("="*80)
+                    print("=" * 80)
                     print("ARRAY COUNT VERIFICATION")
-                    print("="*80)
+                    print("=" * 80)
                     print()
 
                     visual_count = len(data.m_VisualElementAssets)
@@ -31,22 +32,22 @@ def verify_counts():
                     print()
 
                     # Check offset 12
-                    val_12 = struct.unpack_from('<i', raw, 12)[0]
+                    val_12 = struct.unpack_from("<i", raw, 12)[0]
                     print(f"Offset 12: value = {val_12}")
                     if val_12 == template_count:
                         print("  ✓ This matches template count!")
                     print()
 
                     # Check offset 152
-                    val_152 = struct.unpack_from('<i', raw, 152)[0]
+                    val_152 = struct.unpack_from("<i", raw, 152)[0]
                     print(f"Offset 152: value = {val_152}")
                     if val_152 == visual_count:
                         print("  ✓ This matches visual count!")
                     print()
 
-                    print("="*80)
+                    print("=" * 80)
                     print("COMPLETE STRUCTURE")
-                    print("="*80)
+                    print("=" * 80)
                     print()
                     print("VTA binary layout:")
                     print("  Offset 0-11:    Header part 1")
@@ -56,14 +57,20 @@ def verify_counts():
                     print("  Offset 156-195: Visual elements type info")
                     print("  Offset 196-391: Visual elements data (2 elements)")
                     print("  Offset 392+:    Template assets data (1 element)")
-                    print("                  (NO separate count field - uses offset 12)")
+                    print(
+                        "                  (NO separate count field - uses offset 12)"
+                    )
                     print()
 
                     print("CRITICAL INSIGHT:")
-                    print("  Unity stores BOTH array counts in the header (before type info)")
+                    print(
+                        "  Unity stores BOTH array counts in the header (before type info)"
+                    )
                     print("  - Template count at offset 12")
                     print("  - Visual count at offset 152")
-                    print("  - Arrays are stored sequentially without intermediate count fields")
+                    print(
+                        "  - Arrays are stored sequentially without intermediate count fields"
+                    )
                     print()
 
                     # Where does template type info go?
@@ -72,8 +79,8 @@ def verify_counts():
                     print("Checking after visual elements (392+):")
                     # Template starts at 392 with element ID
                     # Check if there's type info before it
-                    for off in range(392-40, 392, 4):
-                        val = struct.unpack_from('<i', raw, off)[0]
+                    for off in range(392 - 40, 392, 4):
+                        val = struct.unpack_from("<i", raw, off)[0]
                         print(f"  Offset {off}: {val}")
                     print()
 
@@ -87,8 +94,10 @@ def verify_counts():
 
             except Exception as e:
                 import traceback
+
                 print(f"Error: {e}")
                 traceback.print_exc()
+
 
 if __name__ == "__main__":
     verify_counts()

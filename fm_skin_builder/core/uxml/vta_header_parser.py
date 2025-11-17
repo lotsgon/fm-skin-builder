@@ -16,6 +16,7 @@ from typing import List, Tuple
 @dataclass
 class TemplateReference:
     """Single template reference metadata."""
+
     name: str
     guid: str
 
@@ -60,7 +61,7 @@ def parse_vta_header(raw_data: bytes) -> VTAHeader:
 
     # Extract visual TypeTree metadata (40 bytes after count at visual_array_offset)
     visual_typetree_offset = visual_array_offset + 4
-    visual_typetree = raw_data[visual_typetree_offset:visual_typetree_offset + 40]
+    visual_typetree = raw_data[visual_typetree_offset : visual_typetree_offset + 40]
 
     # Visual elements data starts after count + TypeTree
     visual_data_start = visual_array_offset + 4 + 40
@@ -68,11 +69,15 @@ def parse_vta_header(raw_data: bytes) -> VTAHeader:
     # Find template array (search for template count)
     # This is harder - need to skip past all visual elements
     # For now, we'll find it by searching for the template count value
-    template_array_offset = _find_template_array_offset(raw_data, visual_data_start, template_refs)
+    template_array_offset = _find_template_array_offset(
+        raw_data, visual_data_start, template_refs
+    )
 
     # Extract template TypeTree metadata (12 bytes after count)
     template_typetree_offset = template_array_offset + 4
-    template_typetree = raw_data[template_typetree_offset:template_typetree_offset + 12]
+    template_typetree = raw_data[
+        template_typetree_offset : template_typetree_offset + 12
+    ]
 
     return VTAHeader(
         fixed_header=fixed_header,
@@ -80,11 +85,13 @@ def parse_vta_header(raw_data: bytes) -> VTAHeader:
         visual_array_offset=visual_array_offset,
         template_array_offset=template_array_offset,
         visual_typetree=visual_typetree,
-        template_typetree=template_typetree
+        template_typetree=template_typetree,
     )
 
 
-def _parse_template_references(raw_data: bytes, start_offset: int) -> Tuple[List[TemplateReference], int]:
+def _parse_template_references(
+    raw_data: bytes, start_offset: int
+) -> Tuple[List[TemplateReference], int]:
     """
     Parse template references section.
 
@@ -98,7 +105,7 @@ def _parse_template_references(raw_data: bytes, start_offset: int) -> Tuple[List
     pos = start_offset
 
     # Read count of unique template references
-    template_count = struct.unpack_from('<i', raw_data, pos)[0]
+    template_count = struct.unpack_from("<i", raw_data, pos)[0]
     pos += 4
 
     templates = []
@@ -108,10 +115,10 @@ def _parse_template_references(raw_data: bytes, start_offset: int) -> Tuple[List
         template_start = pos
 
         # Read template name
-        name_len = struct.unpack_from('<i', raw_data, pos)[0]
+        name_len = struct.unpack_from("<i", raw_data, pos)[0]
         pos += 4
 
-        name = raw_data[pos:pos + name_len].decode('utf-8')
+        name = raw_data[pos : pos + name_len].decode("utf-8")
         pos += name_len
 
         # After name: align to 4-byte boundary (if needed)
@@ -125,7 +132,7 @@ def _parse_template_references(raw_data: bytes, start_offset: int) -> Tuple[List
         pos += 4
 
         # GUID is stored as 32-byte ASCII hex string (no length prefix!)
-        guid = raw_data[pos:pos + 32].decode('ascii')
+        guid = raw_data[pos : pos + 32].decode("ascii")
         pos += 32 + 1  # +1 for null terminator
 
         # Align to 4-byte boundary
@@ -144,9 +151,7 @@ def _parse_template_references(raw_data: bytes, start_offset: int) -> Tuple[List
 
 
 def _find_template_array_offset(
-    raw_data: bytes,
-    search_start: int,
-    template_refs: List[TemplateReference]
+    raw_data: bytes, search_start: int, template_refs: List[TemplateReference]
 ) -> int:
     """
     Find where template array starts by looking for TypeTree metadata.
@@ -172,13 +177,13 @@ def _find_template_array_offset(
     while pos < max_search:
         # Try to read a potential count
         if pos + 16 <= len(raw_data):
-            potential_count = struct.unpack_from('<i', raw_data, pos)[0]
+            potential_count = struct.unpack_from("<i", raw_data, pos)[0]
 
             # Check if this looks like a template count (reasonable range)
             if 0 < potential_count < 100:
                 # Check if next 12 bytes are zeros (template TypeTree)
-                next_12 = raw_data[pos + 4:pos + 16]
-                if next_12 == b'\x00' * 12:
+                next_12 = raw_data[pos + 4 : pos + 16]
+                if next_12 == b"\x00" * 12:
                     # This looks like template array!
                     return pos
 
@@ -201,15 +206,15 @@ def serialize_template_references(template_refs: List[TemplateReference]) -> byt
     data = bytearray()
 
     # Write count
-    data.extend(struct.pack('<i', len(template_refs)))
+    data.extend(struct.pack("<i", len(template_refs)))
 
     for ref in template_refs:
         # Track where this template starts (for padding calculation)
         template_start = len(data)
 
         # Write name
-        name_bytes = ref.name.encode('utf-8')
-        data.extend(struct.pack('<i', len(name_bytes)))
+        name_bytes = ref.name.encode("utf-8")
+        data.extend(struct.pack("<i", len(name_bytes)))
         data.extend(name_bytes)
 
         # After name: align to 4-byte boundary (if needed)
@@ -220,12 +225,14 @@ def serialize_template_references(template_refs: List[TemplateReference]) -> byt
                 data.append(0)
 
         # Write 4-byte separator block (always 0x20 0x00 0x00 0x00)
-        data.extend(b'\x20\x00\x00\x00')
+        data.extend(b"\x20\x00\x00\x00")
 
         # Write GUID (always 32 bytes, no length prefix!)
-        guid_bytes = ref.guid.encode('ascii')
+        guid_bytes = ref.guid.encode("ascii")
         if len(guid_bytes) != 32:
-            raise ValueError(f"GUID must be 32 bytes, got {len(guid_bytes)}: {ref.guid}")
+            raise ValueError(
+                f"GUID must be 32 bytes, got {len(guid_bytes)}: {ref.guid}"
+            )
         data.extend(guid_bytes)
         data.append(0)  # null terminator
 
@@ -237,6 +244,6 @@ def serialize_template_references(template_refs: List[TemplateReference]) -> byt
         # Formula: padding = 12 - (size_before_padding % 12)
         size_before_padding = len(data) - template_start
         padding = 12 - (size_before_padding % 12)
-        data.extend(b'\x00' * padding)
+        data.extend(b"\x00" * padding)
 
     return bytes(data)

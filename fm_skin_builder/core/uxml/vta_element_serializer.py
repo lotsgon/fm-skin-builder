@@ -13,8 +13,7 @@ from .uxml_element_parser import UXMLElementBinary
 
 
 def serialize_visual_elements_array(
-    elements: List[UXMLElementBinary],
-    typetree_metadata: bytes
+    elements: List[UXMLElementBinary], typetree_metadata: bytes
 ) -> bytes:
     """
     Serialize visual elements array.
@@ -34,11 +33,13 @@ def serialize_visual_elements_array(
     data = bytearray()
 
     # Write count
-    data.extend(struct.pack('<i', len(elements)))
+    data.extend(struct.pack("<i", len(elements)))
 
     # Write TypeTree metadata (preserve original)
     if len(typetree_metadata) != 40:
-        raise ValueError(f"Visual TypeTree metadata must be 40 bytes, got {len(typetree_metadata)}")
+        raise ValueError(
+            f"Visual TypeTree metadata must be 40 bytes, got {len(typetree_metadata)}"
+        )
     data.extend(typetree_metadata)
 
     # Write each element
@@ -49,8 +50,7 @@ def serialize_visual_elements_array(
 
 
 def serialize_template_assets_array(
-    elements: List[UXMLElementBinary],
-    typetree_metadata: bytes
+    elements: List[UXMLElementBinary], typetree_metadata: bytes
 ) -> bytes:
     """
     Serialize template assets array.
@@ -70,11 +70,13 @@ def serialize_template_assets_array(
     data = bytearray()
 
     # Write count
-    data.extend(struct.pack('<i', len(elements)))
+    data.extend(struct.pack("<i", len(elements)))
 
     # Write TypeTree metadata (preserve original)
     if len(typetree_metadata) != 12:
-        raise ValueError(f"Template TypeTree metadata must be 12 bytes, got {len(typetree_metadata)}")
+        raise ValueError(
+            f"Template TypeTree metadata must be 12 bytes, got {len(typetree_metadata)}"
+        )
     data.extend(typetree_metadata)
 
     # Write each element

@@ -26,7 +26,7 @@ warnings.warn(
     "fm_skin_builder.utils.uxml_parser is deprecated. "
     "Use fm_skin_builder.core.uxml instead.",
     DeprecationWarning,
-    stacklevel=2
+    stacklevel=2,
 )
 
 __all__ = [

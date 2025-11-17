@@ -59,7 +59,9 @@ class UXMLImporter:
 
         return doc
 
-    def import_uxml_text(self, uxml_text: str, asset_name: str = "Imported") -> UXMLDocument:
+    def import_uxml_text(
+        self, uxml_text: str, asset_name: str = "Imported"
+    ) -> UXMLDocument:
         """
         Import UXML from text string.
 
@@ -109,21 +111,23 @@ class UXMLImporter:
 
         # Remove namespace for easier processing
         for elem in root_xml.iter():
-            if '}' in elem.tag:
-                elem.tag = elem.tag.split('}')[1]
+            if "}" in elem.tag:
+                elem.tag = elem.tag.split("}")[1]
 
         # Build the structure
         visual_elements, template_assets = self._build_element_assets_from_xml(root_xml)
 
         result = {
-            'm_VisualElementAssets': visual_elements,
-            'm_TemplateAssets': template_assets,
-            'm_UxmlObjectAssets': [],
+            "m_VisualElementAssets": visual_elements,
+            "m_TemplateAssets": template_assets,
+            "m_UxmlObjectAssets": [],
         }
 
         return result
 
-    def _build_element_assets_from_xml(self, root_xml: ET.Element) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    def _build_element_assets_from_xml(
+        self, root_xml: ET.Element
+    ) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """
         Convert XML elements to m_VisualElementAssets and m_TemplateAssets lists.
 
@@ -137,12 +141,14 @@ class UXMLImporter:
         template_assets = []
         element_counter = [0]  # Use list for mutable counter in nested function
 
-        def process_element(elem: ET.Element, parent_id: int = 0) -> Optional[Dict[str, Any]]:
+        def process_element(
+            elem: ET.Element, parent_id: int = 0
+        ) -> Optional[Dict[str, Any]]:
             """Recursively process XML elements."""
 
             # Get element ID from data-unity-id attribute (if present in exported UXML)
             # Otherwise use counter
-            unity_id_str = elem.get('data-unity-id')
+            unity_id_str = elem.get("data-unity-id")
             if unity_id_str:
                 try:
                     element_id = int(unity_id_str)
@@ -154,23 +160,23 @@ class UXMLImporter:
                 element_counter[0] += 1
 
             # Check if this is a TemplateContainer
-            is_template = elem.tag == 'TemplateContainer'
-            template_alias = elem.get('template') if is_template else None
+            is_template = elem.tag == "TemplateContainer"
+            template_alias = elem.get("template") if is_template else None
 
             # Build the element asset
             element_asset = {
-                'm_Id': element_id,
-                'm_OrderInDocument': len(visual_elements) + len(template_assets),
-                'm_ParentId': parent_id,
-                'm_RuleIndex': -1,
-                'm_Type': elem.tag,
-                'm_Name': elem.get('name', ''),
-                'm_Classes': elem.get('class', '').split() if elem.get('class') else []
+                "m_Id": element_id,
+                "m_OrderInDocument": len(visual_elements) + len(template_assets),
+                "m_ParentId": parent_id,
+                "m_RuleIndex": -1,
+                "m_Type": elem.tag,
+                "m_Name": elem.get("name", ""),
+                "m_Classes": elem.get("class", "").split() if elem.get("class") else [],
             }
 
             # Add to appropriate list
             if is_template and template_alias:
-                element_asset['m_TemplateAlias'] = template_alias
+                element_asset["m_TemplateAlias"] = template_alias
                 template_assets.append(element_asset)
             else:
                 visual_elements.append(element_asset)
@@ -178,7 +184,7 @@ class UXMLImporter:
             # Process children
             for child in elem:
                 # Skip Template definitions (they're references, not actual elements)
-                if child.tag == 'Template':
+                if child.tag == "Template":
                     continue
                 process_element(child, element_id)
 
@@ -187,16 +193,14 @@ class UXMLImporter:
         # Process all top-level elements
         for child in root_xml:
             # Skip non-element nodes
-            if child.tag in ['Template', 'Style'] or callable(child.tag):
+            if child.tag in ["Template", "Style"] or callable(child.tag):
                 continue
             process_element(child)
 
         return visual_elements, template_assets
 
     def build_visual_tree_asset(
-        self,
-        doc: UXMLDocument,
-        base_vta: Optional[Any] = None
+        self, doc: UXMLDocument, base_vta: Optional[Any] = None
     ) -> Dict[str, Any]:
         """
         Build Unity VisualTreeAsset data structure from UXML document.
@@ -217,46 +221,43 @@ class UXMLImporter:
         # Convert element tree to Unity format
         element_id = 0
 
-        def process_element(
-            elem: UXMLElement,
-            parent_id: int = -1
-        ) -> int:
+        def process_element(elem: UXMLElement, parent_id: int = -1) -> int:
             nonlocal element_id
 
             current_id = element_id
             element_id += 1
 
             # Check if this is a TemplateContainer
-            is_template = elem.element_type == 'TemplateContainer'
+            is_template = elem.element_type == "TemplateContainer"
             template_alias = None
 
             # Build VisualElementAsset structure
             # Unity 2021+ stores data directly (not as string indices)
             ve_asset = {
-                'm_Id': current_id,
-                'm_ParentId': parent_id,
-                'm_OrderInDocument': len(visual_elements) + len(template_elements),
-                'm_FullTypeName': self._get_full_type_name(elem.element_type),
-                'm_Name': '',
-                'm_Classes': [],
+                "m_Id": current_id,
+                "m_ParentId": parent_id,
+                "m_OrderInDocument": len(visual_elements) + len(template_elements),
+                "m_FullTypeName": self._get_full_type_name(elem.element_type),
+                "m_Name": "",
+                "m_Classes": [],
             }
 
             # Process attributes
             for attr in elem.attributes:
-                if attr.name == 'name':
+                if attr.name == "name":
                     # Unity 2021+ stores name as direct string
-                    ve_asset['m_Name'] = attr.value
+                    ve_asset["m_Name"] = attr.value
 
-                elif attr.name == 'class':
+                elif attr.name == "class":
                     # Unity 2021+ stores classes as direct strings
                     classes = [c.strip() for c in attr.value.split() if c.strip()]
-                    ve_asset['m_Classes'] = classes
+                    ve_asset["m_Classes"] = classes
 
-                elif attr.name == 'template':
+                elif attr.name == "template":
                     # Template reference - store the template alias
                     template_alias = attr.value
 
-                elif attr.name == 'style':
+                elif attr.name == "style":
                     # Inline style - store for later processing
                     # Note: Most styles should be in StyleSheet
                     pass
@@ -269,11 +270,11 @@ class UXMLImporter:
             # Process text content
             if elem.text:
                 # Unity 2021+ stores text as direct string
-                ve_asset['m_Text'] = elem.text
+                ve_asset["m_Text"] = elem.text
 
             # If this is a template element, add template-specific fields
             if is_template and template_alias:
-                ve_asset['m_TemplateAlias'] = template_alias
+                ve_asset["m_TemplateAlias"] = template_alias
                 template_elements.append(ve_asset)
             else:
                 # Regular visual element
@@ -291,15 +292,15 @@ class UXMLImporter:
 
         # Build the final VTA structure
         vta_structure = {
-            'm_Name': doc.asset_name or 'ImportedUXML',
-            'm_VisualElementAssets': visual_elements,
-            'm_TemplateAssets': template_elements,  # Template instances from UXML
+            "m_Name": doc.asset_name or "ImportedUXML",
+            "m_VisualElementAssets": visual_elements,
+            "m_TemplateAssets": template_elements,  # Template instances from UXML
         }
 
         # If we have inline styles, we need to build a StyleSheet
         if doc.inline_styles:
             inline_stylesheet = self._build_inline_stylesheet(doc.inline_styles)
-            vta_structure['m_InlineSheet'] = inline_stylesheet
+            vta_structure["m_InlineSheet"] = inline_stylesheet
 
         return vta_structure
 
@@ -315,17 +316,24 @@ class UXMLImporter:
         """
         # Map of common SI.Bindable types
         si_bindable_types = {
-            'BindingRoot', 'BindingVariables', 'BindingRemapper',
-            'BindableSwitchElement', 'SIText', 'SIImage', 'SIButton',
-            'SIVisible', 'SIDropdown', 'TabbedGridLayoutElement',
+            "BindingRoot",
+            "BindingVariables",
+            "BindingRemapper",
+            "BindableSwitchElement",
+            "SIText",
+            "SIImage",
+            "SIButton",
+            "SIVisible",
+            "SIDropdown",
+            "TabbedGridLayoutElement",
         }
 
         # Check if it's an SI.Bindable type
         if element_type in si_bindable_types:
-            return f'SI.Bindable.{element_type}'
+            return f"SI.Bindable.{element_type}"
 
         # Default to UnityEngine.UIElements namespace
-        return f'UnityEngine.UIElements.{element_type}'
+        return f"UnityEngine.UIElements.{element_type}"
 
     def _extract_templates_from_xml(self, root_xml: ET.Element) -> List[UXMLTemplate]:
         """
@@ -339,16 +347,18 @@ class UXMLImporter:
         """
         templates = []
 
-        for template_elem in root_xml.findall('.//Template'):
-            name = template_elem.get('name', '')
-            src = template_elem.get('src', '')
+        for template_elem in root_xml.findall(".//Template"):
+            name = template_elem.get("name", "")
+            src = template_elem.get("src", "")
 
             if name:
                 templates.append(UXMLTemplate(name=name, src=src))
 
         return templates
 
-    def _extract_visual_tree_from_xml(self, root_xml: ET.Element) -> Optional[UXMLElement]:
+    def _extract_visual_tree_from_xml(
+        self, root_xml: ET.Element
+    ) -> Optional[UXMLElement]:
         """
         Extract visual element hierarchy from XML.
 
@@ -365,11 +375,11 @@ class UXMLImporter:
             tag = child.tag
 
             # Remove namespace prefix
-            if '}' in tag:
-                tag = tag.split('}')[1]
+            if "}" in tag:
+                tag = tag.split("}")[1]
 
             # Skip Template, Style elements and comments
-            if tag in ('Template', 'Style') or callable(tag):
+            if tag in ("Template", "Style") or callable(tag):
                 continue
 
             # This is a UI element
@@ -401,8 +411,8 @@ class UXMLImporter:
         tag = xml_elem.tag
 
         # Remove namespace prefix
-        if '}' in tag:
-            tag = tag.split('}')[1]
+        if "}" in tag:
+            tag = tag.split("}")[1]
 
         element_type = tag
 
@@ -412,13 +422,10 @@ class UXMLImporter:
         # Extract attributes
         for attr_name, attr_value in xml_elem.attrib.items():
             # Remove namespace prefix from attribute name
-            if '}' in attr_name:
-                attr_name = attr_name.split('}')[1]
+            if "}" in attr_name:
+                attr_name = attr_name.split("}")[1]
 
-            element.attributes.append(UXMLAttribute(
-                name=attr_name,
-                value=attr_value
-            ))
+            element.attributes.append(UXMLAttribute(name=attr_name, value=attr_value))
 
         # Extract text content
         if xml_elem.text and xml_elem.text.strip():
@@ -446,22 +453,22 @@ class UXMLImporter:
         for elem in root_xml.iter():
             if callable(elem.tag):
                 # This is a comment
-                comment_text = elem.text or ''
-                if 'Inline Styles:' in comment_text:
+                comment_text = elem.text or ""
+                if "Inline Styles:" in comment_text:
                     # Extract CSS from comment
-                    lines = comment_text.split('\n')
+                    lines = comment_text.split("\n")
                     css_lines = []
                     in_css = False
 
                     for line in lines:
-                        if 'Inline Styles:' in line:
+                        if "Inline Styles:" in line:
                             in_css = True
                             continue
 
                         if in_css:
                             css_lines.append(line)
 
-                    return '\n'.join(css_lines).strip()
+                    return "\n".join(css_lines).strip()
 
         return None
 
@@ -479,24 +486,22 @@ class UXMLImporter:
         rules = self.style_serializer.parse_css(css_text)
 
         # Build StyleSheet data structures
-        strings, colors, unity_rules, complex_selectors = \
+        strings, colors, unity_rules, complex_selectors = (
             self.style_serializer.build_stylesheet_data(rules)
+        )
 
         # Build StyleSheet structure
         stylesheet = {
-            'strings': strings,
-            'colors': colors,
-            'm_Rules': unity_rules,
-            'm_ComplexSelectors': complex_selectors,
+            "strings": strings,
+            "colors": colors,
+            "m_Rules": unity_rules,
+            "m_ComplexSelectors": complex_selectors,
         }
 
         return stylesheet
 
     def inject_into_bundle(
-        self,
-        doc: UXMLDocument,
-        bundle_path: Path,
-        output_path: Path
+        self, doc: UXMLDocument, bundle_path: Path, output_path: Path
     ) -> None:
         """
         Inject modified VisualTreeAsset into a Unity bundle.
@@ -560,7 +565,7 @@ class UXMLImporter:
 
         # Write modified bundle
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'wb') as f:
+        with open(output_path, "wb") as f:
             f.write(env.file.save())
 
         log.info(f"Wrote modified bundle to {output_path}")

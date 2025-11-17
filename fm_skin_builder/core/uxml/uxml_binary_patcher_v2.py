@@ -11,7 +11,7 @@ from typing import List, Dict, Any, Optional, Set
 from fm_skin_builder.core.uxml.uxml_element_parser import (
     UXMLElementBinary,
     parse_element_at_offset,
-    find_element_offset
+    find_element_offset,
 )
 
 log = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ class UXMLBinaryPatcherV2:
         raw_data: bytes,
         imported_data: Dict[str, Any],
         visual_elements: List[Any],
-        template_assets: List[Any]
+        template_assets: List[Any],
     ) -> Optional[bytes]:
         """
         Apply UXML changes by directly patching binary data.
@@ -46,7 +46,9 @@ class UXMLBinaryPatcherV2:
             log.debug(f"Applying UXML patch to VTA binary ({len(raw_data)} bytes)")
             log.debug(f"  Original visual elements: {len(visual_elements)}")
             log.debug(f"  Original template assets: {len(template_assets)}")
-            log.debug(f"  Imported UXML elements: {len(imported_data['m_VisualElementAssets'])}")
+            log.debug(
+                f"  Imported UXML elements: {len(imported_data['m_VisualElementAssets'])}"
+            )
 
         # Parse visual elements from binary
         visual_parsed = self._parse_elements_from_array(raw_data, visual_elements)
@@ -61,11 +63,15 @@ class UXMLBinaryPatcherV2:
             return None
 
         if self.verbose:
-            log.debug(f"Parsed {len(visual_parsed)} visual elements and {len(template_parsed)} template assets from binary")
+            log.debug(
+                f"Parsed {len(visual_parsed)} visual elements and {len(template_parsed)} template assets from binary"
+            )
 
         # Apply modifications to both element lists
         # Combine both visual and template arrays from imported data
-        imported_all = imported_data['m_VisualElementAssets'] + imported_data.get('m_TemplateAssets', [])
+        imported_all = imported_data["m_VisualElementAssets"] + imported_data.get(
+            "m_TemplateAssets", []
+        )
         self._apply_modifications(visual_parsed + template_parsed, imported_all)
 
         # Try in-place patching (preserves exact binary structure Unity expects)
@@ -81,14 +87,16 @@ class UXMLBinaryPatcherV2:
         else:
             # In-place patching failed (likely due to element growth)
             # Rebuild method produces bundles that crash the game, so return None
-            log.error("In-place patching failed due to element growth - cannot patch this UXML")
-            log.error("To fix: reduce the size of modified elements (shorter class names, etc.)")
+            log.error(
+                "In-place patching failed due to element growth - cannot patch this UXML"
+            )
+            log.error(
+                "To fix: reduce the size of modified elements (shorter class names, etc.)"
+            )
             return None
 
     def _parse_elements_from_array(
-        self,
-        raw_data: bytes,
-        original_elements: List[Any]
+        self, raw_data: bytes, original_elements: List[Any]
     ) -> Optional[List[UXMLElementBinary]]:
         """Parse elements from a specific array (visual or template).
 
@@ -97,7 +105,9 @@ class UXMLBinaryPatcherV2:
         elements = []
 
         if self.verbose:
-            log.debug(f"Converting {len(original_elements)} elements from UnityPy format")
+            log.debug(
+                f"Converting {len(original_elements)} elements from UnityPy format"
+            )
 
         if not original_elements:
             if self.verbose:
@@ -130,7 +140,9 @@ class UXMLBinaryPatcherV2:
 
             # Verify the element ID matches
             if element.m_Id != orig_elem.m_Id:
-                log.warning(f"Element ID mismatch at offset {offset}: expected {orig_elem.m_Id}, got {element.m_Id}")
+                log.warning(
+                    f"Element ID mismatch at offset {offset}: expected {orig_elem.m_Id}, got {element.m_Id}"
+                )
                 # Still use it - the offset might be slightly wrong but the parse succeeded
 
             # Store the parsed element
@@ -138,8 +150,16 @@ class UXMLBinaryPatcherV2:
                 elements.append(element)
 
                 if self.verbose:
-                    classes_str = ', '.join(f'"{c}"' for c in element.m_Classes) if element.m_Classes else 'none'
-                    paths_str = ', '.join(f'"{p}"' for p in element.m_StylesheetPaths) if element.m_StylesheetPaths else 'none'
+                    classes_str = (
+                        ", ".join(f'"{c}"' for c in element.m_Classes)
+                        if element.m_Classes
+                        else "none"
+                    )
+                    paths_str = (
+                        ", ".join(f'"{p}"' for p in element.m_StylesheetPaths)
+                        if element.m_StylesheetPaths
+                        else "none"
+                    )
                     log.debug(
                         f"Converted element {element.m_Id}: type={element.m_Type}, name={element.m_Name or '(empty)'}, "
                         f"order={element.m_OrderInDocument}, classes=[{classes_str}], paths=[{paths_str}]"
@@ -152,9 +172,7 @@ class UXMLBinaryPatcherV2:
         return elements
 
     def _patch_elements_in_place(
-        self,
-        raw_data: bytearray,
-        elements: List[UXMLElementBinary]
+        self, raw_data: bytearray, elements: List[UXMLElementBinary]
     ) -> bool:
         """
         Patch elements in-place by modifying only the m_Classes array.
@@ -183,20 +201,28 @@ class UXMLBinaryPatcherV2:
                 log.error(f"Element {elem.m_Id}: offset out of bounds")
                 return False
 
-            old_count = struct.unpack_from('<i', raw_data, classes_offset)[0]
+            old_count = struct.unpack_from("<i", raw_data, classes_offset)[0]
 
             # Calculate old classes array size
             old_size = 4  # count field
             pos = classes_offset + 4
             for i in range(old_count):
                 if pos + 4 > len(raw_data):
-                    log.error(f"Element {elem.m_Id}: not enough data to read class string {i}")
+                    log.error(
+                        f"Element {elem.m_Id}: not enough data to read class string {i}"
+                    )
                     return False
-                str_len = struct.unpack_from('<i', raw_data, pos)[0]
+                str_len = struct.unpack_from("<i", raw_data, pos)[0]
                 if str_len < 0 or str_len > 1000:
-                    print(f"[PATCH DEBUG] Element {elem.m_Id}: unreasonable class string length: {str_len} at class {i}/{old_count}")
-                    print(f"[PATCH DEBUG]   Position in raw_data: {pos}, classes_offset: {classes_offset}")
-                    print(f"[PATCH DEBUG]   Hex at position: {raw_data[pos:pos+16].hex()}")
+                    print(
+                        f"[PATCH DEBUG] Element {elem.m_Id}: unreasonable class string length: {str_len} at class {i}/{old_count}"
+                    )
+                    print(
+                        f"[PATCH DEBUG]   Position in raw_data: {pos}, classes_offset: {classes_offset}"
+                    )
+                    print(
+                        f"[PATCH DEBUG]   Hex at position: {raw_data[pos:pos+16].hex()}"
+                    )
                     return False
                 pos += 4 + str_len  # length + data (NO null terminator)
                 # Strings are packed together without nulls
@@ -210,10 +236,10 @@ class UXMLBinaryPatcherV2:
 
             # Serialize new classes array
             new_classes_bytes = bytearray()
-            new_classes_bytes.extend(struct.pack('<i', len(elem.m_Classes)))
+            new_classes_bytes.extend(struct.pack("<i", len(elem.m_Classes)))
             for class_name in elem.m_Classes:
-                class_bytes = class_name.encode('utf-8')
-                new_classes_bytes.extend(struct.pack('<i', len(class_bytes)))
+                class_bytes = class_name.encode("utf-8")
+                new_classes_bytes.extend(struct.pack("<i", len(class_bytes)))
                 new_classes_bytes.extend(class_bytes)
                 # NO null terminator - strings are packed together
 
@@ -223,36 +249,46 @@ class UXMLBinaryPatcherV2:
 
             # Check if new array fits
             if len(new_classes_bytes) > old_size:
-                print(f"[PATCH DEBUG] Element {elem.m_Id}: classes array grew from {old_size} to {len(new_classes_bytes)} bytes")
+                print(
+                    f"[PATCH DEBUG] Element {elem.m_Id}: classes array grew from {old_size} to {len(new_classes_bytes)} bytes"
+                )
                 print(f"[PATCH DEBUG]   Old classes (count={old_count})")
-                print(f"[PATCH DEBUG]   New classes (count={len(elem.m_Classes)}): {elem.m_Classes}")
+                print(
+                    f"[PATCH DEBUG]   New classes (count={len(elem.m_Classes)}): {elem.m_Classes}"
+                )
                 return False
 
             # Patch the classes array in-place
-            raw_data[classes_offset:classes_offset + len(new_classes_bytes)] = new_classes_bytes
+            raw_data[classes_offset : classes_offset + len(new_classes_bytes)] = (
+                new_classes_bytes
+            )
 
             # If smaller, we might need to shift data or just leave it
             # For now, just leave the extra bytes (they'll be ignored by Unity)
 
             if self.verbose:
-                log.debug(f"Patched element {elem.m_Id} classes array: {old_count} → {len(elem.m_Classes)} items")
+                log.debug(
+                    f"Patched element {elem.m_Id} classes array: {old_count} → {len(elem.m_Classes)} items"
+                )
 
         return True
 
     def _apply_modifications(
         self,
         all_elements: List[UXMLElementBinary],
-        imported_elements: List[Dict[str, Any]]
+        imported_elements: List[Dict[str, Any]],
     ) -> None:
         """Apply modifications from imported UXML to parsed elements."""
         # Build a lookup by element ID
-        imported_by_id = {elem['m_Id']: elem for elem in imported_elements}
+        imported_by_id = {elem["m_Id"]: elem for elem in imported_elements}
         matched_imported_ids: Set[int] = set()
 
         for elem in all_elements:
             if elem.m_Id not in imported_by_id:
                 if self.verbose:
-                    log.debug(f"Element {elem.m_Id} not in imported data, keeping original")
+                    log.debug(
+                        f"Element {elem.m_Id} not in imported data, keeping original"
+                    )
                 continue
 
             imported = imported_by_id[elem.m_Id]
@@ -268,18 +304,18 @@ class UXMLBinaryPatcherV2:
             #     elem.m_RuleIndex = imported['m_RuleIndex']
 
             # Update CSS classes
-            if 'm_Classes' in imported:
+            if "m_Classes" in imported:
                 old_classes = elem.m_Classes.copy()
-                elem.m_Classes = imported['m_Classes']
+                elem.m_Classes = imported["m_Classes"]
                 if self.verbose and old_classes != elem.m_Classes:
                     log.debug(
                         f"Element {elem.m_Id}: classes {old_classes} → {elem.m_Classes}"
                     )
 
             # Update stylesheet paths (rare)
-            if 'm_StylesheetPaths' in imported:
+            if "m_StylesheetPaths" in imported:
                 old_paths = elem.m_StylesheetPaths.copy()
-                elem.m_StylesheetPaths = imported['m_StylesheetPaths']
+                elem.m_StylesheetPaths = imported["m_StylesheetPaths"]
                 if self.verbose and old_paths != elem.m_StylesheetPaths:
                     log.debug(
                         f"Element {elem.m_Id}: paths {old_paths} → {elem.m_StylesheetPaths}"
@@ -288,7 +324,9 @@ class UXMLBinaryPatcherV2:
         # Check for unmatched imports
         unmatched = set(imported_by_id.keys()) - matched_imported_ids
         if unmatched and self.verbose:
-            log.warning(f"Found {len(unmatched)} elements in UXML that don't exist in original: {list(unmatched)}")
+            log.warning(
+                f"Found {len(unmatched)} elements in UXML that don't exist in original: {list(unmatched)}"
+            )
 
     def _rebuild_with_separate_arrays(
         self,
@@ -296,7 +334,7 @@ class UXMLBinaryPatcherV2:
         visual_elements: List[UXMLElementBinary],
         template_elements: List[UXMLElementBinary],
         orig_visual: List[Any],
-        orig_template: List[Any]
+        orig_template: List[Any],
     ) -> bytes:
         """
         Rebuild asset with separate m_VisualElementAssets and m_TemplateAssets arrays.
@@ -320,8 +358,8 @@ class UXMLBinaryPatcherV2:
         # NOTE: Offset 12 is NOT used - it's just part of the header!
         # TypeTree reads array counts INLINE at the start of each array.
         VISUAL_COUNT_OFFSET = 152  # Visual array starts here (inline count)
-        TYPE_INFO_START = 156       # Type info for visual elements
-        FIRST_VISUAL_OFFSET = 196   # First visual element data
+        TYPE_INFO_START = 156  # Type info for visual elements
+        FIRST_VISUAL_OFFSET = 196  # First visual element data
 
         # Calculate visual elements end (in ORIGINAL binary)
         if visual_elements:
@@ -367,9 +405,11 @@ class UXMLBinaryPatcherV2:
         result.extend(original_raw[:VISUAL_COUNT_OFFSET])
 
         # 2. Write visual count INLINE at offset 152 (this is correct!)
-        result.extend(struct.pack('<i', len(visual_elements)))
+        result.extend(struct.pack("<i", len(visual_elements)))
         if self.verbose:
-            log.debug(f"Updated visual count at offset {VISUAL_COUNT_OFFSET}: {len(visual_elements)}")
+            log.debug(
+                f"Updated visual count at offset {VISUAL_COUNT_OFFSET}: {len(visual_elements)}"
+            )
 
         # 3. Keep type info (156-195)
         result.extend(original_raw[TYPE_INFO_START:FIRST_VISUAL_OFFSET])
@@ -387,12 +427,16 @@ class UXMLBinaryPatcherV2:
                 result.extend(bytes(padding_needed))
 
             if self.verbose:
-                log.debug(f"  Visual element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding")
+                log.debug(
+                    f"  Visual element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding"
+                )
 
         # 5. Write template count INLINE (TypeTree reads it from here!)
-        result.extend(struct.pack('<i', len(template_elements)))
+        result.extend(struct.pack("<i", len(template_elements)))
         if self.verbose:
-            log.debug(f"  Template count (inline at offset {len(result)-4}): {len(template_elements)}")
+            log.debug(
+                f"  Template count (inline at offset {len(result)-4}): {len(template_elements)}"
+            )
 
         # 6. Write template elements
         for i, elem in enumerate(template_elements):
@@ -405,7 +449,9 @@ class UXMLBinaryPatcherV2:
                 result.extend(bytes(padding_needed))
 
             if self.verbose:
-                log.debug(f"  Template element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding")
+                log.debug(
+                    f"  Template element {i} (ID {elem.m_Id}): {len(elem_bytes)} bytes + {padding_needed} padding"
+                )
 
         # 8. Keep footer (everything after template elements)
         result.extend(original_raw[template_data_end:])
