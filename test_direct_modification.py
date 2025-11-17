@@ -18,7 +18,7 @@ def test_direct_modification():
             try:
                 data = obj.read()
                 if hasattr(data, "m_Name") and data.m_Name == "AboutClubCard":
-                    print(f"\n✓ Found AboutClubCard")
+                    print("\n✓ Found AboutClubCard")
 
                     if hasattr(data, "m_VisualElementAssets"):
                         print(f"  Visual elements: {len(data.m_VisualElementAssets)}")
@@ -45,9 +45,9 @@ def test_direct_modification():
                                     return False
 
                             # Save the data object
-                            print(f"\n  Calling data.save()...")
+                            print("\n  Calling data.save()...")
                             data.save()
-                            print(f"  ✓ data.save() completed")
+                            print("  ✓ data.save() completed")
 
                     break
             except:
@@ -61,7 +61,7 @@ def test_direct_modification():
     print(f"\n✅ Saved modified bundle to: {output_path}")
 
     # Try to load it back
-    print(f"\nLoading modified bundle...")
+    print("\nLoading modified bundle...")
     env2 = UnityPy.load(str(output_path))
 
     for obj in env2.objects:
@@ -69,7 +69,7 @@ def test_direct_modification():
             try:
                 data = obj.read()
                 if hasattr(data, "m_Name") and data.m_Name == "AboutClubCard":
-                    print(f"\n✓ Found AboutClubCard in modified bundle")
+                    print("\n✓ Found AboutClubCard in modified bundle")
 
                     if hasattr(data, "m_VisualElementAssets"):
                         print(f"  Visual elements: {len(data.m_VisualElementAssets)}")
@@ -81,10 +81,10 @@ def test_direct_modification():
 
                             # Check for our test class
                             if 'test-class-added' in elem.m_Classes:
-                                print(f"    ✅ Found 'test-class-added' class!")
+                                print("    ✅ Found 'test-class-added' class!")
                                 return True
                             else:
-                                print(f"    ❌ 'test-class-added' class not found!")
+                                print("    ❌ 'test-class-added' class not found!")
                                 return False
 
             except Exception as e:

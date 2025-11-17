@@ -211,7 +211,7 @@ class UXMLBinaryPatcher:
         last_elem_calculated_end += padding_after_last
 
         if self.verbose:
-            log.debug(f"Rebuild info:")
+            log.debug("Rebuild info:")
             log.debug(f"  First element at offset {first_elem_offset}")
             log.debug(f"  Array size field at offset {array_size_offset}")
             log.debug(f"  Last element (ID {last_elem.m_Id}) at offset {last_elem.offset}")

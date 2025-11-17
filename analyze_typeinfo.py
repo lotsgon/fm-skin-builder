@@ -2,7 +2,6 @@
 """Analyze the type info section (156-195) to understand its structure."""
 
 import UnityPy
-from pathlib import Path
 import struct
 
 def analyze_typeinfo():

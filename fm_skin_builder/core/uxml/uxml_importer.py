@@ -7,7 +7,7 @@ Handles XML parsing, AST construction, and Unity structure rebuilding.
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 import xml.etree.ElementTree as ET
 
 from .uxml_ast import (

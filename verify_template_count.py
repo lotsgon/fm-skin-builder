@@ -25,7 +25,7 @@ def verify_counts():
                     visual_count = len(data.m_VisualElementAssets)
                     template_count = len(data.m_TemplateAssets)
 
-                    print(f"Expected counts:")
+                    print("Expected counts:")
                     print(f"  Visual elements: {visual_count}")
                     print(f"  Template assets: {template_count}")
                     print()
@@ -34,14 +34,14 @@ def verify_counts():
                     val_12 = struct.unpack_from('<i', raw, 12)[0]
                     print(f"Offset 12: value = {val_12}")
                     if val_12 == template_count:
-                        print(f"  ✓ This matches template count!")
+                        print("  ✓ This matches template count!")
                     print()
 
                     # Check offset 152
                     val_152 = struct.unpack_from('<i', raw, 152)[0]
                     print(f"Offset 152: value = {val_152}")
                     if val_152 == visual_count:
-                        print(f"  ✓ This matches visual count!")
+                        print("  ✓ This matches visual count!")
                     print()
 
                     print("="*80)
@@ -49,14 +49,14 @@ def verify_counts():
                     print("="*80)
                     print()
                     print("VTA binary layout:")
-                    print(f"  Offset 0-11:    Header part 1")
+                    print("  Offset 0-11:    Header part 1")
                     print(f"  Offset 12:      Template assets count = {val_12}")
-                    print(f"  Offset 16-151:  Header part 2")
+                    print("  Offset 16-151:  Header part 2")
                     print(f"  Offset 152:     Visual elements count = {val_152}")
-                    print(f"  Offset 156-195: Visual elements type info")
-                    print(f"  Offset 196-391: Visual elements data (2 elements)")
-                    print(f"  Offset 392+:    Template assets data (1 element)")
-                    print(f"                  (NO separate count field - uses offset 12)")
+                    print("  Offset 156-195: Visual elements type info")
+                    print("  Offset 196-391: Visual elements data (2 elements)")
+                    print("  Offset 392+:    Template assets data (1 element)")
+                    print("                  (NO separate count field - uses offset 12)")
                     print()
 
                     print("CRITICAL INSIGHT:")

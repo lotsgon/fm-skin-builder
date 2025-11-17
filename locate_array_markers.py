@@ -21,7 +21,7 @@ def locate_arrays():
                     if asset_name == "AboutClubCard":
                         print("=== Array Location Analysis ===\n")
 
-                        print(f"UnityPy reports:")
+                        print("UnityPy reports:")
                         print(f"  m_VisualElementAssets: {len(data.m_VisualElementAssets)} elements")
                         for elem in data.m_VisualElementAssets:
                             print(f"    - ID {elem.m_Id}")
@@ -70,8 +70,8 @@ def locate_arrays():
                         # We know element 0 starts at 196
                         # So visual elements array should have size field at 192
                         print("Expected locations:")
-                        print(f"  m_VisualElementAssets count at: 192 (value should be 2)")
-                        print(f"  First visual element at: 196")
+                        print("  m_VisualElementAssets count at: 192 (value should be 2)")
+                        print("  First visual element at: 196")
 
                         # Verify
                         val_at_192 = struct.unpack_from('<i', raw_data, 192)[0]
@@ -79,14 +79,14 @@ def locate_arrays():
 
                         # Element 1 ends around 389, element 2 starts at 392
                         # Template array size should be somewhere around 389
-                        print(f"\n  Checking around offset 389 (after visual elements)...")
+                        print("\n  Checking around offset 389 (after visual elements)...")
                         for check_offset in range(385, 395):
                             val = struct.unpack_from('<i', raw_data, check_offset)[0]
                             if val == 1:
                                 print(f"  → Found value '1' at offset {check_offset}")
 
                         # Check what's at specific offsets around the gap
-                        print(f"\n  Bytes around gap (offset 385-400):")
+                        print("\n  Bytes around gap (offset 385-400):")
                         gap_bytes = raw_data[385:400]
                         for i in range(0, len(gap_bytes), 4):
                             if i + 4 <= len(gap_bytes):

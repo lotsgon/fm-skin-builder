@@ -2,7 +2,6 @@
 """Compare original and patched element serialization."""
 
 from pathlib import Path
-import struct
 import UnityPy
 
 from fm_skin_builder.core.uxml.uxml_element_parser import parse_element_at_offset, find_element_offset
@@ -41,7 +40,7 @@ def compare():
                         # Parse it
                         elem = parse_element_at_offset(raw_data, offset, debug=False)
                         if elem:
-                            print(f"\nOriginal element:")
+                            print("\nOriginal element:")
                             print(f"  m_Id: {elem.m_Id}")
                             print(f"  m_OrderInDocument: {elem.m_OrderInDocument}")
                             print(f"  m_ParentId: {elem.m_ParentId}")
@@ -58,7 +57,7 @@ def compare():
                             hex_dump(original_bytes, "Original binary")
 
                             # Now modify and serialize
-                            print(f"\n\nModifying classes:")
+                            print("\n\nModifying classes:")
                             print(f"  Before: {elem.m_Classes}")
                             elem.m_Classes = ['base-template-grow', 'test-class-added']
                             print(f"  After: {elem.m_Classes}")
@@ -68,7 +67,7 @@ def compare():
 
                             hex_dump(modified_bytes, "Modified binary", max_bytes=200)
 
-                            print(f"\n\nSize comparison:")
+                            print("\n\nSize comparison:")
                             print(f"  Original: {original_size} bytes (calculated before modification)")
                             print(f"  Modified (__len__): {modified_size} bytes (calculated after modification)")
                             print(f"  Modified (actual): {len(modified_bytes)} bytes (serialized)")
@@ -76,7 +75,7 @@ def compare():
 
                         return
 
-            except Exception as e:
+            except Exception:
                 pass
 
 if __name__ == "__main__":

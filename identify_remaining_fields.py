@@ -82,14 +82,14 @@ def identify_remaining():
 
                             # Serialization section (16 bytes)
                             ser_fields = struct.unpack('<iiii', raw_data[pos:pos + 16])
-                            print(f"\nBinary serialization section:")
+                            print("\nBinary serialization section:")
                             print(f"  Field[0]: {ser_fields[0]} (unknown_field_3, always 0)")
                             print(f"  Field[1]: {ser_fields[1]} (m_SerializedData rid)")
                             print(f"  Field[2]: {ser_fields[2]} (unknown_field_4, -1 or 0)")
                             print(f"  Field[3]: {ser_fields[3]} (unknown_field_5, always 0)")
 
                             # Check for any list/array attributes
-                            print(f"\nArray/List attributes:")
+                            print("\nArray/List attributes:")
                             for attr, val in attrs.items():
                                 if isinstance(val, (list, tuple)) and len(val) > 0:
                                     print(f"  {attr}: {val[:3]}{'...' if len(val) > 3 else ''}")

@@ -88,7 +88,7 @@ def analyze_complete_vta():
                             # Likely candidate is at 152
                             if off == 152:
                                 visual_count_offset = off
-                                print(f"    → This is likely the visual elements count!")
+                                print("    → This is likely the visual elements count!")
 
                     print()
 
@@ -123,7 +123,7 @@ def analyze_complete_vta():
                     print("Based on analysis:")
                     print()
                     print(f"0-151:     VTA header/metadata ({152} bytes)")
-                    print(f"152-155:   m_VisualElementAssets count = 2 (4 bytes)")
+                    print("152-155:   m_VisualElementAssets count = 2 (4 bytes)")
                     print(f"156-195:   Type info for VisualElementAssets ({elem0_offset - 156} bytes)")
                     print(f"196-{elem1_offset + elem1_size - 1}:   Visual elements array data")
                     print(f"  196-{elem0_offset + elem0_size - 1}:  Element 0 ({elem0_size} bytes with padding)")

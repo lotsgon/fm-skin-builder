@@ -79,7 +79,7 @@ def test_uxml_patch_v2():
     print(f"  → Raw data size: {len(raw_data)} bytes")
 
     # Apply patch with separate arrays
-    print(f"  → Patching AboutClubCard with V2 patcher")
+    print("  → Patching AboutClubCard with V2 patcher")
     new_raw_data = patcher.apply_uxml_to_vta_binary(
         raw_data, imported_data, visual_elements, template_assets
     )
@@ -88,7 +88,7 @@ def test_uxml_patch_v2():
         print(f"  → Patch successful! New size: {len(new_raw_data)} bytes")
         target_obj.set_raw_data(new_raw_data)
     else:
-        print(f"  → Patch failed!")
+        print("  → Patch failed!")
         return False
 
     if not found:

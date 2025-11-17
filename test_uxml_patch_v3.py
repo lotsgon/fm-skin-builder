@@ -71,7 +71,7 @@ def test_uxml_patch_v3():
         return False
 
     # Apply patch with separate arrays
-    print(f"  → Patching AboutClubCard with V2 patcher")
+    print("  → Patching AboutClubCard with V2 patcher")
     new_raw_data = patcher.apply_uxml_to_vta_binary(
         raw_data, imported_data, visual_elements, template_assets
     )
@@ -90,7 +90,7 @@ def test_uxml_patch_v3():
         print(f"\n✅ Saved modified bundle to: {output_path}")
         return True
     else:
-        print(f"  → Patch failed!")
+        print("  → Patch failed!")
         return False
 
 if __name__ == "__main__":

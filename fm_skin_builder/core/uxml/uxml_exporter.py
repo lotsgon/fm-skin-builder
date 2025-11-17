@@ -7,7 +7,7 @@ Handles hierarchy reconstruction, attribute extraction, and inline style seriali
 
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 import xml.etree.ElementTree as ET
 import xml.dom.minidom as minidom
 

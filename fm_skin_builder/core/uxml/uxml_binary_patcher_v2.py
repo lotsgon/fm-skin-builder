@@ -333,7 +333,7 @@ class UXMLBinaryPatcherV2:
             visual_data_end += padding
 
             if self.verbose:
-                log.debug(f"Visual elements:")
+                log.debug("Visual elements:")
                 log.debug(f"  Count: {len(visual_elements)}")
                 log.debug(f"  Data ends at: {visual_data_end} (in original binary)")
         else:
@@ -351,7 +351,7 @@ class UXMLBinaryPatcherV2:
             template_data_end += padding
 
             if self.verbose:
-                log.debug(f"Template assets:")
+                log.debug("Template assets:")
                 log.debug(f"  Count: {len(template_elements)}")
                 log.debug(f"  First at: {first_template_offset}")
                 log.debug(f"  Data ends at: {template_data_end} (in original binary)")

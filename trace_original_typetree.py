@@ -2,7 +2,6 @@
 """Trace TypeTree reading on ORIGINAL data."""
 
 import UnityPy
-from pathlib import Path
 from UnityPy.streams import EndianBinaryReader
 from UnityPy.helpers import TypeTreeHelper
 from UnityPy.helpers.TypeTreeHelper import TypeTreeConfig

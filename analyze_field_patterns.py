@@ -35,7 +35,7 @@ def analyze_patterns():
                             print(f"{'='*60}")
 
                             # Get UnityPy fields
-                            print(f"\nUnityPy fields:")
+                            print("\nUnityPy fields:")
                             print(f"  m_PickingMode: {elem.m_PickingMode}")
                             print(f"  m_SkipClone: {elem.m_SkipClone}")
 
@@ -58,7 +58,7 @@ def analyze_patterns():
 
                             # Parse unknown section 1 (20 bytes at offset 16-35)
                             unknown1 = struct.unpack('<iiiii', raw_data[offset + 16:offset + 36])
-                            print(f"\nUnknown section 1 (20 bytes):")
+                            print("\nUnknown section 1 (20 bytes):")
                             print(f"  int[0]: {unknown1[0]} (likely m_PickingMode)")
                             print(f"  int[1]: {unknown1[1]} (likely m_SkipClone)")
                             print(f"  int[2]: {unknown1[2]} (likely m_XmlNamespace ref)")
@@ -89,7 +89,7 @@ def analyze_patterns():
 
                             # Unknown section 2 (16 bytes)
                             unknown2 = struct.unpack('<iiii', raw_data[pos:pos + 16])
-                            print(f"\nUnknown section 2 (16 bytes):")
+                            print("\nUnknown section 2 (16 bytes):")
                             print(f"  int[0]: {unknown2[0]} (?)")
                             print(f"  int[1]: {unknown2[1]} (likely m_SerializedData rid)")
                             print(f"  int[2]: {unknown2[2]} (?)")
@@ -97,7 +97,7 @@ def analyze_patterns():
 
                         return
 
-            except Exception as e:
+            except Exception:
                 pass
 
 if __name__ == "__main__":

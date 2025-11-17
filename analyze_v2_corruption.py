@@ -2,8 +2,6 @@
 """Analyze where V2 binary format causes read_str error."""
 
 import UnityPy
-from pathlib import Path
-import struct
 from fm_skin_builder.core.uxml.uxml_element_parser import parse_element_at_offset
 
 # Load V2 bundle
@@ -24,7 +22,7 @@ for obj in v2_env.objects:
                 print('\nElement 1 at offset 196:')
                 try:
                     elem1 = parse_element_at_offset(v2_raw, 196, debug=True)
-                    print(f'✅ Element 1 parsed successfully')
+                    print('✅ Element 1 parsed successfully')
                     print(f'   Ended at offset: {elem1.offset + len(elem1)}')
                 except Exception as e:
                     print(f'❌ Error parsing element 1: {e}')
@@ -41,7 +39,7 @@ for obj in v2_env.objects:
                     print(f'\nElement 2 should start at offset {elem2_offset}:')
                     try:
                         elem2 = parse_element_at_offset(v2_raw, elem2_offset, debug=True)
-                        print(f'✅ Element 2 parsed successfully')
+                        print('✅ Element 2 parsed successfully')
                         print(f'   Ended at offset: {elem2.offset + len(elem2)}')
                     except Exception as e:
                         print(f'❌ Error parsing element 2: {e}')

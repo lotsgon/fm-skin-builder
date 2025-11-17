@@ -35,10 +35,10 @@ def debug_arrays():
 
                         print(f"  Element 0 offset: {elem0_offset}")
                         print(f"  Element 1 offset: {elem1_offset}")
-                        print(f"  Element 1 ends around: 389 (from previous analysis)")
+                        print("  Element 1 ends around: 389 (from previous analysis)")
 
                         # Template assets
-                        print(f"\nTemplate Assets:")
+                        print("\nTemplate Assets:")
                         print(f"  Template 0 ID: {data.m_TemplateAssets[0].m_Id}")
 
                         template_offset = raw_data.find(struct.pack('<i', data.m_TemplateAssets[0].m_Id))
@@ -51,7 +51,7 @@ def debug_arrays():
                         print(f"  Gap hex: {' '.join(f'{b:02x}' for b in gap[:40])}")
 
                         # Try to find template array size field
-                        print(f"\nLooking for template array size field...")
+                        print("\nLooking for template array size field...")
                         for check_offset in range(389, template_offset):
                             val = struct.unpack_from('<i', raw_data, check_offset)[0]
                             if val == 1:

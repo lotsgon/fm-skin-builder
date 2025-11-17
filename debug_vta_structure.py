@@ -27,7 +27,7 @@ def analyze_element():
                 if is_vta:
                     asset_name = getattr(data, "m_Name", "")
                     if asset_name == "AboutClubCard":
-                        print(f"Found AboutClubCard VTA")
+                        print("Found AboutClubCard VTA")
 
                         # Get raw data
                         raw_data = obj.get_raw_data()
@@ -96,7 +96,7 @@ def analyze_element():
 
                         return
 
-            except Exception as e:
+            except Exception:
                 pass
 
 if __name__ == "__main__":

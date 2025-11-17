@@ -42,7 +42,7 @@ def check_gaps():
 
                         return
 
-            except Exception as e:
+            except Exception:
                 pass
 
 if __name__ == "__main__":

@@ -52,7 +52,7 @@ def identify_fields():
                             offset = raw_data.find(elem_id_bytes)
 
                             if offset == -1:
-                                print(f"  ERROR: Could not find in binary!")
+                                print("  ERROR: Could not find in binary!")
                                 continue
 
                             print(f"\nBinary structure at offset {offset}:")
@@ -69,7 +69,7 @@ def identify_fields():
                             print(f"  offset +12: m_RuleIndex = {m_rule if m_rule != 0xFFFFFFFF else -1}")
 
                             # Unknown section (20 bytes at offset 16-35)
-                            print(f"\n  Unknown section (offset +16 to +35, 20 bytes):")
+                            print("\n  Unknown section (offset +16 to +35, 20 bytes):")
                             unknown1 = raw_data[offset + 16:offset + 36]
 
                             # Try to interpret as different types

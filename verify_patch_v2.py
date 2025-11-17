@@ -29,7 +29,7 @@ def verify_patch_v2():
                     found_count += 1
                     asset_name = getattr(data, "m_Name", "")
                     if asset_name == "AboutClubCard":
-                        print(f"✓ Found AboutClubCard VTA\n")
+                        print("✓ Found AboutClubCard VTA\n")
 
                         if hasattr(data, "m_VisualElementAssets"):
                             print(f"Visual elements: {len(data.m_VisualElementAssets)}")
@@ -40,7 +40,7 @@ def verify_patch_v2():
 
                                 # Check for our test class
                                 if 'test-class-added' in elem.m_Classes:
-                                    print(f"    ✅ Found 'test-class-added' class!")
+                                    print("    ✅ Found 'test-class-added' class!")
 
                         if hasattr(data, "m_TemplateAssets"):
                             print(f"\nTemplate assets: {len(data.m_TemplateAssets)}")
@@ -59,7 +59,7 @@ def verify_patch_v2():
                             print(f"\n✅ SUCCESS: 'test-class-added' class found on element {elem_with_class.m_Id}!")
                             return True
                         else:
-                            print(f"\n❌ ERROR: 'test-class-added' class not found in any element!")
+                            print("\n❌ ERROR: 'test-class-added' class not found in any element!")
                             return False
 
             except Exception as e:

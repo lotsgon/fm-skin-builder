@@ -139,8 +139,11 @@ class BundleContext:
         out_dir.mkdir(parents=True, exist_ok=True)
         name, ext = os.path.splitext(self.bundle_path.name)
         out_path = out_dir / f"{name}{suffix}{ext}"
+
+        # Use UnityPy's save with original compression flags
         with out_path.open("wb") as fh:
-            fh.write(self.env.file.save())
+            fh.write(self.env.file.save(packer="original"))
+
         self._cleanup_stray_originals(out_dir, name, ext, out_path)
         return out_path
 

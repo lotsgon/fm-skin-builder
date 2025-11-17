@@ -2,7 +2,6 @@
 """Trace TypeTree reading to find where it fails."""
 
 import UnityPy
-from pathlib import Path
 from UnityPy.streams import EndianBinaryReader
 
 # Load generated data
@@ -69,7 +68,7 @@ for obj in env.objects:
 
                         # Show context
                         if reader.Position < len(generated_data):
-                            print(f"  Next 32 bytes:")
+                            print("  Next 32 bytes:")
                             for j in range(reader.Position, min(reader.Position + 32, len(generated_data)), 16):
                                 hex_str = ' '.join(f'{b:02x}' for b in generated_data[j:j+16])
                                 print(f"    {j:04d}: {hex_str}")

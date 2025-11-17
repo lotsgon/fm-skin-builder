@@ -47,7 +47,7 @@ def test_uxml_patch():
                     if asset_name == "AboutClubCard":
                         print(f"\n✓ Found VTA: {asset_name}")
                         found = True
-                        print(f"  → Patching AboutClubCard")
+                        print("  → Patching AboutClubCard")
 
                         # Get original elements
                         original_elements = []
@@ -71,10 +71,10 @@ def test_uxml_patch():
                             print(f"  → Patch successful! New size: {len(new_raw_data)} bytes")
                             obj.set_raw_data(new_raw_data)
                         else:
-                            print(f"  → Patch failed!")
+                            print("  → Patch failed!")
                             return False
 
-            except Exception as e:
+            except Exception:
                 pass
 
     if not found:

@@ -6,7 +6,7 @@ Extracts VisualTreeAsset assets from Unity bundles for the catalogue system.
 
 from __future__ import annotations
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Set
+from typing import List, Any, Optional, Set
 import UnityPy
 import hashlib
 

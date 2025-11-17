@@ -121,13 +121,13 @@ def analyze_field_4():
 
                         # Try to find correlation
                         if is_root and unknown_field_4 == -1:
-                            print(f"    ✓ Pattern: Root element has unknown_field_4 = -1")
+                            print("    ✓ Pattern: Root element has unknown_field_4 = -1")
                         elif not is_root and unknown_field_4 == 0:
-                            print(f"    ✓ Pattern: Non-root element has unknown_field_4 = 0")
+                            print("    ✓ Pattern: Non-root element has unknown_field_4 = 0")
                         else:
-                            print(f"    ⚠ UNEXPECTED: Breaks pattern!")
+                            print("    ⚠ UNEXPECTED: Breaks pattern!")
 
-            except Exception as e:
+            except Exception:
                 pass
 
 if __name__ == "__main__":

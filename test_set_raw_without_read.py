@@ -21,7 +21,7 @@ def test_set_raw_without_read():
             try:
                 name = obj.peek_name()
                 if name == "AboutClubCard":
-                    print(f"\n✓ Found AboutClubCard (using peek_name)")
+                    print("\n✓ Found AboutClubCard (using peek_name)")
                     target_obj = obj
                     break
             except:
@@ -37,7 +37,7 @@ def test_set_raw_without_read():
 
     # Set it back unchanged, but WITHOUT having called read()
     target_obj.set_raw_data(raw_data)
-    print(f"  Set raw data back (without calling read())")
+    print("  Set raw data back (without calling read())")
 
     # Save the bundle
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -47,7 +47,7 @@ def test_set_raw_without_read():
     print(f"\n✅ Saved bundle to: {output_path}")
 
     # Try to load it back
-    print(f"\nLoading saved bundle...")
+    print("\nLoading saved bundle...")
     env2 = UnityPy.load(str(output_path))
 
     for obj in env2.objects:
@@ -55,12 +55,12 @@ def test_set_raw_without_read():
             try:
                 name = obj.peek_name()
                 if name == "AboutClubCard":
-                    print(f"\n✓ Found AboutClubCard in saved bundle")
+                    print("\n✓ Found AboutClubCard in saved bundle")
 
                     # Try to read it
                     try:
                         data = obj.read()
-                        print(f"  ✅ Successfully read() the object!")
+                        print("  ✅ Successfully read() the object!")
 
                         # Get raw data size
                         raw_data2 = obj.get_raw_data()
@@ -68,7 +68,7 @@ def test_set_raw_without_read():
 
                         # Check if it matches original
                         if len(raw_data2) == len(raw_data):
-                            print(f"  ✅ Size matches original!")
+                            print("  ✅ Size matches original!")
                             return True
                         else:
                             print(f"  ❌ Size changed: {len(raw_data)} → {len(raw_data2)} bytes")

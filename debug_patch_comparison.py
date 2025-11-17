@@ -72,29 +72,29 @@ def compare_binaries():
     # Template count at offset 12
     orig_template_count = struct.unpack_from('<i', orig_raw, 12)[0]
     patch_template_count = struct.unpack_from('<i', patched_raw, 12)[0]
-    print(f"\nOffset 12 (template count):")
+    print("\nOffset 12 (template count):")
     print(f"  Original: {orig_template_count}")
     print(f"  Patched:  {patch_template_count}")
     if orig_template_count != patch_template_count:
-        print(f"  ⚠ CHANGED!")
+        print("  ⚠ CHANGED!")
 
     # Visual count at offset 152
     orig_visual_count = struct.unpack_from('<i', orig_raw, 152)[0]
     patch_visual_count = struct.unpack_from('<i', patched_raw, 152)[0]
-    print(f"\nOffset 152 (visual count):")
+    print("\nOffset 152 (visual count):")
     print(f"  Original: {orig_visual_count}")
     print(f"  Patched:  {patch_visual_count}")
     if orig_visual_count != patch_visual_count:
-        print(f"  ⚠ CHANGED!")
+        print("  ⚠ CHANGED!")
 
     # Type info section (156-195)
     orig_typeinfo = orig_raw[156:196]
     patch_typeinfo = patched_raw[156:196]
-    print(f"\nOffset 156-195 (type info):")
+    print("\nOffset 156-195 (type info):")
     if orig_typeinfo == patch_typeinfo:
-        print(f"  ✓ Identical")
+        print("  ✓ Identical")
     else:
-        print(f"  ⚠ CHANGED!")
+        print("  ⚠ CHANGED!")
         print(f"  Original: {orig_typeinfo.hex()[:60]}...")
         print(f"  Patched:  {patch_typeinfo.hex()[:60]}...")
 
@@ -106,19 +106,19 @@ def compare_binaries():
     # Element ID
     orig_elem_id = struct.unpack_from('<i', orig_raw, 196)[0]
     patch_elem_id = struct.unpack_from('<i', patched_raw, 196)[0]
-    print(f"\nElement ID at offset 196:")
+    print("\nElement ID at offset 196:")
     print(f"  Original: {orig_elem_id}")
     print(f"  Patched:  {patch_elem_id}")
 
     # Compare first 100 bytes of first element
-    print(f"\nFirst 100 bytes of first element:")
+    print("\nFirst 100 bytes of first element:")
     orig_elem_data = orig_raw[196:296]
     patch_elem_data = patched_raw[196:296]
 
     if orig_elem_data == patch_elem_data:
-        print(f"  ✓ Identical")
+        print("  ✓ Identical")
     else:
-        print(f"  ⚠ Different - showing hex comparison:")
+        print("  ⚠ Different - showing hex comparison:")
         for i in range(0, min(100, len(orig_elem_data), len(patch_elem_data)), 16):
             orig_hex = ' '.join(f'{b:02x}' for b in orig_elem_data[i:i+16])
             patch_hex = ' '.join(f'{b:02x}' for b in patch_elem_data[i:i+16])
@@ -142,7 +142,7 @@ def compare_binaries():
         if len(orig_raw) != len(patched_raw):
             print(f"Files are identical up to byte {min_len}, but different sizes")
         else:
-            print(f"Files are identical!")
+            print("Files are identical!")
     else:
         print(f"\nFirst difference at offset {first_diff}:")
         start = max(0, first_diff - 16)
@@ -162,9 +162,9 @@ def compare_binaries():
 
         # Try to interpret what field this is
         if first_diff < 196:
-            print(f"\n  → Difference is in HEADER section")
+            print("\n  → Difference is in HEADER section")
         elif first_diff >= 196:
-            print(f"\n  → Difference is in ELEMENT DATA section")
+            print("\n  → Difference is in ELEMENT DATA section")
 
 if __name__ == "__main__":
     compare_binaries()

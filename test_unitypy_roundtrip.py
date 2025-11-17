@@ -19,7 +19,7 @@ def test_roundtrip():
             try:
                 data = obj.read()
                 if hasattr(data, "m_Name") and data.m_Name == "AboutClubCard":
-                    print(f"\n✓ Found AboutClubCard")
+                    print("\n✓ Found AboutClubCard")
 
                     # Get raw data
                     raw_data = obj.get_raw_data()
@@ -28,7 +28,7 @@ def test_roundtrip():
 
                     # Set it back unchanged
                     obj.set_raw_data(raw_data)
-                    print(f"  Set raw data back (unchanged)")
+                    print("  Set raw data back (unchanged)")
 
                     break
             except:
@@ -46,7 +46,7 @@ def test_roundtrip():
     print(f"\n✅ Saved roundtrip bundle to: {output_path}")
 
     # Try to load it back
-    print(f"\nLoading roundtrip bundle...")
+    print("\nLoading roundtrip bundle...")
     env2 = UnityPy.load(str(output_path))
 
     for obj in env2.objects:
@@ -54,7 +54,7 @@ def test_roundtrip():
             try:
                 data = obj.read()
                 if hasattr(data, "m_Name") and data.m_Name == "AboutClubCard":
-                    print(f"\n✓ Found AboutClubCard in roundtrip bundle")
+                    print("\n✓ Found AboutClubCard in roundtrip bundle")
 
                     # Get raw data
                     raw_data2 = obj.get_raw_data()
@@ -62,7 +62,7 @@ def test_roundtrip():
 
                     # Check if it's the same size
                     if len(raw_data2) == orig_raw_size:
-                        print(f"  ✅ Size matches original!")
+                        print("  ✅ Size matches original!")
                     else:
                         print(f"  ❌ Size changed: {orig_raw_size} → {len(raw_data2)} bytes")
 

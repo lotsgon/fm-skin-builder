@@ -13,7 +13,6 @@ from fm_skin_builder.core.uxml import (
     UXMLElement,
     UXMLAttribute,
 )
-from fm_skin_builder.core.uxml.style_parser import StyleParser
 from fm_skin_builder.core.uxml.style_serializer import StyleSerializer
 
 
