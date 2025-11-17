@@ -174,6 +174,26 @@ class UXMLImporter:
                 "m_Classes": elem.get("class", "").split() if elem.get("class") else [],
             }
 
+            # Capture binding attributes (needed for data connections)
+            bindings = {}
+            if elem.get("text-binding"):
+                bindings["text-binding"] = elem.get("text-binding")
+            if elem.get("data-binding"):
+                bindings["data-binding"] = elem.get("data-binding")
+            if elem.get("current-selected-id-binding"):
+                bindings["current-selected-id-binding"] = elem.get(
+                    "current-selected-id-binding"
+                )
+            if elem.get("selection-binding"):
+                bindings["selection-binding"] = elem.get("selection-binding")
+            if elem.get("selected-tab-binding"):
+                bindings["selected-tab-binding"] = elem.get("selected-tab-binding")
+            if elem.get("binding-mappings"):
+                bindings["binding-mappings"] = elem.get("binding-mappings")
+
+            if bindings:
+                element_asset["_bindings"] = bindings
+
             # Add to appropriate list
             if is_template and template_alias:
                 element_asset["m_TemplateAlias"] = template_alias

@@ -88,7 +88,9 @@ def test_css_modification(bundle_path: str, vta_name: str):
     for i, elem in enumerate(visual_parsed):
         if len(elem.m_Name) > 0:
             target_elem = elem
-            print(f"   Found element {i} with name: '{elem.m_Name}' ({len(elem.m_Name)} chars)")
+            print(
+                f"   Found element {i} with name: '{elem.m_Name}' ({len(elem.m_Name)} chars)"
+            )
             break
         elif len(elem.m_Classes) > 0:
             target_elem = elem
@@ -99,7 +101,9 @@ def test_css_modification(bundle_path: str, vta_name: str):
         print("   ⚠️  No elements with content to modify")
         # Create a test by modifying m_Type field instead (always present)
         target_elem = visual_parsed[0]
-        print(f"   Using element 0, will modify m_Type: '{target_elem.m_Type}' ({len(target_elem.m_Type)} chars)")
+        print(
+            f"   Using element 0, will modify m_Type: '{target_elem.m_Type}' ({len(target_elem.m_Type)} chars)"
+        )
 
     # Perform same-size modification
     if len(target_elem.m_Name) > 0:
@@ -130,7 +134,9 @@ def test_css_modification(bundle_path: str, vta_name: str):
         if len(rebuilt_raw) == len(original_raw):
             print("   ✅ Size preserved (in-place patching)")
         else:
-            print(f"   Size difference: {len(rebuilt_raw) - len(original_raw):+,} bytes")
+            print(
+                f"   Size difference: {len(rebuilt_raw) - len(original_raw):+,} bytes"
+            )
     except Exception as e:
         print(f"   ❌ Patch failed: {e}")
         import traceback
