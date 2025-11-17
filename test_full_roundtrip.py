@@ -39,15 +39,17 @@ def test_vta_roundtrip(bundle_path: str, vta_name: str):
     template_elements_unity = None
 
     for obj in env.objects:
-        if obj.type.name == 'MonoBehaviour':
+        if obj.type.name == "MonoBehaviour":
             try:
                 data = obj.read()
-                if hasattr(data, 'm_VisualElementAssets') and data.m_Name == vta_name:
+                if hasattr(data, "m_VisualElementAssets") and data.m_Name == vta_name:
                     original_raw = bytes(obj.get_raw_data())
                     visual_elements_unity = list(data.m_VisualElementAssets)
                     template_elements_unity = list(data.m_TemplateAssets)
                     print(f"   ✅ Found VTA: {len(original_raw):,} bytes")
-                    print(f"   Elements: {len(visual_elements_unity)} visual, {len(template_elements_unity)} template")
+                    print(
+                        f"   Elements: {len(visual_elements_unity)} visual, {len(template_elements_unity)} template"
+                    )
                     break
             except Exception:
                 continue
@@ -110,6 +112,7 @@ def test_vta_roundtrip(bundle_path: str, vta_name: str):
     except Exception as e:
         print(f"   ❌ Build failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
 
@@ -158,14 +161,12 @@ def test_vta_roundtrip(bundle_path: str, vta_name: str):
 if __name__ == "__main__":
     # Test on a simple VTA first
     success = test_vta_roundtrip(
-        "test_bundles/ui-tiles_assets_all.bundle",
-        "ClubsStadiumsTile_2x2_Row"
+        "test_bundles/ui-tiles_assets_all.bundle", "ClubsStadiumsTile_2x2_Row"
     )
 
     if success:
         print("\n\n")
         # Test on a more complex VTA
         test_vta_roundtrip(
-            "test_bundles/ui-tiles_assets_all.bundle",
-            "StaffAdviceAndReportsCell"
+            "test_bundles/ui-tiles_assets_all.bundle", "StaffAdviceAndReportsCell"
         )
