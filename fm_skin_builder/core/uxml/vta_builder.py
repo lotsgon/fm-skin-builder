@@ -10,7 +10,7 @@ Combines:
 
 from __future__ import annotations
 from typing import List
-from .vta_header_parser import VTAHeader, parse_vta_header, serialize_template_references
+from .vta_header_parser import parse_vta_header, serialize_template_references
 from .vta_element_serializer import serialize_visual_elements_array, serialize_template_assets_array
 from .uxml_element_parser import UXMLElementBinary
 

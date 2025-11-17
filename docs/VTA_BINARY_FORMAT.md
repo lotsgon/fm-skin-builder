@@ -4,9 +4,9 @@
 
 This document describes the binary structure of Unity's VisualTreeAsset (VTA) files as discovered through reverse engineering Football Manager's UI bundles.
 
-**Status**: Work in progress (Phase 1 - Structure Discovery)
-**Last Updated**: 2025-11-16
-**Test File**: `test_bundles/ui-tiles_assets_all.bundle` → PlayerAttributesLargeBlock (29,468 bytes)
+**Status**: Template References Format VERIFIED ✅
+**Last Updated**: 2025-11-17
+**Test File**: `test_bundles/ui-tiles_assets_all.bundle` → PlayerAttributesSmallBlock (30,504 bytes)
 
 ---
 
@@ -284,6 +284,99 @@ To manually rebuild a VTA binary:
 | Template count | 7156 | 4 | = 10 |
 | Template TypeTree | 7160 | 12 | All zeros |
 | Template data | 7172 | ~22296 | 10 elements |
+
+---
+
+## Template References - VERIFIED FORMAT ✅
+
+**Discovery Date**: 2025-11-17
+**Verification**: Byte-for-byte match on PlayerAttributesSmallBlock (484 bytes, 6 templates)
+
+### Structure
+
+The template references section is more complex than typical Unity serialization. Each template record has variable padding based on name length and MUST align to 12-byte boundaries.
+
+```
+Template References Section:
+  +0      4 bytes    Template count
+
+  For each template (total size MUST be multiple of 12 bytes):
+    +0    4 bytes    Name length (n)
+    +4    n bytes    Template name (UTF-8, no terminator)
+    +?    variable   Alignment block (depends on n % 4):
+                       If n % 4 == 0: nothing here
+                       If n % 4 != 0: null terminator + padding to 4-byte boundary
+    +?    4 bytes    Separator block (ALWAYS 0x20 0x00 0x00 0x00)
+    +?    32 bytes   GUID (32 ASCII hex chars, NO length prefix)
+    +?    1 byte     Null terminator
+    +?    0-3 bytes  Alignment padding to 4-byte boundary
+    +?    variable   Final padding to make total template size % 12 == 0
+```
+
+### Critical Details
+
+1. **Name Termination**:
+   - If `name_len % 4 == 0`: No terminator, separator block comes immediately after name
+   - If `name_len % 4 != 0`: Null terminator (0x00) + padding to reach 4-byte boundary
+
+2. **4-Byte Separator Block**:
+   - ALWAYS present after name (and alignment)
+   - Always exactly: `0x20 0x00 0x00 0x00` (space + 3 nulls)
+   - Discovered through hex analysis - appears between name and GUID
+
+3. **GUID Format**:
+   - Fixed 32 bytes (ASCII hex characters)
+   - NO length prefix (unlike name)
+   - Followed by single null terminator (0x00)
+   - Then aligned to 4-byte boundary
+
+4. **12-Byte Alignment**:
+   - Total template record size MUST be multiple of 12
+   - Padding formula: `padding = 12 - (size_before_padding % 12)`
+   - Padding is all zeros
+
+### Example: Template with name_len=20 (divisible by 4)
+
+```
+Offset  Bytes              Description
+------  -----------------  -----------
+0       14 00 00 00        Name length = 20
+4       41 74 74 ...       "AttributesTableSmall" (20 bytes)
+24      20 00 00 00        Separator block (space + 3 nulls)
+28      33 66 64 33 ...    GUID "3fd3642a7a..." (32 bytes)
+60      00                 Null terminator
+61      00 00 00           Padding to 4-byte boundary
+64      00 00 00 00        Final padding (8 bytes total)
+68      00 00 00 00
+72      [next template]    Total: 72 bytes (72 % 12 == 0 ✓)
+```
+
+### Example: Template with name_len=31 (NOT divisible by 4)
+
+```
+Offset  Bytes              Description
+------  -----------------  -----------
+0       1f 00 00 00        Name length = 31
+4       46 6f 6f 74 ...    "FootednessStepperWithBorderCell" (31 bytes)
+35      00                 Null terminator (because 31 % 4 != 0)
+36      [already aligned]  31 + 1 = 32, divisible by 4
+36      20 00 00 00        Separator block (space + 3 nulls)
+40      31 33 61 36 ...    GUID "13a62bdd03..." (32 bytes)
+72      00                 Null terminator
+73      00 00 00           Padding to 4-byte boundary
+76      00 00 00 00        Final padding (8 bytes total)
+80      00 00 00 00
+84      [next template]    Total: 84 bytes (84 % 12 == 0 ✓)
+```
+
+### Parser Implementation
+
+See `fm_skin_builder/core/uxml/vta_header_parser.py`:
+- `parse_vta_header()` - Extracts all VTA metadata
+- `_parse_template_references()` - Parses template refs section (VERIFIED)
+- `serialize_template_references()` - Reconstructs byte-perfect output
+
+**Verification**: The serializer produces byte-for-byte identical output to Unity's original format.
 
 ---
 

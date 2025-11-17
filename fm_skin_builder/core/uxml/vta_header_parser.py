@@ -58,10 +58,7 @@ def parse_vta_header(raw_data: bytes) -> VTAHeader:
     # Visual array starts after template references
     visual_array_offset = template_refs_end
 
-    # Find visual count at this offset
-    visual_count = struct.unpack_from('<i', raw_data, visual_array_offset)[0]
-
-    # Extract visual TypeTree metadata (40 bytes after count)
+    # Extract visual TypeTree metadata (40 bytes after count at visual_array_offset)
     visual_typetree_offset = visual_array_offset + 4
     visual_typetree = raw_data[visual_typetree_offset:visual_typetree_offset + 40]
 
@@ -107,16 +104,25 @@ def _parse_template_references(raw_data: bytes, start_offset: int) -> Tuple[List
     templates = []
 
     for _ in range(template_count):
+        # Track where this template starts (for padding calculation)
+        template_start = pos
+
         # Read template name
         name_len = struct.unpack_from('<i', raw_data, pos)[0]
         pos += 4
 
         name = raw_data[pos:pos + name_len].decode('utf-8')
-        pos += name_len + 1  # +1 for null terminator
+        pos += name_len
 
-        # Align to 4-byte boundary
-        if pos % 4 != 0:
-            pos += 4 - (pos % 4)
+        # After name: align to 4-byte boundary (if needed)
+        if name_len % 4 != 0:
+            # Add null terminator + padding to reach alignment
+            pos += 1  # null terminator
+            if pos % 4 != 0:
+                pos += 4 - (pos % 4)
+
+        # Skip 4-byte separator block (always 0x20 0x00 0x00 0x00)
+        pos += 4
 
         # GUID is stored as 32-byte ASCII hex string (no length prefix!)
         guid = raw_data[pos:pos + 32].decode('ascii')
@@ -126,8 +132,11 @@ def _parse_template_references(raw_data: bytes, start_offset: int) -> Tuple[List
         if pos % 4 != 0:
             pos += 4 - (pos % 4)
 
-        # Skip padding (12 bytes zeros)
-        pos += 12
+        # Padding: aligns total template size to multiples of 12 bytes
+        # Formula: padding = 12 - (size_before_padding % 12)
+        size_before_padding = pos - template_start
+        padding = 12 - (size_before_padding % 12)
+        pos += padding
 
         templates.append(TemplateReference(name=name, guid=guid))
 
@@ -195,15 +204,23 @@ def serialize_template_references(template_refs: List[TemplateReference]) -> byt
     data.extend(struct.pack('<i', len(template_refs)))
 
     for ref in template_refs:
+        # Track where this template starts (for padding calculation)
+        template_start = len(data)
+
         # Write name
         name_bytes = ref.name.encode('utf-8')
         data.extend(struct.pack('<i', len(name_bytes)))
         data.extend(name_bytes)
-        data.append(0)  # null terminator
 
-        # Align to 4-byte boundary
-        while len(data) % 4 != 0:
-            data.append(0)
+        # After name: align to 4-byte boundary (if needed)
+        if len(name_bytes) % 4 != 0:
+            # Add null terminator + padding to reach alignment
+            data.append(0)  # null terminator
+            while len(data) % 4 != 0:
+                data.append(0)
+
+        # Write 4-byte separator block (always 0x20 0x00 0x00 0x00)
+        data.extend(b'\x20\x00\x00\x00')
 
         # Write GUID (always 32 bytes, no length prefix!)
         guid_bytes = ref.guid.encode('ascii')
@@ -216,7 +233,10 @@ def serialize_template_references(template_refs: List[TemplateReference]) -> byt
         while len(data) % 4 != 0:
             data.append(0)
 
-        # Write padding (12 bytes zeros)
-        data.extend(b'\x00' * 12)
+        # Padding: aligns total template size to multiples of 12 bytes
+        # Formula: padding = 12 - (size_before_padding % 12)
+        size_before_padding = len(data) - template_start
+        padding = 12 - (size_before_padding % 12)
+        data.extend(b'\x00' * padding)
 
     return bytes(data)
