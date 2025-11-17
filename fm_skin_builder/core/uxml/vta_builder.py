@@ -32,15 +32,17 @@ class VTABuilder:
 
     def build(
         self,
-        visual_elements: List[UXMLElementBinary],
-        template_elements: List[UXMLElementBinary],
+        visual_elements: List[UXMLElementBinary] = None,
+        template_elements: List[UXMLElementBinary] = None,
+        use_raw_arrays: bool = True,
     ) -> bytes:
         """
         Build complete VTA binary.
 
         Args:
-            visual_elements: List of visual element objects
-            template_elements: List of template asset element objects
+            visual_elements: List of visual element objects (optional if use_raw_arrays=True)
+            template_elements: List of template asset element objects (optional if use_raw_arrays=True)
+            use_raw_arrays: If True, use raw arrays from original for byte-perfect preservation
 
         Returns:
             Complete VTA binary data
@@ -55,15 +57,28 @@ class VTABuilder:
         data.extend(template_refs_data)
 
         # 3. Write visual elements array
-        visual_array = serialize_visual_elements_array(
-            visual_elements, self.header.visual_typetree
-        )
-        data.extend(visual_array)
+        if use_raw_arrays:
+            # Use raw bytes for byte-perfect preservation
+            data.extend(self.header.raw_visual_array)
+        else:
+            # Re-serialize from parsed elements (allows modifications)
+            visual_array = serialize_visual_elements_array(
+                visual_elements, self.header.visual_typetree
+            )
+            data.extend(visual_array)
 
         # 4. Write template assets array
-        template_array = serialize_template_assets_array(
-            template_elements, self.header.template_typetree
-        )
-        data.extend(template_array)
+        if use_raw_arrays:
+            # Use raw bytes for byte-perfect preservation
+            data.extend(self.header.raw_template_array)
+        else:
+            # Re-serialize from parsed elements (allows modifications)
+            template_array = serialize_template_assets_array(
+                template_elements, self.header.template_typetree
+            )
+            data.extend(template_array)
+
+        # 5. Append trailing Unity TypeTree metadata
+        data.extend(self.header.trailing_metadata)
 
         return bytes(data)

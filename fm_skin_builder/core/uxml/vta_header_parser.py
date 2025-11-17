@@ -10,7 +10,13 @@ Parses the VTA header structure to extract:
 from __future__ import annotations
 import struct
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .uxml_element_parser import parse_element_at_offset
+else:
+    # Import at runtime to avoid issues
+    from .uxml_element_parser import parse_element_at_offset
 
 
 @dataclass
@@ -38,6 +44,13 @@ class VTAHeader:
     # TypeTree metadata (extracted from original)
     visual_typetree: bytes  # 40 bytes
     template_typetree: bytes  # 12 bytes
+
+    # Raw array data (for byte-perfect preservation)
+    raw_visual_array: bytes  # Complete visual array (count + TypeTree + data)
+    raw_template_array: bytes  # Complete template array (count + TypeTree + data)
+
+    # Trailing Unity TypeTree metadata (after template array)
+    trailing_metadata: bytes
 
 
 def parse_vta_header(raw_data: bytes) -> VTAHeader:
@@ -79,6 +92,18 @@ def parse_vta_header(raw_data: bytes) -> VTAHeader:
         template_typetree_offset : template_typetree_offset + 12
     ]
 
+    # Extract raw visual array (from visual_array_offset to template_array_offset)
+    raw_visual_array = raw_data[visual_array_offset:template_array_offset]
+
+    # Find where template array ends to capture trailing metadata and raw template array
+    template_array_end = _find_template_array_end(raw_data, template_array_offset)
+
+    # Extract raw template array
+    raw_template_array = raw_data[template_array_offset:template_array_end]
+
+    # Extract trailing metadata
+    trailing_metadata = raw_data[template_array_end:]
+
     return VTAHeader(
         fixed_header=fixed_header,
         template_refs=template_refs,
@@ -86,6 +111,9 @@ def parse_vta_header(raw_data: bytes) -> VTAHeader:
         template_array_offset=template_array_offset,
         visual_typetree=visual_typetree,
         template_typetree=template_typetree,
+        raw_visual_array=raw_visual_array,
+        raw_template_array=raw_template_array,
+        trailing_metadata=trailing_metadata,
     )
 
 
@@ -191,6 +219,36 @@ def _find_template_array_offset(
 
     # Fallback: couldn't find it
     raise ValueError("Could not locate template array in binary data")
+
+
+def _find_template_array_end(raw_data: bytes, template_array_offset: int) -> int:
+    """
+    Find where template array ends.
+
+    Args:
+        raw_data: Complete binary data
+        template_array_offset: Offset where template array starts
+
+    Returns:
+        Offset where template array ends (start of trailing metadata)
+    """
+    # Read template count
+    template_count = struct.unpack_from("<i", raw_data, template_array_offset)[0]
+
+    # Template data starts after: count (4) + TypeTree (12)
+    template_data_start = template_array_offset + 4 + 12
+
+    # Parse each template element to find where they end
+    pos = template_data_start
+    for _ in range(template_count):
+        elem = parse_element_at_offset(raw_data, pos, debug=False)
+        if elem is None:
+            # If we can't parse, return end of file to avoid corruption
+            return len(raw_data)
+        pos += elem.original_size
+
+    # Return the position where trailing metadata starts
+    return pos
 
 
 def serialize_template_references(template_refs: List[TemplateReference]) -> bytes:
