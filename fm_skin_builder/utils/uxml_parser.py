@@ -12,15 +12,6 @@ The old string-based approach was unreliable and is no longer maintained.
 
 from __future__ import annotations
 import warnings
-
-warnings.warn(
-    "fm_skin_builder.utils.uxml_parser is deprecated. "
-    "Use fm_skin_builder.core.uxml instead.",
-    DeprecationWarning,
-    stacklevel=2
-)
-
-# Re-export new UXML classes for backwards compatibility
 from fm_skin_builder.core.uxml import (
     UXMLExporter,
     UXMLImporter,
@@ -29,6 +20,13 @@ from fm_skin_builder.core.uxml import (
     UXMLAttribute,
     StyleParser,
     StyleSerializer,
+)
+
+warnings.warn(
+    "fm_skin_builder.utils.uxml_parser is deprecated. "
+    "Use fm_skin_builder.core.uxml instead.",
+    DeprecationWarning,
+    stacklevel=2
 )
 
 __all__ = [

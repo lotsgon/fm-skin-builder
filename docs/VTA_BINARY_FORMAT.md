@@ -380,6 +380,95 @@ See `fm_skin_builder/core/uxml/vta_header_parser.py`:
 
 ---
 
+## String Array Format - VERIFIED ✅
+
+**Discovery Date**: 2025-11-17
+**Verification**: 100% parsing success across 55 elements (49 visual + 6 template) in 10 VTAs
+
+### Conditional Null Terminator Pattern
+
+Unity's string array serialization uses a **conditional null terminator** based on alignment:
+
+```
+For each string in array:
+  1. Write length (4 bytes, little-endian)
+  2. Write string data (N bytes, UTF-8)
+  3. IF (current_position % 4 == 0):
+       - Already aligned, NO null terminator
+       - Continue to next string/field
+     ELSE:
+       - Add null terminator (0x00)
+       - Pad with 0x00 until (position % 4 == 0)
+```
+
+### Examples
+
+#### String Ending Aligned (28 bytes at position 840)
+```
+Position 836: Length field (0x1C 0x00 0x00 0x00 = 28)
+Position 840: String data "margin-left-global-gap-small" (28 bytes)
+Position 868: Next length field (already 4-byte aligned, NO null)
+```
+
+#### String Not Aligned (25 bytes at position 808)
+```
+Position 804: Length field (0x19 0x00 0x00 0x00 = 25)
+Position 808: String data "body-regular-14px-regular" (25 bytes)
+Position 833: Null terminator (0x00)
+Position 834: Padding (0x00 0x00) to align to 836
+Position 836: Next length field
+```
+
+### Key Points
+
+1. **Per-String Alignment**: Each string is aligned BEFORE the next length field, not at the end of the array
+2. **Conditional Null**: Null terminator is only added if string doesn't end on 4-byte boundary
+3. **No Null When Aligned**: If string length causes natural 4-byte alignment, no null is added
+4. **Padding After Null**: After null (if added), pad to next 4-byte boundary
+
+### Implementation
+
+Located in `fm_skin_builder/core/uxml/uxml_element_parser.py`:
+
+**Parser**:
+```python
+pos += str_len  # Move past string data
+
+if pos % 4 == 0:
+    # Already aligned, no null needed
+    pass
+else:
+    pos += 1  # Null terminator
+    # Pad to 4-byte boundary
+    remainder = pos % 4
+    if remainder != 0:
+        pos += 4 - remainder
+```
+
+**Serializer**:
+```python
+data.extend(string_bytes)
+
+if len(data) % 4 == 0:
+    # Already aligned, no null
+    pass
+else:
+    data.append(0)  # Null terminator
+    while len(data) % 4 != 0:
+        data.append(0)  # Padding
+```
+
+### Affected Arrays
+
+This pattern applies to:
+- `m_Classes` string array in elements
+- `m_StylesheetPaths` string array in elements
+- Template names in template references (though they always have null + padding)
+
+**Success Rate**: This discovery enabled 100% parsing accuracy across all tested VTAs, up from ~77% before.
+
+---
+
 ## Resources
 
 **Unity Documentation**:

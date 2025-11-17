@@ -116,11 +116,17 @@ class UXMLElementBinary:
             class_bytes = class_name.encode('utf-8')
             data.extend(struct.pack('<i', len(class_bytes)))
             data.extend(class_bytes)
-            # NO null terminator, NO padding per string
 
-        # Align entire array to 4-byte boundary
-        while len(data) % 4 != 0:
-            data.append(0)
+            # Conditional null terminator + alignment
+            # If string ends on 4-byte boundary, no null needed
+            if len(data) % 4 == 0:
+                # Already aligned, no null
+                pass
+            else:
+                # Add null and pad to align
+                data.append(0)
+                while len(data) % 4 != 0:
+                    data.append(0)
 
         # m_StylesheetPaths array
         data.extend(struct.pack('<i', len(self.m_StylesheetPaths)))
@@ -128,13 +134,19 @@ class UXMLElementBinary:
             path_bytes = path.encode('utf-8')
             data.extend(struct.pack('<i', len(path_bytes)))
             data.extend(path_bytes)
-            # NO null terminator, NO padding per string
 
-        # Align entire array to 4-byte boundary
-        while len(data) % 4 != 0:
-            data.append(0)
+            # Conditional null terminator + alignment
+            # If string ends on 4-byte boundary, no null needed
+            if len(data) % 4 == 0:
+                # Already aligned, no null
+                pass
+            else:
+                # Add null and pad to align
+                data.append(0)
+                while len(data) % 4 != 0:
+                    data.append(0)
 
-        # Serialization fields (16 bytes)
+        # Serialization fields (16 bytes - 4 fields)
         data.extend(struct.pack('<i', self.unknown_field_3))
         data.extend(struct.pack('<i', self.m_SerializedData))
         data.extend(struct.pack('<i', self.unknown_field_4))
@@ -239,7 +251,7 @@ def parse_element_at_offset(raw_data: bytes, offset: int, debug: bool = False) -
                         print(f"DEBUG: Not enough data to read {array_name}[{i}] string at {pos}")
                     return None, pos
 
-                # Read string bytes (NO null terminator between strings)
+                # Read string bytes
                 str_bytes = raw_data[pos:pos + str_len]
                 try:
                     string_val = str_bytes.decode('utf-8')
@@ -252,17 +264,31 @@ def parse_element_at_offset(raw_data: bytes, offset: int, debug: bool = False) -
                         print(f"  Bytes: {str_bytes[:20]}")
                     return None, pos
 
-                pos += str_len  # NO null terminator
+                pos += str_len
 
-                # NO alignment per string - strings are packed together
+                # Conditional null terminator + alignment
+                # If string ends on 4-byte boundary, no null needed
+                # Otherwise, add null and pad to 4-byte boundary
+                if pos % 4 == 0:
+                    # Already aligned, no null needed
+                    if debug and i < count - 1:
+                        print("    string ends aligned, no null needed")
+                else:
+                    # Add null terminator
+                    pos += 1
+                    if debug:
+                        print(f"    added null terminator at {pos-1}")
 
-            # After all strings, align to 4-byte boundary
-            remainder = pos % 4
-            if remainder != 0:
-                padding = 4 - remainder
-                pos += padding
-                if debug:
-                    print(f"  {array_name} array: added {padding} bytes of padding after all strings, now at pos {pos}")
+                    # Pad to 4-byte boundary if needed
+                    remainder = pos % 4
+                    if remainder != 0:
+                        padding = 4 - remainder
+                        pos += padding
+                        if debug and i < count - 1:
+                            print(f"    added {padding} bytes padding to align to {pos}")
+
+            if debug:
+                print(f"  {array_name} array ends at pos {pos}")
 
             return strings, pos
 
@@ -291,7 +317,7 @@ def parse_element_at_offset(raw_data: bytes, offset: int, debug: bool = False) -
         if debug:
             print(f"  serialization fields: ({unknown_field_3}, {m_serialized_data}, {unknown_field_4}, {unknown_field_5}) at pos {pos-16}")
 
-        # Read m_Type string (4-byte aligned)
+        # Read m_Type string (4-byte aligned) - length field is next
         if pos + 4 > len(raw_data):
             if debug:
                 print(f"DEBUG: Not enough data to read m_Type length at {pos}")
